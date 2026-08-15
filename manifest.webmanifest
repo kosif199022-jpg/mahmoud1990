@@ -1,12 +1,12 @@
 {
-  "name":"تمحيص — حسابات ٢",
-  "short_name":"تمحيص",
+  "name":"Kosif — تمحيص | حسابات ٢",
+  "short_name":"Kosif",
   "description":"منصة المراجعة ومكتبة المعايير",
   "lang":"ar",
   "dir":"rtl",
   "start_url":"./",
   "scope":"./",
   "display":"standalone",
-  "background_color":"#f4f1e9",
-  "theme_color":"#162b37"
+  "background_color":"#f7f6fb",
+  "theme_color":"#7659ef"
 }

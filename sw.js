@@ -1,9 +1,9 @@
-const VERSION='tamhees-v2.0.0';
+const VERSION='tamhees-v2.1.0-kosif';
 const SHELL=`${VERSION}-shell`;
 const SHELL_FILES=[
-  './','./index.html','./manifest.webmanifest',
+  './','./index.html','./manifest.webmanifest','./theme-restore.css','./theme-restore.js',
   './parts/p01.txt','./parts/p02.txt','./parts/p03.txt','./parts/p04.txt','./parts/p05a.txt','./parts/p05b.txt','./parts/p05c.txt','./parts/p05d.txt','./parts/p06.txt',
-  './standards/','./standards/index.html','./standards/styles.css','./standards/app.js','./standards/bridge.js','./standards/nav-fix.js'
+  './standards/','./standards/index.html','./standards/styles.css','./standards/kosif-theme.css','./standards/app.js','./standards/bridge.js','./standards/nav-fix.js'
 ];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(SHELL_FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith('tamhees-v')&&k!==SHELL)await caches.delete(k);await self.clients.claim()})())});
