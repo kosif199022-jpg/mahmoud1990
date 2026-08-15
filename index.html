@@ -1,1 +1,33 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تمحيص</title></head><body><div id="loading" style="font-family:system-ui;padding:40px;text-align:center">جارٍ تحميل تمحيص…</div><script>(async()=>{try{const files=["p01.txt","p02.txt","p03.txt","p04.txt","p05a.txt","p05b.txt","p05c.txt","p05d.txt","p06.txt"];const parts=await Promise.all(files.map(f=>fetch(`parts/${f}`).then(r=>{if(!r.ok)throw new Error(f);return r.text()})));const b64=parts.join('');const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const ds=new DecompressionStream('gzip');const html=await new Response(new Blob([u]).stream().pipeThrough(ds)).text();const extra='<script src="./standards/bridge.js"><'+'/script><script src="./standards/nav-fix.js"><'+'/script>';const patched=html.replace(/<\/body>/i,extra+'</body>');document.open();document.write(patched);document.close()}catch(e){document.body.innerHTML='<pre style="direction:ltr;white-space:pre-wrap">Load error: '+e+'</pre>'}})();</script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#162b37">
+  <meta name="description" content="تمحيص — منصة المراجعة ومكتبة المعايير">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>تمحيص — حسابات ٢</title>
+  <style>
+    html,body{margin:0;min-height:100%;background:#f4f1e9;color:#142029;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+    #boot{max-width:560px;margin:18vh auto;padding:26px;text-align:center}.logo{font-size:34px;font-weight:900;margin-bottom:7px}.mut{color:#69757c;line-height:1.7}.bar{height:8px;border-radius:99px;background:#ddd7ca;overflow:hidden;margin:18px 0}.bar i{display:block;height:100%;width:4%;background:#8c6228;transition:.2s}.err{white-space:pre-wrap;direction:rtl;text-align:right;padding:18px;border:1px solid #e0b8b8;border-radius:14px;background:#fff7f7}
+  </style>
+</head>
+<body>
+  <main id="boot"><div class="logo">تمحيص</div><div class="mut" id="bootText">جارٍ تجهيز التطبيق…</div><div class="bar"><i id="bootBar"></i></div></main>
+  <script>
+  (async()=>{
+    const files=['p01.txt','p02.txt','p03.txt','p04.txt','p05a.txt','p05b.txt','p05c.txt','p05d.txt','p06.txt'];
+    const text=document.getElementById('bootText'),bar=document.getElementById('bootBar');
+    try{
+      let done=0;const parts=await Promise.all(files.map(async f=>{const r=await fetch(`parts/${f}`,{cache:'default'});if(!r.ok)throw new Error(`تعذر تحميل ${f}`);const v=await r.text();done++;bar.style.width=`${Math.round(done/files.length*78)}%`;text.textContent=`جارٍ تحميل تمحيص… ${done}/${files.length}`;return v}));
+      const bin=atob(parts.join('')),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+      if(!('DecompressionStream'in window))throw new Error('المتصفح قديم ولا يدعم فك حزمة التطبيق. حدّث المتصفح ثم أعد المحاولة.');
+      text.textContent='جارٍ تشغيل التطبيق…';bar.style.width='88%';
+      const ds=new DecompressionStream('gzip'),html=await new Response(new Blob([u]).stream().pipeThrough(ds)).text();
+      const extra='<script src="./standards/bridge.js?v=2.0.0"><'+'/script><script src="./standards/nav-fix.js?v=2.0.0"><'+'/script><script>if(\'serviceWorker\' in navigator){navigator.serviceWorker.register(\'./sw.js\').catch(()=>{})}<'+'/script>';
+      const patched=html.replace(/<\/body>/i,extra+'</body>');bar.style.width='100%';document.open();document.write(patched);document.close();
+    }catch(e){console.error(e);document.getElementById('boot').innerHTML=`<div class="logo">تمحيص</div><div class="err"><b>تعذر تشغيل التطبيق.</b><br><br>${String(e.message||e)}<br><br><button onclick="location.reload()">إعادة المحاولة</button> &nbsp; <a href="./standards/">فتح مكتبة المعايير</a></div>`}
+  })();
+  </script>
+</body>
+</html>

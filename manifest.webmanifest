@@ -1,0 +1,12 @@
+{
+  "name":"تمحيص — حسابات ٢",
+  "short_name":"تمحيص",
+  "description":"منصة المراجعة ومكتبة المعايير",
+  "lang":"ar",
+  "dir":"rtl",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#f4f1e9",
+  "theme_color":"#162b37"
+}
