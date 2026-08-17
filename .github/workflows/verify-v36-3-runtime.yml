@@ -34,10 +34,17 @@ jobs:
           PW_CHANNEL: chrome
           KOSIF_ALLOW_EMPTY_LOCAL_LIBRARY: '1'
         run: node scripts/verify-v36-3-runtime.cjs
-      - name: Upload screenshot
+      - name: Review Council v2 acceptance
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8787
+          PW_CHANNEL: chrome
+        run: node scripts/verify-council-v36-3.cjs
+      - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kosif-v36-3-runtime
-          path: kosif-v36-3-mobile.png
+          path: |
+            kosif-v36-3-mobile.png
+            kosif-v36-3-council-v2.png
           if-no-files-found: ignore
