@@ -3,7 +3,11 @@ name: Build Kosif v36.3 Historical Continuity
 on:
   push:
     branches: [v36-3-history-continuity]
-    paths: ['.github/workflows/build-v36-3-history.yml']
+    paths:
+      - '.github/workflows/build-v36-3-history.yml'
+      - 'scripts/check-historical-requirements.mjs'
+      - 'scripts/apply-v36-3-history.py'
+      - 'scripts/patch-v36-3-ai-safety.py'
   workflow_dispatch:
 
 permissions:
@@ -80,4 +84,3 @@ jobs:
             kosif-v36-3-mobile.png
             /tmp/wrangler-v363.log
           if-no-files-found: ignore
-# diagnostic rerun 3
