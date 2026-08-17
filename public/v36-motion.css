@@ -1,0 +1,60 @@
+/* Kosif v36 motion layer — dashboard only. No webfonts; standards reader stays separate. */
+:root{
+  --m-grad-btn:linear-gradient(135deg,#4f46e5 0%,#7c3aed 52%,#9333ea 100%);
+  --m-grad-soft:linear-gradient(135deg,rgba(79,70,229,.10),rgba(124,58,237,.06));
+  --m-accent:#6366f1;--m-accent2:#7c3aed;--m-surface:#ffffff;
+  --m-shadow:0 18px 42px -28px rgba(67,56,202,.42);
+  --m-shadow-up:0 24px 54px -30px rgba(67,56,202,.52);
+  --m-ease:cubic-bezier(.2,.8,.2,1);--m-spring:cubic-bezier(.16,1,.3,1);
+}
+html[data-theme="dark"]{
+  --m-grad-soft:linear-gradient(135deg,rgba(99,102,241,.17),rgba(139,92,246,.09));
+  --m-surface:#151b2e;--m-shadow:0 20px 48px -30px rgba(0,0,0,.72);--m-shadow-up:0 26px 58px -32px rgba(0,0,0,.82);
+}
+
+/* restrained depth: existing layout/semantic colours remain authoritative */
+.card,.kpi,.mini-card,.panel,.api-provider-card{transition:transform .28s var(--m-spring),box-shadow .28s var(--m-ease),border-color .2s ease}
+.card-h::after{content:"";height:2px;flex:1;min-width:24px;border-radius:99px;background:linear-gradient(90deg,rgba(99,102,241,.42),transparent)}
+.btn.primary,.btn[data-primary="1"],button.primary{background-image:var(--m-grad-btn);border-color:transparent}
+.tabs{isolation:isolate}.tab{position:relative}.tab.active{border-bottom-color:transparent}
+.tab.active::after{content:"";position:absolute;inset-inline:14px;bottom:0;height:3px;border-radius:99px;background:var(--m-grad-btn);transform-origin:center;animation:m-tab-grow .32s var(--m-spring) both}
+@keyframes m-tab-grow{from{transform:scaleX(.15);opacity:.2}to{transform:scaleX(1);opacity:1}}
+
+section[data-view].show>.card,section[data-view].show>.grid>.card,section[data-view].show .kpi{animation:m-rise .42s var(--m-spring) both}
+section[data-view].show>.card:nth-child(2),section[data-view].show>.grid>.card:nth-child(2),section[data-view].show .kpi:nth-child(2){animation-delay:35ms}
+section[data-view].show>.card:nth-child(3),section[data-view].show>.grid>.card:nth-child(3),section[data-view].show .kpi:nth-child(3){animation-delay:70ms}
+section[data-view].show>.card:nth-child(4),section[data-view].show>.grid>.card:nth-child(4),section[data-view].show .kpi:nth-child(4){animation-delay:105ms}
+@keyframes m-rise{from{opacity:.01;transform:translateY(9px) scale(.992)}to{opacity:1;transform:none}}
+
+/* stream only the first twelve rows; large tables stay cheap */
+section[data-view].show tbody tr:nth-child(-n+12){animation:m-row .34s var(--m-ease) both}
+section[data-view].show tbody tr:nth-child(2){animation-delay:18ms}section[data-view].show tbody tr:nth-child(3){animation-delay:36ms}
+section[data-view].show tbody tr:nth-child(4){animation-delay:54ms}section[data-view].show tbody tr:nth-child(5){animation-delay:72ms}
+section[data-view].show tbody tr:nth-child(6){animation-delay:90ms}section[data-view].show tbody tr:nth-child(7){animation-delay:108ms}
+section[data-view].show tbody tr:nth-child(8){animation-delay:126ms}section[data-view].show tbody tr:nth-child(9){animation-delay:144ms}
+section[data-view].show tbody tr:nth-child(10){animation-delay:162ms}section[data-view].show tbody tr:nth-child(11){animation-delay:180ms}
+section[data-view].show tbody tr:nth-child(12){animation-delay:198ms}
+@keyframes m-row{from{opacity:.01;transform:translateX(5px)}to{opacity:1;transform:none}}
+
+[data-live="1"] .dot,[data-live="1"].pill .dot,[data-live="1"].badge::before{animation:m-live 1.8s ease-in-out infinite}
+@keyframes m-live{50%{filter:brightness(1.25);box-shadow:0 0 0 5px rgba(99,102,241,.10)}}
+
+.kpi strong,.kpi .value,.stat strong{color:var(--m-accent2)}
+@supports ((background-clip:text) or (-webkit-background-clip:text)){
+  .kpi strong,.kpi .value,.stat strong{background:var(--m-grad-btn);-webkit-background-clip:text;background-clip:text;color:transparent}
+}
+
+.sheet,.drawer,.modal-card{transition-timing-function:var(--m-spring)}
+#ops-lab{background:var(--m-grad-soft);border-color:color-mix(in srgb,var(--line) 68%,var(--m-accent) 32%)}
+#ops-out .kpi{box-shadow:var(--m-shadow)}
+
+@media (hover:hover){
+  .card:hover,.kpi:hover,.api-provider-card:hover{transform:translateY(-3px);box-shadow:var(--m-shadow-up);border-color:color-mix(in srgb,var(--line) 72%,var(--m-accent) 28%)}
+  .btn.primary:hover,button.primary:hover{transform:translateY(-1px);filter:saturate(1.08)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  section[data-view].show>.card,section[data-view].show>.grid>.card,section[data-view].show .kpi,
+  section[data-view].show tbody tr:nth-child(-n+12),.tab.active::after,[data-live="1"] .dot,[data-live="1"].pill .dot,[data-live="1"].badge::before{animation:none!important}
+  .card,.kpi,.mini-card,.panel,.api-provider-card,.sheet,.drawer,.modal-card,.btn.primary,button.primary{transition:none!important;transform:none!important}
+}
