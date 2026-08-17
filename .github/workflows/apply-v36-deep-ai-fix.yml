@@ -17,11 +17,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: v36-deep-audit-fix
-      - name: Apply reproducible UI patches
+      - name: Apply reproducible deep fixes
         run: |
           python3 scripts/patch-ai-v36-1.py
           python3 scripts/wire-reader-pro-v36.py
-      - name: Validate AI gate and restored standards reader
+          python3 scripts/patch-governance-v36-1.py
+      - name: Validate AI gate, Council and restored reader
         shell: bash
         run: |
           set -euo pipefail
@@ -30,10 +31,14 @@ jobs:
           grep -q 'AI غير مختبر' public/index.html
           grep -q 'aiVerified' public/index.html
           ! grep -q 'AI Active ·' public/index.html
+          grep -q 'c-test' public/v36-governance.js
+          grep -q 'councilOK' public/v36-governance.js
+          grep -q '/api/kosif/ai/test' public/v36-governance.js
           grep -q 'reader-pro-v36.js?v=36.1' public/standards/index.html
           for x in speechSynthesis wakeLock mediaSession requestAnimationFrame jumpCode exportChapter setSleep; do grep -q "$x" public/standards/reader-pro-v36.js; done
           grep -q '/standards/reader-pro-v36.js' public/standards/sw.js
           node --check public/v36-ai-gate.js
+          node --check public/v36-governance.js
           node --check public/standards/reader-pro-v36.js
           node --check public/standards/sw.js
           python3 - <<'PY'
@@ -51,8 +56,8 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/index.html frontend/index.html public/standards/index.html
+          git add public/index.html frontend/index.html public/standards/index.html public/v36-governance.js
           git diff --cached --quiet && exit 0
-          git commit -m 'Integrate verified AI workflow and restored standards reader'
+          git commit -m 'Integrate verified AI, Council and standards reader v36.1'
           git pull --rebase origin v36-deep-audit-fix
           git push origin HEAD:v36-deep-audit-fix
