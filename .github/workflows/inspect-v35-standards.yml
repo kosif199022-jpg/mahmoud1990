@@ -1,0 +1,30 @@
+name: Inspect v35 standards bundle
+
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/inspect-v35-standards.yml]
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+      - name: Inspect standards data
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/std && mkdir /tmp/std
+          unzip -q standards/library.zip -d /tmp/std
+          echo '--- top files ---'
+          find /tmp/std/data -maxdepth 2 -type f | sort | head -130
+          echo '--- counts ---'
+          printf 'b1='; find /tmp/std/data/b1 -type f -name '*.json' | wc -l
+          printf 'b3='; find /tmp/std/data/b3 -type f -name '*.json' | wc -l
+          echo '--- library.json ---'
+          node - <<'NODE'
+          const fs=require('fs'),z=require('zlib');
+          const p='/tmp/std/data/library.json'; if(fs.existsSync(p)){const j=JSON.parse(fs.readFileSync(p)); console.log(JSON.stringify({type:Array.isArray(j)?'array':typeof j,keys:j&&typeof j==='object'?Object.keys(j).slice(0,30):[],sample:Array.isArray(j)?j.slice(0,2):j},null,2).slice(0,8000));}
+          const g='/tmp/std/data/search-index.json.gz'; if(fs.existsSync(g)){const j=JSON.parse(z.gunzipSync(fs.readFileSync(g))); console.log('SEARCH',JSON.stringify({length:j.length,sample:j.slice(0,5)},null,2).slice(0,12000));}
+          NODE
