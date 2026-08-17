@@ -1,51 +1,42 @@
 name: Build Kosif v36.2.1 Attachment Hardening
-
 on:
   push:
     branches: [v36-2-library-motion-hardening]
-    paths:
-      - '.github/workflows/deep-audit-v36.yml'
+    paths: ['.github/workflows/deep-audit-v36.yml']
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: v36-2-library-motion-hardening
-          fetch-depth: 0
-      - name: Install AST parser without package metadata changes
+        with: {ref: v36-2-library-motion-hardening, fetch-depth: 0}
+      - name: Install AST parser
         run: npm install --no-save --package-lock=false acorn@8
-      - name: Fetch original Mafateeh reader
-        run: curl -fsSL --retry 3 https://raw.githubusercontent.com/kosif199022-jpg/mafateeh-al-tharwa/main/public/reader.html -o /tmp/mafateeh-reader.html
-      - name: Import b4 and apply reviewed hardening
+      - name: Fetch verified 46-chapter Mafateeh source
+        run: curl -fsSL --retry 3 https://raw.githubusercontent.com/kosif199022-jpg/mafateeh-al-tharwa/9d9cdd4784995a8141de4a05a113a9c846769554/public/reader.html -o /tmp/mafateeh-reader.html
+      - name: Import b4 and apply hardening
         run: |
           set -euo pipefail
           node scripts/import-mafateeh-book-v2.mjs /tmp/mafateeh-reader.html
           node scripts/apply-v36-2-attachment-hardening.mjs
       - name: Run complete release gate
         run: npm run check
-      - name: Bundle and verify b4 integrity
-        shell: bash
+      - name: Bundle and verify b4
         run: |
           set -euo pipefail
           npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
           test "$(find public/standards/data/b4 -maxdepth 1 -name '*.json' | wc -l)" -eq 46
           node - <<'NODE'
-          const fs=require('fs'),z=require('zlib');
-          const l=JSON.parse(fs.readFileSync('public/standards/data/library.json','utf8')),b=l.find(x=>x.id==='b4');
-          if(!b||b.chapters!==46||b.words!==34700||b.professionalAuthority!==false)throw Error('b4 metadata gate');
+          const fs=require('fs'),z=require('zlib'),l=JSON.parse(fs.readFileSync('public/standards/data/library.json','utf8')),b=l.find(x=>x.id==='b4');
+          if(!b||b.parts!==6||b.chapters!==46||b.words!==34700||b.professionalAuthority!==false)throw Error('b4 metadata gate');
           const idx=z.gunzipSync(fs.readFileSync('public/standards/data/search-index.json.gz')).toString();if(/"book"\s*:\s*"b4"/.test(idx))throw Error('b4 leaked into professional index');
           const c=JSON.parse(fs.readFileSync('public/standards/data/b4/1.json','utf8'));if(!c.study?.key||!c.study?.idea||!c.study?.application||!c.study?.weeklyTask||!c.study?.questions?.length)throw Error('study layer incomplete');
           console.log('B4_GATE_OK',b.id,b.parts,b.chapters,b.words,c.part,c.title,c.body.length,c.study.questions.length);
           NODE
-      - name: Commit verified application changes
-        shell: bash
+      - name: Commit verified changes
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
