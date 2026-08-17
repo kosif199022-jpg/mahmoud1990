@@ -1,5 +1,5 @@
 name = "mahmoud-eldesouky"
-main = "src/security-edge.js"
+main = "src/release-v36-4.js"
 compatibility_date = "2026-08-17"
 workers_dev = true
 
