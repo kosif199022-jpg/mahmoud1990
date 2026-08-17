@@ -7,8 +7,8 @@ ok('Bridge loads reviewer media independently of reviewer view timing',/function
 ok('Reviewer media blobs live in IndexedDB',media.includes("const DB='kosif-reviewer-media-v1'")&&/indexedDB\.open/.test(media)&&/objectStore\(STORE\)\.put/.test(media));
 ok('Reviewer media does not upload through fetch or legacy storage APIs',!/(fetch\s*\(|\/api\/|\/files\/|\/office\/)/.test(media));
 ok('Reviewer workspace persists metadata JSON, not raw blobs',media.includes("localStorage.setItem('kosif_v36_workspace_v1',JSON.stringify(x))"));
-ok('Reviewer note stores a media reference and integrity metadata only',/x\.notes\.push\(\{at:createdAt,text,source:'reviewer-local-media',media:\{id:mid,kind,mime,name:/.test(media)&&/sha256:sha,durationMs,localOnly:true,rawSentToAI:false/.test(media));
-ok('Reviewer note schema has no raw blob field',!/media:\{[^}]*\bblob\s*:/i.test(media)&&!/media:\{[^}]*\bdata\s*:/i.test(media)&&!/media:\{[^}]*arrayBuffer\s*:/i.test(media)&&!/media:\{[^}]*base64\s*:/i.test(media));
+ok('Reviewer note stores a media reference and integrity metadata only',/x\.notes\.push\(\{at:createdAt,text,source:'reviewer-local-media',media:\{id:mid,kind,mime,name:/.test(media)&&/size:blob\.size,sha256:sha,durationMs,localOnly:true,rawSentToAI:false/.test(media));
+ok('Reviewer note schema has no raw blob field',!/media:\{[^}]*[,\{]\s*blob\s*:/i.test(media)&&!/media:\{[^}]*[,\{]\s*data\s*:/i.test(media)&&!/media:\{[^}]*[,\{]\s*arrayBuffer\s*:/i.test(media)&&!/media:\{[^}]*[,\{]\s*base64\s*:/i.test(media));
 ok('Media metadata explicitly marks raw content as local-only and not sent to AI',/localOnly:true/.test(media)&&/rawSentToAI:false/.test(media));
 ok('Council context exposes integrity metadata only',/sha256:String\(n\.media\.sha256/.test(bridge)&&/localOnly:true,rawSentToAI:false/.test(bridge)&&!/reviewerNotes:[^\n]*(blob|base64|data:)/i.test(bridge));
 ok('Audio and video recording use browser permission-scoped MediaRecorder',/getUserMedia/.test(media)&&/new MediaRecorder/.test(media)&&/kind==='video'/.test(media));
