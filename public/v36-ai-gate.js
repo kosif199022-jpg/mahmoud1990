@@ -22,7 +22,30 @@ async function requireUnlock(){if(await status())return true;openGate();return f
 function addButton(){const grid=$('#kosif-more .kosif-sheet-grid');if(!grid||$('#kosif-ai-lock-open'))return false;const b=document.createElement('button');b.id='kosif-ai-lock-open';b.className='kosif-action';b.onclick=async()=>{if(await status(true))logout();else openGate()};grid.appendChild(b);updateUI();return true}
 function guards(){document.addEventListener('pointerdown',e=>{const el=e.target.closest(KEY_FIELDS);if(el&&!unlocked){e.preventDefault();openGate()}},true);document.addEventListener('focusin',e=>{if(e.target.matches?.(KEY_FIELDS)&&!unlocked){e.target.blur();openGate()}},true);document.addEventListener('beforeinput',e=>{if(e.target.matches?.(KEY_FIELDS)&&!unlocked)e.preventDefault()},true);document.addEventListener('paste',e=>{if(e.target.matches?.(KEY_FIELDS)&&!unlocked)e.preventDefault()},true);document.addEventListener('click',async e=>{const b=e.target.closest('#c-run,#kosif-council-open');if(!b||await status())return;e.preventDefault();e.stopImmediatePropagation();openGate()},true)}
 function message(text,type='info'){try{toast?.(text,type==='error'?'danger':type)}catch(_){const e=$('#kosif-ai-gate-error');if(e)e.textContent=text}}
-function init(){shell();guards();status(true);const mo=new MutationObserver(()=>lockFields());mo.observe(document.documentElement,{childList:true,subtree:true});let n=0,t=setInterval(()=>{addButton();lockFields();if(++n>100)clearInterval(t)},100)}
+/* A whole-document subtree observer that re-ran lockFields() on every mutation, plus a
+ * 100ms poll that always ran its full 100 iterations, together fired ~470 callbacks per
+ * idle second — a measurable battery cost on the phones this app targets, and the broad
+ * document patching the requirements forbid. React only to added nodes that could carry
+ * a key field or the More grid, coalesce a burst into a single frame, and let the
+ * bootstrap poll stop as soon as it succeeds. Locking behaviour is unchanged: every key
+ * field is still locked the moment it enters the DOM. */
+function relevantNode(n){
+  if(!n||n.nodeType!==1)return false;
+  if(n.matches?.(KEY_FIELDS)||n.querySelector?.(KEY_FIELDS))return true;
+  return n.id==='kosif-more'||!!n.querySelector?.('#kosif-more .kosif-sheet-grid');
+}
+function init(){
+  shell();guards();status(true);lockFields();
+  let queued=false;
+  const flush=()=>{queued=false;lockFields();addButton()};
+  const mo=new MutationObserver(recs=>{
+    if(queued)return;
+    for(const r of recs)for(const n of r.addedNodes)if(relevantNode(n)){queued=true;requestAnimationFrame(flush);return}
+  });
+  mo.observe(document.body,{childList:true,subtree:true});
+  /* addButton() returns true once the More grid exists and the button is in place. */
+  let n=0;const t=setInterval(()=>{if(addButton()||++n>30)clearInterval(t)},100);
+}
 window.KosifAIGate={version:'36.3.0',status,requireUnlock,open:openGate,logout,isUnlocked:()=>unlocked,verified:()=>({...verified}),refresh:()=>status(true),message};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

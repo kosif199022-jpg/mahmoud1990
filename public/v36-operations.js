@@ -46,7 +46,26 @@ function riskItems(){if(!analysis)return[];return analysis.findings.map(x=>({are
 function sample(){const today=new Date();rows=[{date:today.toISOString().slice(0,10),invoice:'INV-1001',product:'منتج أ',category:'لحوم',channel:'المتجر',qty:2,sales:900,cost:620,customer:'عميل 1',city:'الرياض',phone:'0500000001',payment:'مدى'},{date:today.toISOString().slice(0,10),invoice:'INV-1002',product:'منتج ب',category:'لحوم',channel:'واتساب',qty:1,sales:300,cost:340,customer:'عميل 2',city:'جدة',phone:'0500000002',payment:'تحويل'},{date:today.toISOString().slice(0,10),invoice:'INV-1002',product:'منتج ب',category:'لحوم',channel:'واتساب',qty:1,sales:300,cost:340,customer:'عميل 2',city:'جدة',phone:'0500000002',payment:'تحويل'},{date:today.toISOString().slice(0,10),invoice:'INV-1003',product:'منتج ج',category:'بوكسات',channel:'التطبيق',qty:-1,sales:-450,cost:-300,customer:'عميل 3',city:'الدمام',phone:'abc',payment:'مدى'}];render()}
 function mount(){const v=q('#view-analytics');if(!v||q('#ops-lab'))return;const c=document.createElement('div');c.className='card';c.id='ops-lab';c.innerHTML=`<div class="card-h"><h2>مختبر المبيعات والتكاليف التشغيلي</h2><span class="hint">مستوحى من لوحة المبيعات المرفقة · تحليل حتمي محلي قبل AI</span></div><div class="note info"><span>📊</span><span>استورد CSV/TSV أو Excel. يتعرف تلقائيًا على أعمدة التاريخ، الفاتورة، الصنف، القناة، الكمية، المبيعات، التكلفة، العميل، المدينة والجوال.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="file" id="ops-file" accept=".csv,.tsv,.txt,.xlsx,.xls"><button class="btn ghost sm" id="ops-sample">بيانات تجريبية</button><span class="badge mut" id="ops-state">لم يتم الاستيراد</span></div><div id="ops-out"></div>`;v.appendChild(c);q('#ops-file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;q('#ops-state').textContent='جاري القراءة…';try{rows=await readFile(f);q('#ops-state').textContent=`${rows.length} سجل`;try{localStorage.setItem(KEY,JSON.stringify({name:f.name,count:rows.length,at:new Date().toISOString()}))}catch{}render();if(typeof refreshAll==='function')setTimeout(()=>refreshAll(),0)}catch(x){q('#ops-state').textContent='فشل الاستيراد';if(typeof toast==='function')toast('تعذر قراءة ملف المبيعات: '+x.message,'danger')}};q('#ops-sample').onclick=()=>{sample();q('#ops-state').textContent=`${rows.length} سجلات تجريبية`;if(typeof refreshAll==='function')setTimeout(()=>refreshAll(),0)};render()}
 function mountReference(){const v=q('#view-library');if(!v||q('#ops-mafateeh-ref'))return;const c=document.createElement('div');c.className='card';c.id='ops-mafateeh-ref';c.innerHTML=`<div class="card-h"><h3>📘 مفاتيح الثروة — المرجع الرابع</h3><span class="hint">46 فصل · 34,700 كلمة · قارئ مفاتيح الثروة الكامل</span><span class="spacer"></span><a class="btn primary sm" href="https://mafateeh-al-tharwa3.kosif199022.workers.dev/reader" target="_blank" rel="noopener">فتح الكتاب</a></div><div class="note info"><span>ℹ️</span><span>أُضيف من حزمة «مفاتيح v36 — أربعة كتب» كمصدر تطويري مساند. طبقة الدراسة منفصلة عن نصوص المعايير الرسمية.</span></div>`;v.appendChild(c)}
-function init(){mount();mountReference();new MutationObserver(()=>{mount();mountReference()}).observe(document.documentElement,{childList:true,subtree:true})}
+/* mount() and mountReference() are one-shot: each early-returns once its card exists.
+ * Re-running both on every document mutation meant four querySelector calls per DOM
+ * change for the entire session. Watch for added elements only, coalesce into a frame,
+ * and disconnect once both cards are mounted (or after a bounded number of passes, so a
+ * build without one of the views cannot leave the observer running forever). */
+function init(){
+  mount();mountReference();
+  const mounted=()=>!!(q('#ops-lab')&&q('#ops-mafateeh-ref'));
+  if(mounted())return;
+  let queued=false,passes=0;
+  const mo=new MutationObserver(recs=>{
+    if(queued)return;
+    for(const r of recs)for(const n of r.addedNodes)if(n.nodeType===1){
+      queued=true;
+      requestAnimationFrame(()=>{queued=false;mount();mountReference();if(mounted()||++passes>60)mo.disconnect()});
+      return;
+    }
+  });
+  mo.observe(document.body,{childList:true,subtree:true});
+}
 window.KosifOperations={version:'36.2.0',riskItems:()=>riskItems(),getAnalysis:()=>analysis,getRows:()=>rows.slice()};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

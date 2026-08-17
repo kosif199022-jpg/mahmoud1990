@@ -18,7 +18,11 @@ ok('main client no whole-document mutation observer',!workspace.includes(".obser
 ok('source client no key-presence Active state',!workspace.includes("wanted=k?'AI Active ·")&&!workspace.includes("p.classList.toggle('on',!!k)"));
 ok('production client connected requires verification',/connected=aiOwnerUnlocked\(\)&&!!k&&aiVerified/.test(html));
 ok('continuity AI uses server verified state',/KosifAIGate\?\.verified/.test(cont)&&/data\.kosifAiUnlocked|dataset\.kosifAiUnlocked/.test(cont));
-ok('company state cannot select and overwrite html',cont.includes('dataset.kosifCompanyState')&&!cont.includes('document.documentElement.dataset.kosifActiveCompany')&&/if\(x!==document\.documentElement\)x\.textContent/.test(cont));
+/* The guarantee is that the company label is never written into <html> itself. The
+ * assertion used to pin the exact expression `x.textContent`, which broke when the write
+ * was routed through the idempotent setText() helper that stops the continuity render
+ * loop. Match the guard instead of its spelling, so the protection survives refactors. */
+ok('company state cannot select and overwrite html',cont.includes('dataset.kosifCompanyState')&&!cont.includes('document.documentElement.dataset.kosifActiveCompany')&&/if\(x!==document\.documentElement\)\s*(x\.textContent|setText\(x)/.test(cont));
 ok('fixed navigation SVG geometry',/--k363-icon:22px/.test(css)&&/#kosif-bottom-nav svg/.test(css));
 ok('More sheet scroll contract',/max-height:min\(88dvh,900px\)/.test(css)&&/overscroll-behavior:contain/.test(css));
 ok('engagement ISA 210',/ISA 210/.test(eng));
