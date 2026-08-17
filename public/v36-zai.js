@@ -32,7 +32,7 @@ function patchLabels(){
   const r=$('#rounds-model');if(r&&/Gemini/.test(r.textContent||''))r.textContent=r.textContent.replace(/Gemini/g,'Z.ai');
   const stage=$('#kosif-progress .kp-note');if(stage&&/Gemini/.test(stage.textContent||''))stage.textContent=stage.textContent.replace(/Gemini/g,'Z.ai');
 }
-function patch(){addOption();syncNote();patchLabels()}
+function patch(){addOption();syncNote();patchLabels();bindLabelObservers()}
 function bindFormObserver(){
   const form=$('#kosif-ai-form');if(!form)return false;
   if(form.dataset.zaiObserved==='1')return true;
@@ -40,23 +40,32 @@ function bindFormObserver(){
   new MutationObserver(()=>queueMicrotask(patch)).observe(form,{childList:true,subtree:true});
   return true;
 }
+function bindLabelObservers(){
+  let bound=false;
+  for(const el of [$('#kosif-ai-status'),$('#rounds-model')]){
+    if(!el||el.dataset.zaiLabelObserved==='1')continue;
+    el.dataset.zaiLabelObserved='1';bound=true;
+    new MutationObserver(()=>queueMicrotask(patchLabels)).observe(el,{childList:true,subtree:true,characterData:true});
+  }
+  return bound;
+}
 async function testMainProvider(btn){
   if(!window.KosifAIGate?.isUnlocked?.()){
     window.KosifAIGate?.open?.();return;
   }
   const p=normalizeProvider($('#kai-provider')?.value),model=String($('#kai-model')?.value||'').trim(),key=String($('#kai-key')?.value||'').trim();
-  if(!p||!model||!key){try{toast?.('أدخل المزود والنموذج ومفتاح API أولًا','warn')}catch(_){alert('أدخل المزود والنموذج ومفتاح API أولًا')}return}
+  if(!p||!model||!key){if(window.toast)window.toast('أدخل المزود والنموذج ومفتاح API أولًا','warn');else alert('أدخل المزود والنموذج ومفتاح API أولًا');return}
   const original=btn.textContent;btn.disabled=true;btn.textContent='جاري الاختبار…';
   try{
     const r=await fetch('/api/kosif/ai/test',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({provider:p,model,key,agent:{jurisdiction:$('#kai-jur')?.value||'saudi',industry:$('#kai-industry')?.value||'عام'}})}),d=await r.json();
     if(!r.ok)throw Error(d.message||d.error||'فشل اختبار الاتصال');
     await window.KosifAIGate?.refresh?.();
     btn.textContent='متصل ✓';patchLabels();
-    try{toast?.('نجح اختبار '+(p==='zai'?'Z.ai':p)+' — اضغط حفظ لاستخدام المفتاح في الجلسة.','ok')}catch(_){alert('نجح اختبار الاتصال. اضغط حفظ لاستخدام المفتاح في الجلسة.')}
+    if(window.toast)window.toast('نجح اختبار '+(p==='zai'?'Z.ai':p)+' — اضغط حفظ لاستخدام المفتاح في الجلسة.','ok');else alert('نجح اختبار الاتصال. اضغط حفظ لاستخدام المفتاح في الجلسة.');
     setTimeout(()=>{if(btn.isConnected){btn.disabled=false;btn.textContent=original}},1400);
     return;
   }catch(e){
-    try{toast?.(e.message||'فشل اختبار الاتصال','danger')}catch(_){alert(e.message||'فشل اختبار الاتصال')}
+    if(window.toast)window.toast(e.message||'فشل اختبار الاتصال','danger');else alert(e.message||'فشل اختبار الاتصال');
   }
   btn.disabled=false;btn.textContent=original;
 }
@@ -74,8 +83,8 @@ document.addEventListener('click',e=>{
 },true);
 window.addEventListener('kosif-ai-gate-change',()=>setTimeout(patchLabels,0));
 window.addEventListener('storage',e=>{if(e.key===LS)setTimeout(patch,0)});
-let tries=0,t=setInterval(()=>{patch();if(bindFormObserver()||++tries>80)clearInterval(t)},250);
-window.KosifZAI={version:'1.1.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider};
+let tries=0,t=setInterval(()=>{patch();if((bindFormObserver()||bindLabelObservers())&&++tries>12)clearInterval(t);else if(++tries>80)clearInterval(t)},250);
+window.KosifZAI={version:'1.2.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider};
 document.documentElement.dataset.kosifZai='ready';
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patch,{once:true});else patch();
 })();
