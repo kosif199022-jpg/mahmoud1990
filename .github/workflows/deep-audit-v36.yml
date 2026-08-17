@@ -13,11 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: v36-2-library-motion-hardening, fetch-depth: 0}
-      - name: Checkout historical 46-chapter Mafateeh payload
+      - name: Checkout checksum-verified 46-chapter Mafateeh payload
         uses: actions/checkout@v4
         with:
           repository: kosif199022-jpg/mafateeh-al-tharwa
-          ref: 9d9cdd4784995a8141de4a05a113a9c846769554
+          ref: a7f86fee08819cba79e2ff04b7d7cd0d0edd4696
           path: maf-source
       - name: Install AST parser
         run: npm install --no-save --package-lock=false acorn@8
