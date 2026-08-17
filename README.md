@@ -1,2 +1,36 @@
-# Kosif Native v35 — A1990
-Worker-first Cloudflare release using native Static Assets, the Stable v34 audit core as recovery/API engine, a native `/standards/` route, v35 mobile navigation, explicit `KosifStandardsBridge`, v35 cache migration, and `kosif_*` localStorage compatibility migration.
+# Kosif v36 — Consolidated
+
+منصة مراجعة وامتثال محاسبي ذكية للسعودية، تجمع **محرك مراجعة حتمي** مع مكتبة المعايير والمصادر الرسمية و**مجلس مراجعين متعدد النماذج**.
+
+## بنية التشغيل
+- `src/worker.js`: Worker-first routing وواجهات API.
+- `public/index.html`: واجهة الإنتاج.
+- `public/legacy/core-v36.js`: المحرك الحتمي المستعاد من آخر حزمة ذاتية مكتملة قبل فقد ملفات الـlegacy في v35.
+- `public/v36-features.js`: الميزان، PBC، Analytics، سجل المخاطر، قبول الارتباط، السنة المقارنة، اختبار القيود، القوالب، ISA 450/530، ومسودة القوائم.
+- `public/v36-outputs.js`: الميزان المعدّل، CSV، Word، والملخص الصوتي.
+- `public/v36-governance.js`: مجلس المراجعين المستقل، Claude adjudication عند تهيئته، الاعتمادات البشرية وAudit Trail.
+- `public/v36-standards-readiness.js`: جاهزية IFRS 18/19 حسب فترة الارتباط وربط المصادر الرسمية.
+- `public/standards/`: مكتبة المعايير المحلية القابلة للبحث.
+
+## الذكاء الاصطناعي
+- Gemini الافتراضي: `gemini-3.6-flash`.
+- OpenAI الافتراضي: `gpt-5.6`.
+- Claude متاح كعضو ورئيس مجلس عند إدخال مفتاحه.
+- المستندات والصور وPDF تبقى مرفقة خلال مسار AI بدل اختزالها إلى نص فقط.
+- محتوى المستندات يُعامل كدليل غير موثوق من ناحية التعليمات لمنع Prompt Injection من الملفات.
+
+## الأمان والحوكمة
+- الشركات العامة الجديدة لها Write Token عشوائي خاص بالجهاز؛ الخادم يحتفظ ببصمة SHA-256 فقط.
+- السجلات العامة القديمة تبقى Read-only حتى ترحيل صريح بدل الاستيلاء التلقائي على ملكيتها.
+- الشركات الخاصة تحتفظ بتشفير AES-GCM محليًا.
+- Service Worker لا يخزن استجابات `/api/`.
+- القيود والنتائج تبقى Proposed حتى اعتماد/رفض بشري موثق.
+
+## سياسة المعايير
+في السعودية، يعطي Kosif الأولوية للمعايير المعتمدة من **SOCPA** عند تحديد الحكم المطبق. المصادر الدولية تستخدم للتحديث والتفسير ولا يتحول مشروع أو إصدار مستقبلي إلى متطلب محلي نافذ قبل التحقق. IFRS 18 وIFRS 19 يعرضان في مركز الجاهزية حسب فترة الارتباط وخيار التطبيق المبكر/الأهلية.
+
+## التحقق
+- `Verify Kosif v36 Production`: بناء Worker + فحص JavaScript/Static Assets + Playwright على مقاس جوال.
+- `Kosif v36 Deep Audit`: تدقيق دوري لبنية المشروع والمزايا والمراجع المفقودة.
+
+آخر Release Gate شامل قبل التنظيف: **Success** — 110 حسابات تجريبية، 3 جولات، PBC، Analytics، سجل مخاطر، ملاحظات، مخرجات، حوكمة، Dark Mode، وصفر أخطاء Runtime/Static 404.

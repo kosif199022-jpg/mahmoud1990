@@ -1,0 +1,69 @@
+{
+  "release": "Kosif v36 — Consolidated",
+  "date": "2026-08-17",
+  "status": "verified-release-candidate",
+  "architecture": "Cloudflare Worker-first + native Static Assets + recovered deterministic audit core",
+  "coreRecovery": {
+    "sourceCommit": "e3d1d8b5751beb2b16a40a7e4ae08164cc858a4e",
+    "sourceFormat": "self-contained packed HTML reconstructed from historical GitHub parts",
+    "runtime": "public/legacy/core-v36.js",
+    "reason": "v35 referenced four legacy JavaScript assets that were not packaged; v36 restores the last verified self-contained deterministic engine."
+  },
+  "mobileNav": ["الرئيسية", "الميزان", "الجولات", "المطالبات", "المزيد"],
+  "restoredAndAddedFeatures": [
+    "deterministic TB engine and 110-account full demo",
+    "Excel/CSV/TXT trial balance import",
+    "audit rounds and final report",
+    "standards map and local standards library",
+    "PBC status center",
+    "analytics and exploratory Benford analysis",
+    "risk/assertions register",
+    "reviewer notes and voice dictation",
+    "engagement acceptance/continuance and independence gate",
+    "prior-year TB comparison",
+    "materiality revision log",
+    "journal testing support for ISA 240 procedures",
+    "sampling suggestion support for ISA 530 procedures",
+    "misstatement schedule support for ISA 450 procedures",
+    "editable working-paper templates",
+    "draft analytical financial statements",
+    "adjusted trial balance and CSV export",
+    "Word report export and audio summary",
+    "multi-agent Review Council using Gemini/OpenAI/Claude",
+    "Claude chair/adjudication when configured",
+    "human approval/rejection register",
+    "Audit Trail export",
+    "structured multimodal evidence flow to AI",
+    "prompt-injection defense for uploaded evidence",
+    "per-device write tokens for public company changes",
+    "dark mode/mobile/font reliability fixes",
+    "period-aware IFRS 18/19 standards readiness center",
+    "network-first PWA caches without API caching"
+  ],
+  "ai": {
+    "defaultGemini": "gemini-3.6-flash",
+    "defaultOpenAI": "gpt-5.6",
+    "claudeCouncilDefault": "claude-sonnet-4-20250514",
+    "keys": "user supplied; council keys are held in page memory only",
+    "evidence": "text, image, PDF and file parts are retained through the backend adapters"
+  },
+  "standardsPolicy": {
+    "SaudiPriority": "SOCPA adopted standards first for Saudi application; international sources and projects are reference/update sources until local adoption is verified.",
+    "IFRS18": "effective for annual reporting periods beginning on or after 2027-01-01; early application permitted",
+    "IFRS19": "effective for annual reporting periods beginning on or after 2027-01-01; early application permitted; optional only for eligible subsidiaries"
+  },
+  "security": {
+    "publicCompanies": "new public companies require a per-device random write token; the server stores its SHA-256 hash only; legacy public records are read-only until explicit migration",
+    "privateCompanies": "AES-GCM client-side encryption retained",
+    "serviceWorker": "API responses are excluded from caching"
+  },
+  "verification": {
+    "comprehensiveGateRun": 32019131815,
+    "result": "success",
+    "viewport": "390x844 mobile",
+    "demoAccounts": 110,
+    "demoRounds": 3,
+    "runtimeFatalErrors": 0,
+    "static404": 0
+  }
+}

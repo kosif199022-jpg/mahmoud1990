@@ -1,0 +1,61 @@
+name: Verify Kosif v36 Production
+
+on:
+  push:
+    branches: [main, v36-consolidated]
+    paths:
+      - 'public/**'
+      - 'frontend/**'
+      - 'src/**'
+      - 'wrangler.toml'
+      - '.github/workflows/verify-v36.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static and worker validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in public/sw.js public/standards/sw.js public/standards/bridge.js public/legacy/core-v36.js public/v36-features.js public/v36-outputs.js public/v36-governance.js public/v36-standards-readiness.js; do node --check "$f"; done
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+          python3 - <<'PY'
+          import pathlib,re,os,subprocess
+          s=pathlib.Path('public/index.html').read_text()
+          req=['/legacy/core-v36.js?v=36','/v36-features.js?v=36','/v36-outputs.js?v=36','/v36-governance.js?v=36','/v36-standards-readiness.js?v=36','/v36.css?v=36']
+          for x in req: assert x in s,x
+          for x in ['/legacy/engine.js','/legacy/appjs.js','/legacy/v5js.js','tamhees-v6-patch.js','fonts.googleapis.com','fonts.gstatic.com']: assert x not in s,x
+          refs=re.findall(r'<(?:script|link)\b[^>]*(?:src|href)=["\']([^"\']+)',s,re.I);missing=[]
+          for u in refs:
+            if not u.startswith('/'): continue
+            p=u.split('?')[0].split('#')[0]
+            if p=='/' or p.startswith('/api/'): continue
+            if not os.path.exists('public'+p): missing.append(p)
+          assert not missing,missing
+          ids=re.findall(r'\bid=["\']([^"\']+)',s);assert len(ids)==len(set(ids))
+          ws=pathlib.Path('src/kosif-workspace.js').read_text()
+          for x in ['attachmentsUsed','writeTokenHash','canWritePublic',"model=model||'gpt-5.6'","model=model||'gemini-3.6-flash'"]: assert x in ws,x
+          PY
+      - name: Install Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+      - name: Mobile smoke test
+        shell: bash
+        run: |
+          python3 -m http.server 8788 -d public >/tmp/http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:8788/ >/dev/null && break; sleep .25; done
+          cat > /tmp/probe.cjs <<'NODE'
+          const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const ok=(x,m)=>{if(!x)throw Error(m)};
+          (async()=>{const b=await chromium.launch({headless:true}),p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const errors=[],bad=[];p.on('pageerror',e=>errors.push(String(e.stack||e)));p.on('console',m=>{if(m.type()==='error')errors.push(m.text())});p.on('response',r=>{if(r.status()>=400&&!new URL(r.url()).pathname.startsWith('/api/'))bad.push(r.status()+' '+r.url())});await p.goto('http://127.0.0.1:8788/?verify=v36',{waitUntil:'domcontentloaded'});await p.waitForTimeout(1800);ok(await p.locator('body').evaluate(e=>e.classList.contains('kosif-ready')),'not ready');ok(await p.locator('#kosif-boot').count()===0,'boot overlay');await p.evaluate(()=>applyDemo('holding',true));await p.waitForTimeout(600);ok(await p.locator('#tb-result tbody tr').count()>=100,'TB not rendered');for(const v of ['overview','tb','rounds','pbc','analytics','reviewer','map','outputs','council','governance','standards-readiness']){await p.evaluate(x=>go(x),v);await p.waitForTimeout(50);ok(await p.locator('#view-'+v).evaluate(e=>e.classList.contains('show')),'view '+v)}ok(await p.locator('#v36-risk-register tbody tr').count()>0,'risks missing');ok(await p.locator('#adj-body tbody tr').count()>=100,'adjusted TB missing');ok(await p.locator('#kosif-bottom-nav button').count()===5,'nav count');ok(bad.length===0,'HTTP '+bad.join(','));ok(!errors.some(x=>/ReferenceError|TypeError|SyntaxError|Kosif boot error/i.test(x)),'runtime '+errors.join('\n'));await b.close();console.log('KOSIF_V36_VERIFY_OK')})().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+          node /tmp/probe.cjs
