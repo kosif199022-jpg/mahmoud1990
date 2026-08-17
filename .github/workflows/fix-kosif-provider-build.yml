@@ -1,0 +1,46 @@
+name: Fix Kosif provider build error
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-kosif-provider-build.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Patch provider mutability and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/kosif-workspace.js')
+          s=p.read_text()
+          old="const b=await req.json();const provider=String(b.provider||'gemini').toLowerCase();"
+          new="const b=await req.json();let provider=String(b.provider||'gemini').toLowerCase();"
+          if old not in s:
+              raise SystemExit('target provider declaration not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          node --check src/kosif-workspace.js
+          npx --yes esbuild src/kosif-workspace.js --bundle --format=esm --platform=browser --outfile=/tmp/kosif-workspace.bundle.js
+      - name: Commit fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/kosif-workspace.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix mutable AI provider in Kosif v35'
+          git push origin main
