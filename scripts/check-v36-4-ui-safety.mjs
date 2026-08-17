@@ -14,6 +14,7 @@ const checks = [
   ['AI gate observers stay scoped', /function watchScopedRoots\(\)/.test(aiGate) && !/observe\(document\.documentElement/.test(aiGate)],
   ['stalled progress has a safety timeout', /PROGRESS_STALE_MS=20000/.test(continuity) && /releaseStaleProgress/.test(continuity) && /watchProgressSafety/.test(continuity)],
   ['progress safety does not abort background work', !/AbortController|\.abort\(/.test(continuity)],
+  ['operations observer is frame-coalesced', /requestAnimationFrame\(\(\)=>\{q=false;mount\(\);mountReference\(\)\}\)/.test(operations) && /observe\(document\.body\|\|document\.documentElement/.test(operations)],
   ['operations analytics remains present', /window\.KosifOperations/.test(operations)]
 ];
 
