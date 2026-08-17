@@ -1,0 +1,84 @@
+name: Final Kosif Native v35 publication
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/publish-kosif-native-v35-final.yml]
+permissions:
+  contents: write
+jobs:
+  final-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+          fetch-depth: 0
+      - name: Reuse tested v35 build recipe
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+          s=Path('.github/workflows/publish-kosif-native-v35-v3.yml').read_text()
+          a=s.index('      - name: Build release\n')
+          a=s.index('        run: |\n',a)+len('        run: |\n')
+          b=s.index('\n      - name: Validate release',a)
+          Path('/tmp/build-v35.sh').write_text('set -euo pipefail\n'+textwrap.dedent(s[a:b]))
+          PY
+          bash /tmp/build-v35.sh
+      - name: Final validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$R"
+          node --check src/worker.js
+          node --check src/legacy-worker.js
+          node --check src/kosif-workspace.js
+          node --check public/migrate-v35.js
+          node --check public/sw.js
+          node --check public/standards/bridge.js
+          node --check public/standards/sw.js
+          ! grep -q 'id="bn-map"' frontend/index.html
+          grep -q 'kosif-bottom-nav' frontend/index.html
+          grep -q 'الرئيسية' frontend/index.html
+          grep -q 'الميزان' frontend/index.html
+          grep -q 'الجولات' frontend/index.html
+          grep -q 'المطالبات' frontend/index.html
+          grep -q 'المزيد' frontend/index.html
+          grep -q 'data-go="map"' frontend/index.html
+          grep -q 'KosifStandardsBridge' public/standards/bridge.js
+          ! grep -q 'window.fetch=' public/standards/bridge.js
+          grep -q 'run_worker_first = true' wrangler.toml
+          test -f public/index.html
+          test -f public/standards/index.html
+          test -f public/standards/data/search-index.json.gz
+          test -f public/standards/data/b3/1.json
+          node -e "const x=require('./public/standards/data/ref-map.json');if(x.refs.length!==66)throw Error('ref-map '+x.refs.length)"
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process'),h=fs.readFileSync('frontend/index.html','utf8');const ids=[...h.matchAll(/\bid=["']([^"']+)["']/g)].map(x=>x[1]),dup=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];if(dup.length)throw Error('duplicate ids: '+dup.join(','));const scripts=[...h.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(x=>x[1]);scripts.forEach((s,i)=>{const p='/tmp/kosif-'+i+'.js';fs.writeFileSync(p,s);cp.execFileSync(process.execPath,['--check',p])});console.log(JSON.stringify({inlineScripts:scripts.length,duplicateIds:dup.length,htmlBytes:Buffer.byteLength(h),refs:66}));
+          NODE
+          echo '--- release hashes ---'
+          sha256sum frontend/index.html public/index.html src/worker.js wrangler.toml public/standards/bridge.js public/standards/sw.js public/standards/data/ref-map.json
+      - name: Publish clean v35 tree to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm -r --ignore-unmatch .
+          cp -a "$R"/. .
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Release Kosif Native v35 A1990'
+          git push origin main
+          echo "PUBLISHED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Verify main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          ACTUAL=$(git rev-parse origin/main)
+          test "$ACTUAL" = "$PUBLISHED_SHA"
+          echo "Kosif Native v35 published: $ACTUAL"
+          git show --oneline --stat --summary "$ACTUAL"
