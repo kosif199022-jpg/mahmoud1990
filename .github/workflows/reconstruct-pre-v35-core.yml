@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Rebuild old packed application
+      - name: Rebuild and inspect old packed application
         shell: bash
         run: |
           set -euo pipefail
@@ -27,35 +27,29 @@ jobs:
             git show "$OLD:parts/$f" >> /tmp/app.b64
           done
           base64 -d /tmp/app.b64 | gzip -dc > /tmp/pre-v35.html
-          echo "HTML_BYTES $(wc -c < /tmp/pre-v35.html)"
-          echo '--- external script refs ---'
-          grep -oE '<script[^>]+src=["'"'][^"'"']+' /tmp/pre-v35.html | head -n 80 || true
-          echo '--- core function offsets/counts ---'
-          python3 - <<'PY'
-          import re
-          s=open('/tmp/pre-v35.html',encoding='utf8').read()
-          for t in ['function go','function refreshAll','function renderAnalytics','function renderPBC','function renderNotes','function renderOutputs','function callGemini','function fileToParts','function runNextRound','function renderMap','function applyDemo']:
-            print(t, s.find(t), len(re.findall(re.escape(t),s)))
-          print('INLINE_SCRIPTS',len(re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>[\s\S]*?</script>',s,re.I)))
-          print('LEGACY_REFS',len(re.findall(r'/legacy/',s,re.I)))
-          PY
-          echo '--- tail ---'
-          tail -n 20 /tmp/pre-v35.html
-      - name: Validate inline scripts
-        shell: bash
-        run: |
           python3 - <<'PY'
           import re,pathlib
           s=pathlib.Path('/tmp/pre-v35.html').read_text()
+          print('HTML_BYTES',len(s.encode()))
+          print('EXTERNAL_SCRIPTS',re.findall(r'<script[^>]+src=["\']([^"\']+)',s,re.I))
+          for t in ['function go','function refreshAll','function renderAnalytics','function renderPBC','function renderNotes','function renderOutputs','function callGemini','function fileToParts','function runNextRound','function renderMap','function applyDemo']:
+              print('CORE',t,s.find(t),len(re.findall(re.escape(t),s)))
           arr=re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',s,re.I)
-          out=pathlib.Path('/tmp/scripts'); out.mkdir(exist_ok=True)
-          for i,x in enumerate(arr): (out/f'{i:02d}.js').write_text(x)
-          print('EXTRACTED',len(arr))
+          print('INLINE_SCRIPTS',len(arr),'LEGACY_REFS',len(re.findall(r'/legacy/',s,re.I)))
+          out=pathlib.Path('/tmp/scripts');out.mkdir(exist_ok=True)
+          for i,x in enumerate(arr):(out/f'{i:02d}.js').write_text(x)
           PY
+      - name: Validate inline scripts
+        shell: bash
+        run: |
+          set +e
           bad=0
-          for f in /tmp/scripts/*.js; do node --check "$f" >/dev/null 2>&1 || { echo "BAD $f"; node --check "$f" || true; bad=1; }; done
+          for f in /tmp/scripts/*.js; do node --check "$f" >/dev/null 2>&1 || { echo "BAD $f"; node --check "$f" || true; bad=$((bad+1)); }; done
           echo "BAD_COUNT=$bad"
+          test "$bad" -eq 0
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: kosif-pre-v35-working-core
           path: /tmp/pre-v35.html
+          if-no-files-found: error
