@@ -3,11 +3,14 @@ on:
   push:
     branches: [main]
     paths: ['public/**','frontend/**','src/**','scripts/**','package.json','.github/workflows/verify-v36-3-runtime.yml']
+  pull_request:
+    branches: [main]
+    paths: ['public/**','frontend/**','src/**','scripts/**','package.json','.github/workflows/verify-v36-3-runtime.yml']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: verify-kosif-v36-3-runtime
+  group: verify-kosif-v36-3-runtime-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
   runtime:
