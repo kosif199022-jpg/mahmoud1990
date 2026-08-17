@@ -1,0 +1,144 @@
+name: Kosif v36 Comprehensive Release Gate
+
+on:
+  push:
+    branches: [v36-consolidated]
+    paths:
+      - 'public/**'
+      - 'frontend/**'
+      - 'src/**'
+      - '.github/workflows/test-v36-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-consolidated
+
+      - name: Static release gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in public/sw.js public/standards/sw.js public/standards/bridge.js public/legacy/core-v36.js public/v36-features.js public/v36-outputs.js public/v36-governance.js; do node --check "$f"; done
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+          python3 - <<'PY'
+          import pathlib,re,os,subprocess
+          s=pathlib.Path('public/index.html').read_text()
+          required=['/legacy/core-v36.js?v=36','/v36-features.js?v=36','/v36-outputs.js?v=36','/v36-governance.js?v=36','/v36.css?v=36','/standards/bridge.js']
+          for x in required: assert x in s, f'missing runtime asset {x}'
+          forbidden=['/legacy/engine.js','/legacy/appjs.js','/legacy/v5js.js','tamhees-v6-patch.js','fonts.googleapis.com','fonts.gstatic.com','2300-elapsed']
+          for x in forbidden: assert x not in s, f'forbidden legacy dependency {x}'
+          refs=re.findall(r'<(?:script|link)\b[^>]*(?:src|href)=["\']([^"\']+)',s,re.I)
+          missing=[]
+          for u in refs:
+              if not u.startswith('/'): continue
+              clean=u.split('?')[0].split('#')[0]
+              if clean=='/' or clean.startswith('/api/'): continue
+              if not os.path.exists('public'+clean): missing.append(clean)
+          print('STATIC_REFS',len(refs),'MISSING',missing); assert not missing
+          ids=re.findall(r'\bid=["\']([^"\']+)',s); dup=sorted({x for x in ids if ids.count(x)>1}); print('DUP_IDS',dup); assert not dup
+          for i,x in enumerate(re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',s,re.I)):
+              p=pathlib.Path('/tmp')/f'inline-{i}.js';p.write_text(x);subprocess.check_call(['node','--check',str(p)],stdout=subprocess.DEVNULL)
+          core=pathlib.Path('public/legacy/core-v36.js').read_text()
+          assert 'تمحيص' not in core, 'legacy visible brand remains in recovered core'
+          ws=pathlib.Path('src/kosif-workspace.js').read_text()
+          for token in ['attachmentsUsed','inline_data','input_file','writeTokenHash','canWritePublic','KOSIF_WORKSPACE_V36_2026_08_17']:
+              assert token in ws, f'missing workspace capability {token}'
+          sw=pathlib.Path('public/sw.js').read_text()
+          assert 'kosif-native-v36-app' in sw and "u.pathname.startsWith('/api/')" in sw
+          print('STATIC_GATE_OK')
+          PY
+
+      - name: Install mobile browser
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+
+      - name: Start candidate server
+        shell: bash
+        run: |
+          python3 -m http.server 8788 -d public >/tmp/kosif-v36-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:8788/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/kosif-v36-http.log
+          exit 1
+
+      - name: Exercise v36 on mobile viewport
+        shell: bash
+        run: |
+          cat > probe.cjs <<'NODE'
+          const {chromium}=require('playwright');
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const errors=[],httpBad=[];
+            page.on('pageerror',e=>errors.push('PAGEERROR '+(e.stack||e.message)));
+            page.on('console',m=>{if(m.type()==='error')errors.push('CONSOLE '+m.text())});
+            page.on('response',r=>{if(r.status()>=400&&!new URL(r.url()).pathname.startsWith('/api/'))httpBad.push(r.status()+' '+new URL(r.url()).pathname)});
+            await page.goto('http://127.0.0.1:8788/?v=36-gate',{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(1800);
+            console.log('READY_CLASS',await page.locator('body').getAttribute('class'));
+            assert(await page.locator('body').evaluate(el=>el.classList.contains('kosif-ready')),'body not kosif-ready');
+            assert(await page.locator('#kosif-boot').count()===0,'boot overlay still present');
+            const funcs=await page.evaluate(()=>Object.fromEntries(['go','refreshAll','renderOutputs','callGemini','fileToParts','runNextRound','renderMap','applyDemo'].map(k=>[k,typeof globalThis[k]])));
+            console.log('FUNCTIONS',JSON.stringify(funcs));
+            for(const [k,v] of Object.entries(funcs))assert(v==='function','missing core function '+k+'='+v);
+
+            await page.evaluate(()=>applyDemo('holding',true));
+            await page.waitForTimeout(900);
+            const state1=await page.evaluate(()=>({tb:state.tb.accounts.length,rounds:state.rounds.length,report:!!state.report,demo:state.demo,entity:state.entity.name}));
+            console.log('DEMO_STATE',JSON.stringify(state1));
+            assert(state1.tb>=100,'demo TB was not restored');assert(state1.rounds===3,'demo rounds missing');assert(state1.report,'demo report missing');
+            const tbRows=await page.locator('#tb-result tbody tr').count();console.log('TB_RENDERED_ROWS',tbRows);assert(tbRows>=100,'TB table did not render');
+
+            const views=[['overview','view-overview'],['tb','view-tb'],['rounds','view-rounds'],['pbc','view-pbc'],['analytics','view-analytics'],['reviewer','view-reviewer'],['map','view-map'],['outputs','view-outputs'],['council','view-council'],['governance','view-governance']];
+            for(const [goName,id] of views){await page.evaluate(v=>go(v),goName);await page.waitForTimeout(120);const shown=await page.locator('#'+id).evaluate(el=>el.classList.contains('show'));console.log('VIEW',goName,shown);assert(shown,'view failed '+goName)}
+
+            await page.evaluate(()=>go('analytics'));await page.waitForTimeout(150);
+            assert((await page.locator('#v36-analytics').innerText()).length>60,'analytics empty');
+            const riskRows=await page.locator('#v36-risk-register tbody tr').count();console.log('RISK_ROWS',riskRows);assert(riskRows>0,'risk register empty');
+            await page.locator('#v36-je-paste').fill('التاريخ\tرقم القيد\tالحساب\tالوصف\tمدين\tدائن\tالمستخدم\n2026-12-31\tJ1\tمصروفات متنوعة\tقيد يدوي تسوية\t100000\t0\tadmin\n2026-12-31\tJ2\tنقدية\tclosing manual\t0\t100000\tadmin');
+            await page.locator('#v36-je-run').click();await page.waitForTimeout(100);
+            const je=await page.evaluate(()=>({rows:state.v36.journals.length,flags:state.v36.journalFlags.length}));console.log('JOURNALS',JSON.stringify(je));assert(je.rows===2&&je.flags>0,'journal testing failed');
+
+            await page.evaluate(()=>go('reviewer'));await page.locator('#v36-note').fill('اختبار ملاحظة مراجع v36');await page.locator('#v36-note-add').click();
+            assert((await page.evaluate(()=>state.v36.notes.length))>0,'reviewer note not saved');
+            assert((await page.locator('#v36-templates .v36-template').count())>=5,'working paper templates missing');
+
+            await page.evaluate(()=>{state.demo=false;go('settings')});await page.waitForTimeout(120);
+            for(const id of ['#v36-ind','#v36-conf','#v36-int','#v36-terms'])await page.locator(id).check();
+            await page.locator('#v36-accept-note').fill('تمت مراجعة القبول والاستقلال للاختبار');await page.locator('#v36-accept-save').click();
+            assert(await page.evaluate(()=>state.v36.acceptance.accepted===true),'engagement acceptance gate failed');
+            const matRows=await page.locator('#v36-mat-log tbody tr').count();console.log('MAT_LOG_ROWS',matRows);assert(matRows>0,'materiality revision log empty');
+
+            await page.evaluate(()=>{state.demo=true;go('pbc')});await page.waitForTimeout(120);
+            const pbcText=await page.locator('#v36-pbc').innerText();console.log('PBC_TEXT_LEN',pbcText.length);assert(pbcText.length>20,'PBC center empty');
+
+            await page.evaluate(()=>go('outputs'));await page.waitForTimeout(150);
+            const adjRows=await page.locator('#adj-body tbody tr').count();console.log('ADJUSTED_ROWS',adjRows);assert(adjRows>=100,'adjusted TB missing');
+            assert(await page.locator('#btn-export-word').count()===1,'Word export button missing');assert(await page.locator('#btn-audio-summary').count()===1,'audio summary button missing');assert(await page.locator('#btn-export-adj').count()===1,'adjusted TB export missing');
+
+            await page.evaluate(()=>go('governance'));await page.waitForTimeout(120);
+            const decisionButtons=page.locator('.g-decide');const dc=await decisionButtons.count();console.log('DECISION_BUTTONS',dc);assert(dc>0,'governance decisions missing');await decisionButtons.first().click();
+            assert(Object.keys(await page.evaluate(()=>state.v36.decisions)).length>0,'human decision not recorded');
+            assert((await page.evaluate(()=>state.v36.auditTrail.length))>0,'audit trail empty');
+
+            await page.evaluate(()=>{document.documentElement.dataset.theme='dark'});await page.waitForTimeout(80);
+            const bg=await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor);console.log('DARK_BG',bg);assert(!/rgb\(255, 255, 255\)/.test(bg),'dark mode still white');
+
+            const navCount=await page.locator('#kosif-bottom-nav button').count();console.log('MOBILE_NAV',navCount);assert(navCount===5,'mobile nav count changed');
+            console.log('HTTP_BAD',JSON.stringify([...new Set(httpBad)]));console.log('ERRORS',JSON.stringify(errors));
+            assert(httpBad.length===0,'static HTTP errors: '+httpBad.join(','));
+            const fatal=errors.filter(x=>/ReferenceError|TypeError|SyntaxError|Kosif boot error|Cannot set properties of null/i.test(x));assert(fatal.length===0,'runtime fatal errors: '+fatal.join('\n'));
+            await browser.close();
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+          node probe.cjs
