@@ -1,0 +1,27 @@
+name: Kosif v36 Deep Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/deep-audit-v36.mjs'
+      - '.github/workflows/deep-audit-v36.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run deep project audit
+        run: node scripts/deep-audit-v36.mjs
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-v36-deep-audit
+          path: /tmp/kosif-v36-deep-audit.md
+          if-no-files-found: error
