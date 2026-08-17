@@ -1,0 +1,105 @@
+name: Finalize Kosif v36.3
+
+on:
+  push:
+    branches: [v36-3-history-continuity]
+    paths: ['.github/workflows/finalize-v36-3.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-3-history-continuity
+      - name: Apply reliable shortcuts and v36.3 build
+        run: |
+          python3 scripts/patch-v36-3-shortcuts.py
+          python3 scripts/apply-v36-3-history.py
+      - name: Complete regression suite
+        run: npm run check
+      - name: Validate release source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/v36-history-continuity.js
+          node --check public/sw.js
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/v363.mjs >/dev/null
+          cmp -s public/index.html frontend/index.html
+          grep -q "version:'v36.3'" src/worker.js
+          grep -q 'native-v36-3-history-continuity' src/worker.js
+          grep -q 'AI_EVIDENCE_SAFETY' src/worker.js
+          grep -q "e.altKey&&k==='k'" public/v36-history-continuity.js
+          grep -q "k==='/'" public/v36-history-continuity.js
+          grep -q 'kosif-native-v36-3-app' public/sw.js
+      - name: Install browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+      - name: Start Worker
+        shell: bash
+        run: |
+          nohup npx --yes wrangler@4 dev --local --port 8793 >/tmp/wrangler-v363.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8793/__health >/tmp/health.json 2>/dev/null; then cat /tmp/health.json; exit 0; fi
+            sleep 1
+          done
+          cat /tmp/wrangler-v363.log; exit 1
+      - name: Verify mobile and desktop runtime
+        shell: bash
+        run: |
+          cat > /tmp/v363.cjs <<'NODE'
+          const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const ok=(v,m)=>{if(!v)throw Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const p=await mobile.newPage(),bad=[],errors=[];
+            p.on('pageerror',e=>errors.push(String(e)));
+            p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
+            const hr=await p.request.get('http://127.0.0.1:8793/__health'),h=await hr.json();ok(h.version==='v36.3','health version');
+            await p.goto('http://127.0.0.1:8793/?v=36.3',{waitUntil:'domcontentloaded'});await p.waitForTimeout(1500);
+            ok(await p.evaluate(()=>!!window.KosifHistoryContinuity),'history module');
+            await p.evaluate(()=>KosifHistoryContinuity.openMore());
+            const more=await p.locator('#kosif-more-sheet').innerText();for(const t of ['الشركات','الخريطة المعيارية','التحليلات','المطالبات','التقارير والمخرجات','ملاحظات المراجع','مكتبة المعايير','الكتب والمراجع','المصادر الرسمية','البحث والأوامر','AI Agent','الإعدادات','المظهر وحجم الخط'])ok(more.includes(t),'More '+t);
+            await p.locator('[data-kosif-action="search"]').click();ok(await p.locator('#kosif-command-palette.show').count()===1,'mobile search');
+            await p.keyboard.press('Escape');await p.evaluate(()=>KosifHistoryContinuity.setFontScale(2));await p.waitForTimeout(100);
+            ok(await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--kosif-user-scale').trim()==='2'),'200 font');
+            ok(await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth)<=4,'mobile 200 overflow');
+            await p.evaluate(()=>localStorage.setItem('kosif_session_doc_meta_v2',JSON.stringify({docs:[{name:'evidence.pdf',size:100,type:'application/pdf'}]})));
+            await p.reload({waitUntil:'domcontentloaded'});await p.waitForTimeout(800);
+            ok(await p.evaluate(()=>KosifHistoryContinuity.docsUnavailable()),'document reload continuity');ok(await p.locator('#kosif-doc-warning').count()===1,'continuity warning');
+            await p.screenshot({path:'kosif-v36-3-mobile.png',fullPage:true});
+            const dc=await browser.newContext({viewport:{width:1366,height:768}}),d=await dc.newPage();
+            await d.goto('http://127.0.0.1:8793/?desktop=1&v=36.3',{waitUntil:'domcontentloaded'});await d.waitForTimeout(1100);
+            await d.keyboard.press('Alt+K');await d.waitForTimeout(120);ok(await d.locator('#kosif-command-palette.show').count()===1,'desktop Alt+K');ok(await d.locator('#kosif-command-input').isFocused(),'palette focus');
+            await d.keyboard.press('Escape');await d.keyboard.press('Control+/');await d.waitForTimeout(120);ok(await d.locator('#kosif-command-palette.show').count()===1,'desktop Ctrl+/');
+            console.log('STATIC_BAD',bad,'ERRORS',errors);ok(!bad.length,'static errors');ok(!errors.some(x=>/ReferenceError|TypeError|SyntaxError/.test(x)),'runtime errors');
+            await browser.close();console.log('KOSIF_V36_3_FINAL_RUNTIME_OK');
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+          node /tmp/v363.cjs
+      - name: Commit finalized release
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/v36-history-continuity.js public/index.html frontend/index.html public/sw.js src/worker.js package.json scripts/deep-audit-v36.mjs
+          git diff --cached --quiet && exit 0
+          git commit -m 'Finalize Kosif v36.3 historical continuity release'
+          git pull --rebase origin v36-3-history-continuity
+          git push origin HEAD:v36-3-history-continuity
+      - name: Upload runtime artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-v36-3-final-runtime
+          path: |
+            kosif-v36-3-mobile.png
+            /tmp/wrangler-v363.log
+          if-no-files-found: ignore
