@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
-const release=read('src/release-v36-4.js'),wrangler=read('wrangler.toml'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),reader=read('public/standards/reader-pro-v36.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),gate=read('public/v36-ai-gate.js'),pkg=read('package.json'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
+const release=read('src/release-v36-4.js'),wrangler=read('wrangler.toml'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),reader=read('public/standards/reader-pro-v36.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),gate=read('public/v36-ai-gate.js'),zai=read('public/v36-zai.js'),reviewer=read('public/v36-reviewer-media.js'),voice=read('public/v36-voice-guide.js'),pkg=read('package.json'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
 const failures=[];const ok=(name,v)=>{console.log((v?'✅':'❌')+' '+name);if(!v)failures.push(name)};
 ok('production enters v36.4 release edge',/main\s*=\s*"src\/release-v36-4\.js"/.test(wrangler));
 ok('v36.4 version endpoint is release source of truth',/version:'v36\.4'/.test(release)&&/2026\.08\.18-v36\.4-mobile-release-integrity/.test(release)&&/\/__version/.test(release));
@@ -20,10 +20,16 @@ ok('reader no longer mutates scrollTop directly during auto-scroll',!/document\.
 ok('reader touch-stop behavior remains',/touchstart[\s\S]*autoOff/.test(reader));
 ok('AI Gate has no whole-document subtree observer',!/observe\(document\.documentElement,\{childList:true,subtree:true\}\)/.test(gate)&&/function watchScopedRoots\(\)/.test(gate));
 ok('AI Gate still fails closed before owner auth',/readOnly=true/.test(gate)&&/beforeinput/.test(gate)&&/requireUnlock/.test(gate));
+ok('reviewer multimedia remains local-first with integrity metadata',/IndexedDB|indexedDB/.test(reviewer)&&/localOnly:true/.test(reviewer)&&/rawSentToAI:false/.test(reviewer)&&/SHA-256/.test(reviewer));
+ok('voice guide exists as an actual runtime capability',/window\.KosifVoiceGuide/.test(voice)&&/function nextStep\(\)/.test(voice)&&/SpeechRecognition|webkitSpeechRecognition/.test(voice));
+ok('runtime wires reviewer media instead of leaving it as dead code',/function loadReviewerMedia\(\)/.test(zai)&&/\/v36-reviewer-media\.js\?v=36\.4-media1/.test(zai)&&/loadReviewerMedia\(\)/.test(zai));
+ok('runtime wires historical voice guide instead of leaving it as dead code',/function loadVoiceGuide\(\)/.test(zai)&&/\/v36-voice-guide\.js\?v=36\.4-voice-guide/.test(zai)&&/loadVoiceGuide\(\)/.test(zai));
 ok('app SW cache generation is v36.4',/const C='kosif-native-v36-4-app'/.test(sw));
 ok('standards SW cache generation is v36.4',/const C='kosif-native-v36-4-standards'/.test(stdSw));
+ok('reviewer media and voice guide are available offline',/\/v36-reviewer-media\.js/.test(sw)&&/\/v36-voice-guide\.js/.test(sw));
 ok('app SW excludes APIs and release diagnostics',/pathname\.startsWith\('\/api\/'\)/.test(sw)&&/u\.pathname==='\/__version'/.test(sw)&&/u\.pathname==='\/__health'/.test(sw));
 ok('old Kosif and Tamhees caches remain purgeable',/tamhees/i.test(sw)&&/kosif-native-v/.test(sw)&&/tamhees/i.test(stdSw));
 ok('package declares v36.4 and this contract',/"version"\s*:\s*"36\.4\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
+ok('reviewer-media regression check remains in full CI',/npm run reviewer-media/.test(pkg)&&/check-reviewer-media-v36-3\.mjs/.test(pkg));
 ok('master anti-regressions still require iPhone/modal/autoscroll safety',/iPhone/.test(req)&&/auto-scroll continuing while a modal\/body lock is active/.test(req)&&/body-scroll\/modal-scroll conflicts/.test(req));
 console.log(`KOSIF_V36_4_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}
