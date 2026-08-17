@@ -8,13 +8,11 @@ Improve the repository without silently removing existing capabilities. Fix defe
 ## Mandatory development workflow
 1. Inspect the repository and the relevant implementation before proposing changes.
 2. For non-trivial work, post a concise implementation plan before writing code.
-3. Never push directly to `main`. Create a dedicated branch and open a Pull Request for code changes.
+3. Never push directly to `main`. Create a dedicated branch whose name starts with `gemini/` and open a Pull Request for code changes.
 4. Keep changes scoped to the requested task unless a directly related defect must also be fixed.
-5. Before proposing merge, run the repository validation suite:
-   - `npm run build`
-   - `npm run check`
-6. If a check fails, investigate and fix the failure when it is caused by your change. Never claim a check passed unless it actually passed.
-7. In the PR summary, list changed files, user-visible behavior, tests executed, and any known limitations.
+5. Never merge your own Pull Request. Repository CI is the required validation gate and must run `npm run build` and `npm run check` before a human merges the change.
+6. Never claim validation passed unless the corresponding CI checks actually passed.
+7. In the PR summary, list changed files, user-visible behavior, what validation is expected, and any known limitations.
 
 ## Product requirements to preserve
 - Arabic-first interface with correct RTL behavior and readable typography.
