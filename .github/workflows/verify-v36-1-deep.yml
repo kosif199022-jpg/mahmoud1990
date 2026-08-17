@@ -1,8 +1,8 @@
-name: Verify Kosif v36.2.1 Deep Runtime
+name: Verify Kosif v36.3 Deep Runtime
 
 on:
   push:
-    branches: [main, v36-2-library-motion-hardening]
+    branches: [main]
     paths:
       - 'src/**'
       - 'frontend/**'
@@ -39,14 +39,14 @@ jobs:
           done
           cat /tmp/wrangler.log
           exit 1
-      - name: Verify mobile app, b4 isolation and motion
+      - name: Verify v36.3 mobile app, AI gate, b4 isolation and motion
         run: node scripts/verify-v36-2-1-runtime.cjs
       - name: Upload screenshot and Worker log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-v36-2-1-deep-runtime
+          name: kosif-v36-3-deep-runtime
           path: |
-            kosif-v36-2-1-mobile.png
+            kosif-v36-3-mobile.png
             /tmp/wrangler.log
           if-no-files-found: ignore
