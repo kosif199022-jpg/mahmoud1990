@@ -1,5 +1,5 @@
-const C='kosif-native-v36-app';
+const C='kosif-native-v36-1-app';
 const CORE=['/','/index.html','/manifest.webmanifest','/icon.svg','/migrate-v35.js','/v36.css','/legacy/core-v36.js','/v36-features.js','/v36-outputs.js','/v36-governance.js','/v36-standards-readiness.js','/v36-ai-gate.js','/standards/bridge.js'];
 self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(C);await c.addAll(CORE);await self.skipWaiting()})()));
-self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys()){if(k===C)continue;if(/^kosif-native-v\d+-app$/i.test(k)||/^tamhees/i.test(k)||/^kosif-app-/i.test(k))await caches.delete(k)}await self.clients.claim()})()));
+self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys()){if(k===C)continue;if(/^kosif-native-v[\d-]+-app$/i.test(k)||/^tamhees/i.test(k)||/^kosif-app-/i.test(k))await caches.delete(k)}await self.clients.claim()})()));
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==location.origin||u.pathname.startsWith('/api/'))return;e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});if(r.ok){const c=await caches.open(C);c.put(e.request,r.clone()).catch(()=>{});return r}}catch(_){}const hit=await caches.match(e.request,{ignoreSearch:true});return hit||Response.error()})())});
