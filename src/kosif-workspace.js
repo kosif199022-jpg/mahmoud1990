@@ -83,7 +83,7 @@ function extractOpenAI(d){if(typeof d?.output_text==='string')return d.output_te
 function extractAnthropic(d){return (d?.content||[]).filter(x=>x?.type==='text').map(x=>x.text).join('\n')}
 function extractGemini(d){if(typeof d?.output_text==='string')return d.output_text;if(typeof d?.text==='string')return d.text;const arr=d?.outputs||d?.output||[];let s='';for(const x of arr){if(typeof x?.text==='string')s+=x.text;for(const c of x?.content||[])if(typeof c?.text==='string')s+=c.text}return s}
 async function aiProxy(req,env){
-  const b=await req.json();const provider=String(b.provider||'gemini').toLowerCase();const key=String(b.key||'').trim();if(!key)return json({error:'مفتاح المستخدم مطلوب. Kosif لا يستخدم مفتاحاً افتراضياً.'},401);
+  const b=await req.json();let provider=String(b.provider||'gemini').toLowerCase();const key=String(b.key||'').trim();if(!key)return json({error:'مفتاح المستخدم مطلوب. Kosif لا يستخدم مفتاحاً افتراضياً.'},401);
   const agent=b.agent||{};const jurisdiction=agent.jurisdiction||'saudi';const task=String(b.prompt||b.input||'').slice(0,120000);if(!task)return json({error:'المهمة فارغة'},400);
   const [standardsSearch,standardsProfessional,booksRefs,sources]=await Promise.all([standardsContext(task,env).catch(()=>''),professionalContext(task,env).catch(()=>''),booksContext(task,env).catch(()=>''),sourceSnapshot(env,jurisdiction).catch(()=>({sources:[]}))]);const standardsRefs=[standardsProfessional,standardsSearch].filter(Boolean).join('\n\n');
   const role=String(agent.rolePrompt||'أنت وكيل مراجعة ومحاسبة مهني. اعمل وفق الأدلة والمصادر الرسمية، وصرّح عند نقص الأدلة ولا تختلق استنتاجات.').slice(0,12000);
