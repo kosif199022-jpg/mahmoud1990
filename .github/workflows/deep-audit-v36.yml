@@ -1,13 +1,14 @@
-name: Kosif v36.1 Deep Audit
+name: Kosif v36.2 Deep Audit
 
 on:
   push:
-    branches: [main, v36-deep-audit-fix]
+    branches: [main, v36-deep-audit-fix, v36-attachments-upgrade]
     paths:
       - 'src/**'
       - 'frontend/**'
       - 'public/**'
-      - 'scripts/deep-audit-v36.mjs'
+      - 'scripts/**'
+      - 'package.json'
       - '.github/workflows/deep-audit-v36.yml'
   workflow_dispatch:
 
@@ -20,18 +21,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate executable JavaScript and Worker
-        shell: bash
-        run: |
-          set -euo pipefail
-          for f in public/sw.js public/v36-ai-gate.js public/v36-governance.js public/standards/sw.js public/standards/reader-pro-v36.js; do node --check "$f"; done
-          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+      - name: Validate all JavaScript and browser payloads
+        run: npm run check
+      - name: Bundle Worker
+        run: npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
       - name: Run deep project audit
         run: node scripts/deep-audit-v36.mjs
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-v36-1-deep-audit
+          name: kosif-v36-2-deep-audit
           path: /tmp/kosif-v36-deep-audit.md
           if-no-files-found: error

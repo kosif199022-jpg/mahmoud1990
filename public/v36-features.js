@@ -73,7 +73,8 @@ function deriveRisks(){
   const out=[];const a=accounts();const abs=a.map(x=>Math.abs(bal(x))).filter(Boolean).sort((x,y)=>y-x);const threshold=abs[Math.min(abs.length-1,Math.floor(abs.length*.1))]||0;
   for(const x of a){const v=bal(x),n=name(x);let score=0,reasons=[];if(Math.abs(v)>=threshold&&threshold){score+=30;reasons.push('رصيد مرتفع')}if(v<0&&/نقد|بنك|مخزون|أصل|مصروف|عميل|ذمم مدينة/.test(n)){score+=35;reasons.push('إشارة غير معتادة')}if(v&&Math.abs(v)%10000===0){score+=15;reasons.push('رقم دائري')}if(/معلق|تسوية|عهدة|سلف|طرف ذي علاقة|أطراف ذات علاقة/.test(n)){score+=25;reasons.push('حساب حساس')}if(score)out.push({area:n||code(x),score:Math.min(score,100),assertions:score>=50?'الوجود · الدقة · العرض':'الدقة · التصنيف',source:'TB',reason:reasons.join('، ')})}
   for(const r of rounds())for(const f of (r.parsed?.findings||[])){out.push({area:f.area||'نتيجة جولة',score:f.severity==='مرتفع'?90:f.severity==='متوسط'?65:35,assertions:'حسب طبيعة البند',source:'Round '+r.no,reason:f.issue||''})}
-  return out.sort((x,y)=>y.score-x.score).slice(0,120);
+  try{const extra=window.KosifOperations?.riskItems?.()||[];for(const x of extra)out.push(x)}catch(_){}
+  return out.sort((x,y)=>y.score-x.score).slice(0,140);
 }
 function renderAnalytics(){
   const w=q('#v36-analytics');if(!w)return;const a=accounts();if(!a.length){w.innerHTML='<div class="empty">اعتمد ميزان المراجعة أولًا.</div>';return}
