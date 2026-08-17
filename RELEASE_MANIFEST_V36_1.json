@@ -1,0 +1,91 @@
+{
+  "release": "Kosif v36.1 — Deep Audit & Verified AI",
+  "date": "2026-08-17",
+  "status": "verified-release-candidate",
+  "basis": {
+    "current": "Kosif v36 Consolidated production tree",
+    "historicalArchiveReviewed": "تمحيص-v35-مع-مكتبة-المعايير.zip",
+    "archiveUsePolicy": "Used as a capability-recovery reference only. Current corrected standards data takes precedence over older OCR/classification metadata."
+  },
+  "aiGate": {
+    "mode": "owner-password + per-provider tested-key verification",
+    "ownerEmailMasked": "m••••••57@gmail.com",
+    "sessionHours": 8,
+    "cookie": "HttpOnly; Secure; SameSite=Strict",
+    "rateLimit": "5 failed owner-password attempts -> 15 minute lockout",
+    "keyStorage": "AI provider keys remain client-side/in-memory; server session stores only SHA-256 fingerprints of provider+model+key after a successful real connection test",
+    "lockedInput": "API key fields are readonly, emptied, paste/beforeinput blocked until owner session is unlocked",
+    "statusPolicy": "A key being present never means connected. Green/connected status is allowed only after a successful /api/kosif/ai/test for the same provider, model and key in the current owner session.",
+    "councilPolicy": "Review Council requires at least two independently tested providers; Claude chairs only when its own key/model has passed testing."
+  },
+  "standardsReader": {
+    "restoredFromV35Capabilities": [
+      "Arabic TTS",
+      "word/paragraph speech highlighting",
+      "Media Session lock-screen controls",
+      "Wake Lock",
+      "auto-scroll speeds 1-10",
+      "stop auto-scroll on first touch",
+      "sleep timer",
+      "jump by IFRS/IAS/IFRIC/SIC code",
+      "chapter export",
+      "reader journal export",
+      "reading streak"
+    ],
+    "dataPolicy": "Reader capabilities restored without reverting to the old archive's known OCR/classification issues.",
+    "currentInventory": {
+      "b1_2018_chapters": 66,
+      "b1_2018_words": 452855,
+      "b3_2025_chapters": 34,
+      "b3_2025_words": 649318,
+      "b2_dipifr_chapters": 139,
+      "b2_dipifr_words": 136572
+    },
+    "metadataFix": "2025 library metadata corrected from 33 to 34 because b3/34.json is a real chapter: معيار محاسبة الزكاة (المعدل)."
+  },
+  "professionalControlsRetained": [
+    "deterministic trial balance engine",
+    "Excel/CSV/TXT import",
+    "PBC center",
+    "analytics and exploratory Benford analysis",
+    "risk/assertions register",
+    "reviewer notes and voice input",
+    "acceptance/continuance and independence",
+    "prior-year comparison",
+    "journal testing support for ISA 240",
+    "sampling support for ISA 530",
+    "misstatement schedule support for ISA 450",
+    "adjusted trial balance",
+    "Word/CSV/report outputs",
+    "Audit Trail and human decisions",
+    "multimodal evidence flow to AI",
+    "prompt-injection defense",
+    "period-aware IFRS 18/19 readiness",
+    "SOCPA-first Saudi standards policy"
+  ],
+  "verification": {
+    "deepAuditRun": 32028881329,
+    "deepAuditResult": "success",
+    "iphoneWorkerRuntimeRun": 32028881342,
+    "iphoneWorkerRuntimeResult": "success",
+    "viewport": "390x844",
+    "assertions": [
+      "AI API returns 401 before owner authentication",
+      "AI test endpoint returns 401 before owner authentication",
+      "AI pill is not shown as connected/active while locked",
+      "API key field is readonly and empty while locked",
+      "AI connection test button is disabled while locked",
+      "Review Council provider keys/tests are locked while owner session is locked",
+      "standards reader opens a real packaged chapter",
+      "Reader Pro controls are present",
+      "no fatal runtime errors",
+      "no missing referenced static assets",
+      "no duplicate static IDs"
+    ]
+  },
+  "pwa": {
+    "mainCache": "kosif-native-v36-1-app",
+    "standardsCache": "kosif-native-v36-1-standards",
+    "apiCaching": false
+  }
+}

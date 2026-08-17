@@ -2,13 +2,19 @@ name = "mahmoud-eldesouky"
 main = "src/worker.js"
 compatibility_date = "2026-08-17"
 workers_dev = true
+
+[vars]
+AI_GATE_HASH = "bd6bb81a4df0eb9c96c1fc11dec2823bf80114a2cec304db699d6edc65ceea2a"
+
 [[kv_namespaces]]
 binding = "DATA"
 id = "ea12d307eba1439c960c8832337a40f4"
+
 [[services]]
 binding = "MAFATEEH"
 service = "mafateeh-al-tharwa3"
 environment = "production"
+
 [assets]
 directory = "./public"
 binding = "ASSETS"

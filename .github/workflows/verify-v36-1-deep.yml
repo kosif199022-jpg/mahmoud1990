@@ -1,0 +1,83 @@
+name: Verify Kosif v36.1 Deep Runtime
+
+on:
+  push:
+    branches: [main, v36-deep-audit-fix]
+    paths:
+      - 'src/**'
+      - 'frontend/**'
+      - 'public/**'
+      - '.github/workflows/verify-v36-1-deep.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser and validate build
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1 || true
+          npm install --no-save playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+      - name: Start local Cloudflare Worker
+        shell: bash
+        run: |
+          nohup npx --yes wrangler@4 dev --local --port 8788 >/tmp/wrangler.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8788/__health >/tmp/health.json 2>/dev/null; then cat /tmp/health.json; exit 0; fi
+            sleep 1
+          done
+          cat /tmp/wrangler.log
+          exit 1
+      - name: Verify server fail-closed and mobile UI
+        shell: bash
+        run: |
+          cat > /tmp/probe.cjs <<'NODE'
+          const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const ok=(v,m)=>{if(!v)throw Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const page=await context.newPage(),errors=[],bad=[];
+            page.on('pageerror',e=>errors.push(String(e.stack||e)));
+            page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+            page.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
+            let r=await page.request.get('http://127.0.0.1:8788/__health');const h=await r.json();console.log('HEALTH',h);ok(h.aiGate==='owner-password+verified-key','health gate marker missing');
+            r=await page.request.post('http://127.0.0.1:8788/api/kosif/ai',{data:{provider:'gemini',model:'gemini-3.6-flash',key:'dummy',prompt:'x'}});console.log('LOCKED_AI',r.status(),await r.text());ok(r.status()===401,'AI must be 401 before owner auth');
+            r=await page.request.post('http://127.0.0.1:8788/api/kosif/ai/test',{data:{provider:'gemini',model:'gemini-3.6-flash',key:'dummy'}});ok(r.status()===401,'AI test must be 401 before owner auth');
+            await page.goto('http://127.0.0.1:8788/?v=36.1',{waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);
+            ok(await page.locator('body').evaluate(e=>e.classList.contains('kosif-ready')),'app not ready');
+            const pill=(await page.locator('#kosif-ai-status .kosif-ai-text').textContent())||'';console.log('PILL',pill);ok(!/متصل|Active/i.test(pill),'AI falsely shown connected');
+            await page.locator('#kosif-ai-status').click();await page.waitForTimeout(150);
+            const key=page.locator('#kai-key');ok(await key.count()===1,'AI key field missing');ok(await key.getAttribute('readonly')!==null,'AI key must be readonly before password');ok((await key.inputValue())==='','AI key must be empty while locked');ok(/باسورد المالك/.test(await key.getAttribute('placeholder')||''),'locked placeholder missing');
+            ok(await page.locator('#kai-test').isDisabled(),'test must be disabled while locked');
+            await page.evaluate(()=>go('council'));await page.waitForTimeout(150);ok(await page.locator('#c-key-gemini').getAttribute('readonly')!==null,'Council Gemini key must be locked');ok(await page.locator('.c-test').first().isDisabled(),'Council tests must be disabled while locked');
+            await page.goto('http://127.0.0.1:8788/standards/?v=36.1',{waitUntil:'domcontentloaded'});await page.waitForTimeout(1000);
+            ok(await page.evaluate(()=>typeof window.KosifStandardsReaderPro==='object'),'Reader Pro missing');
+            await page.evaluate(async()=>{await openBook('b1',1)});await page.waitForTimeout(800);ok(await page.locator('#prose').count()===1,'standard chapter did not open');ok(await page.locator('#rpTools.on').count()===1,'reader tools not visible');
+            for(const id of ['#rpSpeak','#rpAuto','#rpPrefs'])ok(await page.locator(id).count()===1,'missing reader control '+id);
+            const api=await page.evaluate(()=>Object.keys(window.KosifStandardsReaderPro));console.log('READER_API',api);ok(api.includes('jumpCode')&&api.includes('exportChapter'),'reader API incomplete');
+            console.log('STATIC_BAD',bad);console.log('ERRORS',errors);
+            ok(bad.length===0,'static HTTP errors: '+bad.join(','));
+            const fatal=errors.filter(x=>/ReferenceError|TypeError|SyntaxError|Kosif boot error|Cannot set properties of null/i.test(x));ok(fatal.length===0,'fatal runtime errors: '+fatal.join('\n'));
+            await page.screenshot({path:'kosif-v36-1-mobile.png',fullPage:true});await browser.close();console.log('KOSIF_V36_1_DEEP_VERIFY_OK');
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+          node /tmp/probe.cjs
+      - name: Upload screenshot and Worker log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-v36-1-deep-runtime
+          path: |
+            kosif-v36-1-mobile.png
+            /tmp/wrangler.log
+          if-no-files-found: ignore
