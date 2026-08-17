@@ -20,6 +20,15 @@ const fail=(m,x)=>{throw new Error(m+(x!==undefined?' '+JSON.stringify(x):''))};
   if(metrics.rawKeyInputs.some(Boolean))fail('Council key input prefilled while locked',metrics.rawKeyInputs);
   if(!/السعودية/.test(metrics.ctx))fail('Default Saudi engagement jurisdiction not shown',metrics.ctx);
   const locked=await page.request.post(base+'/api/kosif/ai/test',{data:{provider:'zai',model:'glm-5.1',key:'not-a-real-key'}});if(locked.status()!==401)fail('Council AI verification endpoint not owner-locked',locked.status());
+  const evidenceCtx=await page.evaluate(()=>{
+    state.rounds=[{no:7,parsed:{document_requests:[{id:'bank-rec',title:'Bank reconciliation',reason:'Cash existence',standard_refs:['ISA 500']}]}}];
+    state.v36=state.v36||{};state.v36.pbc={'bank-rec':{status:'Received',at:'2026-08-17T20:00:00Z'}};state.v36.notes=[{at:'2026-08-17T20:01:00Z',text:'راجع فرق التسوية البنكية قبل إقفال الجولة.'}];
+    return window.KosifZAI.councilStructuredContext();
+  });
+  console.log('COUNCIL_EVIDENCE_CONTEXT',evidenceCtx);
+  if(evidenceCtx.pbc?.[0]?.status!=='Received')fail('Council context lost PBC workflow status',evidenceCtx);
+  if(!/فرق التسوية البنكية/.test(evidenceCtx.reviewerNotes?.[0]?.text||''))fail('Council context lost reviewer note',evidenceCtx);
+  if(evidenceCtx.pbcSummary?.Received!==1)fail('Council context PBC summary incorrect',evidenceCtx.pbcSummary);
   await page.evaluate(()=>{localStorage.setItem('kosif_engagement_governance_v36_3',JSON.stringify({jurisdiction:'international',framework:'full-ifrs'}));window.dispatchEvent(new CustomEvent('kosif-engagement-change',{detail:{jurisdiction:'international',framework:'full-ifrs'}}))});
   await page.waitForTimeout(100);const intl=await page.locator('#cv2-context').innerText();console.log('COUNCIL_INTL',intl);if(!/دولي/.test(intl)||/السعودية/.test(intl))fail('Council did not follow international jurisdiction',intl);
   if(errors.length)fail('Council page errors',errors);
