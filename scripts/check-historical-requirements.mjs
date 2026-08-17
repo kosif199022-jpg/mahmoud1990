@@ -21,7 +21,7 @@ const req={
  'More sheet includes command search':/البحث والأوامر/.test(hist),
  'More sheet includes AI Agent':/AI Agent/.test(hist),
  'More sheet includes settings and appearance':/الإعدادات/.test(hist)&&/المظهر وحجم الخط/.test(hist),
- 'Command palette keyboard shortcut':/ctrlKey\|\|e\.metaKey/.test(hist)&&/key\.toLowerCase\(\)===['"]k['"]/.test(hist),
+ 'Command palette has reliable keyboard shortcuts':/e\.altKey&&k===['"]k['"]/.test(hist)&&/k===['"]\/['"]/.test(hist)&&/e\.metaKey/.test(hist),
  'Guided Arabic voice tour':/SpeechSynthesisUtterance/.test(hist)&&/جولة تعريفية صوتية/.test(hist),
  'Font control reaches 200%':/max=\"200\"/.test(hist)&&/Math\.min\(2/.test(hist),
  '200% font layout has overflow protections':/data-kosif-font=\"xl\"/.test(histCss)&&/overflow-wrap:anywhere/.test(histCss),
