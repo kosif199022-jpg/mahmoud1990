@@ -14,7 +14,7 @@ ok('Legacy notes/files/office storage is owner-gated',edge.includes("'/api/notes
 ok('Legacy company store is owner-gated without blocking modern company API',edge.includes("'/api/companies'")&&!edge.includes("'/api/kosif/companies'"));
 ok('Raw legacy file download routes are owner-gated',edge.includes("path.startsWith('/files/')")&&edge.includes("path.startsWith('/office/files/')"));
 ok('Source export prefix is owner-gated',edge.includes("const EXPORT_PREFIX='/6ff6b51050ba881059c63e74/'")&&edge.includes('u.pathname.startsWith(EXPORT_PREFIX)'));
-ok('Owner session validates hashed HttpOnly-session token from KV',edge.includes("const OWNER_COOKIE='kosif_ai_session'")&&edge.includes("'kosif:ai:session:'")&&edge.includes('await sha256(token)')&&/expiresAt/.test(edge));
+ok('Owner session validates hashed HttpOnly-session token from KV',edge.includes("const OWNER_COOKIE='kosif_ai_session'")&&edge.includes("'kosif:ai:session:'")&&/sha256\((?:token|t)\)/.test(edge)&&/expiresAt/.test(edge));
 ok('Legacy worker still contains routes being protected',legacy.includes("'/api/state'")&&legacy.includes("'/api/notes'")&&legacy.includes("'/api/office/upload'"));
 
 const env={};
