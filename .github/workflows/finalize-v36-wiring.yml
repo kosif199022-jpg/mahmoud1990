@@ -1,0 +1,84 @@
+name: Finalize Kosif v36 Consolidated Wiring
+
+on:
+  push:
+    branches: [v36-consolidated]
+    paths: ['.github/workflows/finalize-v36-wiring.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-consolidated
+      - name: Consolidate runtime assets and release identity
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for fn in ['frontend/index.html','public/index.html']:
+            p=Path(fn);s=p.read_text(encoding='utf8')
+            s=re.sub(r'\s*<link[^>]+(?:fonts\.googleapis\.com|fonts\.gstatic\.com)[^>]*>','',s,flags=re.I)
+            s=s.replace('Math.max(0,2300-elapsed)','Math.max(0,700-elapsed)')
+            s=re.sub(r'(?m)^500;600;700;800;900&family=Plus\+Jakarta\+Sans[^\n]*\n?','',s)
+            s=s.replace('KOSIF_NATIVE_V35_PRO_COMPAT','KOSIF_NATIVE_V36_PRO_COMPAT').replace('version:"35.0.0"','version:"36.0.0"')
+            css='<link rel="stylesheet" href="/v36.css?v=36">'
+            if css not in s:s=s.replace('</head>',css+'</head>')
+            anchor='<script src="/v36-features.js?v=36"></script>'
+            if anchor not in s:
+              core='<script src="/legacy/core-v36.js?v=36"></script>'
+              s=s.replace(core,core+'\n'+anchor)
+            for asset in ['<script src="/v36-outputs.js?v=36"></script>','<script src="/v36-governance.js?v=36"></script>']:
+              if asset not in s:s=s.replace(anchor,anchor+'\n'+asset)
+            p.write_text(s,encoding='utf8')
+          p=Path('src/kosif-workspace.js');s=p.read_text(encoding='utf8');s=s.replace('Math.max(0,2300-elapsed)','Math.max(0,700-elapsed)');s=re.sub(r'(?m)^500;600;700;800;900&family=Plus\+Jakarta\+Sans[^\n]*\n?','',s);p.write_text(s,encoding='utf8')
+          p=Path('public/legacy/core-v36.js');s=p.read_text(encoding='utf8').replace('تمحيص','kosif');p.write_text(s,encoding='utf8')
+          p=Path('src/worker.js');s=p.read_text(encoding='utf8').replace("version:'v35',release:'A1990'","version:'v36',release:'Consolidated'" ).replace("native-v35-a1990","native-v36-consolidated");p.write_text(s,encoding='utf8')
+          p=Path('public/sw.js');s=p.read_text(encoding='utf8');s=s.replace("'/v36-outputs.js','/standards/bridge.js'","'/v36-outputs.js','/v36-governance.js','/standards/bridge.js'");p.write_text(s,encoding='utf8')
+          PY
+      - name: Validate all release JavaScript and asset references
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in public/sw.js public/v36-features.js public/v36-outputs.js public/v36-governance.js public/legacy/core-v36.js public/standards/bridge.js public/standards/sw.js; do node --check "$f"; done
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+          python3 - <<'PY'
+          import re,pathlib,subprocess,os
+          for fn in ['frontend/index.html','public/index.html']:
+            s=pathlib.Path(fn).read_text()
+            for required in ['/legacy/core-v36.js?v=36','/v36-features.js?v=36','/v36-outputs.js?v=36','/v36-governance.js?v=36','/v36.css?v=36']:
+              assert required in s,(fn,required)
+            assert 'fonts.googleapis.com' not in s and 'fonts.gstatic.com' not in s
+            assert '/legacy/engine.js' not in s and '/legacy/appjs.js' not in s and '/legacy/v5js.js' not in s and 'tamhees-v6-patch.js' not in s
+            assert '2300-elapsed' not in s
+            for i,x in enumerate(re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',s,re.I)):
+              f=f'/tmp/inline-{i}.js';pathlib.Path(f).write_text(x);subprocess.check_call(['node','--check',f],stdout=subprocess.DEVNULL)
+          s=pathlib.Path('public/index.html').read_text()
+          refs=re.findall(r'<(?:script|link)\b[^>]*(?:src|href)=["\']([^"\']+)',s,re.I);missing=[]
+          for u in refs:
+            if not u.startswith('/'):continue
+            clean=u.split('?')[0].split('#')[0]
+            if clean=='/' or clean.startswith('/api/'):continue
+            if not os.path.exists('public'+clean):missing.append(clean)
+          print('STATIC_MISSING',missing);assert not missing
+          ids=re.findall(r'\bid=["\']([^"\']+)',s);dup=sorted({x for x in ids if ids.count(x)>1});print('DUP_IDS',dup);assert not dup
+          PY
+          grep -q "native-v36-consolidated" src/worker.js
+          ! grep -q 'تمحيص' public/legacy/core-v36.js
+      - name: Commit consolidated runtime
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add frontend/index.html public/index.html src/kosif-workspace.js src/worker.js public/sw.js public/legacy/core-v36.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Finalize Kosif v36 consolidated runtime'
+          git pull --rebase origin v36-consolidated
+          git push origin HEAD:v36-consolidated
