@@ -20,6 +20,7 @@ jobs:
       - name: Apply reproducible deep fixes
         run: |
           python3 scripts/patch-ai-v36-1.py
+          python3 scripts/patch-ai-client-semantic-v36-1.py
           python3 scripts/wire-reader-pro-v36.py
           python3 scripts/patch-governance-v36-1.py
       - name: Validate AI gate, Council and restored reader
@@ -30,7 +31,9 @@ jobs:
           grep -q '/api/kosif/ai/test' public/index.html
           grep -q 'AI غير مختبر' public/index.html
           grep -q 'aiVerified' public/index.html
+          grep -q "isConnected:()=>" public/index.html
           ! grep -q 'AI Active ·' public/index.html
+          ! grep -q "hasKey:()=>!!apiKey()" public/index.html
           grep -q 'c-test' public/v36-governance.js
           grep -q 'councilOK' public/v36-governance.js
           grep -q '/api/kosif/ai/test' public/v36-governance.js
@@ -58,6 +61,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/index.html frontend/index.html public/standards/index.html public/v36-governance.js
           git diff --cached --quiet && exit 0
-          git commit -m 'Integrate verified AI, Council and standards reader v36.1'
+          git commit -m 'Enforce verified AI semantics and restore reader capabilities'
           git pull --rebase origin v36-deep-audit-fix
           git push origin HEAD:v36-deep-audit-fix
