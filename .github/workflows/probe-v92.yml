@@ -1,0 +1,36 @@
+name: Capture stable rendered shell
+
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/probe-v92.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+      - name: Capture Version 92 preview
+        run: |
+          set -euo pipefail
+          base='https://2fe00bb6-mahmoud-eldesouky.kosif199022.workers.dev'
+          rm -rf _v35_probe && mkdir _v35_probe
+          curl -fLsS --max-time 90 "$base/" -o _v35_probe/index.html
+          curl -fLsS --max-time 30 "$base/manifest.webmanifest" -o _v35_probe/manifest.webmanifest
+          curl -fLsS --max-time 30 "$base/sw.js" -o _v35_probe/sw.js
+          printf 'index bytes: '; wc -c < _v35_probe/index.html
+          printf 'index sha256: '; sha256sum _v35_probe/index.html | cut -d' ' -f1
+          grep -o 'Kosif\|تمحيص\|bn-map\|الرئيسية\|الميزان\|الجولات\|المطالبات\|المزيد' _v35_probe/index.html | sort | uniq -c || true
+      - name: Commit capture
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add _v35_probe
+          git diff --cached --quiet && exit 0
+          git commit -m 'Capture stable rendered shell for Native v35 [skip ci]'
+          git push origin HEAD:a1990-v35-import
