@@ -1,0 +1,52 @@
+name: Kosif v36 Runtime Capability Audit
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/runtime-capability-audit-v36.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+      - name: Audit live runtime capabilities
+        shell: bash
+        run: |
+          cat > probe.cjs <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({headless:true});
+            const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const errors=[]; const fails=[];
+            p.on('pageerror',e=>errors.push(String(e.stack||e.message)));
+            p.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+            p.on('response',r=>{if(r.status()>=400)fails.push(`${r.status()} ${new URL(r.url()).pathname}`)});
+            await p.goto('https://mahmoud-eldesouky.kosif199022.workers.dev/?cb='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+            await p.waitForTimeout(3500);
+            const names=['go','refreshAll','renderAnalytics','renderPBC','renderNotes','renderOutputs','callGemini','speak'];
+            for(const n of names) console.log('FUNC',n,await p.evaluate(n=>{try{return typeof globalThis[n]}catch{return 'error'}},n));
+            const ids=['btn-demo-full','btn-sample','btn-commit','btn-export-json','btn-export-aje','btn-export-word','btn-audio-summary','btn-check-upd','btn-save-entity','btn-export-all','imp-file'];
+            for(const id of ids) console.log('ELEMENT',id,await p.locator('#'+id).count());
+            async function click(id){const x=p.locator('#'+id);if(!await x.count())return console.log('CLICK',id,'MISSING');try{await x.click({timeout:3000});await p.waitForTimeout(700);console.log('CLICK',id,'OK')}catch(e){console.log('CLICK',id,'FAIL',e.message.split('\n')[0])}}
+            await click('btn-demo-full');
+            await click('btn-sample');
+            for(const label of ['الميزان','الجولات','المطالبات','المزيد']){const x=p.locator('#kosif-bottom-nav button').filter({hasText:label}).first();if(await x.count()){try{await x.click();await p.waitForTimeout(400);console.log('NAV',label,'OK')}catch(e){console.log('NAV',label,'FAIL')}}}
+            console.log('VISIBLE_VIEWS',await p.locator('section[data-view].show').evaluateAll(es=>es.map(e=>e.id)));
+            console.log('TB_ROWS',await p.locator('#tb-body tr').count().catch(()=>-1));
+            console.log('PBC_ITEMS',await p.locator('#pbc-body .docreq,#pbc-body tr,#pbc-list .docreq').count().catch(()=>-1));
+            console.log('ERRORS',JSON.stringify(errors));
+            console.log('HTTP_FAILS',JSON.stringify([...new Set(fails)]));
+            await b.close();
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+          node probe.cjs
