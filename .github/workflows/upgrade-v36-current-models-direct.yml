@@ -1,0 +1,53 @@
+name: Upgrade Kosif v36 Current Provider Models Direct
+
+on:
+  push:
+    branches: [v36-consolidated]
+    paths: ['.github/workflows/upgrade-v36-current-models-direct.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-consolidated
+      - name: Update current stable provider defaults
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for fn in ['scripts/v36-ai-backend.js.txt','src/kosif-workspace.js']:
+            p=Path(fn);s=p.read_text()
+            s=s.replace("model=model||'gpt-5';", "model=model||'gpt-5.6';")
+            s=s.replace("model=model||'gemini-2.5-flash';const generationConfig={temperature:.2,maxOutputTokens:maxTokens};", "model=model||'gemini-3.6-flash';const generationConfig={maxOutputTokens:maxTokens};")
+            assert "model=model||'gpt-5.6';" in s,(fn,'gpt')
+            assert "model=model||'gemini-3.6-flash';const generationConfig={maxOutputTokens:maxTokens};" in s,(fn,'gemini')
+            p.write_text(s)
+          p=Path('public/v36-governance.js');s=p.read_text();s=s.replace('value="gpt-5"','value="gpt-5.6"').replace('value="gemini-2.5-flash"','value="gemini-3.6-flash"');assert 'value="gpt-5.6"' in s;assert 'value="gemini-3.6-flash"' in s;p.write_text(s)
+          PY
+      - name: Validate updated worker and governance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/v36-governance.js
+          grep -q "model=model||'gpt-5.6'" src/kosif-workspace.js
+          grep -q "model=model||'gemini-3.6-flash'" src/kosif-workspace.js
+          ! grep -q "model=model||'gemini-2.5-flash'" src/kosif-workspace.js
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+      - name: Commit current stable defaults
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts/v36-ai-backend.js.txt src/kosif-workspace.js public/v36-governance.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Use GPT-5.6 and Gemini 3.6 Flash defaults'
+          git pull --rebase origin v36-consolidated
+          git push origin HEAD:v36-consolidated
