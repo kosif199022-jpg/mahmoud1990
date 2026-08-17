@@ -1,0 +1,21 @@
+# Dependencies — wrangler is a devDependency, so `npm install` is required to run the
+# checks or `wrangler dev`. Without this file a broad `git add -A` after a local run
+# would commit the whole tree.
+node_modules/
+package-lock.json
+
+# Wrangler local state (Miniflare KV, caches, build output)
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Runtime-verifier artefacts
+kosif-v36-3-mobile.png
+*.local.png
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

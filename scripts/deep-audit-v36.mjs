@@ -86,6 +86,23 @@ const architecture={
  'Standards SW scoped to standards':/pathname\.startsWith\('\/standards\/'\)/.test(src.stdSw),
  'Public company writes authenticated':/writeTokenHash|canWritePublic|authorization/i.test(src.workspace),
  'Private company encryption retained':/AES-GCM|AES_GCM|crypto\.subtle/i.test(all),
+ /* The brand was a <div>, so the document had no h1 at all and screen-reader heading
+  * navigation — a primary AT mode — had no top-level anchor. */
+ 'App shell exposes a top-level h1':/<h1 class="brand-name">/.test(src.pub)&&/<h1 class="brand-name">/.test(src.html),
+ /* Reader feedback ("نُسخ المرجع", audio load failures) is delivered only through the
+  * toast; without a live region none of it reaches assistive tech at all. */
+ 'Standards reader announces toasts':/id="toast"[^>]*role="status"/.test(src.stdHtml)&&/aria-live="polite"/.test(src.stdHtml),
+ /* A skip link is only useful as the first focusable element, so it must precede the
+  * top bar in source order — after it, the bar's buttons win the first Tab. */
+ 'Reader skip link precedes the top bar':(()=>{
+  const a=src.stdHtml.indexOf('id="std-skip"'),b=src.stdHtml.indexOf('<div id="bar">');
+  return a>=0&&b>=0&&a<b;
+ })(),
+ /* npm install is required to run the checks; without an ignore file a broad `git add -A`
+  * after a local run would commit node_modules. */
+ 'Repository ignores local build state':(()=>{
+  const g=read('.gitignore');return /(^|\n)node_modules\/?\s*(\n|$)/.test(g)&&/\.wrangler/.test(g);
+ })(),
  /* The narration lives in mafateeh-al-tharwa (~66MB). Copying it here would bloat every
   * clone and fork the source of truth, so the worker proxies it instead. */
  'Narration proxied, not copied into the repo':(()=>{
