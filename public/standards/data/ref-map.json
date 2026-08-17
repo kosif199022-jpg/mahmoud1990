@@ -1,0 +1,270 @@
+{
+  "version": "v35",
+  "policy": "Prefer verified 2025 segments when available; 2018 is historical fallback. Latest externally verified official requirements override local extracts.",
+  "refs": [
+    {
+      "ref": "IFRS 15",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 18",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 1",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 19",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 16",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 40",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 2",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 16",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 9",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 1",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 2",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 3",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 4",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 5",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 6",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 7",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 8",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 10",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 11",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 12",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 13",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 14",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IFRS 17",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 7",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 8",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 10",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 12",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 19",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 20",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 21",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 23",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 24",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 26",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 27",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 28",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 29",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 32",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 33",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 34",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 36",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 37",
+      "sourcePolicy": "2025-preferred"
+    },
+    {
+      "ref": "IAS 38",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IAS 41",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 1",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 2",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 3",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 4",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 5",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 6",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 7",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 8",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 9",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 10",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 11",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 12",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 13",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 14",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 15",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 16",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 17",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 18",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 19",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 20",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 21",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 22",
+      "sourcePolicy": "2018-historical-fallback"
+    },
+    {
+      "ref": "IFRIC 23",
+      "sourcePolicy": "2018-historical-fallback"
+    }
+  ]
+}

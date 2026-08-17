@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#16232C">
+<title>مكتبة المعايير</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --paper:#FCFBF8; --ink:#16232C; --ink2:#4A5A66; --rule:#E2DACB;
+  --seal:#1F6B5C; --seal-soft:#E8F0ED; --mark:#FBE9A7; --shade:rgba(16,32,44,.45);
+  --fs:19px; --lh:1.95; --measure:calc(var(--fs)*33);
+  --font:'Noto Naskh Arabic','Sakkal Majalla','Traditional Arabic','Amiri',serif;
+  --ui:system-ui,'Segoe UI',Tahoma,sans-serif;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+[data-theme=sepia]{--paper:#F4EDE0;--ink:#2B2419;--ink2:#6B5B45;--rule:#DCCFB6;--seal-soft:#E6E9DC;--mark:#EDD9A0}
+[data-theme=night]{--paper:#0F171C;--ink:#D7DEE3;--ink2:#8A9AA5;--rule:#26333C;--seal:#4FA793;--seal-soft:#16262A;--mark:#5A4A18;--shade:rgba(0,0,0,.6)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);
+     overscroll-behavior-y:none;min-height:100dvh;transition:background .25s,color .25s}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--seal);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ─── شريط علوي ─── */
+#bar{position:fixed;inset:0 0 auto 0;z-index:40;display:flex;align-items:center;gap:2px;
+     padding:calc(var(--safe-t) + 6px) 8px 6px;background:color-mix(in srgb,var(--paper) 90%,transparent);
+     backdrop-filter:blur(12px);border-bottom:1px solid var(--rule)}
+#bar button{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;font-size:17px}
+#bar button:active{background:var(--seal-soft)}
+#crumb{flex:1;min-width:0;font-size:12.5px;color:var(--ink2);text-align:center;
+       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+#prog{position:fixed;top:calc(var(--safe-t) + 51px);right:0;height:2px;background:var(--seal);z-index:41;width:0;transition:width .2s}
+
+/* ─── المكتبة ─── */
+#library{padding:calc(var(--safe-t) + 80px) 20px calc(var(--safe-b) + 48px);max-width:640px;margin:0 auto}
+.lib-h{font-family:var(--font);font-size:30px;font-weight:700;letter-spacing:-.01em;margin:0 0 6px}
+.lib-s{color:var(--ink2);font-size:14px;margin:0 0 32px;line-height:1.7}
+.card{display:block;width:100%;text-align:right;border:1px solid var(--rule);border-radius:14px;
+      padding:18px 18px 16px;margin-bottom:14px;background:color-mix(in srgb,var(--paper) 96%,var(--ink) 4%)}
+.card:active{border-color:var(--seal)}
+.card .yr{display:inline-block;font-size:11px;letter-spacing:.08em;color:var(--seal);
+          border:1px solid var(--seal);border-radius:99px;padding:2px 9px;margin-bottom:10px;font-variant-numeric:tabular-nums}
+.card h3{font-family:var(--font);font-size:19px;margin:0 0 6px;line-height:1.5;font-weight:700}
+.card p{margin:0 0 12px;color:var(--ink2);font-size:13px;line-height:1.6}
+.card .st{display:flex;gap:16px;font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums;
+          border-top:1px solid var(--rule);padding-top:10px}
+.card .st b{color:var(--ink);font-weight:600}
+
+/* ─── قائمة الفصول ─── */
+#toc{padding:calc(var(--safe-t) + 74px) 16px calc(var(--safe-b) + 48px);max-width:680px;margin:0 auto}
+.tp{font-family:var(--font);font-size:22px;font-weight:700;margin:0 0 4px;line-height:1.5}
+.ts{color:var(--ink2);font-size:13px;margin:0 0 22px}
+.ci{display:flex;gap:12px;align-items:baseline;width:100%;text-align:right;padding:13px 12px;
+    border-radius:10px;border-bottom:1px solid var(--rule)}
+.ci:active{background:var(--seal-soft)}
+.ci .n{flex:0 0 30px;font-size:12px;color:var(--seal);font-variant-numeric:tabular-nums;font-weight:600}
+.ci .t{flex:1;min-width:0}
+.ci .t b{display:block;font-family:var(--font);font-size:15.5px;font-weight:600;line-height:1.55}
+.ci .t i{display:block;font-style:normal;font-size:12.5px;color:var(--ink2);margin-top:3px;line-height:1.5}
+.ci .m{flex:0 0 auto;font-size:11px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.ci.done .n::after{content:" ✓"}
+.ci.readnow{background:var(--seal-soft)}
+
+/* ─── القراءة ─── */
+#reader{padding:calc(var(--safe-t) + 72px) 20px calc(var(--safe-b) + 90px);
+        max-width:var(--measure);margin:0 auto}
+#chead{border-bottom:2px solid var(--seal);padding-bottom:14px;margin-bottom:26px}
+#chead .k{font-size:11.5px;letter-spacing:.1em;color:var(--seal);font-variant-numeric:tabular-nums}
+#chead h1{font-family:var(--font);font-size:25px;line-height:1.5;margin:8px 0 0;font-weight:700}
+#chead h2{font-family:var(--font);font-size:17px;line-height:1.6;margin:8px 0 0;font-weight:400;color:var(--ink2)}
+#chead .pg{margin-top:10px;font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#prose{font-family:var(--font);font-size:var(--fs);line-height:var(--lh);text-align:justify;
+       text-justify:inter-word;hyphens:none;word-spacing:-.015em}
+#prose p{margin:0 0 1.05em;position:relative}
+#prose h3{font-family:var(--font);font-size:calc(var(--fs)*1.06);font-weight:700;
+          margin:1.9em 0 .8em;padding-inline-start:11px;border-inline-start:3px solid var(--seal);line-height:1.55}
+/* المرساة: رقم الفقرة كمرجع استشهاد */
+.anch{color:var(--seal);font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer;
+      padding:1px 4px;margin-inline-end:3px;border-radius:5px;border:1px solid transparent}
+.anch:active,.anch.hit{background:var(--seal-soft);border-color:var(--seal)}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+
+/* ─── أدوات سفلية ─── */
+#dock{position:fixed;inset:auto 0 0 0;z-index:40;display:flex;justify-content:center;gap:6px;
+      padding:6px 10px calc(var(--safe-b) + 8px);background:color-mix(in srgb,var(--paper) 92%,transparent);
+      backdrop-filter:blur(12px);border-top:1px solid var(--rule)}
+#dock button{flex:1;max-width:96px;height:42px;border-radius:11px;font-size:13px;display:grid;place-items:center}
+#dock button:active{background:var(--seal-soft)}
+#dock button[disabled]{opacity:.32}
+
+/* ─── لوحات ─── */
+.shade{position:fixed;inset:0;background:var(--shade);z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+.shade.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;inset:auto 0 0 0;z-index:61;background:var(--paper);border-radius:18px 18px 0 0;
+       max-height:86dvh;display:flex;flex-direction:column;transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+       padding-bottom:var(--safe-b);border-top:1px solid var(--rule)}
+.sheet.on{transform:none}
+.sheet header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--rule);flex:0 0 auto}
+.sheet header b{flex:1;font-family:var(--font);font-size:16px}
+.sheet header button{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:17px}
+.sheet .body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 24px;overscroll-behavior:contain}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.row>span{flex:0 0 74px;font-size:13px;color:var(--ink2)}
+.seg{display:flex;flex:1;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.seg button{flex:1;padding:9px 4px;font-size:13px}
+.seg button[aria-pressed=true]{background:var(--seal);color:#fff}
+input[type=range]{flex:1;accent-color:var(--seal);height:30px}
+#q{width:100%;padding:11px 13px;border:1px solid var(--rule);border-radius:11px;background:transparent;
+   color:inherit;font-size:16px;font-family:var(--font)}
+.res{width:100%;text-align:right;padding:12px 4px;border-bottom:1px solid var(--rule);display:block}
+.res .rk{font-size:11.5px;color:var(--seal);font-variant-numeric:tabular-nums;margin-bottom:4px}
+.res .rt{font-family:var(--font);font-size:14.5px;line-height:1.75;color:var(--ink2)}
+.res .rt mark{background:var(--mark);color:var(--ink)}
+.note{border:1px solid var(--rule);border-radius:11px;padding:12px;margin-bottom:11px}
+.note .nk{font-size:11.5px;color:var(--seal);font-variant-numeric:tabular-nums;margin-bottom:6px}
+.note .nq{font-family:var(--font);font-size:14px;line-height:1.75;border-inline-start:3px solid var(--mark);padding-inline-start:9px}
+.note .nx{margin-top:9px;font-size:12px;color:var(--ink2)}
+.empty{text-align:center;color:var(--ink2);font-size:13.5px;padding:34px 10px;line-height:1.8}
+#toast{position:fixed;bottom:calc(var(--safe-b) + 74px);right:50%;transform:translate(50%,14px);z-index:80;
+       background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:99px;font-size:13.5px;
+       opacity:0;pointer-events:none;transition:.22s;max-width:88vw;text-align:center}
+#toast.on{opacity:1;transform:translate(50%,0)}
+.hidden{display:none!important}
+.spin{width:22px;height:22px;border:2px solid var(--rule);border-top-color:var(--seal);
+      border-radius:50%;animation:sp .7s linear infinite;margin:44px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+<script defer src="./bridge.js"></script></head>
+<body>
+
+<div id="bar">
+  <button id="bBack" aria-label="رجوع">→</button>
+  <button id="bToc" aria-label="الفصول" class="hidden">☰</button>
+  <div id="crumb">مكتبة المعايير</div>
+  <button id="bFind" aria-label="بحث" class="hidden">⌕</button>
+  <button id="bPrefs" aria-label="إعدادات العرض">Aa</button>
+</div>
+<div id="prog"></div>
+
+<main id="library"></main>
+<main id="toc" class="hidden"></main>
+<main id="reader" class="hidden"></main>
+
+<nav id="dock" class="hidden">
+  <button id="bPrev">السابق</button>
+  <button id="bMark">تظليل</button>
+  <button id="bJournal">الدفتر</button>
+  <button id="bNext">التالي</button>
+</nav>
+
+<div class="shade" id="shade"></div>
+
+<section class="sheet" id="shPrefs">
+  <header><b>إعدادات العرض</b><button data-close aria-label="إغلاق">✕</button></header>
+  <div class="body">
+    <div class="row"><span>السمة</span><div class="seg" id="segTheme">
+      <button data-v="light">نهاري</button><button data-v="sepia">ورقي</button><button data-v="night">ليلي</button></div></div>
+    <div class="row"><span>الخط</span><div class="seg" id="segFont">
+      <button data-v="naskh">نسخي</button><button data-v="modern">حديث</button></div></div>
+    <div class="row"><span>حجم النص</span><input type="range" id="rgFs" min="15" max="30" step="1"></div>
+    <div class="row"><span>تباعد الأسطر</span><input type="range" id="rgLh" min="16" max="26" step="1"></div>
+    <div class="row"><span>محاذاة</span><div class="seg" id="segAlign">
+      <button data-v="justify">ضبط</button><button data-v="start">من اليمين</button></div></div>
+  </div>
+</section>
+
+<section class="sheet" id="shFind">
+  <header><b>بحث في الكتاب</b><button data-close aria-label="إغلاق">✕</button></header>
+  <div class="body">
+    <input id="q" type="search" placeholder="اكتب كلمة أو رقم فقرة…" autocomplete="off">
+    <div id="res"></div>
+  </div>
+</section>
+
+<section class="sheet" id="shJournal">
+  <header><b>دفتر القارئ</b><button id="bExport" aria-label="تصدير">⤓</button><button data-close aria-label="إغلاق">✕</button></header>
+  <div class="body" id="journal"></div>
+</section>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const AR=n=>(BOOK&&BOOK.dir==='ltr')?String(n):String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+let BOOK=null;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ── تخزين ── */
+const mem={};
+const S={
+  get(k,d){try{const v=localStorage.getItem('mk_std_'+k);return v===null?(k in mem?mem[k]:d):JSON.parse(v)}catch(e){return k in mem?mem[k]:d}},
+  set(k,v){mem[k]=v;try{localStorage.setItem('mk_std_'+k,JSON.stringify(v))}catch(e){}}
+};
+let prefs=Object.assign({theme:'light',font:'naskh',fs:19,lh:19,align:'justify'},S.get('prefs',{}));
+let read=S.get('read',{}), marks=S.get('marks',{}), notes=S.get('notes',{}), last=S.get('last',null);
+
+function applyPrefs(){
+  const r=document.documentElement;
+  r.dataset.theme=prefs.theme;
+  r.style.setProperty('--fs',prefs.fs+'px');
+  r.style.setProperty('--lh',(prefs.lh/10).toFixed(1));
+  r.style.setProperty('--font',prefs.font==='modern'
+    ? "system-ui,'Segoe UI',Tahoma,sans-serif"
+    : "'Noto Naskh Arabic','Sakkal Majalla','Traditional Arabic','Amiri',serif");
+  const p=$('#prose');
+  if(p){ const ltr = BOOK && BOOK.dir==='ltr';
+    p.style.textAlign = ltr ? 'left' : prefs.align;
+    p.style.fontFamily = ltr ? "Georgia,'Times New Roman',serif" : '';
+    p.style.direction  = ltr ? 'ltr' : 'rtl'; }
+  $('meta[name=theme-color]').content=prefs.theme==='night'?'#0F171C':'#16232C';
+  $$('#segTheme button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===prefs.theme));
+  $$('#segFont button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===prefs.font));
+  $$('#segAlign button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===prefs.align));
+  $('#rgFs').value=prefs.fs; $('#rgLh').value=prefs.lh;
+  S.set('prefs',prefs);
+}
+
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2100)}
+
+/* ── تطبيع عربي للبحث ── */
+const DIAC=/[\u064B-\u0652\u0640\u0670]/g;
+function norm(s){return s.replace(DIAC,'')
+  .replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+  .replace(/[ؤئ]/g,'ء').replace(/\s+/g,' ').toLowerCase()}
+/* خريطة مواضع: من فهرس مطبَّع إلى فهرس أصلي */
+function normMap(s){const out=[],idx=[];
+  for(let i=0;i<s.length;i++){const c=s[i];
+    if(DIAC.test(c)){DIAC.lastIndex=0;continue}DIAC.lastIndex=0;
+    let n=c;
+    if('أإآٱ'.includes(c))n='ا'; else if(c==='ى')n='ي'; else if(c==='ة')n='ه';
+    else if('ؤئ'.includes(c))n='ء'; else n=c.toLowerCase();
+    if(/\s/.test(n)){if(out.length&&out[out.length-1]===' ')continue;n=' '}
+    out.push(n);idx.push(i)}
+  return{n:out.join(''),idx}}
+
+/* ── حالة ── */
+let LIB=null, CH=null, chIdx=0;
+const chCache=new Map();
+
+async function jget(u){const r=await fetch(u);if(!r.ok)throw new Error('تعذر تحميل '+u);return r.json()}
+
+/* ── المكتبة ── */
+async function showLibrary(){
+  view('library'); document.documentElement.dir='rtl';
+  $('#crumb').textContent='مكتبة المعايير';
+  $('#bBack').classList.add('hidden'); $('#bToc').classList.add('hidden'); $('#bFind').classList.add('hidden');
+  if(!LIB){$('#library').innerHTML='<div class="spin"></div>';
+    try{LIB=await jget('data/library.json')}catch(e){$('#library').innerHTML=
+      '<p class="empty">تعذّر تحميل المكتبة. تأكد من تشغيل المجلد عبر خادم محلي لا بفتح الملف مباشرة.</p>';return}}
+  const cont=last?`<button class="card" id="resume" style="border-color:var(--seal)">
+      <span class="yr">متابعة القراءة</span>
+      <h3>${esc(last.chTitle)}</h3><p>${esc(last.bookTitle)}</p></button>`:'';
+  $('#library').innerHTML=`<h1 class="lib-h">مكتبة المعايير</h1>
+    <p class="lib-s">النصوص كما وردت في المصادر الرسمية، بلا تعديل ولا إعادة صياغة.</p>${cont}`+
+    LIB.map(b=>{const done=Object.keys(read[b.id]||{}).length;
+      return `<button class="card" data-b="${b.id}">
+        <span class="yr">${AR(b.year)}</span>
+        <h3>${esc(b.title)}</h3><p>${esc(b.sub)}</p>
+        <div class="st"><span><b>${AR(b.chapters)}</b> فصلًا</span>
+        <span><b>${AR(b.words.toLocaleString('en'))}</b> كلمة</span>
+        ${done?`<span><b>${AR(done)}</b> مقروء</span>`:''}</div></button>`}).join('');
+  $$('#library .card[data-b]').forEach(c=>c.onclick=()=>openBook(c.dataset.b));
+  const r=$('#resume'); if(r) r.onclick=()=>openBook(last.book,last.ch);
+}
+
+/* ── فهرس الكتاب ── */
+async function openBook(id,jump){
+  view('toc'); $('#toc').innerHTML='<div class="spin"></div>';
+  $('#bBack').classList.remove('hidden');
+  try{BOOK=await jget(`data/${id}.json`)}catch(e){$('#toc').innerHTML='<p class="empty">تعذّر تحميل الكتاب.</p>';return}
+  $('#crumb').textContent=BOOK.title;
+  document.documentElement.dir = BOOK.dir==='ltr' ? 'ltr' : 'rtl';
+  const rd=read[id]||{};
+  $('#toc').innerHTML=`<h2 class="tp">${esc(BOOK.title)}</h2>
+    <p class="ts">${esc(BOOK.sub)} · ${AR(BOOK.year)}</p>`+
+    BOOK.chapters.map(c=>`<button class="ci ${rd[c.no]>=100?'done':''} ${last&&last.book===id&&last.ch===c.no?'readnow':''}" data-n="${c.no}">
+      <span class="n">${AR(c.no)}</span>
+      <span class="t"><b>${esc(c.title)}</b>${c.name?`<i>${esc(c.name)}</i>`:''}</span>
+      <span class="m">${AR(c.words.toLocaleString('en'))}</span></button>`).join('');
+  $$('#toc .ci').forEach(b=>b.onclick=()=>openChapter(id,+b.dataset.n));
+  if(jump) openChapter(id,jump);
+}
+
+/* ── فصل ── */
+async function openChapter(bookId,no){
+  view('reader'); $('#reader').innerHTML='<div class="spin"></div>';
+  $('#bToc').classList.remove('hidden'); $('#bFind').classList.remove('hidden'); $('#dock').classList.remove('hidden');
+  const key=bookId+'/'+no;
+  try{
+    if(!chCache.has(key)) chCache.set(key,await jget(`data/${bookId}/${no}.json`));
+    CH=chCache.get(key);
+  }catch(e){$('#reader').innerHTML='<p class="empty">تعذّر تحميل هذا الفصل.</p>';return}
+  chIdx=BOOK.chapters.findIndex(c=>c.no===no);
+  $('#crumb').textContent=`${BOOK.title} · ${AR(no)}`;
+  render();
+  last={book:bookId,ch:no,bookTitle:BOOK.title,chTitle:CH.title}; S.set('last',last);
+  scrollTo(0,0);
+  $('#bPrev').disabled=chIdx<=0;
+  $('#bNext').disabled=chIdx>=BOOK.chapters.length-1;
+}
+
+/* رقم الفقرة ⇐ مرساة استشهاد */
+const NUMLEAD=/^((?:\d{1,3}(?:\/\d{1,3})?)|(?:\(\s*[أ-ي\d]{1,3}\s*\))|(?:[أ-ي]\s*[\/.)]))\s+/;
+
+function render(){
+  const mk=(marks[BOOK.id]||{})[CH.no]||[];
+  const html=CH.body.map((b,i)=>{
+    if(b[0]==='h') return `<h3 id="b${i}">${esc(b[1])}</h3>`;
+    let t=esc(b[1]); const m=b[1].match(NUMLEAD);
+    if(m){const lbl=esc(m[1]);
+      t=`<span class="anch" data-ref="${lbl}">${AR(lbl)}</span>`+esc(b[1].slice(m[0].length))}
+    if(mk.includes(i)) t=`<mark>${t}</mark>`;
+    return `<p id="b${i}" data-i="${i}">${t}</p>`;
+  }).join('');
+  $('#reader').innerHTML=`<header id="chead">
+      <div class="k">${esc(BOOK.title)}</div>
+      <h1>${esc(CH.title)}</h1>${CH.name?`<h2>${esc(CH.name)}</h2>`:''}
+      <div class="pg">صفحات المصدر ${AR(CH.pages[0])}–${AR(CH.pages[1])} · ${AR(CH.body.length)} فقرة</div>
+    </header><article id="prose">${html}</article>`;
+  applyPrefs();
+  $$('.anch').forEach(a=>a.onclick=e=>{e.stopPropagation();cite(a)});
+}
+
+/* الاستشهاد: نسخ المرجع الكامل */
+function cite(a){
+  const ref=`${CH.title}${CH.name?` «${CH.name}»`:''} — فقرة ${a.dataset.ref}`;
+  a.classList.add('hit'); setTimeout(()=>a.classList.remove('hit'),700);
+  navigator.clipboard?.writeText(ref).then(()=>toast('نُسخ المرجع: فقرة '+a.dataset.ref))
+    .catch(()=>toast('فقرة '+a.dataset.ref));
+}
+
+/* ── تقدّم القراءة ── */
+addEventListener('scroll',()=>{
+  const h=document.documentElement, max=h.scrollHeight-innerHeight;
+  const p=max>40?Math.min(100,Math.round(h.scrollTop/max*100)):0;
+  $('#prog').style.width=p+'%';
+  if(CH&&BOOK&&p>((read[BOOK.id]||{})[CH.no]||0)){
+    read[BOOK.id]=read[BOOK.id]||{}; read[BOOK.id][CH.no]=p; S.set('read',read)}
+},{passive:true});
+
+/* ── تظليل ── */
+function markSelection(){
+  const sel=getSelection(); if(!sel||!sel.toString().trim()) return toast('حدّد نصًا أولًا');
+  let n=sel.anchorNode; while(n&&n.nodeType!==1) n=n.parentNode;
+  const p=n&&n.closest('p[data-i]'); if(!p) return toast('حدّد نصًا من متن الفصل');
+  const i=+p.dataset.i, txt=sel.toString().trim();
+  marks[BOOK.id]=marks[BOOK.id]||{}; const arr=marks[BOOK.id][CH.no]=marks[BOOK.id][CH.no]||[];
+  if(!arr.includes(i)) arr.push(i);
+  notes[BOOK.id]=notes[BOOK.id]||{}; const na=notes[BOOK.id][CH.no]=notes[BOOK.id][CH.no]||[];
+  na.push({i,q:txt.slice(0,400),t:Date.now(),ref:(CH.body[i][1].match(NUMLEAD)||[,''])[1]});
+  S.set('marks',marks); S.set('notes',notes); sel.removeAllRanges(); render(); toast('حُفظ التظليل في الدفتر');
+}
+
+/* ── بحث ── */
+let searchT;
+function doSearch(v){
+  const box=$('#res'); const nq=norm(v.trim());
+  if(nq.length<2){box.innerHTML='<p class="empty">اكتب حرفين على الأقل.</p>';return}
+  const hits=[];
+  // بحث داخل كل فصول الكتاب المحمَّلة + الفصل الحالي، ثم بقية الفصول عند الطلب
+  const scan=(ch)=>{ch.body.forEach((bl,i)=>{
+      const {n,idx}=normMap(bl[1]); let at=n.indexOf(nq);
+      if(at<0) return;
+      const s=Math.max(0,at-45), e=Math.min(n.length,at+nq.length+55);
+      const orig=bl[1].slice(idx[s],(idx[e-1]??bl[1].length)+1);
+      const oa=idx[at]-idx[s], ob=(idx[at+nq.length-1]??idx[at])-idx[s]+1;
+      hits.push({no:ch.no,title:ch.title,i,
+        html:esc(orig.slice(0,oa))+'<mark>'+esc(orig.slice(oa,ob))+'</mark>'+esc(orig.slice(ob)),
+        ref:(bl[1].match(NUMLEAD)||[,''])[1]})})};
+  if(CH) scan(CH);
+  box.innerHTML = hits.length
+    ? hits.slice(0,60).map(h=>`<button class="res" data-n="${h.no}" data-i="${h.i}">
+        <div class="rk">${esc(h.title)}${h.ref?` · فقرة ${AR(h.ref)}`:''}</div>
+        <div class="rt">…${h.html}…</div></button>`).join('')
+      + `<p class="empty">${AR(hits.length)} نتيجة في هذا الفصل.<br>
+         <button id="scanAll" style="color:var(--seal);text-decoration:underline">ابحث في الكتاب كله</button></p>`
+    : `<p class="empty">لا نتائج في هذا الفصل.<br>
+       <button id="scanAll" style="color:var(--seal);text-decoration:underline">ابحث في الكتاب كله</button></p>`;
+  bindRes();
+  const sa=$('#scanAll'); if(sa) sa.onclick=()=>searchAll(v);
+}
+
+async function searchAll(v){
+  const box=$('#res'); box.innerHTML='<div class="spin"></div>';
+  const nq=norm(v.trim()), hits=[];
+  for(const c of BOOK.chapters){
+    const key=BOOK.id+'/'+c.no;
+    try{ if(!chCache.has(key)) chCache.set(key,await jget(`data/${BOOK.id}/${c.no}.json`)); }catch(e){continue}
+    const ch=chCache.get(key);
+    ch.body.forEach((bl,i)=>{
+      const {n,idx}=normMap(bl[1]); const at=n.indexOf(nq); if(at<0) return;
+      const s=Math.max(0,at-45), e=Math.min(n.length,at+nq.length+55);
+      const orig=bl[1].slice(idx[s],(idx[e-1]??bl[1].length)+1);
+      const oa=idx[at]-idx[s], ob=(idx[at+nq.length-1]??idx[at])-idx[s]+1;
+      hits.push({no:ch.no,title:ch.title,i,
+        html:esc(orig.slice(0,oa))+'<mark>'+esc(orig.slice(oa,ob))+'</mark>'+esc(orig.slice(ob)),
+        ref:(bl[1].match(NUMLEAD)||[,''])[1]})});
+    if(hits.length>400) break;
+  }
+  box.innerHTML=hits.length
+    ? `<p class="empty">${AR(hits.length)} نتيجة في الكتاب.</p>`+hits.slice(0,200).map(h=>
+        `<button class="res" data-n="${h.no}" data-i="${h.i}">
+          <div class="rk">${esc(h.title)}${h.ref?` · فقرة ${AR(h.ref)}`:''}</div>
+          <div class="rt">…${h.html}…</div></button>`).join('')
+    : '<p class="empty">لا نتائج في هذا الكتاب.</p>';
+  bindRes();
+}
+
+function bindRes(){$$('#res .res').forEach(b=>b.onclick=async()=>{
+  closeSheets();
+  if(+b.dataset.n!==CH.no) await openChapter(BOOK.id,+b.dataset.n);
+  const el=$('#b'+b.dataset.i);
+  if(el){el.scrollIntoView({block:'center'}); el.style.background='var(--seal-soft)';
+    setTimeout(()=>el.style.background='',1400)}})}
+
+/* ── الدفتر ── */
+function renderJournal(){
+  const all=[];
+  for(const bid in notes) for(const cno in notes[bid])
+    notes[bid][cno].forEach((n,k)=>all.push({...n,bid,cno:+cno,k}));
+  all.sort((a,b)=>b.t-a.t);
+  $('#journal').innerHTML = all.length
+    ? all.map(n=>`<div class="note"><div class="nk">${esc((LIB.find(b=>b.id===n.bid)||{}).title||'')} · فصل ${AR(n.cno)}${n.ref?` · فقرة ${AR(n.ref)}`:''}</div>
+        <div class="nq">${esc(n.q)}</div>
+        <div class="nx"><button data-go="${n.bid}|${n.cno}|${n.i}" style="color:var(--seal)">اذهب</button>
+        · <button data-del="${n.bid}|${n.cno}|${n.k}" style="color:var(--ink2)">حذف</button></div></div>`).join('')
+    : '<p class="empty">لا تظليلات بعد.<br>حدّد نصًا في أي فصل واضغط «تظليل».</p>';
+  $$('#journal [data-go]').forEach(b=>b.onclick=async()=>{
+    const [bid,cno,i]=b.dataset.go.split('|'); closeSheets();
+    if(!BOOK||BOOK.id!==bid) await openBook(bid);
+    await openChapter(bid,+cno);
+    const el=$('#b'+i); if(el) el.scrollIntoView({block:'center'})});
+  $$('#journal [data-del]').forEach(b=>b.onclick=()=>{
+    const [bid,cno,k]=b.dataset.del.split('|');
+    const n=notes[bid][cno][k]; notes[bid][cno].splice(k,1);
+    const mk=(marks[bid]||{})[cno]; if(mk&&!notes[bid][cno].some(x=>x.i===n.i)){
+      const j=mk.indexOf(n.i); if(j>-1) mk.splice(j,1)}
+    S.set('notes',notes); S.set('marks',marks); renderJournal();
+    if(CH&&BOOK&&BOOK.id===bid&&CH.no===+cno) render()});
+}
+
+function exportJournal(){
+  const L=['# دفتر القارئ — مكتبة المعايير',''];
+  for(const bid in notes){const bt=(LIB.find(b=>b.id===bid)||{}).title||bid;
+    L.push('## '+bt,'');
+    for(const cno of Object.keys(notes[bid]).sort((a,b)=>a-b)){
+      if(!notes[bid][cno].length) continue;
+      L.push(`### فصل ${cno}`,'');
+      notes[bid][cno].forEach(n=>L.push(`> ${n.q}`,'',n.ref?`— فقرة ${n.ref}`:'',''))}}
+  const blob=new Blob([L.join('\n')],{type:'text/markdown;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='دفتر-القارئ.md'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000); toast('نُزّل الدفتر');
+}
+
+/* ── تنقّل ── */
+function view(id){['library','toc','reader'].forEach(v=>$('#'+v).classList.toggle('hidden',v!==id));
+  $('#dock').classList.toggle('hidden',id!=='reader');
+  if(id!=='reader'){$('#prog').style.width='0'}}
+
+function openSheet(el){$('#shade').classList.add('on');el.classList.add('on');document.body.style.overflow='hidden'}
+function closeSheets(){$('#shade').classList.remove('on');$$('.sheet').forEach(s=>s.classList.remove('on'));document.body.style.overflow=''}
+
+$('#shade').onclick=closeSheets;
+$$('.sheet [data-close]').forEach(b=>b.onclick=closeSheets);
+$('#bPrefs').onclick=()=>openSheet($('#shPrefs'));
+$('#bFind').onclick=()=>{openSheet($('#shFind'));setTimeout(()=>$('#q').focus(),260)};
+$('#bJournal').onclick=()=>{renderJournal();openSheet($('#shJournal'))};
+$('#bExport').onclick=exportJournal;
+$('#bMark').onclick=markSelection;
+$('#bToc').onclick=()=>openBook(BOOK.id);
+$('#bBack').onclick=()=>{ if($('#reader').classList.contains('hidden')) showLibrary(); else openBook(BOOK.id) };
+$('#bPrev').onclick=()=>chIdx>0&&openChapter(BOOK.id,BOOK.chapters[chIdx-1].no);
+$('#bNext').onclick=()=>chIdx<BOOK.chapters.length-1&&openChapter(BOOK.id,BOOK.chapters[chIdx+1].no);
+$('#q').oninput=e=>{clearTimeout(searchT);searchT=setTimeout(()=>doSearch(e.target.value),200)};
+$$('#segTheme button').forEach(b=>b.onclick=()=>{prefs.theme=b.dataset.v;applyPrefs()});
+$$('#segFont button').forEach(b=>b.onclick=()=>{prefs.font=b.dataset.v;applyPrefs()});
+$$('#segAlign button').forEach(b=>b.onclick=()=>{prefs.align=b.dataset.v;applyPrefs()});
+$('#rgFs').oninput=e=>{prefs.fs=+e.target.value;applyPrefs()};
+$('#rgLh').oninput=e=>{prefs.lh=+e.target.value;applyPrefs()};
+
+applyPrefs();
+showLibrary();
+if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>

@@ -1,17 +1,2 @@
-# تمحيص — حسابات ٢
-
-نسخة V2 من تطبيق تمحيص ومكتبة المعايير.
-
-## أهم التطويرات
-
-- مكتبة معايير كاملة لثلاثة كتب مع تمييز قوة المصدر: أحدث مرجع رسمي، مرجع رسمي سابق، ومادة تدريبية ACCA/BPP.
-- بحث شامل عبر جميع الكتب باستخدام فهرس مضغوط يُبنى تلقائياً عند النشر.
-- قراءة صوتية مع متابعة الفقرة والكلمة حيث يدعم المتصفح ذلك، وتحكم في السرعة وتكبير الخط وتباعد السطور والوضع الليلي.
-- حفظ التقدم ومكان القراءة والملاحظات والتظليل والعلامات على الجهاز.
-- تنزيل كامل للمكتبة للعمل بدون إنترنت.
-- PWA وService Worker لتشغيل تمحيص والمكتبة بشكل أفضل على الهاتف وبدون اتصال بعد التخزين.
-- جسر Gemini يستخدم المكتبة كمراجع داعمة ويعطي أولوية للمصدر الرسمي الأحدث، مع طلب التحقق من الإنترنت عند المسائل المتغيرة.
-
-## النشر
-
-GitHub Actions يفك `standards/library.zip` وقت النشر، يبني `search-index.json.gz`، يختبر JavaScript، ثم ينشر الموقع عبر GitHub Pages.
+# Kosif Native v35 — A1990
+Worker-first Cloudflare release using native Static Assets, the Stable v34 audit core as recovery/API engine, a native `/standards/` route, v35 mobile navigation, explicit `KosifStandardsBridge`, v35 cache migration, and `kosif_*` localStorage compatibility migration.

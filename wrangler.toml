@@ -1,0 +1,15 @@
+name = "mahmoud-eldesouky"
+main = "src/worker.js"
+compatibility_date = "2026-08-17"
+workers_dev = true
+[[kv_namespaces]]
+binding = "DATA"
+id = "ea12d307eba1439c960c8832337a40f4"
+[[services]]
+binding = "MAFATEEH"
+service = "mafateeh-al-tharwa3"
+environment = "production"
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true

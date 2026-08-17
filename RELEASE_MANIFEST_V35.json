@@ -1,0 +1,32 @@
+{
+  "release": "Kosif Native v35 — A1990 GitHub",
+  "date": "2026-08-17",
+  "base": "Stable v34 audit core",
+  "architecture": "Worker-first + native Cloudflare Static Assets",
+  "mobile_nav": [
+    "الرئيسية",
+    "الميزان",
+    "الجولات",
+    "المطالبات",
+    "المزيد"
+  ],
+  "standards": {
+    "packagedIndexRows": 100,
+    "refMap": 66,
+    "note": "Packaged repository standards split files indexed natively at build time."
+  },
+  "tests": {},
+  "hashes": {
+    "frontend/index.html": "2f812033bdf90b6cb5b2fc66dad425d059b4c0150c1f9a7f372b8cfd88516d15",
+    "public/index.html": "2f812033bdf90b6cb5b2fc66dad425d059b4c0150c1f9a7f372b8cfd88516d15",
+    "src/worker.js": "cacc54faa401a84445e5f9ac1663981fafa5d7b838aeddaaecd2b936f66b70b5",
+    "wrangler.toml": "db211c5ad1a9f868ba85f2f6adcae4f8b10228a6bd5506f79fc28d0d8a05e73f",
+    "public/standards/index.html": "d09c326cab1c1757e0e71499ed0f7f1735a53247874a2aacf9b5e4f0c378660c",
+    "public/standards/bridge.js": "4afbe1fe2433391f829f7509983dee473201b518dc7fa7a9498cbf7e483dbdda",
+    "public/standards/sw.js": "ba6b635df02ed51747a274479ecec4a6af77e94a2f4d6f01fcfd340119b822cf",
+    "public/standards/data/ref-map.json": "90eb9983d89acc09981c23c906bcb8cf7384548541300f4378379992f3813a03",
+    "public/standards/data/search-index.json.gz": "25957d654d4753ccfe4b6333d3a6b5954185fd2a50378e63af2bee617c09f8e2",
+    "package.json": "23099e6da6c3f6db390d037a87b8fa41134212d594b5a76ac03ec6287b865c6f",
+    "scripts/build-assets.mjs": "3b0d4cea5830ebb07e6052686e2ad4d21e9b4f47eaea5b153738e433a2cd3e1e"
+  }
+}
