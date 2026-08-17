@@ -78,3 +78,4 @@ jobs:
             kosif-v36-3-mobile.png
             /tmp/wrangler-v363.log
           if-no-files-found: ignore
+# diagnostic rerun 2
