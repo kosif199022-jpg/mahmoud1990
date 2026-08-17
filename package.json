@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-assets.mjs",
-    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run contract && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run audit",
+    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run contract && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run feature-reachability && npm run audit",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
     "legacy-regressions": "node scripts/check-legacy-regressions.mjs",
@@ -15,6 +15,7 @@
     "security-edge": "node scripts/check-security-edge-v36-3.mjs",
     "library-privacy": "node scripts/check-library-privacy-v36-3.mjs",
     "executor-contract": "node scripts/check-executor-v36-3.mjs",
-    "reviewer-media": "node scripts/check-reviewer-media-v36-3.mjs"
+    "reviewer-media": "node scripts/check-reviewer-media-v36-3.mjs",
+    "feature-reachability": "node scripts/check-feature-reachability-v36-3.mjs"
   }
 }
