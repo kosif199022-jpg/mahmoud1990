@@ -1,0 +1,45 @@
+name: Rebuild Kosif v35 shell
+
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/rebuild-v35-shell.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+      - name: Reconstruct rendered stable shell
+        run: |
+          set -euo pipefail
+          rm -rf _v35_work && mkdir -p _v35_work/mod
+          cp _v35_base/professional-upgrade.js _v35_work/mod/professional-upgrade.mjs
+          cp _v35_base/kosif-workspace.js _v35_work/mod/kosif-workspace.mjs
+          cat > _v35_work/render.mjs <<'EOF'
+          import fs from 'node:fs';
+          import {injectProfessionalUpgrade} from './mod/professional-upgrade.mjs';
+          import {injectKosifWorkspace} from './mod/kosif-workspace.mjs';
+          let h=fs.readFileSync('_v35_base/app-base.html','utf8');
+          h=injectProfessionalUpgrade(h);
+          h=injectKosifWorkspace(h);
+          fs.writeFileSync('_v35_work/rendered-v34.html',h);
+          const count=x=>(h.match(new RegExp(x,'g'))||[]).length;
+          console.log(JSON.stringify({bytes:Buffer.byteLength(h),tamhees:count('تمحيص'),Kosif:count('Kosif'),kosif:count('kosif'),bnMap:count('bn-map'),home:count('الرئيسية'),balance:count('الميزان'),rounds:count('الجولات'),pbc:count('المطالبات'),more:count('المزيد')},null,2));
+          EOF
+          node _v35_work/render.mjs
+          sha256sum _v35_work/rendered-v34.html
+          unzip -l standards/library.zip | sed -n '1,45p'
+      - name: Commit reconstruction
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add _v35_work
+          git diff --cached --quiet && exit 0
+          git commit -m 'Reconstruct stable shell for Kosif Native v35 [skip ci]'
+          git push origin HEAD:a1990-v35-import
