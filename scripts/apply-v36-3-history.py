@@ -20,6 +20,9 @@ s=s.replace("version:'v36.2.1',release:'Library Integrity & Motion Hardening'","
 if "version:'v36.3'" not in s or 'native-v36-3-history-continuity' not in s: raise SystemExit('worker version patch failed')
 p.write_text(s,encoding='utf-8')
 
+# Server-enforced AI evidence safety / prompt-injection defence.
+exec(compile(Path('scripts/patch-v36-3-ai-safety.py').read_text(encoding='utf-8'),'scripts/patch-v36-3-ai-safety.py','exec'))
+
 # Service worker identity / precache.
 p=Path('public/sw.js'); s=p.read_text(encoding='utf-8')
 s=s.replace("const C='kosif-native-v36-2-1-app'","const C='kosif-native-v36-3-app'")
