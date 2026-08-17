@@ -1,1 +1,1 @@
-{"name":"kosif-native-v35","version":"35.0.0","private":true,"type":"module","scripts":{"build":"node scripts/build-assets.mjs","check":"node --check src/worker.js && node --check public/standards/bridge.js && node --check public/sw.js && node --check public/standards/sw.js"},"devDependencies":{"wrangler":"^4.0.0"}}
+{"name":"kosif-native-v36-2","version":"36.2.0","private":true,"type":"module","scripts":{"build":"node scripts/build-assets.mjs","check":"node scripts/check-all.mjs"},"devDependencies":{"wrangler":"^4.0.0"}}
