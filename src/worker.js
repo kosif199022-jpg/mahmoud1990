@@ -13,7 +13,9 @@ function safeEq(a,b){a=String(a||'');b=String(b||'');if(a.length!==b.length)retu
 function cookies(req){const out={};for(const p of String(req.headers.get('cookie')||'').split(';')){const i=p.indexOf('=');if(i>0)out[p.slice(0,i).trim()]=decodeURIComponent(p.slice(i+1).trim())}return out}
 function token(){const b=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 async function session(req,env){if(!env?.DATA)return null;const t=cookies(req)[AI_COOKIE];if(!t)return null;const key='kosif:ai:session:'+await sha256(t);const s=await env.DATA.get(key,'json');if(!s||!s.expiresAt||s.expiresAt<Date.now()){if(s)await env.DATA.delete(key).catch(()=>{});return null}return{token:t,key,data:s}}
-async function authStatus(req,env){const s=await session(req,env);return j({unlocked:!!s,expiresAt:s?.data?.expiresAt||null,email:'melkosif57@gmail.com'})}
+async function saveSession(env,s){const ttl=Math.max(60,Math.ceil((Number(s.data.expiresAt)-Date.now())/1000));await env.DATA.put(s.key,JSON.stringify(s.data),{expirationTtl:ttl})}
+function publicVerified(s){const out={};for(const [provider,x] of Object.entries(s?.data?.verified||{}))out[provider]={model:x.model,testedAt:x.testedAt};return out}
+async function authStatus(req,env){const s=await session(req,env);return j({unlocked:!!s,expiresAt:s?.data?.expiresAt||null,ownerEmailMasked:'m••••••57@gmail.com',verified:publicVerified(s)})}
 async function authLogin(req,env){
   if(!env?.DATA||!env?.AI_GATE_HASH)return j({error:'AI gate is not configured. Access remains locked.'},503);
   const ip=req.headers.get('cf-connecting-ip')||req.headers.get('x-forwarded-for')||'unknown';
@@ -29,19 +31,48 @@ async function authLogin(req,env){
   }
   await env.DATA.delete(rlKey).catch(()=>{});
   const t=token(),hash=await sha256(t),expiresAt=now+AI_SESSION_TTL*1000;
-  await env.DATA.put('kosif:ai:session:'+hash,JSON.stringify({createdAt:now,expiresAt}),{expirationTtl:AI_SESSION_TTL});
-  return j({ok:true,unlocked:true,expiresAt},200,{'set-cookie':`${AI_COOKIE}=${encodeURIComponent(t)}; Path=/; Max-Age=${AI_SESSION_TTL}; HttpOnly; Secure; SameSite=Strict`});
+  await env.DATA.put('kosif:ai:session:'+hash,JSON.stringify({createdAt:now,expiresAt,verified:{}}),{expirationTtl:AI_SESSION_TTL});
+  return j({ok:true,unlocked:true,expiresAt,verified:{}},200,{'set-cookie':`${AI_COOKIE}=${encodeURIComponent(t)}; Path=/; Max-Age=${AI_SESSION_TTL}; HttpOnly; Secure; SameSite=Strict`});
 }
 async function authLogout(req,env){const s=await session(req,env);if(s)await env.DATA.delete(s.key).catch(()=>{});return j({ok:true,unlocked:false},200,{'set-cookie':`${AI_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`})}
 function aiPath(p){return /^\/api\/(?:kosif\/)?(?:ai|gemini|openai|anthropic|claude|council)(?:\/|$)/i.test(p)}
+function normalProvider(v){v=String(v||'').toLowerCase();return v==='claude'?'anthropic':v}
+function providerFrom(path,b){const p=normalProvider(b?.provider);if(p)return p;if(/gemini/i.test(path))return'gemini';if(/openai/i.test(path))return'openai';if(/anthropic|claude/i.test(path))return'anthropic';return''}
+async function keyFingerprint(provider,model,key){return sha256([normalProvider(provider),String(model||'').trim(),String(key||'').trim()].join('\n'))}
+async function parseBody(req){try{return await req.clone().json()}catch{return null}}
+async function testAI(req,env,ctx){
+  const s=await session(req,env);if(!s)return j({error:'AI_LOCKED',locked:true,message:'أدخل باسورد المالك أولًا.'},401);
+  const b=await parseBody(req);if(!b)return j({error:'طلب اختبار غير صالح'},400);
+  const provider=providerFrom('/api/kosif/ai',b),model=String(b.model||'').trim(),key=String(b.key||'').trim();
+  if(!provider||!model||!key)return j({error:'حدد المزود والنموذج ومفتاح API قبل الاختبار.'},400);
+  const probeBody={provider,model,key,prompt:'اختبار اتصال Kosif. أجب بكلمة واحدة فقط: CONNECTED',json:false,maxTokens:64,agent:b.agent||{jurisdiction:'saudi',industry:'عام'}};
+  const probe=new Request(new URL('/api/kosif/ai',req.url),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(probeBody)});
+  const upstream=await legacyWorker.fetch(probe,env,ctx);
+  let data={};try{data=await upstream.clone().json()}catch{try{data={text:await upstream.clone().text()}}catch{}}
+  if(!upstream.ok)return j({error:data?.error||data?.message||'فشل اختبار مزود AI',provider,model},upstream.status>=400&&upstream.status<500?400:502);
+  const testedAt=new Date().toISOString(),fp=await keyFingerprint(provider,model,key);
+  s.data.verified=s.data.verified||{};s.data.verified[provider]={fp,model,testedAt};await saveSession(env,s);
+  return j({ok:true,connected:true,provider,model,testedAt,message:'تم اختبار الاتصال بنجاح.'});
+}
+async function requireVerifiedAI(req,env){
+  const s=await session(req,env);if(!s)return{response:j({error:'AI_LOCKED',locked:true,message:'أدخل باسورد المالك لفتح قدرات الذكاء الاصطناعي.'},401)};
+  if(req.method!=='POST')return{response:j({error:'AI_METHOD_NOT_ALLOWED'},405)};
+  const b=await parseBody(req);if(!b)return{response:j({error:'AI_REQUEST_INVALID'},400)};
+  const provider=providerFrom(new URL(req.url).pathname,b),model=String(b.model||'').trim(),key=String(b.key||'').trim();
+  if(!provider||!model||!key)return{response:j({error:'AI_NOT_VERIFIED',message:'اختبر اتصال المفتاح أولًا.'},428)};
+  const v=s.data?.verified?.[provider],fp=await keyFingerprint(provider,model,key);
+  if(!v||!safeEq(v.fp,fp))return{response:j({error:'AI_NOT_VERIFIED',provider,model,message:'هذا المفتاح/النموذج لم يجتز اختبار الاتصال في جلسة المالك الحالية.'},428)};
+  return{s,body:b,provider};
+}
 
 export default{async fetch(req,env,ctx){
   const u=new URL(req.url);
-  if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:'v36',release:'Consolidated',architecture:'worker-first-static-assets',aiGate:'owner-password'});
+  if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:'v36',release:'Consolidated',architecture:'worker-first-static-assets',aiGate:'owner-password+verified-key'});
   if(u.pathname==='/api/kosif/auth/status'&&req.method==='GET')return authStatus(req,env);
   if(u.pathname==='/api/kosif/auth/login'&&req.method==='POST')return authLogin(req,env);
   if(u.pathname==='/api/kosif/auth/logout'&&req.method==='POST')return authLogout(req,env);
-  if(aiPath(u.pathname)&&!(await session(req,env)))return j({error:'AI_LOCKED',locked:true,message:'أدخل باسورد المالك لفتح قدرات الذكاء الاصطناعي.'},401);
+  if(u.pathname==='/api/kosif/ai/test'&&req.method==='POST')return testAI(req,env,ctx);
+  if(aiPath(u.pathname)){const gate=await requireVerifiedAI(req,env);if(gate.response)return gate.response;return legacyWorker.fetch(req,env,ctx)}
   if(u.pathname==='/standards')return Response.redirect(new URL('/standards/',u),308);
   if(req.method==='GET'&&(E.has(u.pathname)||u.pathname.startsWith('/standards/'))){const r=await a(req,env);if(r)return tag(r);if(E.has(u.pathname))return tag(await legacyWorker.fetch(req,env,ctx));return new Response('Not found',{status:404})}
   if(u.pathname.startsWith('/api/')||req.method!=='GET')return legacyWorker.fetch(req,env,ctx);
