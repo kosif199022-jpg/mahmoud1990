@@ -29,6 +29,7 @@ function loadCouncilV2(){loadModule('KosifCouncilV2','script[data-kosif-council-
 function loadExecutor(){loadModule('KosifExecutor','script[data-kosif-executor="1"]','/v36-executor.js?v=36.3-executor1','kosifExecutor')}
 function loadReviewerMedia(){loadModule('KosifReviewerMedia','script[data-kosif-reviewer-media="1"]','/v36-reviewer-media.js?v=36.3-media1','kosifReviewerMedia')}
 function loadVoiceGuide(){loadModule('KosifVoiceGuide','script[data-kosif-voice-guide="1"]','/v36-voice-guide.js?v=36.3-history1','kosifVoiceGuide')}
+function loadHistoryRestore(){loadModule('KosifHistoryRestore','script[data-kosif-history-restore="1"]','/v36-history-restore.js?v=36.3-history1','kosifHistoryRestore')}
 function openCouncilV2(){
   try{window.KosifCouncilV2?.mount?.()}catch(_){}
   const host=$('#view-council');
@@ -66,7 +67,7 @@ function patchLabels(){
   const r=$('#rounds-model');if(r&&/Gemini/.test(r.textContent||''))r.textContent=r.textContent.replace(/Gemini/g,'Z.ai');
   const stage=$('#kosif-progress .kp-note');if(stage&&/Gemini/.test(stage.textContent||''))stage.textContent=stage.textContent.replace(/Gemini/g,'Z.ai');
 }
-function patch(){addOption();syncNote();patchLabels();bindLabelObservers();loadCouncilV2();loadExecutor();loadReviewerMedia();loadVoiceGuide()}
+function patch(){addOption();syncNote();patchLabels();bindLabelObservers();loadCouncilV2();loadExecutor();loadReviewerMedia();loadVoiceGuide();loadHistoryRestore()}
 function bindFormObserver(){
   const form=$('#kosif-ai-form');if(!form)return false;
   if(form.dataset.zaiObserved==='1')return true;
@@ -121,7 +122,7 @@ document.addEventListener('click',e=>{
 window.addEventListener('kosif-ai-gate-change',()=>setTimeout(patchLabels,0));
 window.addEventListener('storage',e=>{if(e.key===LS)setTimeout(patch,0)});
 let tries=0,t=setInterval(()=>{patch();if((bindFormObserver()||bindLabelObservers())&&++tries>12)clearInterval(t);else if(++tries>80)clearInterval(t)},250);
-window.KosifZAI={version:'1.6.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider,loadCouncilV2,loadExecutor,loadReviewerMedia,loadVoiceGuide,openCouncilV2,councilStructuredContext,injectCouncilContext};
+window.KosifZAI={version:'1.7.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider,loadCouncilV2,loadExecutor,loadReviewerMedia,loadVoiceGuide,loadHistoryRestore,openCouncilV2,councilStructuredContext,injectCouncilContext};
 document.documentElement.dataset.kosifZai='ready';
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patch,{once:true});else patch();
 })();
