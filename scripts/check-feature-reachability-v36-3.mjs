@@ -6,7 +6,8 @@ const modules=[
   {file:'v36-council-v2.js',global:'KosifCouncilV2',loader:'loadCouncilV2'},
   {file:'v36-executor.js',global:'KosifExecutor',loader:'loadExecutor'},
   {file:'v36-reviewer-media.js',global:'KosifReviewerMedia',loader:'loadReviewerMedia'},
-  {file:'v36-voice-guide.js',global:'KosifVoiceGuide',loader:'loadVoiceGuide'}
+  {file:'v36-voice-guide.js',global:'KosifVoiceGuide',loader:'loadVoiceGuide'},
+  {file:'v36-history-restore.js',global:'KosifHistoryRestore',loader:'loadHistoryRestore'}
 ];
 for(const m of modules){
   const src=read('public/'+m.file);
