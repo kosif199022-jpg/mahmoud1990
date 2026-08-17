@@ -1,0 +1,53 @@
+name: Diagnose Kosif v35 gate
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/diagnose-kosif-v35.yml]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+          fetch-depth: 1
+      - name: Build same release
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+          s=Path('.github/workflows/publish-kosif-native-v35-v3.yml').read_text()
+          a=s.index('      - name: Build release\n');a=s.index('        run: |\n',a)+len('        run: |\n');b=s.index('\n      - name: Validate release',a)
+          Path('/tmp/build.sh').write_text('set -euo pipefail\n'+textwrap.dedent(s[a:b]))
+          PY
+          bash /tmp/build.sh
+      - name: Diagnose every gate
+        shell: bash
+        run: |
+          set +e
+          cd "$R"
+          check(){ "$@" >/dev/null 2>&1; rc=$?; printf '%-48s rc=%s\n' "$*" "$rc"; }
+          check node --check src/worker.js
+          check node --check src/legacy-worker.js
+          check node --check src/kosif-workspace.js
+          check node --check public/migrate-v35.js
+          check node --check public/sw.js
+          check node --check public/standards/bridge.js
+          check node --check public/standards/sw.js
+          echo "bn-map id count=$(grep -c 'id=\"bn-map\"' frontend/index.html)"
+          echo "kosif-bottom-nav count=$(grep -c 'kosif-bottom-nav' frontend/index.html)"
+          for x in الرئيسية الميزان الجولات المطالبات المزيد; do echo "$x count=$(grep -c "$x" frontend/index.html)"; done
+          echo "literal data-go map=$(grep -c 'data-go=\"map\"' frontend/index.html)"
+          echo "escaped data-go map=$(grep -c 'data-go=\\\"map\\\"' frontend/index.html)"
+          echo "bridge=$(grep -c 'KosifStandardsBridge' public/standards/bridge.js) monkey=$(grep -c 'window.fetch=' public/standards/bridge.js)"
+          echo "run_worker_first=$(grep -c 'run_worker_first = true' wrangler.toml)"
+          for f in public/index.html public/standards/index.html public/standards/data/search-index.json.gz public/standards/data/b3/1.json; do test -f "$f"; echo "$f exists=$?"; done
+          echo 'first b3 files:'; find public/standards/data/b3 -maxdepth 1 -type f | sort | head -10
+          node -e "const x=require('./public/standards/data/ref-map.json');console.log('ref-map',x.refs.length)"
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process'),h=fs.readFileSync('frontend/index.html','utf8');const ids=[...h.matchAll(/\bid=["']([^"']+)["']/g)].map(x=>x[1]),dup=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];console.log('duplicate ids',dup.length,dup.slice(0,20));const scripts=[...h.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(x=>x[1]);console.log('inline scripts',scripts.length);for(let i=0;i<scripts.length;i++){const p='/tmp/d'+i+'.js';fs.writeFileSync(p,scripts[i]);try{cp.execFileSync(process.execPath,['--check',p]);console.log('inline',i,'PASS')}catch(e){console.log('inline',i,'FAIL')}}
+          NODE
+          exit 0
