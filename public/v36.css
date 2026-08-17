@@ -1,0 +1,27 @@
+/* Kosif v36 consolidated UI reliability layer */
+:root{--kosif-font-scale:1;--v36-bg:#fbfbfe;--v36-surface:#fff;--v36-ink:#1e293b;--v36-muted:#64748b}
+html,body,button,input,select,textarea{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Arabic","Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,Arial,sans-serif!important}
+body{font-size:calc(15px * var(--kosif-font-scale))!important}
+#kosif-font-sheet{position:fixed;z-index:2147483000;inset:0;display:none;align-items:flex-end;justify-content:center;padding:12px;background:rgba(15,23,42,.38);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#kosif-font-sheet.show{display:flex}
+#kosif-font-sheet>.kosif-sheet{width:min(620px,100%)}
+html[data-theme="dark"]{background:#0b1020!important;color-scheme:dark}
+html[data-theme="dark"] body{background:#0b1020!important;background-image:radial-gradient(700px 460px at 92% -6%,rgba(99,102,241,.18),transparent 62%),radial-gradient(560px 420px at -6% 36%,rgba(6,182,212,.11),transparent 60%)!important;color:#e2e8f0!important}
+html[data-theme="dark"] .topbar{background:rgba(15,20,38,.94)!important;color:#e2e8f0!important;border-bottom-color:rgba(148,163,184,.14)!important}
+html[data-theme="dark"] .card,html[data-theme="dark"] .kpi,html[data-theme="dark"] .step,html[data-theme="dark"] .std-card,html[data-theme="dark"] .finding,html[data-theme="dark"] .docreq,html[data-theme="dark"] .empty,html[data-theme="dark"] .kosif-sheet{background:#151b2e!important;color:#e2e8f0!important;border-color:rgba(148,163,184,.16)!important}
+html[data-theme="dark"] .card.hero{background:linear-gradient(135deg,#4338ca,#6d28d9,#be185d)!important;color:#fff!important}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background:#0f1526!important;border-color:rgba(148,163,184,.22)!important;color:#e2e8f0!important}
+html[data-theme="dark"] table.data td{color:#dbe2f2!important;border-bottom-color:rgba(148,163,184,.11)!important}
+html[data-theme="dark"] table.data th,html[data-theme="dark"] table.data tfoot td{background:rgba(99,102,241,.18)!important;color:#c7d2fe!important}
+html[data-theme="dark"] .kosif-action{background:#11172a!important;color:#e2e8f0!important;border-color:rgba(148,163,184,.16)!important}
+html[data-theme="dark"] .kosif-action small,html[data-theme="dark"] .hint,html[data-theme="dark"] .round-meta{color:#94a3b8!important}
+html[data-theme="dark"] #kosif-bottom-nav{background:rgba(15,20,38,.94)!important;border-color:rgba(148,163,184,.14)!important}
+#kosif-core-compat{display:none!important}
+@media(max-width:720px){
+ body{font-size:calc(15px * var(--kosif-font-scale))!important}
+ .topbar-inner{gap:10px!important}.brand-sub{max-width:78vw}
+ .twrap{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+ button,.btn,.kosif-action{touch-action:manipulation}
+ #kosif-bottom-nav{padding-bottom:max(7px,env(safe-area-inset-bottom))!important}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}}
