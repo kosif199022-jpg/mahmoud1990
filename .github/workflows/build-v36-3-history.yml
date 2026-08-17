@@ -58,12 +58,38 @@ jobs:
           nohup npx --yes wrangler@4 dev --local --port 8793 >/tmp/wrangler-v363.log 2>&1 &
           for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8793/__health >/tmp/v363-health.json 2>/dev/null && { cat /tmp/v363-health.json; exit 0; }; sleep 1; done
           cat /tmp/wrangler-v363.log; exit 1
-      - name: Mobile runtime
+      - name: Mobile and desktop runtime
         shell: bash
         run: |
           cat > /tmp/v363.cjs <<'NODE'
-          const {chromium}=require(process.cwd()+'/node_modules/playwright'),ok=(v,m)=>{if(!v)throw Error(m)};
-          (async()=>{const b=await chromium.launch({headless:true}),c=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),p=await c.newPage(),errors=[],bad=[];p.on('pageerror',e=>errors.push(String(e)));p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});let r=await p.request.get('http://127.0.0.1:8793/__health'),h=await r.json();ok(h.version==='v36.3','health');await p.goto('http://127.0.0.1:8793/?v=36.3',{waitUntil:'domcontentloaded'});await p.waitForTimeout(1600);ok(await p.evaluate(()=>!!window.KosifHistoryContinuity),'module');await p.evaluate(()=>KosifHistoryContinuity.openMore());const more=await p.locator('#kosif-more-sheet').innerText();for(const t of ['الشركات','الخريطة المعيارية','التحليلات','المطالبات','التقارير والمخرجات','ملاحظات المراجع','مكتبة المعايير','الكتب والمراجع','المصادر الرسمية','البحث والأوامر','AI Agent','الإعدادات','المظهر وحجم الخط'])ok(more.includes(t),'More '+t);await p.keyboard.press('Escape');await p.keyboard.press('Control+K');ok(await p.locator('#kosif-command-palette.show').count()===1,'palette');await p.keyboard.press('Escape');await p.evaluate(()=>KosifHistoryContinuity.setFontScale(2));await p.waitForTimeout(100);ok(await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--kosif-user-scale').trim()==='2'),'font');ok(await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth)<=4,'overflow');ok(await p.evaluate(()=>typeof KosifHistoryContinuity.structuredBrief()==='object'),'brief');await p.evaluate(()=>localStorage.setItem('kosif_session_doc_meta_v2',JSON.stringify({docs:[{name:'evidence.pdf',size:100,type:'application/pdf'}]})));await p.reload({waitUntil:'domcontentloaded'});await p.waitForTimeout(800);ok(await p.evaluate(()=>KosifHistoryContinuity.docsUnavailable()),'continuity');ok(await p.locator('#kosif-doc-warning').count()===1,'warning');ok(!bad.length,'static '+bad);ok(!errors.some(x=>/ReferenceError|TypeError|SyntaxError/.test(x)),'errors '+errors);await p.screenshot({path:'kosif-v36-3-mobile.png',fullPage:true});await b.close();console.log('KOSIF_V36_3_HISTORY_RUNTIME_OK')})().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const ok=(v,m)=>{if(!v)throw Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const p=await mobile.newPage(),errors=[],bad=[];
+            p.on('pageerror',e=>errors.push(String(e)));
+            p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
+            let r=await p.request.get('http://127.0.0.1:8793/__health'),h=await r.json();ok(h.version==='v36.3','health');
+            await p.goto('http://127.0.0.1:8793/?v=36.3',{waitUntil:'domcontentloaded'});await p.waitForTimeout(1600);
+            ok(await p.evaluate(()=>!!window.KosifHistoryContinuity),'module');
+            await p.evaluate(()=>KosifHistoryContinuity.openMore());await p.waitForTimeout(100);
+            const more=await p.locator('#kosif-more-sheet').innerText();for(const t of ['الشركات','الخريطة المعيارية','التحليلات','المطالبات','التقارير والمخرجات','ملاحظات المراجع','مكتبة المعايير','الكتب والمراجع','المصادر الرسمية','البحث والأوامر','AI Agent','الإعدادات','المظهر وحجم الخط'])ok(more.includes(t),'More '+t);
+            await p.locator('[data-kosif-action="search"]').click();await p.waitForTimeout(100);ok(await p.locator('#kosif-command-palette.show').count()===1,'mobile palette action');
+            await p.keyboard.press('Escape');await p.evaluate(()=>KosifHistoryContinuity.setFontScale(2));await p.waitForTimeout(100);
+            ok(await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--kosif-user-scale').trim()==='2'),'font');
+            ok(await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth)<=4,'mobile overflow at 200%');
+            ok(await p.evaluate(()=>typeof KosifHistoryContinuity.structuredBrief()==='object'),'brief');
+            await p.evaluate(()=>localStorage.setItem('kosif_session_doc_meta_v2',JSON.stringify({docs:[{name:'evidence.pdf',size:100,type:'application/pdf'}]})));
+            await p.reload({waitUntil:'domcontentloaded'});await p.waitForTimeout(800);ok(await p.evaluate(()=>KosifHistoryContinuity.docsUnavailable()),'continuity');ok(await p.locator('#kosif-doc-warning').count()===1,'warning');
+            await p.screenshot({path:'kosif-v36-3-mobile.png',fullPage:true});
+            const desktop=await browser.newContext({viewport:{width:1366,height:768}}),d=await desktop.newPage();
+            await d.goto('http://127.0.0.1:8793/?desktop=1&v=36.3',{waitUntil:'domcontentloaded'});await d.waitForTimeout(1200);
+            await d.keyboard.press('Control+K');await d.waitForTimeout(120);ok(await d.locator('#kosif-command-palette.show').count()===1,'desktop Ctrl+K palette');
+            ok(await d.locator('#kosif-command-input').isFocused(),'desktop palette focus');
+            console.log('STATIC_BAD',bad);console.log('ERRORS',errors);ok(!bad.length,'static '+bad);ok(!errors.some(x=>/ReferenceError|TypeError|SyntaxError/.test(x)),'errors '+errors);
+            await browser.close();console.log('KOSIF_V36_3_HISTORY_RUNTIME_OK');
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
           NODE
           node /tmp/v363.cjs
       - name: Commit release changes
