@@ -19,12 +19,12 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf _v35_work && mkdir -p _v35_work/mod
-          cp _v35_base/professional-upgrade.js _v35_work/mod/professional-upgrade.mjs
-          cp _v35_base/kosif-workspace.js _v35_work/mod/kosif-workspace.mjs
+          cp _v35_base/*.js _v35_work/mod/
+          printf '{"type":"module"}\n' > _v35_work/mod/package.json
           cat > _v35_work/render.mjs <<'EOF'
           import fs from 'node:fs';
-          import {injectProfessionalUpgrade} from './mod/professional-upgrade.mjs';
-          import {injectKosifWorkspace} from './mod/kosif-workspace.mjs';
+          import {injectProfessionalUpgrade} from './mod/professional-upgrade.js';
+          import {injectKosifWorkspace} from './mod/kosif-workspace.js';
           let h=fs.readFileSync('_v35_base/app-base.html','utf8');
           h=injectProfessionalUpgrade(h);
           h=injectKosifWorkspace(h);
@@ -34,7 +34,8 @@ jobs:
           EOF
           node _v35_work/render.mjs
           sha256sum _v35_work/rendered-v34.html
-          unzip -l standards/library.zip | sed -n '1,45p'
+          echo '--- library zip sample ---'
+          unzip -l standards/library.zip | sed -n '1,55p'
       - name: Commit reconstruction
         run: |
           git config user.name 'github-actions[bot]'
