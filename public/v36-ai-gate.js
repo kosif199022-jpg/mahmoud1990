@@ -1,4 +1,4 @@
-/* Kosif v36.3 AI Gate — owner session + tested-key workflow */
+/* Kosif v36.4 AI Gate — owner session + tested-key workflow, scoped observers only */
 (()=>{'use strict';
 const $=s=>document.querySelector(s),KEY_FIELDS='#kai-key,#c-key-gemini,#c-key-openai,#c-key-anthropic';
 let unlocked=false,checked=false,pending=null,verified={};
@@ -21,8 +21,9 @@ async function logout(){try{await fetch('/api/kosif/auth/logout',{method:'POST',
 async function requireUnlock(){if(await status())return true;openGate();return false}
 function addButton(){const grid=$('#kosif-more .kosif-sheet-grid');if(!grid||$('#kosif-ai-lock-open'))return false;const b=document.createElement('button');b.id='kosif-ai-lock-open';b.className='kosif-action';b.onclick=async()=>{if(await status(true))logout();else openGate()};grid.appendChild(b);updateUI();return true}
 function guards(){document.addEventListener('pointerdown',e=>{const el=e.target.closest(KEY_FIELDS);if(el&&!unlocked){e.preventDefault();openGate()}},true);document.addEventListener('focusin',e=>{if(e.target.matches?.(KEY_FIELDS)&&!unlocked){e.target.blur();openGate()}},true);document.addEventListener('beforeinput',e=>{if(e.target.matches?.(KEY_FIELDS)&&!unlocked)e.preventDefault()},true);document.addEventListener('paste',e=>{if(e.target.matches?.(KEY_FIELDS)&&!unlocked)e.preventDefault()},true);document.addEventListener('click',async e=>{const b=e.target.closest('#c-run,#kosif-council-open');if(!b||await status())return;e.preventDefault();e.stopImmediatePropagation();openGate()},true)}
+function watchScopedRoots(){['#view-ai','#view-council','#kosif-ai-sheet','#kosif-more'].forEach(sel=>{const root=$(sel);if(!root||root.dataset.kosifAiGateWatch==='1')return;root.dataset.kosifAiGateWatch='1';new MutationObserver(()=>lockFields()).observe(root,{childList:true,subtree:true})})}
 function message(text,type='info'){try{toast?.(text,type==='error'?'danger':type)}catch(_){const e=$('#kosif-ai-gate-error');if(e)e.textContent=text}}
-function init(){shell();guards();status(true);const mo=new MutationObserver(()=>lockFields());mo.observe(document.documentElement,{childList:true,subtree:true});let n=0,t=setInterval(()=>{addButton();lockFields();if(++n>100)clearInterval(t)},100)}
-window.KosifAIGate={version:'36.3.0',status,requireUnlock,open:openGate,logout,isUnlocked:()=>unlocked,verified:()=>({...verified}),refresh:()=>status(true),message};
+function init(){shell();guards();status(true);watchScopedRoots();let n=0,t=setInterval(()=>{addButton();watchScopedRoots();lockFields();if(++n>100)clearInterval(t)},100)}
+window.KosifAIGate={version:'36.4.0',status,requireUnlock,open:openGate,logout,isUnlocked:()=>unlocked,verified:()=>({...verified}),refresh:()=>status(true),message};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
