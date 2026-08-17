@@ -1,16 +1,30 @@
-name: Analyze legacy dead declarations
+name: Prune verified dead legacy constants
 on:
   push:
     branches: [v36-2-library-motion-hardening]
     paths: ['.github/workflows/analyze-dead-legacy.yml']
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
-  analyze:
+  prune:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with: {ref: v36-2-library-motion-hardening, fetch-depth: 0}
       - run: npm install --no-save --package-lock=false acorn@8 acorn-walk@8
-      - run: node scripts/analyze-dead-legacy.mjs
+      - name: Prune and verify
+        run: |
+          node scripts/prune-dead-legacy.mjs
+          node scripts/analyze-dead-legacy.mjs
+          npm run check
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+      - name: Commit verified prune
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/legacy-worker.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Remove remaining unreachable legacy payload constants'
+          git push origin HEAD:v36-2-library-motion-hardening
