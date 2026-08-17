@@ -1,0 +1,38 @@
+name: Import A1990 v35 base
+
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/import-v35-base.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+          fetch-depth: 1
+      - name: Download source bundle
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 20 \
+            'https://mahmoud-eldesouky.kosif199022.workers.dev/6ff6b51050ba881059c63e74/kosif-full-source.zip' \
+            -o /tmp/kosif-full-source.zip
+          rm -rf _v35_base
+          mkdir -p _v35_base
+          unzip -q /tmp/kosif-full-source.zip -d _v35_base
+          find _v35_base -maxdepth 2 -type f | sort | head -100
+      - name: Commit imported source
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add _v35_base
+          if ! git diff --cached --quiet; then
+            git commit -m 'Import Kosif source bundle for Native v35 [skip ci]'
+            git push origin HEAD:a1990-v35-import
+          fi
