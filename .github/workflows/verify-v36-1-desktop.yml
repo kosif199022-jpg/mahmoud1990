@@ -1,4 +1,4 @@
-name: Verify Kosif v36.3 Desktop Navigation
+name: Verify Kosif v36.4 Desktop Navigation
 
 on:
   push:
@@ -11,11 +11,32 @@ on:
       - 'public/v36-zai.js'
       - 'public/sw.js'
       - 'src/worker.js'
+      - 'src/security-edge.js'
+      - 'package.json'
+      - 'RELEASE_MANIFEST_V36_4.json'
+      - '.github/workflows/verify-v36-1-desktop.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/index.html'
+      - 'public/v36.css'
+      - 'public/v36-continuity.css'
+      - 'public/v36-ai-gate.js'
+      - 'public/v36-zai.js'
+      - 'public/sw.js'
+      - 'src/worker.js'
+      - 'src/security-edge.js'
+      - 'package.json'
+      - 'RELEASE_MANIFEST_V36_4.json'
       - '.github/workflows/verify-v36-1-desktop.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: verify-kosif-desktop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify-desktop:
@@ -44,14 +65,18 @@ jobs:
         run: |
           cat > /tmp/desktop-probe.cjs <<'NODE'
           const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const fs=require('fs');
           const ok=(v,m)=>{if(!v)throw Error(m)};
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          const expectedGateVersion=String(pkg.version||'');
+          const expectedRelease='v'+expectedGateVersion.split('.').slice(0,2).join('.');
           const widths=[1024,1366,1920];
           (async()=>{
             const browser=await chromium.launch({headless:true});
             for(const width of widths){
               const context=await browser.newContext({viewport:{width,height:800}});
               const page=await context.newPage();
-              await page.goto(`http://127.0.0.1:8788/?desktop=${width}`,{waitUntil:'domcontentloaded'});
+              await page.goto(`http://127.0.0.1:8788/?desktop=${width}&release=${expectedRelease}`,{waitUntil:'domcontentloaded'});
               await page.waitForTimeout(1600);
               const metrics=await page.evaluate(()=>{
                 const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
@@ -84,7 +109,7 @@ jobs:
               ok(metrics.minTabWidth>=100,`choice buttons too narrow at ${width}`);
               ok(metrics.navDisplay!=='none',`desktop tab list hidden at ${width}`);
               ok(metrics.bottomDisplay==='none'||metrics.bottomDisplay==='missing',`mobile bottom nav visible at ${width}`);
-              ok(metrics.gateVersion==='36.3.0','v36.3 AI gate not loaded');
+              ok(metrics.gateVersion===expectedGateVersion,`AI gate version mismatch: expected ${expectedGateVersion}, got ${metrics.gateVersion}`);
               ok(metrics.zaiReady,'Z.ai bridge not loaded');
               if(width<1600)ok(metrics.rows===2,`expected balanced 2-row choice list at ${width}, got ${metrics.rows}`);
               else ok(metrics.rows===1,`expected single-row choice list at ${width}, got ${metrics.rows}`);
@@ -95,11 +120,11 @@ jobs:
                 await tab.click();await page.waitForTimeout(40);
                 ok(await page.locator(`#view-${go}.show`).count()===1,`navigation failed for ${go} at ${width}`);
               }
-              await page.screenshot({path:`kosif-v36-3-desktop-${width}.png`,fullPage:true});
+              await page.screenshot({path:`kosif-v36-4-desktop-${width}.png`,fullPage:true});
               await context.close();
             }
             await browser.close();
-            console.log('KOSIF_V36_3_DESKTOP_NAV_OK');
+            console.log('KOSIF_DESKTOP_NAV_OK',expectedRelease,expectedGateVersion);
           })().catch(e=>{console.error(e.stack||e);process.exit(1)});
           NODE
           node /tmp/desktop-probe.cjs
@@ -107,10 +132,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-v36-3-desktop-navigation
+          name: kosif-v36-4-desktop-navigation
           path: |
-            kosif-v36-3-desktop-1024.png
-            kosif-v36-3-desktop-1366.png
-            kosif-v36-3-desktop-1920.png
+            kosif-v36-4-desktop-1024.png
+            kosif-v36-4-desktop-1366.png
+            kosif-v36-4-desktop-1920.png
             /tmp/wrangler-desktop.log
           if-no-files-found: ignore

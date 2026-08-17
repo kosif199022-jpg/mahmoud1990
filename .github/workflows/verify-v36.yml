@@ -1,4 +1,4 @@
-name: Verify Kosif v36.3 Production
+name: Verify Kosif v36.4 Production
 
 on:
   push:
@@ -9,6 +9,18 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'package.json'
+      - 'RELEASE_MANIFEST_V36_4.json'
+      - 'wrangler.toml'
+      - '.github/workflows/verify-v36.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - 'frontend/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'RELEASE_MANIFEST_V36_4.json'
       - 'wrangler.toml'
       - '.github/workflows/verify-v36.yml'
   workflow_dispatch:
@@ -16,13 +28,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: verify-kosif-production-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      - name: Validate v36.3 build and contracts
+      - name: Validate current build and contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -50,7 +66,12 @@ jobs:
         run: |
           cat > /tmp/probe.cjs <<'NODE'
           const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const fs=require('fs');
           const ok=(x,m)=>{if(!x)throw Error(m)};
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('RELEASE_MANIFEST_V36_4.json','utf8'));
+          const expectedVersion='v'+String(pkg.version||'').split('.').slice(0,2).join('.');
+          const expectedBuild=String(manifest.buildId||'');
           (async()=>{
             const b=await chromium.launch({headless:true});
             const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
@@ -59,11 +80,13 @@ jobs:
             p.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
             p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
             const health=await (await p.request.get('http://127.0.0.1:8788/__health')).json();
-            ok(health.version==='v36.3','wrong health version');
+            ok(health.version===expectedVersion,`wrong health version: expected ${expectedVersion}, got ${health.version}`);
+            ok(health.buildId===expectedBuild,`wrong health build: expected ${expectedBuild}, got ${health.buildId}`);
             ok(Array.isArray(health.aiProviders)&&health.aiProviders.includes('zai'),'Z.ai missing from health providers');
             const version=await (await p.request.get('http://127.0.0.1:8788/__version')).json();
-            ok(version.buildId==='2026.08.17-v36.3-master-requirements','wrong build id');
-            await p.goto('http://127.0.0.1:8788/?verify=v36.3',{waitUntil:'domcontentloaded'});
+            ok(version.version===expectedVersion,`wrong version endpoint: expected ${expectedVersion}, got ${version.version}`);
+            ok(version.buildId===expectedBuild,`wrong build id: expected ${expectedBuild}, got ${version.buildId}`);
+            await p.goto(`http://127.0.0.1:8788/?verify=${encodeURIComponent(expectedVersion)}`,{waitUntil:'domcontentloaded'});
             await p.waitForTimeout(1800);
             ok(await p.locator('body').evaluate(e=>e.classList.contains('kosif-ready')),'not ready');
             ok(await p.locator('#kosif-boot').count()===0,'boot overlay');
@@ -81,7 +104,7 @@ jobs:
             ok(bad.length===0,'HTTP '+bad.join(','));
             ok(!errors.some(x=>/ReferenceError|TypeError|SyntaxError|Kosif boot error/i.test(x)),'runtime '+errors.join('\n'));
             await b.close();
-            console.log('KOSIF_V36_3_PRODUCTION_VERIFY_OK');
+            console.log('KOSIF_PRODUCTION_VERIFY_OK',expectedVersion,expectedBuild);
           })().catch(e=>{console.error(e.stack||e);process.exit(1)});
           NODE
           node /tmp/probe.cjs
@@ -89,6 +112,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-v36-3-production-log
+          name: kosif-v36-4-production-log
           path: /tmp/wrangler-production.log
           if-no-files-found: ignore
