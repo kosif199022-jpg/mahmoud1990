@@ -4,16 +4,17 @@ import path from 'node:path';
 const root=process.cwd();
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
 const json=p=>{try{return JSON.parse(read(p))}catch{return null}};
-const html=read('frontend/index.html'),pub=read('public/index.html'),workspace=read('src/kosif-workspace.js'),worker=read('src/worker.js'),legacy=read('src/legacy-worker.js'),sw=read('public/sw.js'),stdHtml=read('public/standards/index.html'),stdPro=read('public/standards/reader-pro-v36.js'),stdSw=read('public/standards/sw.js'),gov=read('public/v36-governance.js'),gate=read('public/v36-ai-gate.js'),features=read('public/v36-features.js'),outputs=read('public/v36-outputs.js');
-const all=[html,pub,workspace,worker,legacy,sw,stdHtml,stdPro,stdSw,gov,gate,features,outputs].join('\n');
+const html=read('frontend/index.html'),pub=read('public/index.html'),workspace=read('src/kosif-workspace.js'),worker=read('src/worker.js'),legacy=read('src/legacy-worker.js'),sw=read('public/sw.js'),stdHtml=read('public/standards/index.html'),stdPro=read('public/standards/reader-pro-v36.js'),stdSw=read('public/standards/sw.js'),gov=read('public/v36-governance.js'),gate=read('public/v36-ai-gate.js'),features=read('public/v36-features.js'),outputs=read('public/v36-outputs.js'),readiness=read('public/v36-standards-readiness.js');
+const all=[html,pub,workspace,worker,legacy,sw,stdHtml,stdPro,stdSw,gov,gate,features,outputs,readiness].join('\n');
 function walk(dir,out=[]){if(!fs.existsSync(dir))return out;for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(e.name==='.git'||e.name==='node_modules')continue;const p=path.join(dir,e.name);e.isDirectory()?walk(p,out):out.push(p)}return out}
 const files=walk(root).map(p=>path.relative(root,p)).sort();
 const ids=[...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]),dup=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];
 const refs=[...html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)=["']([^"']+)["']/gi)].map(m=>m[1]).filter(x=>x.startsWith('/'));
 const missing=[];for(const u of refs){const clean=u.split('?')[0].split('#')[0];if(clean==='/'||clean.startsWith('/api/'))continue;if(!fs.existsSync('public'+clean))missing.push(clean)}
 const legacyRefs=[...new Set(refs.map(x=>x.split('?')[0]).filter(x=>x.startsWith('/legacy/')))];
-const lib=json('public/standards/data/library.json')||[];
-const bookCounts=Object.fromEntries(['b1','b2','b3'].map(id=>[id,fs.existsSync('public/standards/data/'+id)?fs.readdirSync('public/standards/data/'+id).filter(x=>x.endsWith('.json')).length:0]));
+const libRaw=json('public/standards/data/library.json')||[],lib=Array.isArray(libRaw)?libRaw:(libRaw.books||[]);
+const bookCounts=Object.fromEntries(['b1','b2','b3'].map(id=>[id,fs.existsSync('public/standards/data/'+id)?fs.readdirSync('public/standards/data/'+id).filter(x=>/^\d+\.json$/.test(x)).length:0]));
+const metadataConsistent=lib.every(x=>!bookCounts[x.id]||Number(x.chapters)===bookCounts[x.id]);
 const checks={
  'TB / Excel / CSV import':/XLSX|tb-file|CSV/i.test(all),
  'Deterministic audit engine':/core-v36|applyDemo|renderTB/i.test(all),
@@ -42,15 +43,16 @@ const checks={
  'Reader word highlighting':/Highlight|kosif-speech|onboundary/.test(stdPro),
  'Reader Media Session':/mediaSession|MediaMetadata/.test(stdPro),
  'Reader Wake Lock':/wakeLock/.test(stdPro),
- 'Reader auto-scroll 1–10':/requestAnimationFrame/.test(stdPro)&&/min=\\?"1\\?" max=\\?"10/.test(stdPro),
+ 'Reader auto-scroll 1–10':/requestAnimationFrame/.test(stdPro)&&/min="1" max="10"/.test(stdPro),
  'Reader stops auto-scroll on touch':/touchstart[\s\S]*autoOff/.test(stdPro),
  'Reader sleep timer':/setSleep|sleepId/.test(stdPro),
  'Reader standards code jump':/jumpCode|IAS 16|IFRS 9/.test(stdPro),
  'Reader chapter/journal export':/exportChapter/.test(stdPro)&&/exportJournalPro/.test(stdPro),
  'Reader streak / continue support':/streak\(|markDay/.test(stdPro)&&/last/.test(stdHtml),
  'Standards pro runtime wired':/reader-pro-v36\.js\?v=36\.1/.test(stdHtml)&&/reader-pro-v36\.js/.test(stdSw),
+ 'Standards metadata matches packaged chapters':metadataConsistent,
  'SOCPA/latest priority policy':/SOCPA|الهيئة السعودية|أولوية/.test(all),
- 'IFRS 18/19 readiness':/IFRS 18/.test(all)&&/IFRS 19/.test(all),
+ 'IFRS 18/19 readiness':/IFRS 18/.test(readiness)&&/IFRS 19/.test(readiness),
  'Current GPT default':/gpt-5\.6/.test(workspace),
  'Current Gemini default':/gemini-3\.6-flash/.test(workspace),
 };
