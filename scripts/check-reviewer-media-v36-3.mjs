@@ -7,7 +7,7 @@ ok('Bridge loads reviewer media independently of reviewer view timing',/function
 ok('Reviewer media blobs live in IndexedDB',media.includes("const DB='kosif-reviewer-media-v1'")&&/indexedDB\.open/.test(media)&&/objectStore\(STORE\)\.put/.test(media));
 ok('Reviewer media does not upload through fetch or legacy storage APIs',!/(fetch\s*\(|\/api\/|\/files\/|\/office\/)/.test(media));
 const notePayload=(media.match(/x\.notes\.push\(\{([\s\S]*?)\}\);const input=/)||[])[1]||'';
-ok('Reviewer workspace persists metadata JSON, not raw blobs',media.includes('localStorage.setItem(\'kosif_v36_workspace_v1\'')||media.includes('localStorage.setItem(V36_KEY,JSON.stringify(x))');
+ok('Reviewer workspace persists metadata JSON, not raw blobs',media.includes("localStorage.setItem('kosif_v36_workspace_v1',JSON.stringify(x))"));
 ok('Reviewer note metadata contains no raw blob or binary buffer',!!notePayload&&!/(\bblob\b|arrayBuffer|base64|data:)/i.test(notePayload)&&/media:\{id:mid/.test(notePayload));
 ok('Media metadata explicitly marks raw content as local-only and not sent to AI',/localOnly:true/.test(media)&&/rawSentToAI:false/.test(media));
 ok('Council context exposes integrity metadata only',/sha256:String\(n\.media\.sha256/.test(bridge)&&/localOnly:true,rawSentToAI:false/.test(bridge)&&!/reviewerNotes:[^\n]*(blob|base64|data:)/i.test(bridge));
