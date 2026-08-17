@@ -1302,6 +1302,9 @@ function invalidateAI(p){delete AI_VERIFIED[p];syncAI()}
 function aiOwnerUnlocked(){return document.documentElement.dataset.kosifAiUnlocked==='1'}
 function aiVerified(p,m,k){const v=AI_VERIFIED[p];return !!(v&&v.model===String(m||'').trim()&&v.key===String(k||'').trim())}
 function invalidateAI(p){delete AI_VERIFIED[p];syncAI()}
+function aiOwnerUnlocked(){return document.documentElement.dataset.kosifAiUnlocked==='1'}
+function aiVerified(p,m,k){const v=AI_VERIFIED[p];return !!(v&&v.model===String(m||'').trim()&&v.key===String(k||'').trim())}
+function invalidateAI(p){delete AI_VERIFIED[p];syncAI()}
 function syncAI(){const st=settings(),k=apiKey(),p=$('#kosif-ai-status'),connected=aiOwnerUnlocked()&&!!k&&aiVerified(st.provider,st.model,k);try{localStorage.removeItem('tamhees_key')}catch(_){}if(p){p.classList.toggle('on',connected);p.classList.toggle('off',!connected);p.classList.toggle('pending',aiOwnerUnlocked()&&!!k&&!connected);const t=p.querySelector('.kosif-ai-text');let wanted='🔐 AI مقفول';if(aiOwnerUnlocked())wanted=!k?'AI غير مربوط':connected?'AI متصل · '+providerLabel(st.provider):'AI غير مختبر · '+providerLabel(st.provider);if(t&&t.textContent!==wanted)t.textContent=wanted}const rm=$('#rounds-model');if(rm){const rw=connected?'AI متصل: '+providerLabel(st.provider)+' · '+st.model:aiOwnerUnlocked()?'AI غير مختبر':'AI مقفول';if(rm.textContent!==rw)rm.textContent=rw}}
 window.addEventListener('kosif-ai-gate-change',e=>{if(!e.detail?.unlocked){for(const k of Object.keys(AI_KEYS))delete AI_KEYS[k];for(const k of Object.keys(AI_VERIFIED))delete AI_VERIFIED[k]}syncAI()});
 
