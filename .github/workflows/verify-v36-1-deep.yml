@@ -2,7 +2,7 @@ name: Verify Kosif v36.1 Deep Runtime
 
 on:
   push:
-    branches: [v36-deep-audit-fix]
+    branches: [main, v36-deep-audit-fix]
     paths:
       - 'src/**'
       - 'frontend/**'
