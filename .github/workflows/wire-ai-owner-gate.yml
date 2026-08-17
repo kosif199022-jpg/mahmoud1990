@@ -19,6 +19,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          echo 'AI gate wiring revision 2'
           python3 - <<'PY'
           from pathlib import Path
           asset='<script src="/v36-ai-gate.js?v=36.1"></script>'
@@ -44,7 +45,7 @@ jobs:
           grep -q "'/v36-ai-gate.js'" public/sw.js
           npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
           python3 - <<'PY'
-          import pathlib,re,os,subprocess
+          import pathlib,re,os
           s=pathlib.Path('public/index.html').read_text()
           refs=re.findall(r'<(?:script|link)\b[^>]*(?:src|href)=["\']([^"\']+)',s,re.I)
           missing=[]
