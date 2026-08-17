@@ -1,0 +1,157 @@
+name: Fix and publish Kosif Native v35 A1990
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/publish-kosif-native-v35-fixed.yml]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+          fetch-depth: 0
+
+      - name: Build v35 release tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+          s=Path('.github/workflows/publish-kosif-native-v35-v3.yml').read_text()
+          a=s.index('      - name: Build release\n')
+          a=s.index('        run: |\n',a)+len('        run: |\n')
+          b=s.index('\n      - name: Validate release',a)
+          Path('/tmp/build-v35.sh').write_text('set -euo pipefail\n'+textwrap.dedent(s[a:b]))
+          PY
+          bash /tmp/build-v35.sh
+
+      - name: Native v35 cleanup and search index
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - "$R" <<'NODE'
+          const fs=require('fs'),path=require('path'),z=require('zlib'),crypto=require('crypto');
+          const root=process.argv[2];
+          const front=path.join(root,'frontend/index.html');
+          let h=fs.readFileSync(front,'utf8');
+
+          // The reconstructed stable shell contains one legacy injected inline layer
+          // whose generated payload is syntactically invalid. Native v35 replaces it
+          // with an explicit compatibility marker; the stable server/API engine remains.
+          const legacyPro=/<script[^>]*>\s*\/\*\s*TAMHEES_PROFESSIONAL_V2\s*\*\/[\s\S]*?<\/script>/i;
+          if(!legacyPro.test(h)) throw new Error('Legacy professional inline layer not found');
+          h=h.replace(legacyPro,'<script>/* KOSIF_NATIVE_V35_PRO_COMPAT */window.KosifProfessional=window.KosifProfessional||{version:"35.0.0",mode:"native"};</script>');
+
+          // Preserve the newest/Native instance of every duplicated id and rename older
+          // compatibility instances so getElementById/querySelector are deterministic.
+          const idRe=/\bid=(['"])([^'"<>]+)\1/g;
+          const occurrences=new Map();
+          for(const m of h.matchAll(idRe)){
+            const id=m[2]; if(!occurrences.has(id))occurrences.set(id,[]); occurrences.get(id).push(m.index);
+          }
+          const dups=[...occurrences.entries()].filter(([,a])=>a.length>1).map(([id])=>id);
+          for(const id of dups){
+            let seen=0,total=occurrences.get(id).length;
+            const escaped=id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+            h=h.replace(new RegExp('id=([\\\'\"])'+escaped+'\\1','g'),(m,q)=>{seen++;return seen===total?m:`id=${q}${id}-legacy-v35-${seen}${q}`});
+          }
+          fs.writeFileSync(front,h);
+          fs.writeFileSync(path.join(root,'public/index.html'),h);
+
+          // Build the missing native standards search index directly from packaged split chapters.
+          const dataRoot=path.join(root,'public/standards/data');
+          const rows=[];
+          const flatten=(v,out=[])=>{
+            if(v==null)return out;
+            if(typeof v==='string'){out.push(v);return out;}
+            if(Array.isArray(v)){for(const x of v)flatten(x,out);return out;}
+            if(typeof v==='object'){for(const [k,x] of Object.entries(v))if(k!=='words')flatten(x,out);}
+            return out;
+          };
+          for(const book of ['b1','b3']){
+            const dir=path.join(dataRoot,book); if(!fs.existsSync(dir))continue;
+            const year=book==='b3'?2025:2018;
+            for(const name of fs.readdirSync(dir).filter(x=>/^\d+\.json$/.test(x)).sort((a,b)=>parseInt(a)-parseInt(b))){
+              const p=path.join(dir,name); let j; try{j=JSON.parse(fs.readFileSync(p,'utf8'))}catch{continue}
+              const body=flatten(j.body||j.blocks||j.content||j.paragraphs||[]).join(' ').replace(/\s+/g,' ').trim();
+              rows.push({book,year,no:j.no??parseInt(name),title:j.title||'',name:j.name||'',key:j.key||'',pages:j.pages||null,text:body});
+            }
+          }
+          if(rows.length<80)throw new Error('Unexpected standards index size '+rows.length);
+          fs.writeFileSync(path.join(dataRoot,'search-index.json.gz'),z.gzipSync(Buffer.from(JSON.stringify(rows))));
+          fs.writeFileSync(path.join(dataRoot,'search-index.meta.json'),JSON.stringify({version:'v35',generated:'2026-08-17',rows:rows.length,books:{b1:rows.filter(x=>x.book==='b1').length,b3:rows.filter(x=>x.book==='b3').length}},null,2));
+
+          // Refresh release hashes after the cleanup.
+          const files=['frontend/index.html','public/index.html','src/worker.js','wrangler.toml','public/standards/index.html','public/standards/bridge.js','public/standards/sw.js','public/standards/data/ref-map.json','public/standards/data/search-index.json.gz','package.json','scripts/build-assets.mjs'];
+          const hashes={}; for(const f of files)hashes[f]=crypto.createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex');
+          const manifest={release:'Kosif Native v35 — A1990 GitHub',date:'2026-08-17',base:'Stable v34 audit core',architecture:'Worker-first + native Cloudflare Static Assets',mobile_nav:['الرئيسية','الميزان','الجولات','المطالبات','المزيد'],standards:{packagedIndexRows:rows.length,refMap:66,note:'Packaged repository standards split files indexed natively at build time.'},tests:{},hashes};
+          fs.writeFileSync(path.join(root,'RELEASE_MANIFEST_V35.json'),JSON.stringify(manifest,null,2));
+          console.log(JSON.stringify({duplicateIdsRewritten:dups,searchRows:rows.length},null,2));
+          NODE
+
+      - name: Validate v35 release gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$R"
+          node --check src/worker.js
+          node --check src/legacy-worker.js
+          node --check src/kosif-workspace.js
+          node --check public/migrate-v35.js
+          node --check public/sw.js
+          node --check public/standards/bridge.js
+          node --check public/standards/sw.js
+          ! grep -q 'id="bn-map"' frontend/index.html
+          grep -q 'kosif-bottom-nav' frontend/index.html
+          for x in الرئيسية الميزان الجولات المطالبات المزيد; do grep -q "$x" frontend/index.html; done
+          grep -q 'data-go="map"' frontend/index.html
+          grep -q 'KosifStandardsBridge' public/standards/bridge.js
+          ! grep -q 'window.fetch=' public/standards/bridge.js
+          grep -q 'run_worker_first = true' wrangler.toml
+          test -f public/index.html
+          test -f public/standards/index.html
+          test -f public/standards/data/search-index.json.gz
+          test -f public/standards/data/b3/1.json
+          node -e "const fs=require('fs'),z=require('zlib');const x=JSON.parse(z.gunzipSync(fs.readFileSync('./public/standards/data/search-index.json.gz')));if(x.length<80)throw Error('search rows '+x.length);console.log('search rows',x.length)"
+          node -e "const x=require('./public/standards/data/ref-map.json');if(x.refs.length!==66)throw Error('ref-map '+x.refs.length);console.log('ref-map',x.refs.length)"
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process'),h=fs.readFileSync('frontend/index.html','utf8');
+          const ids=[...h.matchAll(/\bid=["']([^"']+)["']/g)].map(x=>x[1]);
+          const dup=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];
+          if(dup.length)throw Error('duplicate ids: '+dup.join(','));
+          const scripts=[...h.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(x=>x[1]);
+          if(scripts.length!==4)throw Error('inline script count '+scripts.length);
+          scripts.forEach((s,i)=>{const p='/tmp/kosif-inline-'+i+'.js';fs.writeFileSync(p,s);cp.execFileSync(process.execPath,['--check',p])});
+          console.log(JSON.stringify({inlineScripts:scripts.length,duplicateIds:dup.length,htmlBytes:Buffer.byteLength(h)}));
+          NODE
+          echo '--- validated hashes ---'
+          sha256sum frontend/index.html public/index.html src/worker.js wrangler.toml public/standards/bridge.js public/standards/sw.js public/standards/data/ref-map.json public/standards/data/search-index.json.gz
+
+      - name: Publish clean v35 release to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm -r --ignore-unmatch .
+          cp -a "$R"/. .
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Release Kosif Native v35 A1990'
+          git push origin main
+          echo "PUBLISHED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Verify published main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          ACTUAL=$(git rev-parse origin/main)
+          test "$ACTUAL" = "$PUBLISHED_SHA"
+          echo "KOSIF_NATIVE_V35_PUBLISHED=$ACTUAL"
+          git show --oneline --stat --summary "$ACTUAL"
