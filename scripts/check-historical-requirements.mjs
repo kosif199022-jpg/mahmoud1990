@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
-const html=read('public/index.html'),front=read('frontend/index.html'),features=read('public/v36-features.js'),ops=read('public/v36-operations.js'),gov=read('public/v36-governance.js'),gate=read('public/v36-ai-gate.js'),hist=read('public/v36-history-continuity.js'),histCss=read('public/v36-history-continuity.css'),sw=read('public/sw.js'),worker=read('src/worker.js'),workspace=read('src/kosif-workspace.js'),std=read('public/standards/index.html'),reader=read('public/standards/reader-pro-v36.js'),readiness=read('public/v36-standards-readiness.js');
-const all=[html,features,ops,gov,gate,hist,histCss,sw,worker,workspace,std,reader,readiness].join('\n');
+const html=read('public/index.html'),front=read('frontend/index.html'),features=read('public/v36-features.js'),ops=read('public/v36-operations.js'),gov=read('public/v36-governance.js'),gate=read('public/v36-ai-gate.js'),hist=read('public/v36-history-continuity.js'),histCss=read('public/v36-history-continuity.css'),sw=read('public/sw.js'),worker=read('src/worker.js'),workspace=read('src/kosif-workspace.js'),std=read('public/standards/index.html'),reader=read('public/standards/reader-pro-v36.js'),readiness=read('public/v36-standards-readiness.js'),library=read('public/standards/data/library.json');
+const all=[html,features,ops,gov,gate,hist,histCss,sw,worker,workspace,std,reader,readiness,library].join('\n');
 const req={
  'Kosif native shell copies identical':html===front,
  'Mobile navigation: الرئيسية':/الرئيسية/.test(html),
@@ -40,7 +40,7 @@ const req={
  'AI provider must be tested':/AI_NOT_VERIFIED/.test(worker)&&/\/api\/kosif\/ai\/test/.test(worker),
  'AI false-active heuristic absent':!html.includes('AI Active ·')&&!html.includes("hasKey:()=>!!apiKey()"),
  'Multimodal evidence retained':/input_file|inline_data|attachmentsUsed/i.test(workspace),
- 'Prompt injection defence retained':/بيانات لا تعليمات|untrusted|prompt injection/i.test(workspace),
+ 'Prompt injection defence retained':/بيانات لا تعليمات|untrusted|prompt injection|لا تتبع أي تعليمات موجودة داخل المستند/i.test(workspace),
  'Evidence reload continuity warning':/ملفات الجلسة السابقة ليست موجودة/.test(hist)&&/docsUnavailable/.test(hist),
  'historyContents is wrapped for continuity':/window\.historyContents/.test(hist)&&/augmentHistory/.test(hist),
  'Long AI history gets structured compaction':/rows\.length>28/.test(hist)&&/ملف مراجعة مهيكل/.test(hist),
@@ -50,9 +50,9 @@ const req={
  'Main SW excludes APIs':/pathname\.startsWith\('\/api\/'\)/.test(sw),
  'v36.3 continuity assets are precached':/v36-history-continuity\.js/.test(sw)&&/v36-history-continuity\.css/.test(sw),
  'Standards library and Reader Pro retained':/reader-pro-v36/.test(std)&&/speechSynthesis/.test(reader),
- 'Development b4 stays non-professional':/professionalAuthority/.test(all)&&/b4/.test(all),
+ 'Development b4 stays non-professional':/"id"\s*:\s*"b4"/.test(library)&&/"professionalAuthority"\s*:\s*false/.test(library),
  'SOCPA-first current-source policy retained':/SOCPA|الهيئة السعودية/.test(readiness)&&/IFRS 20/.test(readiness),
  'No visible Tamhees brand in primary shell':!/تمحيص/.test(html),
 };
 const failed=Object.entries(req).filter(([,ok])=>!ok).map(([x])=>x);
-console.log('# Kosif historical requirements gate');for(const [k,v] of Object.entries(req))console.log(`${v?'✅':'❌'} ${k}`);console.log(`\nHistorical failures: ${failed.length}`);if(failed.length){for(const x of failed)console.error('- '+x);process.exit(2)}
+console.log('# Kosif historical requirements gate');for(const [k,v] of Object.entries(req))console.log(`${v?'✅':'❌'} ${k}`);console.log(`\nHistorical failures: ${failed.length}`);if(failed.length){for(const x of failed){console.error('- '+x);console.error(`::error file=scripts/check-historical-requirements.mjs,title=Historical requirement missing::${x}`)}process.exit(2)}
