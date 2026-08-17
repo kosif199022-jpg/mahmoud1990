@@ -32,4 +32,8 @@ ok('legacy cache purge retained',/tamhees/i.test(sw)&&/tamhees/i.test(stdSw));
 ok('package is v36.3 and contract runs',/"version"\s*:\s*"36\.3\.0"/.test(pkg)&&/check-v36-3-contract\.mjs/.test(pkg));
 ok('master requirements registry exists',req.includes('Master Requirements')&&req.includes('90% through 200%')&&req.includes('ISA 210')&&req.includes('AI Agent'));
 ok('no document.write architecture in primary shell',!html.includes('document.write(')&&!html.includes('theme-restore'));
+const ss=worker.indexOf('async function nativeShell'),se=worker.indexOf('async function assetIndexDiagnostic'),sf=ss>=0&&se>ss?worker.slice(ss,se):'';
+ok('root shell is native and fail closed',ss>=0&&sf.includes('status:503')&&!sf.includes('legacyWorker')&&worker.includes("u.pathname==='/'||u.pathname==='/index.html'")&&worker.includes('return nativeShell(req,env)'));
+ok('root excluded from legacy fallback set',!worker.includes("const E=new Set(['/','/index.html'"));
+ok('asset index diagnostic exists',worker.includes("u.pathname==='/__asset-index'")&&worker.includes('hasKosifBoot'));
 console.log(`KOSIF_V36_3_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}

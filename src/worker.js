@@ -1,12 +1,14 @@
 import legacyWorker from './legacy-worker.js';
 
-const E=new Set(['/','/index.html','/manifest.webmanifest','/sw.js','/icon.svg','/migrate-v35.js']);
+const E=new Set(['/manifest.webmanifest','/sw.js','/icon.svg','/migrate-v35.js']);
 const AI_COOKIE='kosif_ai_session';
 const AI_SESSION_TTL=8*60*60;
 const MAX_ATTEMPTS=5;
 const BUILD_INFO={version:'v36.3',buildId:'2026.08.17-v36.3-master-requirements',release:'Requirements Consolidation & Continuity',schemaVersion:13,appCache:'kosif-native-v36-3-app',standardsCache:'kosif-native-v36-3-standards',sourceRepo:'kosif199022-jpg/mahmoud1990',mobileNav:['الرئيسية','الميزان','الجولات','المطالبات','المزيد'],fontScale:{min:90,max:200},aiGate:'owner-password+verified-key'};
 
 async function a(req,env){if(!env?.ASSETS)return null;try{const u=new URL(req.url);let p=u.pathname;if(p==='/'||p.endsWith('/'))p=p+'index.html'.replace(/^\/index\.html$/,'index.html');if(u.pathname==='/')p='/index.html';if(p!==u.pathname){u.pathname=p;req=new Request(u,req)}const r=await env.ASSETS.fetch(req);return r.status===404?null:r}catch{return null}}
+async function nativeShell(req,env){if(!env?.ASSETS)return new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}});try{const r=await env.ASSETS.fetch(new Request(new URL('/index.html',req.url),{method:'GET',headers:req.headers}));return r.ok?tag(r):new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}})}catch{return new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}})}}
+async function assetIndexDiagnostic(req,env){if(!env?.ASSETS)return j({ok:false,error:'ASSETS_MISSING'},503);try{const r=await env.ASSETS.fetch(new Request(new URL('/index.html',req.url),{method:'GET',headers:req.headers}));const text=await r.clone().text();return j({ok:r.ok,status:r.status,contentType:r.headers.get('content-type'),bytes:text.length,hasKosifBoot:text.includes('id=\"kosif-boot\"'),hasV36Continuity:text.includes('/v36-continuity.js?v=36.3'),hasLegacyWorkspace:text.includes('KOSIF_WORKSPACE_V36_2026_08_17')},r.ok?200:503)}catch{return j({ok:false,error:'ASSET_INDEX_UNAVAILABLE'},503)}}
 function tag(r){const h=new Headers(r.headers);h.set('x-kosif-release','native-v36-3-master-requirements');h.set('x-content-type-options','nosniff');h.set('referrer-policy','strict-origin-when-cross-origin');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
 function j(body,status=200,headers={}){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json;charset=utf-8','cache-control':'no-store',...headers}})}
 async function sha256(s){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s||'')));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
@@ -70,6 +72,8 @@ export default{async fetch(req,env,ctx){
   const u=new URL(req.url);
   if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:BUILD_INFO.version,release:BUILD_INFO.release,buildId:BUILD_INFO.buildId,architecture:'worker-first-static-assets',aiGate:BUILD_INFO.aiGate});
   if(u.pathname==='/__version')return j(BUILD_INFO);
+  if(u.pathname==='/__asset-index')return assetIndexDiagnostic(req,env);
+  if(req.method==='GET'&&(u.pathname==='/'||u.pathname==='/index.html'))return nativeShell(req,env);
   if(u.pathname==='/api/kosif/auth/status'&&req.method==='GET')return authStatus(req,env);
   if(u.pathname==='/api/kosif/auth/login'&&req.method==='POST')return authLogin(req,env);
   if(u.pathname==='/api/kosif/auth/logout'&&req.method==='POST')return authLogout(req,env);
