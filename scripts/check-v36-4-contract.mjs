@@ -23,14 +23,16 @@ ok('AI Gate still fails closed before owner auth',/readOnly=true/.test(gate)&&/b
 ok('reviewer multimedia remains local-first with integrity metadata',/indexedDB/.test(reviewer)&&/localOnly:true/.test(reviewer)&&/rawSentToAI:false/.test(reviewer)&&/SHA-256/.test(reviewer));
 ok('voice guide exists as an actual runtime capability',/window\.KosifVoiceGuide/.test(voice)&&/function nextStep\(\)/.test(voice)&&/SpeechRecognition|webkitSpeechRecognition/.test(voice));
 ok('runtime wires reviewer media independently of view timing',/function loadReviewerMedia\(\)/.test(zai)&&/\/v36-reviewer-media\.js\?v=36\.3-media1/.test(zai)&&/loadReviewerMedia\(\)/.test(zai));
-ok('runtime wires historical voice guide instead of leaving it as dead code',/function loadVoiceGuide\(\)/.test(zai)&&/\/v36-voice-guide\.js\?v=36\.4-voice-guide/.test(zai)&&/loadVoiceGuide\(\)/.test(zai));
+ok('runtime wires historical voice guide instead of leaving it as dead code',/function loadVoiceGuide\(\)/.test(zai)&&/\/v36-voice-guide\.js\?v=36\.3-history1/.test(zai)&&/loadVoiceGuide\(\)/.test(zai));
+ok('runtime wires history restoration independently of view timing',/function loadHistoryRestore\(\)/.test(zai)&&/\/v36-history-restore\.js\?v=36\.3-history1/.test(zai)&&/loadHistoryRestore\(\)/.test(zai));
 ok('historical Council loader identifier remains stable',/\/v36-council-v2\.js\?v=36\.3-council2/.test(zai));
+ok('shared guarded module loader prevents duplicate injections',/function loadModule\(globalName,selector,src,datasetKey\)/.test(zai)&&/window\[globalName\]\|\|document\.querySelector\(selector\)/.test(zai));
 ok('app SW cache generation is v36.4',/const C='kosif-native-v36-4-app'/.test(sw));
 ok('standards SW cache generation is v36.4',/const C='kosif-native-v36-4-standards'/.test(stdSw));
 ok('reviewer media voice guide and history restoration are available offline',/\/v36-reviewer-media\.js/.test(sw)&&/\/v36-voice-guide\.js/.test(sw)&&/\/v36-history-restore\.js/.test(sw));
 ok('app SW excludes APIs and release diagnostics',/pathname\.startsWith\('\/api\/'\)/.test(sw)&&/u\.pathname==='\/__version'/.test(sw)&&/u\.pathname==='\/__health'/.test(sw));
 ok('old Kosif and Tamhees caches remain purgeable',/tamhees/i.test(sw)&&/kosif-native-v/.test(sw)&&/tamhees/i.test(stdSw));
 ok('package declares v36.4 and this contract',/"version"\s*:\s*"36\.4\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
-ok('all restored regression gates remain in full CI',/npm run reviewer-media/.test(pkg)&&/npm run history-restoration/.test(pkg)&&/npm run accounting/.test(pkg));
+ok('all restored regression gates remain in full CI',/npm run reviewer-media/.test(pkg)&&/npm run history-restoration/.test(pkg)&&/npm run feature-reachability/.test(pkg)&&/npm run accounting/.test(pkg));
 ok('master anti-regressions still require iPhone modal and autoscroll safety',/iPhone/.test(req)&&/auto-scroll continuing while a modal\/body lock is active/.test(req)&&/body-scroll\/modal-scroll conflicts/.test(req));
 console.log(`KOSIF_V36_4_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}
