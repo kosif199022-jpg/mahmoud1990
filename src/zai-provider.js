@@ -130,7 +130,8 @@ export async function handleZaiAI(req,env){
   const wantsJson=b.json!==false;
   if(wantsJson&&!isProbe)messages[0].content+='\n\nأعد النتيجة بصيغة JSON صالحة فقط دون Markdown.';
   const model=String(b.model||'').trim()||DEFAULT_MODEL,maxTokens=Math.min(16000,Math.max(64,Number(b.maxTokens)||8192));
-  const body={model,messages,stream:false,temperature:.2,max_tokens:maxTokens};
+  const body={model,messages,stream:false,temperature:isProbe?0:.2,max_tokens:maxTokens};
+  if(!/^glm-4-32b/i.test(model))body.thinking={type:isProbe?'disabled':'enabled'};
   if(Array.isArray(b.tools)&&b.tools.length&&b.tools.every(x=>x?.type==='function'&&x?.function))body.tools=b.tools;
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),120000);
   let r,d;
