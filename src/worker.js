@@ -4,9 +4,10 @@ const E=new Set(['/','/index.html','/manifest.webmanifest','/sw.js','/icon.svg',
 const AI_COOKIE='kosif_ai_session';
 const AI_SESSION_TTL=8*60*60;
 const MAX_ATTEMPTS=5;
+const BUILD_INFO={version:'v36.3',buildId:'2026.08.17-v36.3-master-requirements',release:'Requirements Consolidation & Continuity',schemaVersion:13,appCache:'kosif-native-v36-3-app',standardsCache:'kosif-native-v36-3-standards',sourceRepo:'kosif199022-jpg/mahmoud1990',mobileNav:['الرئيسية','الميزان','الجولات','المطالبات','المزيد'],fontScale:{min:90,max:200},aiGate:'owner-password+verified-key'};
 
 async function a(req,env){if(!env?.ASSETS)return null;try{const r=await env.ASSETS.fetch(req);return r.status===404?null:r}catch{return null}}
-function tag(r){const h=new Headers(r.headers);h.set('x-kosif-release','native-v36-2-1-library-hardening');h.set('x-content-type-options','nosniff');h.set('referrer-policy','strict-origin-when-cross-origin');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
+function tag(r){const h=new Headers(r.headers);h.set('x-kosif-release','native-v36-3-master-requirements');h.set('x-content-type-options','nosniff');h.set('referrer-policy','strict-origin-when-cross-origin');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
 function j(body,status=200,headers={}){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json;charset=utf-8','cache-control':'no-store',...headers}})}
 async function sha256(s){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s||'')));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function safeEq(a,b){a=String(a||'');b=String(b||'');if(a.length!==b.length)return false;let x=0;for(let i=0;i<a.length;i++)x|=a.charCodeAt(i)^b.charCodeAt(i);return x===0}
@@ -67,7 +68,8 @@ async function requireVerifiedAI(req,env){
 
 export default{async fetch(req,env,ctx){
   const u=new URL(req.url);
-  if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:'v36.2.1',release:'Library Integrity & Motion Hardening',architecture:'worker-first-static-assets',aiGate:'owner-password+verified-key'});
+  if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:BUILD_INFO.version,release:BUILD_INFO.release,buildId:BUILD_INFO.buildId,architecture:'worker-first-static-assets',aiGate:BUILD_INFO.aiGate});
+  if(u.pathname==='/__version')return j(BUILD_INFO);
   if(u.pathname==='/api/kosif/auth/status'&&req.method==='GET')return authStatus(req,env);
   if(u.pathname==='/api/kosif/auth/login'&&req.method==='POST')return authLogin(req,env);
   if(u.pathname==='/api/kosif/auth/logout'&&req.method==='POST')return authLogout(req,env);
