@@ -1,0 +1,45 @@
+name: Wire Kosif v36 Standards Readiness
+
+on:
+  push:
+    branches: [v36-consolidated]
+    paths: ['.github/workflows/wire-v36-readiness.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-consolidated
+      - name: Wire readiness runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for fn in ['frontend/index.html','public/index.html']:
+            p=Path(fn);s=p.read_text()
+            anchor='<script src="/v36-governance.js?v=36"></script>'
+            asset='<script src="/v36-standards-readiness.js?v=36"></script>'
+            if asset not in s:s=s.replace(anchor,anchor+'\n'+asset)
+            p.write_text(s)
+          p=Path('public/sw.js');s=p.read_text();s=s.replace("'/v36-governance.js','/standards/bridge.js'","'/v36-governance.js','/v36-standards-readiness.js','/standards/bridge.js'");p.write_text(s)
+          PY
+          node --check public/v36-standards-readiness.js
+          node --check public/sw.js
+          grep -q '/v36-standards-readiness.js?v=36' public/index.html
+          grep -q "'/v36-standards-readiness.js'" public/sw.js
+      - name: Commit readiness wiring
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add frontend/index.html public/index.html public/sw.js
+          git commit -m 'Wire period-aware standards readiness center'
+          git pull --rebase origin v36-consolidated
+          git push origin HEAD:v36-consolidated
