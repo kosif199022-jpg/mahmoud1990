@@ -1,0 +1,97 @@
+name: Build Kosif v36.3 Historical Continuity
+
+on:
+  push:
+    branches: [v36-3-history-continuity]
+    paths: ['.github/workflows/build-v36-3-history.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-3-history-continuity
+      - name: Apply v36.3 historical requirements patch
+        run: python3 scripts/apply-v36-3-history.py
+      - name: Run complete regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run check
+          node --check public/v36-history-continuity.js
+          node --check public/sw.js
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/kosif-v36-3-worker.mjs >/dev/null
+          cmp -s public/index.html frontend/index.html
+          grep -q '/v36-history-continuity.css?v=36.3' public/index.html
+          grep -q '/v36-history-continuity.js?v=36.3' public/index.html
+          grep -q "version:'v36.3'" src/worker.js
+          grep -q 'native-v36-3-history-continuity' src/worker.js
+          grep -q 'kosif-native-v36-3-app' public/sw.js
+      - name: Install Playwright
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+      - name: Start local Worker
+        shell: bash
+        run: |
+          nohup npx --yes wrangler@4 dev --local --port 8793 >/tmp/wrangler-v363.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8793/__health >/tmp/v363-health.json 2>/dev/null; then cat /tmp/v363-health.json; exit 0; fi
+            sleep 1
+          done
+          cat /tmp/wrangler-v363.log; exit 1
+      - name: Verify historical UX, continuity and 200 percent font
+        shell: bash
+        run: |
+          cat > /tmp/v363.cjs <<'NODE'
+          const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const ok=(v,m)=>{if(!v)throw Error(m)};
+          (async()=>{
+            const b=await chromium.launch({headless:true});
+            const c=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+            const p=await c.newPage(),errors=[],bad=[];
+            p.on('pageerror',e=>errors.push(String(e)));
+            p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
+            let r=await p.request.get('http://127.0.0.1:8793/__health'),h=await r.json();console.log('HEALTH',h);ok(h.version==='v36.3','health version');
+            await p.goto('http://127.0.0.1:8793/?v=36.3',{waitUntil:'domcontentloaded'});await p.waitForTimeout(1600);
+            ok(await p.evaluate(()=>typeof window.KosifHistoryContinuity==='object'),'history module missing');
+            await p.evaluate(()=>window.KosifHistoryContinuity.openMore());await p.waitForTimeout(100);
+            ok(await p.locator('#kosif-more-sheet.show').count()===1,'More sheet not open');
+            const more=await p.locator('#kosif-more-sheet').innerText();for(const t of ['الشركات','الخريطة المعيارية','التحليلات','المطالبات','التقارير والمخرجات','ملاحظات المراجع','مكتبة المعايير','الكتب والمراجع','المصادر الرسمية','البحث والأوامر','AI Agent','الإعدادات','المظهر وحجم الخط'])ok(more.includes(t),'missing More '+t);
+            await p.keyboard.press('Escape');await p.keyboard.press('Control+K');await p.waitForTimeout(100);ok(await p.locator('#kosif-command-palette.show').count()===1,'palette shortcut failed');
+            await p.keyboard.press('Escape');await p.evaluate(()=>window.KosifHistoryContinuity.setFontScale(2));await p.waitForTimeout(150);
+            const scale=await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--kosif-user-scale').trim());ok(scale==='2','font 200 not applied');
+            const overflow=await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth);console.log('FONT200_OVERFLOW',overflow);ok(overflow<=4,'unintended page horizontal overflow at 200%');
+            const brief=await p.evaluate(()=>window.KosifHistoryContinuity.structuredBrief());ok(brief&&typeof brief==='object'&&'documentsAvailableThisLoad'in brief,'brief invalid');
+            await p.evaluate(()=>localStorage.setItem('kosif_session_doc_meta_v2',JSON.stringify({savedAt:new Date().toISOString(),entity:'اختبار',docs:[{name:'evidence.pdf',size:100,type:'application/pdf'}]})));
+            await p.reload({waitUntil:'domcontentloaded'});await p.waitForTimeout(900);ok(await p.evaluate(()=>window.KosifHistoryContinuity.docsUnavailable()),'reload continuity guard failed');ok(await p.locator('#kosif-doc-warning').count()===1,'reload warning missing');
+            console.log('STATIC_BAD',bad);console.log('ERRORS',errors);ok(bad.length===0,'bad static '+bad.join(','));ok(errors.filter(x=>/ReferenceError|TypeError|SyntaxError/.test(x)).length===0,'fatal '+errors.join('\n'));
+            await p.screenshot({path:'kosif-v36-3-mobile.png',fullPage:true});await b.close();console.log('KOSIF_V36_3_HISTORY_RUNTIME_OK');
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+          node /tmp/v363.cjs
+      - name: Commit generated release changes
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/index.html frontend/index.html public/sw.js src/worker.js package.json scripts/deep-audit-v36.mjs
+          git diff --cached --quiet && exit 0
+          git commit -m 'Integrate v36.3 historical requirements and evidence continuity'
+          git pull --rebase origin v36-3-history-continuity
+          git push origin HEAD:v36-3-history-continuity
+      - name: Upload runtime screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-v36-3-history-runtime
+          path: |
+            kosif-v36-3-mobile.png
+            /tmp/wrangler-v363.log
+          if-no-files-found: ignore
