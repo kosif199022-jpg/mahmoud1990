@@ -1,0 +1,65 @@
+name: Fix Kosif v35 Runtime Boot
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch null onclick bindings
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files=[Path('public/index.html'),Path('frontend/index.html'),Path('src/kosif-workspace.js')]
+          reps={
+            "$('#kosif-books').onclick=()=>location.href='/library/smart';":"{const el=$('#kosif-books')||$('#kosif-books-legacy-v35-1');if(el)el.onclick=()=>location.href='/library/smart';}",
+            "$('#kosif-ai-open').onclick=openAI;":"{const el=$('#kosif-ai-open')||$('#kosif-ai-open-legacy-v35-1');if(el)el.onclick=openAI;}",
+            "$('#kosif-command').onclick=openCommands;":"{const el=$('#kosif-command')||$('#kosif-command-legacy-v35-1');if(el)el.onclick=openCommands;}",
+            "$('#kosif-new-company').onclick=newCompanyForm;":"{const el=$('#kosif-new-company');if(el)el.onclick=newCompanyForm;}",
+            "$('#kosif-open-private').onclick=privateOpenForm":"{const el=$('#kosif-open-private');if(el)el.onclick=privateOpenForm}"
+          }
+          changed=[]
+          for p in files:
+            s=p.read_text(encoding='utf-8')
+            before=s
+            for a,b in reps.items(): s=s.replace(a,b)
+            if s!=before:
+              p.write_text(s,encoding='utf-8')
+              changed.append(str(p))
+          print('patched',changed)
+          if not changed: raise SystemExit('No target bindings were patched')
+          for p in [Path('public/index.html'),Path('frontend/index.html')]:
+            s=p.read_text(encoding='utf-8')
+            bad=[x for x in ["$('#kosif-books').onclick","$('#kosif-ai-open').onclick","$('#kosif-command').onclick"] if x in s]
+            if bad: raise SystemExit(f'{p}: unsafe bindings remain: {bad}')
+          PY
+      - name: Validate inline JavaScript
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          s=pathlib.Path('public/index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\s[^>]*)?>([\s\S]*?)</script>',s,re.I)
+          for i,x in enumerate(scripts): pathlib.Path(f'/tmp/kosif-inline-{i}.js').write_text(x,encoding='utf-8')
+          print('inline scripts',len(scripts))
+          PY
+          for f in /tmp/kosif-inline-*.js; do node --check "$f"; done
+          node --check src/kosif-workspace.js
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/kosif-worker.mjs >/dev/null
+      - name: Commit runtime fix
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/index.html frontend/index.html src/kosif-workspace.js
+          if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
+          git commit -m 'Fix Kosif v35 browser boot null bindings'
+          git push origin main
