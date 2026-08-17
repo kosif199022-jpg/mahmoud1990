@@ -1,15 +1,18 @@
 import legacyWorker from './legacy-worker.js';
+import {handleZaiAI,isZaiProvider} from './zai-provider.js';
 
 const E=new Set(['/manifest.webmanifest','/sw.js','/icon.svg','/migrate-v35.js']);
 const AI_COOKIE='kosif_ai_session';
 const AI_SESSION_TTL=8*60*60;
 const MAX_ATTEMPTS=5;
-const BUILD_INFO={version:'v36.3',buildId:'2026.08.17-v36.3-master-requirements',release:'Requirements Consolidation & Continuity',schemaVersion:13,appCache:'kosif-native-v36-3-app',standardsCache:'kosif-native-v36-3-standards',sourceRepo:'kosif199022-jpg/mahmoud1990',mobileNav:['الرئيسية','الميزان','الجولات','المطالبات','المزيد'],fontScale:{min:90,max:200},aiGate:'owner-password+verified-key'};
+const AI_PROVIDERS=new Set(['gemini','openai','anthropic','zai']);
+const BUILD_INFO={version:'v36.3',buildId:'2026.08.17-v36.3-master-requirements-zai',release:'Requirements Consolidation & Continuity + Z.ai',schemaVersion:13,appCache:'kosif-native-v36-3-app',standardsCache:'kosif-native-v36-3-standards',sourceRepo:'kosif199022-jpg/mahmoud1990',mobileNav:['الرئيسية','الميزان','الجولات','المطالبات','المزيد'],fontScale:{min:90,max:200},aiGate:'owner-password+verified-key',aiProviders:['gemini','openai','anthropic','zai']};
 
 async function a(req,env){if(!env?.ASSETS)return null;try{const u=new URL(req.url);let p=u.pathname;if(p==='/'||p.endsWith('/'))p=p+'index.html'.replace(/^\/index\.html$/,'index.html');if(u.pathname==='/')p='/index.html';if(p!==u.pathname){u.pathname=p;req=new Request(u,req)}const r=await env.ASSETS.fetch(req);return r.status===404?null:r}catch{return null}}
-async function nativeShell(req,env){if(!env?.ASSETS)return new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}});try{const r=await env.ASSETS.fetch(new Request(new URL('/index.html',req.url),{method:'GET',headers:req.headers}));return r.ok?tag(r):new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}})}catch{return new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}})}}
-async function assetIndexDiagnostic(req,env){if(!env?.ASSETS)return j({ok:false,error:'ASSETS_MISSING'},503);try{const r=await env.ASSETS.fetch(new Request(new URL('/index.html',req.url),{method:'GET',headers:req.headers}));const text=await r.clone().text();return j({ok:r.ok,status:r.status,contentType:r.headers.get('content-type'),bytes:text.length,hasKosifBoot:text.includes('id=\"kosif-boot\"'),hasV36Continuity:text.includes('/v36-continuity.js?v=36.3'),hasLegacyWorkspace:text.includes('KOSIF_WORKSPACE_V36_2026_08_17')},r.ok?200:503)}catch{return j({ok:false,error:'ASSET_INDEX_UNAVAILABLE'},503)}}
-function tag(r){const h=new Headers(r.headers);h.set('x-kosif-release','native-v36-3-master-requirements');h.set('x-content-type-options','nosniff');h.set('referrer-policy','strict-origin-when-cross-origin');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
+async function enhanceNativeShell(r){if(!r?.ok||!/text\/html/i.test(r.headers.get('content-type')||''))return tag(r);const text=await r.text(),marker='<script src="/v36-zai.js?v=36.3-zai"></script>',out=text.includes('/v36-zai.js')?text:text.replace(/<\/body>/i,marker+'</body>'),h=new Headers(r.headers);h.delete('content-length');h.set('content-type','text/html; charset=utf-8');return tag(new Response(out,{status:r.status,statusText:r.statusText,headers:h}))}
+async function nativeShell(req,env){if(!env?.ASSETS)return new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}});try{const r=await env.ASSETS.fetch(new Request(new URL('/index.html',req.url),{method:'GET',headers:req.headers}));return r.ok?await enhanceNativeShell(r):new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}})}catch{return new Response('Kosif shell unavailable',{status:503,headers:{'cache-control':'no-store'}})}}
+async function assetIndexDiagnostic(req,env){if(!env?.ASSETS)return j({ok:false,error:'ASSETS_MISSING'},503);try{const r=await env.ASSETS.fetch(new Request(new URL('/index.html',req.url),{method:'GET',headers:req.headers}));const text=await r.clone().text();return j({ok:r.ok,status:r.status,contentType:r.headers.get('content-type'),bytes:text.length,hasKosifBoot:text.includes('id="kosif-boot"'),hasV36Continuity:text.includes('/v36-continuity.js?v=36.3'),hasLegacyWorkspace:text.includes('KOSIF_WORKSPACE_V36_2026_08_17')},r.ok?200:503)}catch{return j({ok:false,error:'ASSET_INDEX_UNAVAILABLE'},503)}}
+function tag(r){const h=new Headers(r.headers);h.set('x-kosif-release','native-v36-3-master-requirements-zai');h.set('x-content-type-options','nosniff');h.set('referrer-policy','strict-origin-when-cross-origin');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
 function j(body,status=200,headers={}){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json;charset=utf-8','cache-control':'no-store',...headers}})}
 async function sha256(s){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s||'')));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function safeEq(a,b){a=String(a||'');b=String(b||'');if(a.length!==b.length)return false;let x=0;for(let i=0;i<a.length;i++)x|=a.charCodeAt(i)^b.charCodeAt(i);return x===0}
@@ -38,19 +41,19 @@ async function authLogin(req,env){
   return j({ok:true,unlocked:true,expiresAt,verified:{}},200,{'set-cookie':`${AI_COOKIE}=${encodeURIComponent(t)}; Path=/; Max-Age=${AI_SESSION_TTL}; HttpOnly; Secure; SameSite=Strict`});
 }
 async function authLogout(req,env){const s=await session(req,env);if(s)await env.DATA.delete(s.key).catch(()=>{});return j({ok:true,unlocked:false},200,{'set-cookie':`${AI_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`})}
-function aiPath(p){return /^\/api\/(?:kosif\/)?(?:ai|gemini|openai|anthropic|claude|council)(?:\/|$)/i.test(p)}
-function normalProvider(v){v=String(v||'').toLowerCase();return v==='claude'?'anthropic':v}
-function providerFrom(path,b){const p=normalProvider(b?.provider);if(p)return p;if(/gemini/i.test(path))return'gemini';if(/openai/i.test(path))return'openai';if(/anthropic|claude/i.test(path))return'anthropic';return''}
+function aiPath(p){return /^\/api\/(?:kosif\/)?(?:ai|gemini|openai|anthropic|claude|zai|z-ai|zhipu|glm|council)(?:\/|$)/i.test(p)}
+function normalProvider(v){v=String(v||'').trim().toLowerCase();if(v==='claude')return'anthropic';if(isZaiProvider(v))return'zai';return v}
+function providerFrom(path,b){const p=normalProvider(b?.provider);if(p)return AI_PROVIDERS.has(p)?p:'';if(/gemini/i.test(path))return'gemini';if(/openai/i.test(path))return'openai';if(/anthropic|claude/i.test(path))return'anthropic';if(/z(?:\.?ai|-ai)|zhipu|glm/i.test(path))return'zai';return''}
 async function keyFingerprint(provider,model,key){return sha256([normalProvider(provider),String(model||'').trim(),String(key||'').trim()].join('\n'))}
 async function parseBody(req){try{return await req.clone().json()}catch{return null}}
 async function testAI(req,env,ctx){
   const s=await session(req,env);if(!s)return j({error:'AI_LOCKED',locked:true,message:'أدخل باسورد المالك أولًا.'},401);
   const b=await parseBody(req);if(!b)return j({error:'طلب اختبار غير صالح'},400);
   const provider=providerFrom('/api/kosif/ai',b),model=String(b.model||'').trim(),key=String(b.key||'').trim();
-  if(!provider||!model||!key)return j({error:'حدد المزود والنموذج ومفتاح API قبل الاختبار.'},400);
+  if(!provider||!model||!key)return j({error:'حدد مزودًا معتمدًا والنموذج ومفتاح API قبل الاختبار.'},400);
   const probeBody={provider,model,key,prompt:'اختبار اتصال Kosif. أجب بكلمة واحدة فقط: CONNECTED',json:false,maxTokens:64,agent:b.agent||{jurisdiction:'saudi',industry:'عام'}};
   const probe=new Request(new URL('/api/kosif/ai',req.url),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(probeBody)});
-  const upstream=await legacyWorker.fetch(probe,env,ctx);
+  const upstream=provider==='zai'?await handleZaiAI(probe,env):await legacyWorker.fetch(probe,env,ctx);
   let data={};try{data=await upstream.clone().json()}catch{try{data={text:await upstream.clone().text()}}catch{}}
   if(!upstream.ok)return j({error:data?.error||data?.message||'فشل اختبار مزود AI',provider,model},upstream.status>=400&&upstream.status<500?400:502);
   const testedAt=new Date().toISOString(),fp=await keyFingerprint(provider,model,key);
@@ -62,7 +65,7 @@ async function requireVerifiedAI(req,env){
   if(req.method!=='POST')return{response:j({error:'AI_METHOD_NOT_ALLOWED'},405)};
   const b=await parseBody(req);if(!b)return{response:j({error:'AI_REQUEST_INVALID'},400)};
   const provider=providerFrom(new URL(req.url).pathname,b),model=String(b.model||'').trim(),key=String(b.key||'').trim();
-  if(!provider||!model||!key)return{response:j({error:'AI_NOT_VERIFIED',message:'اختبر اتصال المفتاح أولًا.'},428)};
+  if(!provider||!model||!key)return{response:j({error:'AI_NOT_VERIFIED',message:'اختر مزودًا معتمدًا واختبر اتصال المفتاح أولًا.'},428)};
   const v=s.data?.verified?.[provider],fp=await keyFingerprint(provider,model,key);
   if(!v||!safeEq(v.fp,fp))return{response:j({error:'AI_NOT_VERIFIED',provider,model,message:'هذا المفتاح/النموذج لم يجتز اختبار الاتصال في جلسة المالك الحالية.'},428)};
   return{s,body:b,provider};
@@ -70,7 +73,7 @@ async function requireVerifiedAI(req,env){
 
 export default{async fetch(req,env,ctx){
   const u=new URL(req.url);
-  if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:BUILD_INFO.version,release:BUILD_INFO.release,buildId:BUILD_INFO.buildId,architecture:'worker-first-static-assets',aiGate:BUILD_INFO.aiGate});
+  if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:BUILD_INFO.version,release:BUILD_INFO.release,buildId:BUILD_INFO.buildId,architecture:'worker-first-static-assets',aiGate:BUILD_INFO.aiGate,aiProviders:BUILD_INFO.aiProviders});
   if(u.pathname==='/__version')return j(BUILD_INFO);
   if(u.pathname==='/__asset-index')return assetIndexDiagnostic(req,env);
   if(req.method==='GET'&&(u.pathname==='/'||u.pathname==='/index.html'))return nativeShell(req,env);
@@ -78,7 +81,7 @@ export default{async fetch(req,env,ctx){
   if(u.pathname==='/api/kosif/auth/login'&&req.method==='POST')return authLogin(req,env);
   if(u.pathname==='/api/kosif/auth/logout'&&req.method==='POST')return authLogout(req,env);
   if(u.pathname==='/api/kosif/ai/test'&&req.method==='POST')return testAI(req,env,ctx);
-  if(aiPath(u.pathname)){const gate=await requireVerifiedAI(req,env);if(gate.response)return gate.response;return legacyWorker.fetch(req,env,ctx)}
+  if(aiPath(u.pathname)){const gate=await requireVerifiedAI(req,env);if(gate.response)return gate.response;if(gate.provider==='zai')return handleZaiAI(req,env);return legacyWorker.fetch(req,env,ctx)}
   if(u.pathname==='/standards')return Response.redirect(new URL('/standards/',u),308);
   if(req.method==='GET'&&(E.has(u.pathname)||u.pathname.startsWith('/standards/'))){const r=await a(req,env);if(r)return tag(r);if(E.has(u.pathname))return tag(await legacyWorker.fetch(req,env,ctx));return new Response('Not found',{status:404})}
   if(u.pathname.startsWith('/api/')||req.method!=='GET')return legacyWorker.fetch(req,env,ctx);
