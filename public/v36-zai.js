@@ -21,8 +21,8 @@ function injectCouncilContext(){
   setTimeout(()=>{if(task.isConnected&&String(task.value||'').includes(COUNCIL_CTX_MARK))task.value=String(task.value).split(COUNCIL_CTX_MARK)[0].trimEnd()},0);
   return true;
 }
-function loadCouncilV2(){if(window.KosifCouncilV2||document.querySelector('script[data-kosif-council-v2="1"]'))return;const s=document.createElement('script');s.src='/v36-council-v2.js?v=36.4-council2';s.defer=true;s.dataset.kosifCouncilV2='1';document.head.appendChild(s)}
-function loadExecutor(){if(window.KosifExecutor||document.querySelector('script[data-kosif-executor="1"]'))return;const s=document.createElement('script');s.src='/v36-executor.js?v=36.4-executor1';s.defer=true;s.dataset.kosifExecutor='1';document.head.appendChild(s)}
+function loadCouncilV2(){if(window.KosifCouncilV2||document.querySelector('script[data-kosif-council-v2="1"]'))return;const s=document.createElement('script');s.src='/v36-council-v2.js?v=36.3-council2';s.defer=true;s.dataset.kosifCouncilV2='1';document.head.appendChild(s)}
+function loadExecutor(){if(window.KosifExecutor||document.querySelector('script[data-kosif-executor="1"]'))return;const s=document.createElement('script');s.src='/v36-executor.js?v=36.3-executor1';s.defer=true;s.dataset.kosifExecutor='1';document.head.appendChild(s)}
 function loadReviewerMedia(){if(window.KosifReviewerMedia||document.querySelector('script[data-kosif-reviewer-media="1"]'))return;const s=document.createElement('script');s.src='/v36-reviewer-media.js?v=36.4-media1';s.defer=true;s.dataset.kosifReviewerMedia='1';document.head.appendChild(s)}
 function loadVoiceGuide(){if(window.KosifVoiceGuide||document.querySelector('script[data-kosif-voice-guide="1"]'))return;const s=document.createElement('script');s.src='/v36-voice-guide.js?v=36.4-voice-guide';s.defer=true;s.dataset.kosifVoiceGuide='1';document.head.appendChild(s)}
 function openCouncilV2(){
