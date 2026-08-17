@@ -1,57 +1,52 @@
-name: Build Kosif v36.2.1 Attachment Hardening
+name: Kosif v36.2.1 Deep Audit
+
 on:
   push:
-    branches: [v36-2-library-motion-hardening]
-    paths: ['.github/workflows/deep-audit-v36.yml']
+    branches: [main, v36-2-library-motion-hardening]
+    paths:
+      - 'src/**'
+      - 'frontend/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'package.json'
+      - '.github/workflows/deep-audit-v36.yml'
   workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
+
 jobs:
-  build:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with: {ref: v36-2-library-motion-hardening, fetch-depth: 0}
-      - name: Checkout checksum-verified 46-chapter Mafateeh payload
-        uses: actions/checkout@v4
-        with:
-          repository: kosif199022-jpg/mafateeh-al-tharwa
-          ref: a7f86fee08819cba79e2ff04b7d7cd0d0edd4696
-          path: maf-source
-      - name: Install AST parser
-        run: npm install --no-save --package-lock=false acorn@8
-      - name: Reconstruct verified historical reader
-        working-directory: maf-source
-        run: node scripts/apply-modified-book.mjs
-      - name: Import b4 and apply hardening
-        run: |
-          set -euo pipefail
-          node scripts/import-mafateeh-book-v2.mjs maf-source/public/reader.html
-          node scripts/apply-v36-2-attachment-hardening.mjs
-          node scripts/post-hardening-gate-fix.mjs
-          rm -rf maf-source
-      - name: Run complete release gate
+      - name: Run complete syntax, payload and deep-audit gate
         run: npm run check
-      - name: Bundle and verify b4
+      - name: Bundle Worker
+        run: npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/kosif-v36-2-1-worker.mjs >/dev/null
+      - name: Verify release invariants
+        shell: bash
         run: |
           set -euo pipefail
-          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+          grep -q "native-v36-2-1-library-hardening" src/worker.js
+          grep -q "version:'v36.2.1'" src/worker.js
           test "$(find public/standards/data/b4 -maxdepth 1 -name '*.json' | wc -l)" -eq 46
           node - <<'NODE'
-          const fs=require('fs'),z=require('zlib'),l=JSON.parse(fs.readFileSync('public/standards/data/library.json','utf8')),b=l.find(x=>x.id==='b4');
-          if(!b||b.parts!==6||b.chapters!==46||b.words!==34700||b.professionalAuthority!==false)throw Error('b4 metadata gate');
-          const idx=z.gunzipSync(fs.readFileSync('public/standards/data/search-index.json.gz')).toString();if(/"book"\s*:\s*"b4"/.test(idx))throw Error('b4 leaked into professional index');
-          const c=JSON.parse(fs.readFileSync('public/standards/data/b4/1.json','utf8'));if(!c.study?.key||!c.study?.idea||!c.study?.application||!c.study?.weeklyTask||!c.study?.questions?.length)throw Error('study layer incomplete');
-          console.log('B4_GATE_OK',b.id,b.parts,b.chapters,b.words,c.part,c.title,c.body.length,c.study.questions.length);
+          const fs=require('fs'),z=require('zlib');
+          const lib=JSON.parse(fs.readFileSync('public/standards/data/library.json','utf8'));
+          const b4=lib.find(x=>x.id==='b4');
+          if(lib.length!==4||!b4||b4.parts!==6||b4.chapters!==46||b4.words!==34700||b4.professionalAuthority!==false)throw Error('four-book library invariant failed');
+          const index=z.gunzipSync(fs.readFileSync('public/standards/data/search-index.json.gz')).toString();
+          if(/"book"\s*:\s*"b4"/.test(index))throw Error('development book leaked into professional index');
+          const nums=fs.readdirSync('public/standards/data/b4').filter(x=>/^\d+\.json$/.test(x)).map(x=>+x.replace('.json','')).sort((a,b)=>a-b);
+          if(nums.length!==46||!nums.every((n,i)=>n===i+1))throw Error('b4 chapter sequence failed');
+          console.log('V36_2_1_INVARIANTS_OK',b4);
           NODE
-      - name: Commit verified changes
-        run: |
-          set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add frontend public src scripts package.json
-          git status --short
-          git diff --cached --quiet && exit 0
-          git commit -m 'Complete v36.2.1 library integrity and motion hardening'
-          git push origin HEAD:v36-2-library-motion-hardening
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-v36-2-1-deep-audit
+          path: /tmp/kosif-v36-deep-audit.md
+          if-no-files-found: error
