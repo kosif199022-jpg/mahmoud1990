@@ -22,7 +22,7 @@ ok('AI Gate has no whole-document subtree observer',!/observe\(document\.documen
 ok('AI Gate still fails closed before owner auth',/readOnly=true/.test(gate)&&/beforeinput/.test(gate)&&/requireUnlock/.test(gate));
 ok('reviewer multimedia remains local-first with integrity metadata',/indexedDB/.test(reviewer)&&/localOnly:true/.test(reviewer)&&/rawSentToAI:false/.test(reviewer)&&/SHA-256/.test(reviewer));
 ok('voice guide exists as an actual runtime capability',/window\.KosifVoiceGuide/.test(voice)&&/function nextStep\(\)/.test(voice)&&/SpeechRecognition|webkitSpeechRecognition/.test(voice));
-ok('runtime wires reviewer media instead of leaving it as dead code',/function loadReviewerMedia\(\)/.test(zai)&&/\/v36-reviewer-media\.js\?v=36\.4-media1/.test(zai)&&/loadReviewerMedia\(\)/.test(zai));
+ok('runtime wires reviewer media independently of view timing',/function loadReviewerMedia\(\)/.test(zai)&&/\/v36-reviewer-media\.js\?v=36\.3-media1/.test(zai)&&/loadReviewerMedia\(\)/.test(zai));
 ok('runtime wires historical voice guide instead of leaving it as dead code',/function loadVoiceGuide\(\)/.test(zai)&&/\/v36-voice-guide\.js\?v=36\.4-voice-guide/.test(zai)&&/loadVoiceGuide\(\)/.test(zai));
 ok('historical Council loader identifier remains stable',/\/v36-council-v2\.js\?v=36\.3-council2/.test(zai));
 ok('app SW cache generation is v36.4',/const C='kosif-native-v36-4-app'/.test(sw));
