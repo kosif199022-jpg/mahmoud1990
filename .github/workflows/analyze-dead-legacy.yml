@@ -9,6 +9,7 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - run: npm install --no-save --package-lock=false acorn@8 acorn-walk@8
