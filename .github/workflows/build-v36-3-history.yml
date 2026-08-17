@@ -41,6 +41,8 @@ jobs:
           grep -q '/v36-history-continuity.js?v=36.3' public/index.html
           grep -q "version:'v36.3'" src/worker.js
           grep -q 'native-v36-3-history-continuity' src/worker.js
+          grep -q 'AI_EVIDENCE_SAFETY' src/worker.js
+          grep -q 'prompt injection' src/worker.js
           grep -q 'kosif-native-v36-3-app' public/sw.js
       - name: Install browser
         run: |
@@ -78,4 +80,4 @@ jobs:
             kosif-v36-3-mobile.png
             /tmp/wrangler-v363.log
           if-no-files-found: ignore
-# diagnostic rerun 2
+# diagnostic rerun 3
