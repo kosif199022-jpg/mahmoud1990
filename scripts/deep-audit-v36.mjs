@@ -4,12 +4,15 @@ import path from 'node:path';
 const root=process.cwd();
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
 const json=p=>{try{return JSON.parse(read(p))}catch{return null}};
-const html=read('frontend/index.html'),pub=read('public/index.html'),workspace=read('src/kosif-workspace.js'),worker=read('src/worker.js'),legacy=read('src/legacy-worker.js'),sw=read('public/sw.js'),stdHtml=read('public/standards/index.html'),stdPro=read('public/standards/reader-pro-v36.js'),stdSw=read('public/standards/sw.js'),gov=read('public/v36-governance.js'),gate=read('public/v36-ai-gate.js'),features=read('public/v36-features.js'),outputs=read('public/v36-outputs.js'),readiness=read('public/v36-standards-readiness.js');
-const all=[html,pub,workspace,worker,legacy,sw,stdHtml,stdPro,stdSw,gov,gate,features,outputs,readiness].join('\n');
+const src={
+ html:read('frontend/index.html'),pub:read('public/index.html'),workspace:read('src/kosif-workspace.js'),worker:read('src/worker.js'),legacy:read('src/legacy-worker.js'),sw:read('public/sw.js'),stdHtml:read('public/standards/index.html'),stdPro:read('public/standards/reader-pro-v36.js'),stdSw:read('public/standards/sw.js'),gov:read('public/v36-governance.js'),gate:read('public/v36-ai-gate.js'),features:read('public/v36-features.js'),outputs:read('public/v36-outputs.js'),readiness:read('public/v36-standards-readiness.js')
+};
+const all=Object.values(src).join('\n');
 function walk(dir,out=[]){if(!fs.existsSync(dir))return out;for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(e.name==='.git'||e.name==='node_modules')continue;const p=path.join(dir,e.name);e.isDirectory()?walk(p,out):out.push(p)}return out}
 const files=walk(root).map(p=>path.relative(root,p)).sort();
-const ids=[...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]),dup=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];
-const refs=[...html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)=["']([^"']+)["']/gi)].map(m=>m[1]).filter(x=>x.startsWith('/'));
+const ids=[...src.html.matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]);
+const dup=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];
+const refs=[...src.html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)=["']([^"']+)["']/gi)].map(m=>m[1]).filter(x=>x.startsWith('/'));
 const missing=[];for(const u of refs){const clean=u.split('?')[0].split('#')[0];if(clean==='/'||clean.startsWith('/api/'))continue;if(!fs.existsSync('public'+clean))missing.push(clean)}
 const legacyRefs=[...new Set(refs.map(x=>x.split('?')[0]).filter(x=>x.startsWith('/legacy/')))];
 const libRaw=json('public/standards/data/library.json')||[],lib=Array.isArray(libRaw)?libRaw:(libRaw.books||[]);
@@ -29,45 +32,48 @@ const checks={
  'Misstatements / ISA 450':/ISA 450|misstatement|التحريفات/i.test(all),
  'Adjusted TB + CSV':/adj-tb|الميزان المعدّل|export-adj/i.test(all),
  'Word / report outputs':/export-word|msword|Word/i.test(all),
- 'Audit Trail + human decisions':/Audit Trail|HUMAN_DECISION|Accepted|Rejected/i.test(gov),
- 'Multimodal AI evidence':/inline_data|inlineData|input_file|document.*base64|attachmentsUsed/i.test(workspace),
- 'Council independent providers':/gemini[\s\S]*openai[\s\S]*anthropic/i.test(gov),
- 'Council provider tests':/councilOK|\/api\/kosif\/ai\/test|c-test/.test(gov),
- 'Owner password gate':/AI_GATE_HASH|kosif_ai_session|HttpOnly; Secure; SameSite=Strict/.test(worker),
- 'Server verified-key fingerprint':/keyFingerprint|AI_NOT_VERIFIED|verified-key/.test(worker),
- 'Dedicated connection test endpoint':/\/api\/kosif\/ai\/test/.test(worker)&&/testAI\(/.test(worker),
- 'API key fields hard locked before owner auth':/KEY_FIELDS[\s\S]*readOnly=true[\s\S]*beforeinput/.test(gate),
- 'No key-presence Active heuristic':!html.includes('AI Active ·')&&!html.includes("hasKey:()=>!!apiKey()"),
- 'Connected status requires verification':/aiVerified\(st\.provider,st\.model,k\)/.test(html)&&/AI متصل/.test(html),
- 'Reader TTS':/speechSynthesis|SpeechSynthesisUtterance/.test(stdPro),
- 'Reader word highlighting':/Highlight|kosif-speech|onboundary/.test(stdPro),
- 'Reader Media Session':/mediaSession|MediaMetadata/.test(stdPro),
- 'Reader Wake Lock':/wakeLock/.test(stdPro),
- 'Reader auto-scroll 1–10':/requestAnimationFrame/.test(stdPro)&&/min="1" max="10"/.test(stdPro),
- 'Reader stops auto-scroll on touch':/touchstart[\s\S]*autoOff/.test(stdPro),
- 'Reader sleep timer':/setSleep|sleepId/.test(stdPro),
- 'Reader standards code jump':/jumpCode|IAS 16|IFRS 9/.test(stdPro),
- 'Reader chapter/journal export':/exportChapter/.test(stdPro)&&/exportJournalPro/.test(stdPro),
- 'Reader streak / continue support':/streak\(|markDay/.test(stdPro)&&/last/.test(stdHtml),
- 'Standards pro runtime wired':/reader-pro-v36\.js\?v=36\.1/.test(stdHtml)&&/reader-pro-v36\.js/.test(stdSw),
+ 'Audit Trail + human decisions':/Audit Trail|HUMAN_DECISION|Accepted|Rejected/i.test(src.gov),
+ 'Multimodal AI evidence':/inline_data|inlineData|input_file|document.*base64|attachmentsUsed/i.test(src.workspace),
+ 'Council independent providers':/gemini[\s\S]*openai[\s\S]*anthropic/i.test(src.gov),
+ 'Council provider tests':/councilOK|\/api\/kosif\/ai\/test|c-test/.test(src.gov),
+ 'Owner password gate':/AI_GATE_HASH|kosif_ai_session|HttpOnly; Secure; SameSite=Strict/.test(src.worker),
+ 'Server verified-key fingerprint':/keyFingerprint|AI_NOT_VERIFIED|verified-key/.test(src.worker),
+ 'Dedicated connection test endpoint':/\/api\/kosif\/ai\/test/.test(src.worker)&&/testAI\(/.test(src.worker),
+ 'API key fields hard locked before owner auth':/KEY_FIELDS[\s\S]*readOnly=true[\s\S]*beforeinput/.test(src.gate),
+ 'No key-presence Active heuristic':!src.html.includes('AI Active ·')&&!src.html.includes("hasKey:()=>!!apiKey()"),
+ 'Connected status requires verification':/aiVerified\(st\.provider,st\.model,k\)/.test(src.html)&&/AI متصل/.test(src.html),
+ 'Reader TTS':/speechSynthesis|SpeechSynthesisUtterance/.test(src.stdPro),
+ 'Reader word highlighting':/Highlight|kosif-speech|onboundary/.test(src.stdPro),
+ 'Reader Media Session':/mediaSession|MediaMetadata/.test(src.stdPro),
+ 'Reader Wake Lock':/wakeLock/.test(src.stdPro),
+ 'Reader auto-scroll 1–10':/requestAnimationFrame/.test(src.stdPro)&&/min="1" max="10"/.test(src.stdPro),
+ 'Reader stops auto-scroll on touch':/touchstart[\s\S]*autoOff/.test(src.stdPro),
+ 'Reader sleep timer':/setSleep|sleepId/.test(src.stdPro),
+ 'Reader standards code jump':/jumpCode|IAS 16|IFRS 9/.test(src.stdPro),
+ 'Reader chapter/journal export':/exportChapter/.test(src.stdPro)&&/exportJournalPro/.test(src.stdPro),
+ 'Reader streak / continue support':/streak\(|markDay/.test(src.stdPro)&&/last/.test(src.stdHtml),
+ 'Standards pro runtime wired':/reader-pro-v36\.js\?v=36\.1/.test(src.stdHtml)&&/reader-pro-v36\.js/.test(src.stdSw),
  'Standards metadata matches packaged chapters':metadataConsistent,
- 'SOCPA/latest priority policy':/SOCPA|الهيئة السعودية|أولوية/.test(all),
- 'IFRS 18/19 readiness':/IFRS 18/.test(readiness)&&/IFRS 19/.test(readiness),
- 'Current GPT default':/gpt-5\.6/.test(workspace),
- 'Current Gemini default':/gemini-3\.6-flash/.test(workspace),
+ 'SOCPA-first / official-latest priority policy':/SOCPA|الهيئة السعودية/.test(src.readiness)&&/المصدر الرسمي الأحدث|Official post-book updates override|قاعدة الحداثة/.test(src.readiness),
+ 'IFRS 18/19/20 period-aware readiness':/IFRS 18/.test(src.readiness)&&/IFRS 19/.test(src.readiness)&&/IFRS 20/.test(src.readiness)&&/2029/.test(src.readiness),
+ 'Source freshness date is explicit':/VERIFIED_AS_OF=['"]2026-08-17['"]/.test(src.readiness)&&/sourceVerifiedAsOf/.test(src.readiness),
+ 'Post-2025 Saudi update layer':/socpaUpdate2026/.test(src.readiness)&&/4076/.test(src.readiness),
+ 'International vs Saudi audit distinction':/iaasbHandbook/.test(src.readiness)&&/latest international|مرجع دولي/.test(src.readiness)&&/الاعتماد المحلي/.test(src.readiness),
+ 'Current GPT default':/gpt-5\.6/.test(src.workspace),
+ 'Current Gemini default':/gemini-3\.6-flash/.test(src.workspace),
 };
 const architecture={
  'No missing static refs':missing.length===0,
  'No duplicate static IDs':dup.length===0,
  'Only approved recovered legacy core':legacyRefs.length===1&&legacyRefs[0]==='/legacy/core-v36.js',
- 'No Google Fonts dependency':!/fonts\.googleapis\.com|fonts\.gstatic\.com/i.test(html),
+ 'No Google Fonts dependency':!/fonts\.googleapis\.com|fonts\.gstatic\.com/i.test(src.html),
  'No global fetch monkeypatch':!/window\.fetch\s*=/.test(all),
- 'Main SW excludes APIs':/pathname\.startsWith\('\/api\/'\)/.test(sw),
- 'Standards SW scoped to standards':/pathname\.startsWith\('\/standards\/'\)/.test(stdSw),
- 'Public company writes authenticated':/writeTokenHash|canWritePublic|authorization/i.test(workspace),
+ 'Main SW excludes APIs':/pathname\.startsWith\('\/api\/'\)/.test(src.sw),
+ 'Standards SW scoped to standards':/pathname\.startsWith\('\/standards\/'\)/.test(src.stdSw),
+ 'Public company writes authenticated':/writeTokenHash|canWritePublic|authorization/i.test(src.workspace),
  'Private company encryption retained':/AES-GCM|AES_GCM|crypto\.subtle/i.test(all),
 };
 const critical=[...Object.entries(checks),...Object.entries(architecture)].filter(([,v])=>!v).map(([k])=>k);
-const lines=['# Kosif v36.1 Deep Audit','',`Files scanned: **${files.length}**`,`Frontend bytes: **${Buffer.byteLength(html)}**`,`Duplicate IDs: **${dup.length}**`,`Missing referenced static assets: **${missing.length}**`,'', '## Standards data inventory',...lib.map(x=>`- ${x.id}: metadata chapters=${x.chapters??'—'} words=${x.words??'—'} · packaged chapter files=${bookCounts[x.id]??0}`),'', '## Capability inventory',...Object.entries(checks).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'','## Architecture / security gates',...Object.entries(architecture).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'',`## Critical failures: ${critical.length}`,...critical.map(x=>'- '+x),'','## Missing refs',...missing.map(x=>'- '+x)];
+const lines=['# Kosif v36.1 Deep Audit','',`Files scanned: **${files.length}**`,`Frontend bytes: **${Buffer.byteLength(src.html)}**`,`Duplicate IDs: **${dup.length}**`,`Missing referenced static assets: **${missing.length}**`,'','## Standards data inventory',...lib.map(x=>`- ${x.id}: metadata chapters=${x.chapters??'—'} words=${x.words??'—'} · packaged chapter files=${bookCounts[x.id]??0}`),'','## Capability inventory',...Object.entries(checks).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'','## Architecture / security gates',...Object.entries(architecture).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'',`## Critical failures: ${critical.length}`,...critical.map(x=>'- '+x),'','## Missing refs',...missing.map(x=>'- '+x)];
 fs.writeFileSync('/tmp/kosif-v36-deep-audit.md',lines.join('\n'));console.log(lines.join('\n'));
 if(critical.length)process.exitCode=2;
