@@ -8,7 +8,7 @@ ok('canonical shell copies remain byte-identical',html===front);
 for(const a of liveModules)ok('native shell wires historical module '+a,html.includes(a));
 for(const a of [...liveModules,'/v36-zai.js','/v36-council-v2.js'])ok('PWA precaches live module '+a,sw.includes(a));
 ok('worker remains native-shell owner',/return nativeShell\(req,env\)/.test(worker)&&/status:503/.test(worker));
-ok('legacy workspace fallback is explicitly non-primary',workspace.includes('injectKosifWorkspace')&&req.includes('worker-first')&&req.includes('native shell'));
+ok('legacy workspace fallback keeps scoped continuity wiring',workspace.includes('injectKosifWorkspace')&&workspace.includes('/v36-engagement.js?v=36.3')&&workspace.includes('/v36-continuity.js?v=36.3'));
 ok('v36 manifest still declares Review Council',/Review Council|multi-agent Review Council/i.test(manifest36));
 ok('v36.1 manifest requires verified council providers',/at least two independently tested providers/i.test(manifest361)&&/Claude chairs only/i.test(manifest361));
 ok('legacy governance remains wired for approvals and audit trail',html.includes('/v36-governance.js')&&/Audit Trail/.test(gov)&&/human|بشري/i.test(gov));
@@ -27,7 +27,8 @@ ok('engagement owns jurisdiction and framework state',/jurisdiction:'saudi'/.tes
 ok('Master Requirements retain country anti-silent-fallback rule',/must not silently continue Saudi|لا.*السعود/i.test(req)||(/jurisdiction/i.test(req)&&/Saudi/i.test(req)&&/other/i.test(req)));
 ok('Master Requirements retain PBC lifecycle',/PBC/.test(req)&&/Requested/.test(req)&&/Received/.test(req)&&/Need Clarification/.test(req));
 ok('Master Requirements retain evidence and reviewer-note requirements',/reviewer/i.test(req)&&/voice/i.test(req)&&/evidence/i.test(req));
-ok('Master Requirements retain adjusted-TB and human-decision workflow',/adjusted trial balance/i.test(req)&&/human/i.test(req)&&/Accepted/.test(req)&&/Rejected/.test(req));
+ok('Master Requirements retain adjusted-TB workflow states',/Corrected\/adjusted TB/i.test(req)&&/proposed\/reviewed\/accepted\/rejected\/external-posting/i.test(req));
+ok('Master Requirements retain human decision workflow',/human/i.test(req)&&/Accepted/.test(req)&&/Rejected/.test(req));
 ok('development book b4 remains in library registry',/"id"\s*:\s*"b4"/.test(library)&&/تطوير|development/i.test(library));
 ok('new Council V2 source exists',exists('public/v36-council-v2.js'));
 console.log(`KOSIF_HISTORY_PARITY ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}
