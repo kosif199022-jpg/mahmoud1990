@@ -14,6 +14,35 @@ function normBookText(s=''){
   return String(s||'').normalize('NFKC').toLowerCase().replace(/[إأآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\u0600-\u06ffa-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
 }
 
+/* normBookText folds characters and collapses punctuation runs, so an offset found in
+ * the normalized string does NOT address the same character in the source. Slicing the
+ * source with a normalized offset drifts by however much the text shrank -- on a
+ * standards page dense with Latin references and punctuation that is easily >1500
+ * characters, far enough to push the matched term out of the snippet window entirely
+ * and hand the model an excerpt that does not contain the term it matched on.
+ *
+ * This returns the same normalized string plus `idx`, mapping each normalized position
+ * back to its offset in the NFKC source, so snippets stay anchored to the real match.
+ * Slice against the returned `src`, not the original argument: NFKC can itself change
+ * length, so these offsets are only valid against the normalized source. */
+function normBookTextMapped(s=''){
+  const src=String(s||'').normalize('NFKC');
+  const chars=[],idx=[];
+  for(let i=0;i<src.length;i++){
+    let c=src[i].toLowerCase();
+    if(c==='\u0625'||c==='\u0623'||c==='\u0622')c='\u0627';
+    else if(c==='\u0649')c='\u064a';
+    else if(c==='\u0629')c='\u0647';
+    if(!/[\u0600-\u06ffa-z0-9]/.test(c)){
+      if(!chars.length||chars[chars.length-1]===' ')continue;
+      chars.push(' ');idx.push(i);continue;
+    }
+    chars.push(c);idx.push(i);
+  }
+  while(chars.length&&chars[chars.length-1]===' '){chars.pop();idx.pop()}
+  return{src,n:chars.join(''),idx};
+}
+
 async function booksContext(query,env){
   if(!env?.DATA)return '';
   const q=normBookText(query),terms=[...new Set(q.split(' ').filter(x=>x.length>1))].slice(0,16);
@@ -37,9 +66,13 @@ async function booksContext(query,env){
         for(const t of terms)if(nt.includes(t))score+=t.length>5?4:2;
         if(q.length>5&&nt.includes(q))score+=18;
         if(!score)continue;
-        const low=normBookText(text);let pos=0;
-        for(const t of terms){const z=low.indexOf(t);if(z>=0){pos=z;break}}
-        hits.push({score,title:b.title,page:Number(p.page)||0,heading:p.title||'',snippet:text.slice(Math.max(0,pos-160),Math.max(0,pos-160)+760)});
+        /* Match in normalized space, then map the hit back to a source offset before
+         * slicing — see normBookTextMapped. Falls back to the start of the page only
+         * when no term is located, which is the same behaviour as before. */
+        const mapped=normBookTextMapped(text);let pos=0;
+        for(const t of terms){const z=mapped.n.indexOf(t);if(z>=0){pos=mapped.idx[z]??0;break}}
+        const from=Math.max(0,pos-160);
+        hits.push({score,title:b.title,page:Number(p.page)||0,heading:p.title||'',snippet:mapped.src.slice(from,from+760)});
       }
       if(reads>=70)break;
     }
@@ -104,7 +137,14 @@ export async function handleZaiAI(req,env){
   const contents=normalizeContents(b),task=contentsText(contents);
   if(!contents.length||!task)return json({error:'المهمة فارغة',provider:'zai'},400);
   const agent=b.agent||{},jurisdiction=agent.jurisdiction==='international'?'international':'saudi';
-  const isProbe=/اختبار اتصال Kosif|CONNECTED|أجب بكلمة واحدة: متصل/i.test(task);
+  /* Trust the caller's explicit flag. The previous text heuristic matched a bare
+   * "CONNECTED" anywhere in the prompt, so a genuine audit question mentioning
+   * "connected parties", or one with a pasted English status log, was treated as a
+   * connection test: all standards/professional/books/official-source context was
+   * skipped and the auditor system prompt was replaced with "you are testing a
+   * connection". The text fallback is kept only for the exact legacy probe, anchored to
+   * the start of the prompt so ordinary text cannot trigger it. */
+  const isProbe=b.probe===true||/^اختبار اتصال Kosif\b/.test(task.trim());
   let standardsRefs='',booksRefs='',sources=null;
   if(!isProbe){
     const [s1,s2,bk,src]=await Promise.all([

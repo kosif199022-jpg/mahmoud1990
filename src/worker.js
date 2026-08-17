@@ -52,7 +52,11 @@ async function testAI(req,env,ctx){
   const b=await parseBody(req);if(!b)return j({error:'طلب اختبار غير صالح'},400);
   const provider=providerFrom('/api/kosif/ai',b),model=String(b.model||'').trim(),key=String(b.key||'').trim();
   if(!provider||!model||!key)return j({error:'حدد مزودًا معتمدًا والنموذج ومفتاح API قبل الاختبار.'},400);
-  const probeBody={provider,model,key,prompt:'اختبار اتصال Kosif. أجب بكلمة واحدة فقط: CONNECTED',json:false,maxTokens:64,agent:b.agent||{jurisdiction:'saudi',industry:'عام'}};
+  /* `probe:true` is authoritative. A provider must not sniff the prompt text to decide
+   * whether a request is a connection test — a real audit question that merely contains
+   * the word "connected" would otherwise be answered with no standards context and no
+   * auditor role. */
+  const probeBody={provider,model,key,probe:true,prompt:'اختبار اتصال Kosif. أجب بكلمة واحدة فقط: CONNECTED',json:false,maxTokens:64,agent:b.agent||{jurisdiction:'saudi',industry:'عام'}};
   const probe=new Request(new URL('/api/kosif/ai',req.url),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(probeBody)});
   const upstream=provider==='zai'?await handleZaiAI(probe,env):await legacyWorker.fetch(probe,env,ctx);
   let data={};try{data=await upstream.clone().json()}catch{try{data={text:await upstream.clone().text()}}catch{}}

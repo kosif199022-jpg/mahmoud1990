@@ -6,7 +6,7 @@ const root=process.cwd();
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
 const json=p=>{try{return JSON.parse(read(p))}catch{return null}};
 const src={
- html:read('frontend/index.html'),pub:read('public/index.html'),workspace:read('src/kosif-workspace.js'),worker:read('src/worker.js'),legacy:read('src/legacy-worker.js'),sw:read('public/sw.js'),stdHtml:read('public/standards/index.html'),stdPro:read('public/standards/reader-pro-v36.js'),stdSw:read('public/standards/sw.js'),gov:read('public/v36-governance.js'),gate:read('public/v36-ai-gate.js'),features:read('public/v36-features.js'),outputs:read('public/v36-outputs.js'),readiness:read('public/v36-standards-readiness.js'),ops:read('public/v36-operations.js'),motion:read('public/v36-motion.css'),pkg:read('package.json'),checker:read('scripts/check-all.mjs')
+ html:read('frontend/index.html'),pub:read('public/index.html'),workspace:read('src/kosif-workspace.js'),worker:read('src/worker.js'),legacy:read('src/legacy-worker.js'),sw:read('public/sw.js'),stdHtml:read('public/standards/index.html'),stdPro:read('public/standards/reader-pro-v36.js'),stdSw:read('public/standards/sw.js'),gov:read('public/v36-governance.js'),gate:read('public/v36-ai-gate.js'),features:read('public/v36-features.js'),outputs:read('public/v36-outputs.js'),readiness:read('public/v36-standards-readiness.js'),ops:read('public/v36-operations.js'),motion:read('public/v36-motion.css'),pkg:read('package.json'),checker:read('scripts/check-all.mjs'),zai:read('src/zai-provider.js')
 };
 const all=Object.values(src).join('\n');
 function walk(dir,out=[]){if(!fs.existsSync(dir))return out;for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(e.name==='.git'||e.name==='node_modules')continue;const p=path.join(dir,e.name);e.isDirectory()?walk(p,out):out.push(p)}return out}
@@ -86,6 +86,23 @@ const architecture={
  'Standards SW scoped to standards':/pathname\.startsWith\('\/standards\/'\)/.test(src.stdSw),
  'Public company writes authenticated':/writeTokenHash|canWritePublic|authorization/i.test(src.workspace),
  'Private company encryption retained':/AES-GCM|AES_GCM|crypto\.subtle/i.test(all),
+ /* A connection probe skips all standards/professional context and swaps in a
+  * "you are testing a connection" system prompt. Deciding that from the prompt text
+  * meant a real audit question containing "connected" silently lost its grounding and
+  * its auditor role, so the probe path must be driven by the caller's explicit flag. */
+ 'AI probe detection is flag-driven, not text-sniffed':
+   !src.zai||(/b\.probe===true/.test(src.zai)&&!/\/[^\n]*\bCONNECTED\b[^\n]*\/i\.test\(task\)/.test(src.zai)),
+ /* Anchored to the probeBody literal, not the file: a bare /probe:true/ also matches the
+  * explanatory comment above it, so the gate would pass even with the flag deleted. */
+ 'Worker marks its own connection probe explicitly':
+   !src.zai||/probeBody\s*=\s*\{[^}]*\bprobe:\s*true\b/.test(src.worker),
+ /* Snippet offsets are found in normalized text but sliced from the source; without an
+  * index map they drift by however much normalization shrank the page, which can push
+  * the matched term out of the excerpt handed to the model. Require the mapped offset to
+  * actually be *used* at the slice site, not merely defined somewhere in the file. */
+ 'Evidence snippets use index-mapped offsets':
+   [src.zai,src.workspace].filter(Boolean).every(s=>
+     /function normBookTextMapped/.test(s)&&/mapped\.idx\[z\]/.test(s)&&/mapped\.src\.slice\(/.test(s)),
 };
 const critical=[...Object.entries(checks),...Object.entries(architecture)].filter(([,v])=>!v).map(([k])=>k);
 const lines=['# Kosif v36.3 Deep Audit','',`Files scanned: **${files.length}**`,`Frontend bytes: **${Buffer.byteLength(src.html)}**`,`Duplicate IDs: **${dup.length}**`,`Missing referenced static assets: **${missing.length}**`,'','## Standards data inventory',...lib.map(x=>`- ${x.id}: metadata chapters=${x.chapters??'—'} words=${x.words??'—'} · packaged chapter files=${bookCounts[x.id]??0}`),'','## Capability inventory',...Object.entries(checks).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'','## Architecture / security gates',...Object.entries(architecture).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'',`## Critical failures: ${critical.length}`,...critical.map(x=>'- '+x),'','## Missing refs',...missing.map(x=>'- '+x)];

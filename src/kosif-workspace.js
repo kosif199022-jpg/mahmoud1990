@@ -9,10 +9,32 @@ function cleanText(s=''){return String(s).replace(/<script[\s\S]*?<\/script>/gi,
 function titleFromHtml(h=''){return cleanText((String(h).match(/<title[^>]*>([\s\S]*?)<\/title>/i)||[])[1]||'').slice(0,220)}
 
 function normBookText(s=''){return String(s||'').normalize('NFKC').toLowerCase().replace(/[إأآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\u0600-\u06ffa-z0-9]+/g,' ').replace(/\s+/g,' ').trim()}
+/* Terms are normalized (hamza/ta-marbuta folded) but were matched against the raw
+ * text, so a folded term never matched and the snippet silently fell back to the start
+ * of the page. Match in normalized space and map the hit back to a real source offset.
+ * Slice against the returned `src`: NFKC can change length, so offsets are only valid
+ * against the normalized source. */
+function normBookTextMapped(s=''){
+  const src=String(s||'').normalize('NFKC');
+  const chars=[],idx=[];
+  for(let i=0;i<src.length;i++){
+    let c=src[i].toLowerCase();
+    if(c==='\u0625'||c==='\u0623'||c==='\u0622')c='\u0627';
+    else if(c==='\u0649')c='\u064a';
+    else if(c==='\u0629')c='\u0647';
+    if(!/[\u0600-\u06ffa-z0-9]/.test(c)){
+      if(!chars.length||chars[chars.length-1]===' ')continue;
+      chars.push(' ');idx.push(i);continue;
+    }
+    chars.push(c);idx.push(i);
+  }
+  while(chars.length&&chars[chars.length-1]===' '){chars.pop();idx.pop()}
+  return{src,n:chars.join(''),idx};
+}
 async function booksContext(query,env){
   if(!env?.DATA)return '';const q=normBookText(query),terms=[...new Set(q.split(' ').filter(x=>x.length>1))].slice(0,18);if(!terms.length)return '';
   const list=await env.DATA.list({prefix:'library:meta:',limit:1000}),books=[];for(const k of list.keys||[]){const m=await env.DATA.get(k.name,'json');if(!m||m.state!=='ready'||!m.intelReady)continue;const id=String(m.id||k.name.slice('library:meta:'.length)),im=await env.DATA.get('library:intelmeta:'+id,'json');if(!im||!Array.isArray(im.batches)||!im.batches.length)continue;books.push({id,title:im.title||m.bookTitle||m.name||'كتاب',meta:im})}
-  const hits=[];let reads=0;for(const b of books.slice(0,12)){for(const bt of b.meta.batches||[]){if(reads++>=100)break;const pages=await env.DATA.get(bt.key,'json');for(const p of pages||[]){const text=String(p.text||'').replace(/\s+/g,' ').trim();if(!text)continue;const nt=normBookText((p.title||'')+' '+text);let score=0;for(const t of terms)if(nt.includes(t))score+=t.length>5?4:2;if(q.length>5&&nt.includes(q))score+=18;if(!score)continue;const low=text.toLowerCase();let pos=0;for(const t of terms){const z=low.indexOf(t.toLowerCase());if(z>=0){pos=z;break}}hits.push({score,title:b.title,page:Number(p.page)||0,heading:p.title||'',snippet:text.slice(Math.max(0,pos-180),Math.max(0,pos-180)+820)})}if(reads>=100)break}if(reads>=100)break}
+  const hits=[];let reads=0;for(const b of books.slice(0,12)){for(const bt of b.meta.batches||[]){if(reads++>=100)break;const pages=await env.DATA.get(bt.key,'json');for(const p of pages||[]){const text=String(p.text||'').replace(/\s+/g,' ').trim();if(!text)continue;const nt=normBookText((p.title||'')+' '+text);let score=0;for(const t of terms)if(nt.includes(t))score+=t.length>5?4:2;if(q.length>5&&nt.includes(q))score+=18;if(!score)continue;const mapped=normBookTextMapped(text);let pos=0;for(const t of terms){const z=mapped.n.indexOf(t);if(z>=0){pos=mapped.idx[z]??0;break}}const from=Math.max(0,pos-180);hits.push({score,title:b.title,page:Number(p.page)||0,heading:p.title||'',snippet:mapped.src.slice(from,from+820)})}if(reads>=100)break}if(reads>=100)break}
   hits.sort((a,b)=>b.score-a.score||a.page-b.page);return hits.slice(0,10).map((h,i)=>'[B'+(i+1)+'] '+h.title+(h.page?' — ص '+h.page:'')+(h.heading?' — '+h.heading:'')+'\n'+h.snippet).join('\n\n')
 }
 const OFFICIAL={
