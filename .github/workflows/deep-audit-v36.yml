@@ -13,14 +13,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: v36-2-library-motion-hardening, fetch-depth: 0}
+      - name: Checkout historical 46-chapter Mafateeh payload
+        uses: actions/checkout@v4
+        with:
+          repository: kosif199022-jpg/mafateeh-al-tharwa
+          ref: 9d9cdd4784995a8141de4a05a113a9c846769554
+          path: maf-source
       - name: Install AST parser
         run: npm install --no-save --package-lock=false acorn@8
-      - name: Fetch verified 46-chapter Mafateeh source
-        run: curl -fsSL --retry 3 https://raw.githubusercontent.com/kosif199022-jpg/mafateeh-al-tharwa/9d9cdd4784995a8141de4a05a113a9c846769554/public/reader.html -o /tmp/mafateeh-reader.html
+      - name: Reconstruct verified historical reader
+        working-directory: maf-source
+        run: node scripts/apply-modified-book.mjs
       - name: Import b4 and apply hardening
         run: |
           set -euo pipefail
-          node scripts/import-mafateeh-book-v2.mjs /tmp/mafateeh-reader.html
+          node scripts/import-mafateeh-book-v2.mjs maf-source/public/reader.html
           node scripts/apply-v36-2-attachment-hardening.mjs
       - name: Run complete release gate
         run: npm run check
@@ -39,6 +46,7 @@ jobs:
       - name: Commit verified changes
         run: |
           set -euo pipefail
+          rm -rf maf-source
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add frontend public src scripts package.json
