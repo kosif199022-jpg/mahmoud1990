@@ -16,15 +16,26 @@ jobs:
         with:
           ref: a1990-v35-import
           fetch-depth: 1
-      - name: Download source bundle
+      - name: Download stable source bundle from version preview
         run: |
           set -euo pipefail
-          curl -fL --retry 3 --connect-timeout 20 \
-            'https://mahmoud-eldesouky.kosif199022.workers.dev/6ff6b51050ba881059c63e74/kosif-full-source.zip' \
-            -o /tmp/kosif-full-source.zip
+          base='mahmoud-eldesouky.kosif199022.workers.dev/6ff6b51050ba881059c63e74/kosif-full-source.zip'
+          ok=0
+          for prefix in 8e3b7199 8e3b7199f188 8e3b7199-f188; do
+            url="https://${prefix}-${base}"
+            echo "Trying $url"
+            code=$(curl -sS -L --connect-timeout 20 --max-time 60 -o /tmp/kosif-full-source.zip -w '%{http_code}' "$url" || true)
+            echo "HTTP $code"
+            if [ "$code" = 200 ] && unzip -tq /tmp/kosif-full-source.zip >/dev/null 2>&1; then ok=1; break; fi
+          done
+          if [ "$ok" != 1 ]; then
+            echo 'Could not retrieve valid source ZIP from version preview.' >&2
+            exit 1
+          fi
           rm -rf _v35_base
           mkdir -p _v35_base
           unzip -q /tmp/kosif-full-source.zip -d _v35_base
+          echo 'Imported files:'
           find _v35_base -maxdepth 2 -type f | sort | head -100
       - name: Commit imported source
         run: |
