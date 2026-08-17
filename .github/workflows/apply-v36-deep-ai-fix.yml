@@ -1,4 +1,4 @@
-name: Apply Kosif v36.1 Verified AI UI
+name: Apply Kosif v36.1 Deep Fixes
 
 on:
   push:
@@ -17,9 +17,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: v36-deep-audit-fix
-      - name: Apply reproducible AI UI patch
-        run: python3 scripts/patch-ai-v36-1.py
-      - name: Validate patched application
+      - name: Apply reproducible UI patches
+        run: |
+          python3 scripts/patch-ai-v36-1.py
+          python3 scripts/wire-reader-pro-v36.py
+      - name: Validate AI gate and restored standards reader
         shell: bash
         run: |
           set -euo pipefail
@@ -28,24 +30,29 @@ jobs:
           grep -q 'AI غير مختبر' public/index.html
           grep -q 'aiVerified' public/index.html
           ! grep -q 'AI Active ·' public/index.html
+          grep -q 'reader-pro-v36.js?v=36.1' public/standards/index.html
+          for x in speechSynthesis wakeLock mediaSession requestAnimationFrame jumpCode exportChapter setSleep; do grep -q "$x" public/standards/reader-pro-v36.js; done
+          grep -q '/standards/reader-pro-v36.js' public/standards/sw.js
+          node --check public/v36-ai-gate.js
+          node --check public/standards/reader-pro-v36.js
+          node --check public/standards/sw.js
           python3 - <<'PY'
           import re,pathlib,subprocess
-          for fn in ['public/index.html','frontend/index.html']:
+          for fn in ['public/index.html','frontend/index.html','public/standards/index.html']:
             s=pathlib.Path(fn).read_text()
             for i,x in enumerate(re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',s,re.I)):
               p=pathlib.Path('/tmp')/f'{pathlib.Path(fn).name}-{i}.js'
               p.write_text(x)
               subprocess.check_call(['node','--check',str(p)],stdout=subprocess.DEVNULL)
           PY
-          node --check public/v36-ai-gate.js
           npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
-      - name: Commit verified AI UI
+      - name: Commit integrated v36.1 fixes
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/index.html frontend/index.html
+          git add public/index.html frontend/index.html public/standards/index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Require owner unlock and verified AI connection in UI'
+          git commit -m 'Integrate verified AI workflow and restored standards reader'
           git pull --rebase origin v36-deep-audit-fix
           git push origin HEAD:v36-deep-audit-fix
