@@ -11,11 +11,14 @@ input.kosif-ai-key-locked{cursor:pointer!important;background:repeating-linear-g
 html[data-theme="dark"] #kosif-ai-gate .box{background:#151b2e;color:#e2e8f0}html[data-theme="dark"] #kosif-ai-gate .safe{color:#a7f3d0}html[data-theme="dark"] #kosif-ai-gate .mail-note{background:#20294a;color:#c7d2fe;border-color:#3730a3}html[data-theme="dark"] input.kosif-ai-key-locked{background:#101729!important;color:#94a3b8!important}
 @media (min-width:1024px){
   html,body,#app{width:100%;max-width:none!important}
+  body{padding-bottom:0!important}
   .topbar-inner,.tabs-inner,main{width:100%!important;max-width:none!important;margin-inline:0!important}
   .topbar{padding-inline:clamp(24px,3vw,58px)!important}
   .topbar-inner{padding-inline:0!important}
-  .tabs-inner{padding-inline:clamp(24px,3vw,58px)!important}
-  main{padding-inline:clamp(24px,3vw,58px)!important}
+  .tabs{display:block!important;visibility:visible!important;position:sticky!important}
+  .tabs-inner{display:flex!important;visibility:visible!important;padding-inline:clamp(24px,3vw,58px)!important;min-height:48px!important}
+  #kosif-bottom-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  main{padding-inline:clamp(24px,3vw,58px)!important;padding-bottom:48px!important}
   section[data-view],.card,.twrap{width:100%!important;max-width:none!important}
   .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
   .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
