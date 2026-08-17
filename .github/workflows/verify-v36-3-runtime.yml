@@ -1,0 +1,41 @@
+name: Verify Kosif v36.3 Runtime
+on:
+  push:
+    branches: [main]
+    paths: ['public/**','frontend/**','src/**','scripts/**','package.json','.github/workflows/verify-v36-3-runtime.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: verify-kosif-v36-3-runtime
+  cancel-in-progress: true
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Full source contract
+        run: npm run check
+      - name: Install Chromium
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+      - name: Start local Worker
+        run: |
+          nohup npx wrangler@4 dev --local --port 8787 >/tmp/kosif-wrangler.log 2>&1 &
+          ok=0
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8787/__health >/tmp/health.json 2>/dev/null && { ok=1; break; }; sleep 1; done
+          [ "$ok" = 1 ] || { cat /tmp/kosif-wrangler.log; exit 1; }
+          cat /tmp/health.json
+      - name: Mobile and desktop acceptance
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8787
+        run: node scripts/verify-v36-3-runtime.cjs
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-v36-3-runtime
+          path: kosif-v36-3-mobile.png
+          if-no-files-found: ignore
