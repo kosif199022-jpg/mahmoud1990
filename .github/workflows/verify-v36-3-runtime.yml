@@ -32,6 +32,7 @@ jobs:
         env:
           KOSIF_TEST_URL: http://127.0.0.1:8787
           PW_CHANNEL: chrome
+          KOSIF_ALLOW_EMPTY_LOCAL_LIBRARY: '1'
         run: node scripts/verify-v36-3-runtime.cjs
       - name: Upload screenshot
         if: always()
