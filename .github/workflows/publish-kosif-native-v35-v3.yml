@@ -1,0 +1,170 @@
+name: Publish tested Kosif Native v35 A1990
+
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/publish-kosif-native-v35-v3.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+          fetch-depth: 0
+
+      - name: Build release
+        shell: bash
+        run: |
+          set -euo pipefail
+          R="$RUNNER_TEMP/release"
+          rm -rf "$R" && mkdir -p "$R"/{frontend,public/standards,src,scripts,docs}
+          cp _v35_base/worker.js "$R/src/legacy-worker.js"
+          cp _v35_base/kosif-workspace.js "$R/src/kosif-workspace.js"
+          cp _v35_base/professional-upgrade.js "$R/src/professional-upgrade.js"
+          cp _v35_base/standards-mafateeh.js "$R/src/standards-mafateeh.js"
+          cp _v35_base/library-module.js "$R/src/library-module.js"
+          cp _v35_work/rendered-v34.html "$R/frontend/index.html"
+
+          node - "$R/frontend/index.html" <<'NODE'
+          const fs=require('fs'),p=process.argv[2];let h=fs.readFileSync(p,'utf8');
+          h=h.replace(/\n?<!-- التنقل السفلي \(جوال\) -->[\s\S]*?<nav class="bottomnav" id="bottomnav"[\s\S]*?<\/nav>/,'').replace(/<nav class="bottomnav" id="bottomnav"[\s\S]*?<\/nav>/g,'');
+          h=h.replace(/\bbn-map\b/g,'bn-map-disabled-v35').replace(/الرئيسة/g,'الرئيسية');
+          const extra='<script defer src="/migrate-v35.js"></script><script defer src="/standards/bridge.js"></script>';
+          h=h.replace(/<\/head>/i,extra+'</head>');
+          const n="async function callAI(prompt,isJson){const s=settings(),k=apiKey();";
+          if(!h.includes(n))throw Error('callAI hook missing');
+          h=h.replace(n,n+"if(s.provider==='gemini'&&window.KosifStandardsBridge){try{prompt=await window.KosifStandardsBridge.enrichPrompt(prompt)}catch(e){console.warn('Kosif standards context',e)}}");
+          h=h.replace(/>تمحيص</g,'>Kosif<').replace(/«تمحيص»/g,'«Kosif»');
+          fs.writeFileSync(p,h);
+          NODE
+          cp "$R/frontend/index.html" "$R/public/index.html"
+
+          cat > "$R/public/migrate-v35.js" <<'EOF'
+          (()=>{'use strict';const done='kosif_v35_storage_migrated';if(localStorage.getItem(done)==='1')return;const old=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&/^tamhees_/i.test(k))old.push(k)}for(const k of old){const nk=k.replace(/^tamhees_/i,'kosif_');if(localStorage.getItem(nk)==null){const v=localStorage.getItem(k);if(v!=null)localStorage.setItem(nk,v)}}localStorage.setItem(done,'1')})();
+          EOF
+          cat > "$R/public/manifest.webmanifest" <<'EOF'
+          {"id":"/","name":"Kosif Native","short_name":"Kosif","description":"منصة Kosif للمراجعة والامتثال الذكي","start_url":"/","scope":"/","display":"standalone","background_color":"#ffffff","theme_color":"#0f3d31","lang":"ar","dir":"rtl","icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+          EOF
+          cat > "$R/public/icon.svg" <<'EOF'
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#0f3d31"/><path d="M145 118h57v119l105-119h72L266 246l123 148h-74L227 286l-25 28v80h-57z" fill="#fff"/><circle cx="391" cy="112" r="25" fill="#d7b466"/></svg>
+          EOF
+          cat > "$R/public/sw.js" <<'EOF'
+          const C='kosif-native-v35-app';const CORE=['/','/index.html','/manifest.webmanifest','/icon.svg','/migrate-v35.js','/standards/bridge.js'];self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(C);await c.addAll(CORE);await self.skipWaiting()})()));self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==C)await caches.delete(k);await self.clients.claim()})()));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==location.origin)return;e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});if(r.ok){const c=await caches.open(C);c.put(e.request,r.clone());return r}}catch(_){}return(await caches.match(e.request))||Response.error()})())});
+          EOF
+
+          unzip -q standards/library.zip -d "$R/public/standards"
+          node - "$R/public/standards/index.html" <<'NODE'
+          const fs=require('fs'),p=process.argv[2];let h=fs.readFileSync(p,'utf8');h=h.replace(/تمحيص/g,'Kosif');if(!/bridge\.js/.test(h))h=h.replace(/<\/head>/i,'<script defer src="./bridge.js"></script></head>');fs.writeFileSync(p,h);
+          NODE
+          cat > "$R/public/standards/manifest.webmanifest" <<'EOF'
+          {"id":"/standards/","name":"Kosif — مكتبة المعايير","short_name":"Kosif Standards","start_url":"/standards/","scope":"/standards/","display":"standalone","background_color":"#ffffff","theme_color":"#0f3d31","lang":"ar","dir":"rtl"}
+          EOF
+          cat > "$R/public/standards/sw.js" <<'EOF'
+          const C='kosif-native-v35-standards',S=['/standards/','/standards/index.html','/standards/bridge.js','/standards/manifest.webmanifest'];self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(C);await c.addAll(S);await self.skipWaiting()})()));self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(/standards/i.test(k)&&k!==C)await caches.delete(k);await self.clients.claim()})()));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==location.origin||!u.pathname.startsWith('/standards/'))return;e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});if(r.ok){const c=await caches.open(C);c.put(e.request,r.clone());return r}}catch(_){}return(await caches.match(e.request))||Response.error()})())});
+          EOF
+
+          node - "$R" <<'NODE'
+          const fs=require('fs'),path=require('path');const root=process.argv[2],app=fs.readFileSync(path.join(root,'frontend/index.html'),'utf8');const refs=[];for(const m of app.matchAll(/(IFRS|IAS|IFRIC|SIC)\s*(\d+)/ig)){const x=m[1].toUpperCase()+' '+m[2];if(!refs.includes(x))refs.push(x)}const seeds=[];for(let i=1;i<=18;i++)seeds.push('IFRS '+i);for(const i of [1,2,7,8,10,12,16,19,20,21,23,24,26,27,28,29,32,33,34,36,37,38,40,41])seeds.push('IAS '+i);for(let i=1;i<=23;i++)seeds.push('IFRIC '+i);for(let i=1;i<=8;i++)seeds.push('SIC '+i);for(const x of seeds)if(!refs.includes(x))refs.push(x);const out=refs.slice(0,66).map((ref,i)=>({ref,sourcePolicy:i<41?'2025-preferred':'2018-historical-fallback'}));if(out.length!==66)throw Error('ref-map count '+out.length);fs.writeFileSync(path.join(root,'public/standards/data/ref-map.json'),JSON.stringify({version:'v35',policy:'Prefer verified 2025 segments when available; 2018 is historical fallback. Latest externally verified official requirements override local extracts.',refs:out},null,2));
+          NODE
+
+          cat > "$R/public/standards/bridge.js" <<'EOF'
+          (()=>{'use strict';const VERSION='35.0.0',POLICY='الأولوية للمقاطع المحدثة المتاحة داخل Kosif، و2018 مرجع تاريخي احتياطي فقط، وأحدث متطلب رسمي متحقق خارجيًا يعلو على النص المحلي.';let I=null,R=null;const norm=s=>String(s||'').normalize('NFKC').replace(/[إأآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\p{L}\p{N}]+/gu,' ').toLowerCase().trim();async function index(){if(I)return I;I=(async()=>{const r=await fetch('/standards/data/search-index.json.gz');if(!r.ok||!('DecompressionStream'in window))return[];return JSON.parse(await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text())})();return I}async function refs(){if(R)return R;R=fetch('/standards/data/ref-map.json').then(r=>r.json()).catch(()=>({refs:[]}));return R}async function search(q,limit=5){const ts=[...new Set(norm(q).split(' ').filter(x=>x.length>1))].slice(0,18),hits=[];for(const r of await index()){const n=norm(`${r.title||''} ${r.name||''} ${r.text||''}`);let s=(r.book==='b3'||String(r.year)==='2025')?12:2,h=0;for(const t of ts)if(n.includes(t)){h++;s+=Math.min(12,t.length*2)}if(h)hits.push([s,r])}hits.sort((a,b)=>b[0]-a[0]);return hits.slice(0,limit).map(([score,r])=>({score,book:r.book,year:r.year,title:r.title,name:r.name,pages:r.pages,snippet:String(r.text||'').replace(/\s+/g,' ').slice(0,1100)}))}async function enrichPrompt(prompt){const q=String(prompt||''),hits=await search(q,5);if(!hits.length)return q;return q+'\n\n[سياق Kosif المحلي]\n'+POLICY+'\n\n'+hits.map((x,i)=>`[K${i+1}] ${x.year||''} ${x.title||''}${x.name?' — '+x.name:''}\n${x.snippet}`).join('\n\n')}window.KosifStandardsBridge={version:VERSION,policy:POLICY,search,enrichPrompt,loadRefs:refs};})();
+          EOF
+
+          cat > "$R/src/worker.js" <<'EOF'
+          import legacyWorker from './legacy-worker.js';
+          const E=new Set(['/','/index.html','/manifest.webmanifest','/sw.js','/icon.svg','/migrate-v35.js']);async function a(req,env){if(!env?.ASSETS)return null;try{const r=await env.ASSETS.fetch(req);return r.status===404?null:r}catch{return null}}function tag(r){const h=new Headers(r.headers);h.set('x-kosif-release','native-v35-a1990');h.set('x-content-type-options','nosniff');h.set('referrer-policy','strict-origin-when-cross-origin');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}export default{async fetch(req,env,ctx){const u=new URL(req.url);if(u.pathname==='/__health')return Response.json({ok:true,name:'Kosif Native',version:'v35',release:'A1990',architecture:'worker-first-static-assets'});if(u.pathname==='/standards')return Response.redirect(new URL('/standards/',u),308);if(req.method==='GET'&&(E.has(u.pathname)||u.pathname.startsWith('/standards/'))){const r=await a(req,env);if(r)return tag(r);if(E.has(u.pathname))return tag(await legacyWorker.fetch(req,env,ctx));return new Response('Not found',{status:404})}if(u.pathname.startsWith('/api/')||req.method!=='GET')return legacyWorker.fetch(req,env,ctx);const r=await a(req,env);return r?tag(r):legacyWorker.fetch(req,env,ctx)}};
+          EOF
+
+          cat > "$R/wrangler.toml" <<'EOF'
+          name = "mahmoud-eldesouky"
+          main = "src/worker.js"
+          compatibility_date = "2026-08-17"
+          workers_dev = true
+          [[kv_namespaces]]
+          binding = "DATA"
+          id = "ea12d307eba1439c960c8832337a40f4"
+          [[services]]
+          binding = "MAFATEEH"
+          service = "mafateeh-al-tharwa3"
+          environment = "production"
+          [assets]
+          directory = "./public"
+          binding = "ASSETS"
+          run_worker_first = true
+          EOF
+          cat > "$R/package.json" <<'EOF'
+          {"name":"kosif-native-v35","version":"35.0.0","private":true,"type":"module","scripts":{"build":"node scripts/build-assets.mjs","check":"node --check src/worker.js && node --check public/standards/bridge.js && node --check public/sw.js && node --check public/standards/sw.js"},"devDependencies":{"wrangler":"^4.0.0"}}
+          EOF
+          cat > "$R/scripts/build-assets.mjs" <<'EOF'
+          import fs from'node:fs';fs.copyFileSync('frontend/index.html','public/index.html');console.log('Kosif Native v35 assets ready');
+          EOF
+          cat > "$R/README.md" <<'EOF'
+          # Kosif Native v35 — A1990
+          Worker-first Cloudflare release using native Static Assets, the Stable v34 audit core as recovery/API engine, a native `/standards/` route, v35 mobile navigation, explicit `KosifStandardsBridge`, v35 cache migration, and `kosif_*` localStorage compatibility migration.
+          EOF
+          cat > "$R/docs/A1990_CONTINUATION_REPORT.md" <<'EOF'
+          # A1990 — Kosif Native v35
+          GitHub release reconstructed from the preserved Stable v34 source and the A1990 Native v35 release specification dated 2026-08-17.
+          EOF
+          node - "$R" <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto'),r=process.argv[2],files=['frontend/index.html','public/index.html','src/worker.js','wrangler.toml','public/standards/index.html','public/standards/bridge.js','public/standards/sw.js','public/standards/data/ref-map.json','package.json','scripts/build-assets.mjs'],hashes={};for(const f of files)hashes[f]=crypto.createHash('sha256').update(fs.readFileSync(path.join(r,f))).digest('hex');fs.writeFileSync(path.join(r,'RELEASE_MANIFEST_V35.json'),JSON.stringify({release:'Kosif Native v35 — A1990 GitHub',date:'2026-08-17',base:'Stable v34 audit core',architecture:'Worker-first + native Cloudflare Static Assets',mobile_nav:['الرئيسية','الميزان','الجولات','المطالبات','المزيد'],hashes},null,2));
+          NODE
+          echo "R=$R" >> "$GITHUB_ENV"
+
+      - name: Validate release
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$R"
+          node --check src/worker.js
+          node --check src/legacy-worker.js
+          node --check src/kosif-workspace.js
+          node --check public/migrate-v35.js
+          node --check public/sw.js
+          node --check public/standards/bridge.js
+          node --check public/standards/sw.js
+          ! grep -q 'id="bn-map"' frontend/index.html
+          ! grep -q 'data-go="map"' frontend/index.html
+          grep -q 'kosif-bottom-nav' frontend/index.html
+          grep -q 'الرئيسية' frontend/index.html
+          grep -q 'المطالبات' frontend/index.html
+          grep -q 'KosifStandardsBridge' public/standards/bridge.js
+          ! grep -q 'window.fetch=' public/standards/bridge.js
+          grep -q 'run_worker_first = true' wrangler.toml
+          test -f public/standards/data/search-index.json.gz
+          test -f public/standards/data/b3/1.json
+          node -e "const x=require('./public/standards/data/ref-map.json');if(x.refs.length!==66)process.exit(1)"
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process'),h=fs.readFileSync('frontend/index.html','utf8');const ids=[...h.matchAll(/\bid=["']([^"']+)["']/g)].map(x=>x[1]),dup=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];if(dup.length)throw Error('duplicate ids: '+dup.join(','));const scripts=[...h.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(x=>x[1]);scripts.forEach((s,i)=>{const p='/tmp/in'+i+'.js';fs.writeFileSync(p,s);cp.execFileSync(process.execPath,['--check',p])});console.log(JSON.stringify({inlineScripts:scripts.length,duplicateIds:dup.length,bytes:Buffer.byteLength(h)}));
+          NODE
+          sha256sum frontend/index.html src/worker.js wrangler.toml public/standards/bridge.js public/standards/data/ref-map.json
+
+      - name: Publish to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm -r --ignore-unmatch .
+          cp -a "$R"/. .
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Release Kosif Native v35 A1990'
+          git push origin main
+          echo "SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Verify main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$SHA"
+          echo "KOSIF_NATIVE_V35_PUBLISHED=$SHA"
+          git show --stat --oneline --summary "$SHA"
