@@ -19,20 +19,22 @@ jobs:
           ref: v36-attachments-upgrade
           fetch-depth: 0
       - name: Apply reviewed attachment upgrade
-        run: python3 scripts/apply-v36-2-upgrade.py
+        run: |
+          python3 scripts/apply-v36-2-upgrade.py
+          python3 scripts/fix-v36-2-pro.py
       - name: Validate all JavaScript and browser payloads
         run: npm run check
       - name: Run deep audit
         run: node scripts/deep-audit-v36.mjs
       - name: Bundle Worker
         run: npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
-      - name: Commit verified release candidate and remove one-off patcher
+      - name: Commit verified release candidate and remove one-off patchers
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git rm scripts/apply-v36-2-upgrade.py .github/workflows/apply-v36-attachments.yml
+          git rm scripts/apply-v36-2-upgrade.py scripts/fix-v36-2-pro.py .github/workflows/apply-v36-attachments.yml
           git add package.json src/worker.js src/professional-upgrade.js public/index.html frontend/index.html public/sw.js public/v36-features.js public/v36-operations.js scripts/deep-audit-v36.mjs .github/workflows/deep-audit-v36.yml .github/workflows/verify-v36-1-deep.yml
           git commit -m 'Upgrade Kosif v36.2 from reviewed attachments'
           git pull --rebase origin v36-attachments-upgrade
