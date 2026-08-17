@@ -1,7 +1,7 @@
 /* Kosif v36.3 — accessibility, dialog and release-continuity contract */
 :root{--kosif-font-scale-v36-3:1;--k363-icon:22px;--k363-focus:#7c3aed}
-html{font-size:calc(16px * var(--kosif-font-scale-v36-3,1))}
-body{font-size:.9375rem!important;overflow-wrap:anywhere}
+html{font-size:16px}
+body{font-size:calc(.9375rem * var(--kosif-font-scale,1))!important;overflow-wrap:anywhere}
 button,input,select,textarea{font-size:inherit}
 .card,.kpi,.step,.field,.kosif-action,.kosif-company-item,.note,.round,.finding,.docreq{min-width:0}
 .card-h,.kosif-row,.top-status{min-width:0}
