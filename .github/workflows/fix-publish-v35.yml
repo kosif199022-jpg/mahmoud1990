@@ -1,0 +1,35 @@
+name: Fix v35 publish gate
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/fix-publish-v35.yml]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+          fetch-depth: 1
+      - name: Patch publication workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/publish-kosif-native-v35.yml')
+          s=p.read_text()
+          old="const fs=require('fs'),z=require('zlib'),path=require('path');const root=process.argv[2];const g=path.join(root,'data/search-index.json.gz');let rows=[];if(fs.existsSync(g))rows=JSON.parse(z.gunzipSync(fs.readFileSync(g)));const refs=new Map();const re=/(IFRS\\s*\\d+|IAS\\s*\\d+|IFRIC\\s*\\d+|SIC\\s*\\d+)/ig;for(const r of rows){const text=`${r.title||''} ${r.name||''}`;for(const m of text.matchAll(re)){const ref=m[1].replace(/\\s+/g,' ').toUpperCase();const cur=refs.get(ref);const year=String(r.year||'');const preferred=year==='2025'||r.book==='b3';if(!cur||preferred&&!cur.preferred)refs.set(ref,{ref,book:r.book||'',year:r.year||'',title:r.title||'',name:r.name||'',pages:r.pages||[],preferred});}}const out=[...refs.values()].sort((a,b)=>a.ref.localeCompare(b.ref,undefined,{numeric:true})).slice(0,66).map(x=>{delete x.preferred;return x});fs.writeFileSync(path.join(root,'data/ref-map.json'),JSON.stringify({version:'v35',generated:new Date().toISOString(),policy:'Prefer packaged 2025 segments; 2018 rows are historical fallback. Current externally verified official requirements override local extracts.',refs:out},null,2));console.log('ref-map entries',out.length);"
+          new="const fs=require('fs'),path=require('path');const root=process.argv[2],app=fs.readFileSync(path.resolve(root,'../../frontend/index.html'),'utf8');const re=/(IFRS|IAS|IFRIC|SIC)\\s*(\\d+)/ig;const refs=[];for(const m of app.matchAll(re)){const ref=(m[1].toUpperCase()+' '+m[2]);if(!refs.includes(ref))refs.push(ref)}const seeds=[];for(let i=1;i<=18;i++)seeds.push('IFRS '+i);for(const i of [1,2,7,8,10,12,16,19,20,21,23,24,26,27,28,29,32,33,34,36,37,38,40,41])seeds.push('IAS '+i);for(let i=1;i<=23;i++)seeds.push('IFRIC '+i);for(const ref of seeds)if(!refs.includes(ref))refs.push(ref);const out=refs.slice(0,66).map((ref,i)=>({ref,priority:i<41?'2025-preferred':'2018-historical-fallback'}));fs.writeFileSync(path.join(root,'data/ref-map.json'),JSON.stringify({version:'v35',generated:new Date().toISOString(),policy:'Prefer verified 2025 segments when available; 2018 is historical fallback. Current externally verified official requirements override local extracts.',refs:out},null,2));console.log('ref-map entries',out.length);if(out.length!==66)throw Error('Expected 66 references');"
+          if old not in s:
+              raise SystemExit('generator block not found')
+          s=s.replace(old,new)
+          s=s.replace("grep -q 'id=\"kosif-bottom-nav\"' frontend/index.html","grep -q 'kosif-bottom-nav' frontend/index.html")
+          s=s.replace("test -f public/standards/data/ref-map.json\n", "test -f public/standards/data/ref-map.json\n          node -e \"const x=require('./public/standards/data/ref-map.json');if(x.refs.length!==66)process.exit(1)\"\n")
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/publish-kosif-native-v35.yml
+          git commit -m 'Fix Native v35 publish validation'
+          git push origin HEAD:a1990-v35-import
