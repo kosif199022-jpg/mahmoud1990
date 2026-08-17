@@ -1,1 +1,17 @@
-{"name":"kosif-native-v36-2","version":"36.2.0","private":true,"type":"module","scripts":{"build":"node scripts/build-assets.mjs","check":"node scripts/check-all.mjs"},"devDependencies":{"wrangler":"^4.0.0"}}
+{
+  "name": "kosif-native-v36-2-1",
+  "version": "36.2.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-assets.mjs",
+    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run audit",
+    "syntax": "node scripts/check-all.mjs",
+    "payloads": "node scripts/validate-payloads.mjs",
+    "legacy-regressions": "node scripts/check-legacy-regressions.mjs",
+    "audit": "node scripts/deep-audit-v36.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

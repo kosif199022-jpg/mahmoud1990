@@ -1,8 +1,8 @@
-name: Kosif v36.2 Deep Audit
+name: Kosif v36.2.1 Deep Audit
 
 on:
   push:
-    branches: [main, v36-deep-audit-fix, v36-attachments-upgrade]
+    branches: [main, v36-2-library-motion-hardening]
     paths:
       - 'src/**'
       - 'frontend/**'
@@ -21,16 +21,32 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate all JavaScript and browser payloads
+      - name: Run complete syntax, payload and deep-audit gate
         run: npm run check
       - name: Bundle Worker
-        run: npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
-      - name: Run deep project audit
-        run: node scripts/deep-audit-v36.mjs
+        run: npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/kosif-v36-2-1-worker.mjs >/dev/null
+      - name: Verify release invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "native-v36-2-1-library-hardening" src/worker.js
+          grep -q "version:'v36.2.1'" src/worker.js
+          test "$(find public/standards/data/b4 -maxdepth 1 -name '*.json' | wc -l)" -eq 46
+          node - <<'NODE'
+          const fs=require('fs'),z=require('zlib');
+          const lib=JSON.parse(fs.readFileSync('public/standards/data/library.json','utf8'));
+          const b4=lib.find(x=>x.id==='b4');
+          if(lib.length!==4||!b4||b4.parts!==6||b4.chapters!==46||b4.words!==34700||b4.professionalAuthority!==false)throw Error('four-book library invariant failed');
+          const index=z.gunzipSync(fs.readFileSync('public/standards/data/search-index.json.gz')).toString();
+          if(/"book"\s*:\s*"b4"/.test(index))throw Error('development book leaked into professional index');
+          const nums=fs.readdirSync('public/standards/data/b4').filter(x=>/^\d+\.json$/.test(x)).map(x=>+x.replace('.json','')).sort((a,b)=>a-b);
+          if(nums.length!==46||!nums.every((n,i)=>n===i+1))throw Error('b4 chapter sequence failed');
+          console.log('V36_2_1_INVARIANTS_OK',b4);
+          NODE
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-v36-2-deep-audit
+          name: kosif-v36-2-1-deep-audit
           path: /tmp/kosif-v36-deep-audit.md
           if-no-files-found: error

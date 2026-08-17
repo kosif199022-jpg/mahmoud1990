@@ -1,11 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 
 const root=process.cwd();
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
 const json=p=>{try{return JSON.parse(read(p))}catch{return null}};
 const src={
- html:read('frontend/index.html'),pub:read('public/index.html'),workspace:read('src/kosif-workspace.js'),worker:read('src/worker.js'),legacy:read('src/legacy-worker.js'),sw:read('public/sw.js'),stdHtml:read('public/standards/index.html'),stdPro:read('public/standards/reader-pro-v36.js'),stdSw:read('public/standards/sw.js'),gov:read('public/v36-governance.js'),gate:read('public/v36-ai-gate.js'),features:read('public/v36-features.js'),outputs:read('public/v36-outputs.js'),readiness:read('public/v36-standards-readiness.js'),ops:read('public/v36-operations.js'),pkg:read('package.json'),checker:read('scripts/check-all.mjs')
+ html:read('frontend/index.html'),pub:read('public/index.html'),workspace:read('src/kosif-workspace.js'),worker:read('src/worker.js'),legacy:read('src/legacy-worker.js'),sw:read('public/sw.js'),stdHtml:read('public/standards/index.html'),stdPro:read('public/standards/reader-pro-v36.js'),stdSw:read('public/standards/sw.js'),gov:read('public/v36-governance.js'),gate:read('public/v36-ai-gate.js'),features:read('public/v36-features.js'),outputs:read('public/v36-outputs.js'),readiness:read('public/v36-standards-readiness.js'),ops:read('public/v36-operations.js'),motion:read('public/v36-motion.css'),pkg:read('package.json'),checker:read('scripts/check-all.mjs')
 };
 const all=Object.values(src).join('\n');
 function walk(dir,out=[]){if(!fs.existsSync(dir))return out;for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(e.name==='.git'||e.name==='node_modules')continue;const p=path.join(dir,e.name);e.isDirectory()?walk(p,out):out.push(p)}return out}
@@ -16,8 +17,12 @@ const refs=[...src.html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)=["']([^"']
 const missing=[];for(const u of refs){const clean=u.split('?')[0].split('#')[0];if(clean==='/'||clean.startsWith('/api/'))continue;if(!fs.existsSync('public'+clean))missing.push(clean)}
 const legacyRefs=[...new Set(refs.map(x=>x.split('?')[0]).filter(x=>x.startsWith('/legacy/')))];
 const libRaw=json('public/standards/data/library.json')||[],lib=Array.isArray(libRaw)?libRaw:(libRaw.books||[]);
-const bookCounts=Object.fromEntries(['b1','b2','b3'].map(id=>[id,fs.existsSync('public/standards/data/'+id)?fs.readdirSync('public/standards/data/'+id).filter(x=>/^\d+\.json$/.test(x)).length:0]));
-const metadataConsistent=lib.every(x=>Number(x.chapters||0)===(bookCounts[x.id]||0));
+const bookCounts=Object.fromEntries(lib.map(x=>{const id=String(x.id||'');const d='public/standards/data/'+id;return[id,fs.existsSync(d)?fs.readdirSync(d).filter(n=>/^\d+\.json$/.test(n)).length:0]}));
+const chapterSequences=Object.fromEntries(lib.map(x=>{const id=String(x.id||''),d='public/standards/data/'+id,expected=Number(x.chapters||0);const nums=fs.existsSync(d)?fs.readdirSync(d).filter(n=>/^\d+\.json$/.test(n)).map(n=>+n.replace('.json','')).sort((a,b)=>a-b):[];return[id,expected>0&&nums.length===expected&&nums.every((n,i)=>n===i+1)]}));
+const metadataConsistent=lib.every(x=>Number(x.chapters||0)>0&&Number(x.chapters||0)===(bookCounts[x.id]||0)&&chapterSequences[x.id]);
+const deadFns=[...src.legacy.matchAll(/^function\s+(\w+)\s*\(/gm)].map(m=>m[1]).filter(n=>((src.legacy+'\n'+src.worker).match(new RegExp('\\b'+n+'\\b','g'))||[]).length===1);
+let professionalIndexText='';try{professionalIndexText=zlib.gunzipSync(fs.readFileSync('public/standards/data/search-index.json.gz')).toString('utf8')}catch{}
+const b4=lib.find(x=>x.id==='b4');
 const checks={
  'TB / Excel / CSV import':/XLSX|tb-file|CSV/i.test(all),
  'Deterministic audit engine':/core-v36|applyDemo|renderTB/i.test(all),
@@ -61,11 +66,17 @@ const checks={
  'International vs Saudi audit distinction':/iaasbHandbook/.test(src.readiness)&&/latest international|مرجع دولي/.test(src.readiness)&&/الاعتماد المحلي/.test(src.readiness),
  'Current GPT default':/gpt-5\.6/.test(src.workspace),
  'Current Gemini default':/gemini-3\.6-flash/.test(src.workspace),
- 'Browser payload validator wired':/validate-payloads\.mjs/.test(src.checker)&&/check-all\.mjs/.test(src.pkg)&&fs.existsSync('scripts/validate-payloads.mjs'),
+ 'Browser payload validator wired':/validate-payloads\.mjs/.test(src.pkg)&&/check-all\.mjs/.test(src.pkg)&&fs.existsSync('scripts/validate-payloads.mjs'),
  'Operational sales/cost analytics':/KosifOperations/.test(src.ops)&&/هوامش سالبة|negative margin/.test(src.ops)&&/قطع زمني/.test(src.ops),
  'Operational data-quality bridge':/تكرار محتمل/.test(src.ops)&&/تنسيق جوال العميل/.test(src.ops)&&/riskItems/.test(src.ops),
+ 'Four-book library with development b4':!!b4&&b4.kind==='development'&&b4.professionalAuthority===false&&Number(b4.chapters)===46&&Number(b4.words)===34700,
+ 'Development book excluded from professional index':professionalIndexText.length>0&&!/\"book\"\s*:\s*\"b4\"/.test(professionalIndexText),
+ 'Motion layer wired and accessible':fs.existsSync('public/v36-motion.css')&&src.pub.includes('/v36-motion.css')&&src.html.includes('/v36-motion.css')&&/prefers-reduced-motion/.test(src.motion)&&!/fonts\.googleapis|@import|font-family/i.test(src.motion),
 };
 const architecture={
+ 'App shell copies byte-identical':src.html===src.pub,
+ 'No unreachable declarations in worker sources':deadFns.length===0,
+ 'Chapter files numbered contiguously 1..n':Object.values(chapterSequences).every(Boolean),
  'No missing static refs':missing.length===0,
  'No duplicate static IDs':dup.length===0,
  'Only approved recovered legacy core':legacyRefs.length===1&&legacyRefs[0]==='/legacy/core-v36.js',
@@ -77,6 +88,6 @@ const architecture={
  'Private company encryption retained':/AES-GCM|AES_GCM|crypto\.subtle/i.test(all),
 };
 const critical=[...Object.entries(checks),...Object.entries(architecture)].filter(([,v])=>!v).map(([k])=>k);
-const lines=['# Kosif v36.2 Deep Audit','',`Files scanned: **${files.length}**`,`Frontend bytes: **${Buffer.byteLength(src.html)}**`,`Duplicate IDs: **${dup.length}**`,`Missing referenced static assets: **${missing.length}**`,'','## Standards data inventory',...lib.map(x=>`- ${x.id}: metadata chapters=${x.chapters??'—'} words=${x.words??'—'} · packaged chapter files=${bookCounts[x.id]??0}`),'','## Capability inventory',...Object.entries(checks).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'','## Architecture / security gates',...Object.entries(architecture).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'',`## Critical failures: ${critical.length}`,...critical.map(x=>'- '+x),'','## Missing refs',...missing.map(x=>'- '+x)];
+const lines=['# Kosif v36.2.1 Deep Audit','',`Files scanned: **${files.length}**`,`Frontend bytes: **${Buffer.byteLength(src.html)}**`,`Duplicate IDs: **${dup.length}**`,`Missing referenced static assets: **${missing.length}**`,'','## Standards data inventory',...lib.map(x=>`- ${x.id}: metadata chapters=${x.chapters??'—'} words=${x.words??'—'} · packaged chapter files=${bookCounts[x.id]??0}`),'','## Capability inventory',...Object.entries(checks).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'','## Architecture / security gates',...Object.entries(architecture).map(([k,v])=>`- ${v?'✅':'❌'} ${k}`),'',`## Critical failures: ${critical.length}`,...critical.map(x=>'- '+x),'','## Missing refs',...missing.map(x=>'- '+x)];
 fs.writeFileSync('/tmp/kosif-v36-deep-audit.md',lines.join('\n'));console.log(lines.join('\n'));
 if(critical.length)process.exitCode=2;
