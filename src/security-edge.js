@@ -1,5 +1,20 @@
 import appWorker from './worker.js';
 
+const BUILD_INFO={
+  version:'v36.4',
+  buildId:'2026.08.18-v36.4-mobile-release-integrity',
+  release:'Mobile Modal Integrity, Reader Auto-scroll Guard & Cache Generation',
+  schemaVersion:14,
+  appCache:'kosif-native-v36-4-app',
+  standardsCache:'kosif-native-v36-4-standards',
+  sourceRepo:'kosif199022-jpg/mahmoud1990',
+  sourceCommit:'main',
+  mobileNav:['الرئيسية','الميزان','الجولات','المطالبات','المزيد'],
+  fontScale:{min:90,max:200},
+  aiGate:'owner-password+verified-key',
+  aiProviders:['gemini','openai','anthropic','zai'],
+  integrity:{securityEdge:'fail-closed',modalScrollLock:'ios-safe',readerAutoScrollGuard:true,cacheGeneration:'v36.4'}
+};
 const OWNER_COOKIE='kosif_ai_session';
 const LIBRARY_COOKIE='kosif_library_device';
 const LIBRARY_COOKIE_TTL=365*24*60*60;
@@ -16,7 +31,7 @@ const LEGACY_SHARED_PATHS=new Set([
   '/api/source-refresh'
 ]);
 
-function json(body,status=200,headers={}){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff',...headers}})}
+function json(body,status=200,headers={}){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-kosif-release':'native-v36-4-mobile-release-integrity','x-kosif-build-id':BUILD_INFO.buildId,...headers}})}
 function cookies(req){const out={};for(const p of String(req.headers.get('cookie')||'').split(';')){const i=p.indexOf('=');if(i>0){try{out[p.slice(0,i).trim()]=decodeURIComponent(p.slice(i+1).trim())}catch{out[p.slice(0,i).trim()]=p.slice(i+1).trim()}}}return out}
 async function sha256(s){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s||'')));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function token(){const b=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
@@ -30,15 +45,8 @@ async function ownerSession(req,env){
   return rec;
 }
 function isLegacySharedPath(path){return LEGACY_SHARED_PATHS.has(path)||path.startsWith('/files/')||path.startsWith('/office/files/')}
-function needsOwner(req,u){
-  if(u.pathname.startsWith(EXPORT_PREFIX))return true;
-  if(isLegacySharedPath(u.pathname))return true;
-  return false;
-}
-async function ownerGuard(req,env,u,owner){
-  if(!needsOwner(req,u)||owner)return null;
-  return json({error:'OWNER_AUTH_REQUIRED',locked:true,message:'هذا المسار يقرأ أو يعدّل تخزينًا مشتركًا قديمًا أو يصدّر مصدر التطبيق، ولذلك يتطلب جلسة المالك. الواجهة العامة وبيانات الشركات الحديثة تظل متاحة دون هذا القفل.'},401);
-}
+function needsOwner(req,u){if(u.pathname.startsWith(EXPORT_PREFIX))return true;if(isLegacySharedPath(u.pathname))return true;return false}
+async function ownerGuard(req,env,u,owner){if(!needsOwner(req,u)||owner)return null;return json({error:'OWNER_AUTH_REQUIRED',locked:true,message:'هذا المسار يقرأ أو يعدّل تخزينًا مشتركًا قديمًا أو يصدّر مصدر التطبيق، ولذلك يتطلب جلسة المالك. الواجهة العامة وبيانات الشركات الحديثة تظل متاحة دون هذا القفل.'},401)}
 
 function validLibraryToken(v){return /^[A-Za-z0-9_-]{40,80}$/.test(String(v||''))}
 async function libraryDevice(req){const current=cookies(req)[LIBRARY_COOKIE];const fresh=!validLibraryToken(current),value=fresh?token():current;return{token:value,hash:await sha256(value),fresh}}
@@ -95,7 +103,10 @@ function aiEnv(env){if(!env?.DATA)return env;const data=trustedLibraryData(env.D
 
 export default{
   async fetch(req,env,ctx){
-    const u=new URL(req.url),owner=await ownerSession(req,env),blocked=await ownerGuard(req,env,u,owner);if(blocked)return blocked;
+    const u=new URL(req.url);
+    if(u.pathname==='/__version')return json(BUILD_INFO);
+    if(u.pathname==='/__health')return json({ok:true,name:'Kosif Native',version:BUILD_INFO.version,release:BUILD_INFO.release,buildId:BUILD_INFO.buildId,architecture:'security-edge → native-worker',aiGate:BUILD_INFO.aiGate,aiProviders:BUILD_INFO.aiProviders,integrity:BUILD_INFO.integrity});
+    const owner=await ownerSession(req,env),blocked=await ownerGuard(req,env,u,owner);if(blocked)return blocked;
     const trust=await ownerTrustApi(req,env,u,owner);if(trust)return trust;
     const lib=await libraryPrivacy(req,env,ctx,u,owner);if(lib)return lib;
     return appWorker.fetch(req,isAIPath(u.pathname)?aiEnv(env):env,ctx);
