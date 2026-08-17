@@ -1,0 +1,66 @@
+name: Wire Kosif Owner AI Gate
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/wire-ai-owner-gate.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject gate client into production HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          asset='<script src="/v36-ai-gate.js?v=36.1"></script>'
+          anchor='<script src="/v36-standards-readiness.js?v=36"></script>'
+          for fn in ['public/index.html','frontend/index.html']:
+              p=Path(fn);s=p.read_text(encoding='utf8')
+              if asset not in s:
+                  if anchor not in s: raise SystemExit(f'anchor missing in {fn}')
+                  s=s.replace(anchor,anchor+'\n'+asset)
+              p.write_text(s,encoding='utf8')
+          PY
+      - name: Validate fail-closed AI gate build
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/v36-ai-gate.js
+          node --check public/sw.js
+          grep -q '/v36-ai-gate.js?v=36.1' public/index.html
+          grep -q '/v36-ai-gate.js?v=36.1' frontend/index.html
+          grep -q 'AI_GATE_HASH' src/worker.js
+          grep -q 'AI_LOCKED' src/worker.js
+          grep -q 'HttpOnly; Secure; SameSite=Strict' src/worker.js
+          grep -q "'/v36-ai-gate.js'" public/sw.js
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+          python3 - <<'PY'
+          import pathlib,re,os,subprocess
+          s=pathlib.Path('public/index.html').read_text()
+          refs=re.findall(r'<(?:script|link)\b[^>]*(?:src|href)=["\']([^"\']+)',s,re.I)
+          missing=[]
+          for u in refs:
+              if not u.startswith('/'): continue
+              p=u.split('?')[0].split('#')[0]
+              if p=='/' or p.startswith('/api/'): continue
+              if not os.path.exists('public'+p): missing.append(p)
+          print('MISSING',missing);assert not missing
+          PY
+      - name: Commit wired AI owner gate
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/index.html frontend/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Wire owner password gate into AI interface'
+          git push origin HEAD:main
