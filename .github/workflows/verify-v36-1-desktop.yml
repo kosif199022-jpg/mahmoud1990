@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - 'public/index.html'
       - 'public/v36.css'
+      - 'public/v36-continuity.css'
       - 'public/v36-ai-gate.js'
       - 'public/v36-zai.js'
       - 'public/sw.js'
