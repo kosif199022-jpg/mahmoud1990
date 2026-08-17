@@ -7,6 +7,10 @@ function readSettings(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}ca
 function provider(){return String(readSettings().provider||'').toLowerCase()}
 function isZai(v){return ['zai','z.ai','z-ai','z_ai','zhipu','glm'].includes(String(v||'').trim().toLowerCase())}
 function normalizeProvider(v){v=String(v||'').trim().toLowerCase();if(v==='claude')return'anthropic';if(isZai(v))return'zai';return v}
+function loadCouncilV2(){
+  if(window.KosifCouncilV2||document.querySelector('script[data-kosif-council-v2="1"]'))return;
+  const s=document.createElement('script');s.src='/v36-council-v2.js?v=36.3-council2';s.defer=true;s.dataset.kosifCouncilV2='1';document.head.appendChild(s);
+}
 function addOption(){
   const select=$('#kai-provider');if(!select)return false;
   if(!select.querySelector('option[value="zai"]')){
@@ -32,7 +36,7 @@ function patchLabels(){
   const r=$('#rounds-model');if(r&&/Gemini/.test(r.textContent||''))r.textContent=r.textContent.replace(/Gemini/g,'Z.ai');
   const stage=$('#kosif-progress .kp-note');if(stage&&/Gemini/.test(stage.textContent||''))stage.textContent=stage.textContent.replace(/Gemini/g,'Z.ai');
 }
-function patch(){addOption();syncNote();patchLabels();bindLabelObservers()}
+function patch(){addOption();syncNote();patchLabels();bindLabelObservers();loadCouncilV2()}
 function bindFormObserver(){
   const form=$('#kosif-ai-form');if(!form)return false;
   if(form.dataset.zaiObserved==='1')return true;
@@ -84,7 +88,7 @@ document.addEventListener('click',e=>{
 window.addEventListener('kosif-ai-gate-change',()=>setTimeout(patchLabels,0));
 window.addEventListener('storage',e=>{if(e.key===LS)setTimeout(patch,0)});
 let tries=0,t=setInterval(()=>{patch();if((bindFormObserver()||bindLabelObservers())&&++tries>12)clearInterval(t);else if(++tries>80)clearInterval(t)},250);
-window.KosifZAI={version:'1.2.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider};
+window.KosifZAI={version:'1.3.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider,loadCouncilV2};
 document.documentElement.dataset.kosifZai='ready';
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patch,{once:true});else patch();
 })();
