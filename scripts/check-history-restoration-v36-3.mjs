@@ -1,0 +1,24 @@
+import fs from'node:fs';const R=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
+const voice=R('public/v36-voice-guide.js'),hist=R('public/v36-history-restore.js'),media=R('public/v36-reviewer-media.js'),html=R('public/index.html'),front=R('frontend/index.html'),sw=R('public/sw.js'),pkg=R('package.json'),master=R('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
+const bad=[];const ok=(n,v)=>{console.log((v?'✅':'❌')+' '+n);if(!v)bad.push(n)};
+ok('Voice guide tells auditor where to start',/ابدأ منين/.test(voice)&&/function nextStep\(/.test(voice));
+ok('Voice guide summarizes current work',/function summary\(/.test(voice)&&/highRiskCount/.test(voice)&&/openPbcCount/.test(voice));
+ok('Voice guide reports open problems',/function problems\(/.test(voice));
+ok('Voice guide speaks Arabic locally',/SpeechSynthesisUtterance/.test(voice)&&/speechSynthesis\.speak/.test(voice)&&/u\.lang='ar-SA'/.test(voice));
+ok('Voice guide accepts spoken commands when browser supports it',/SpeechRecognition\|\|window\.webkitSpeechRecognition/.test(voice)&&/function interpret\(/.test(voice));
+ok('Voice guide has explicit stop command',/speechSynthesis\.cancel/.test(voice)&&/إيقاف الصوت/.test(voice));
+ok('Reviewer real audio/video/file media remains restored',/MediaRecorder/.test(media)&&/kind==='video'/.test(media)&&/IndexedDB|indexedDB/.test(media));
+ok('Reviewer raw media is local only and not sent to AI',/localOnly:true/.test(media)&&/rawSentToAI:false/.test(media));
+ok('Historical languages restored',/en:'English'/.test(hist)&&/it:'Italiano'/.test(hist)&&/hi:'हिन्दी'/.test(hist));
+ok('Language bridge is conservative about standards source language',/المعايير والكتب تبقى بلغة المصدر/.test(hist)&&/view-library/.test(hist)&&/view-sources/.test(hist));
+ok('Profit materiality benchmark restored',/value==='profit'/.test(hist)&&/الربح قبل الضريبة \/ الزكاة/.test(hist));
+ok('Listed entity activates IAS 33 IFRS 8 ISA 701 readiness',/\['IAS 33','IFRS 8','ISA 701'\]/.test(hist));
+ok('SME plus listed conflict is not silently accepted',/smeConflict/.test(hist)&&/تعارض يحتاج حسمًا/.test(hist));
+ok('Entity framework mirrors into engagement readiness',/saveEngagementPatch/.test(hist)&&/ifrs-smes/.test(hist)&&/full-ifrs/.test(hist));
+ok('AI output language can inherit restored UI language',/buildSystemInstruction/.test(hist)&&/لغة الإخراج المطلوبة/.test(hist));
+ok('Main shell copies stay identical',html===front);
+ok('Voice and history restoration modules are loaded',html.includes('/v36-voice-guide.js?v=36.3-history1')&&html.includes('/v36-history-restore.js?v=36.3-history1'));
+ok('Voice and history modules are offline precached',sw.includes("'/v36-voice-guide.js'")&&sw.includes("'/v36-history-restore.js'"));
+ok('History restoration gate runs in npm check',pkg.includes('history-restoration')&&pkg.includes('check-history-restoration-v36-3.mjs'));
+ok('Master requirements retain voice guide requirement',master.includes('مساعد صوتي')&&master.includes('ابدأ منين')&&master.includes('English / Italian / Hindi'));
+console.log(`KOSIF_HISTORY_RESTORATION ${bad.length?'FAILED':'OK'} failures=${bad.length}`);if(bad.length){for(const x of bad)console.error(' - '+x);process.exit(2)}
