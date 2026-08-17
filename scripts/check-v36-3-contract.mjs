@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
-const html=read('public/index.html'),front=read('frontend/index.html'),workspace=read('src/kosif-workspace.js'),worker=read('src/worker.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),pkg=read('package.json'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),eng=read('public/v36-engagement.js'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
+const html=read('public/index.html'),front=read('frontend/index.html'),workspace=read('src/kosif-workspace.js'),worker=read('src/worker.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),pkg=read('package.json'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),eng=read('public/v36-engagement.js'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md'),zai=read('public/v36-zai.js'),zaiProvider=read('src/zai-provider.js');
 const failures=[];const ok=(name,v)=>{console.log((v?'✅':'❌')+' '+name);if(!v)failures.push(name)};
 const count=(s,re)=>(s.match(re)||[]).length;
 ok('shell copies identical',html===front);
@@ -37,4 +37,12 @@ const ss=worker.indexOf('async function nativeShell'),se=worker.indexOf('async f
 ok('root shell is native and fail closed',ss>=0&&sf.includes('status:503')&&!sf.includes('legacyWorker')&&worker.includes("u.pathname==='/'||u.pathname==='/index.html'")&&worker.includes('return nativeShell(req,env)'));
 ok('root excluded from legacy fallback set',!worker.includes("const E=new Set(['/','/index.html'"));
 ok('asset index diagnostic exists',worker.includes("u.pathname==='/__asset-index'")&&worker.includes('hasKosifBoot'));
+ok('Z.ai provider is gated and explicitly routed',worker.includes("'zai'")&&worker.includes('handleZaiAI')&&worker.includes("gate.provider==='zai'")&&worker.includes('AI_PROVIDERS'));
+ok('unknown AI providers fail closed',worker.includes("AI_PROVIDERS.has(p)?p:''"));
+ok('Z.ai uses general API endpoint',zaiProvider.includes('https://api.z.ai/api/paas/v4/chat/completions')&&!zaiProvider.includes('/api/coding/'));
+ok('Z.ai uses bearer auth and GLM default',/authorization:'Bearer '\+key/.test(zaiProvider)&&/glm-5\.1/.test(zaiProvider));
+ok('Z.ai keeps standards and books grounding',/standardsContext\(task,env\)/.test(zaiProvider)&&/professionalContext\(task,env\)/.test(zaiProvider)&&/booksContext\(task,env\)/.test(zaiProvider));
+ok('Z.ai UI bridge exposes provider and default model',zai.includes('option[value="zai"]')&&zai.includes('Z.ai / GLM')&&zai.includes('glm-5.1'));
+ok('native shell injects Z.ai bridge',worker.includes('/v36-zai.js?v=36.3-zai'));
+ok('Z.ai bridge cached for PWA',sw.includes('/v36-zai.js'));
 console.log(`KOSIF_V36_3_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}
