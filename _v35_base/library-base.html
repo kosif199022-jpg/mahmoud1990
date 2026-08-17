@@ -1,0 +1,192 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#6366f1"><title>مكتبة Kosif</title><style>@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap');
+:root{--i:#6366f1;--v:#8b5cf6;--p:#ec4899;--ink:#28263f;--mut:#76738b;--line:rgba(99,102,241,.15);--bg:#f8f8fd;--card:#fff;--grad:linear-gradient(135deg,#6366f1,#8b5cf6 60%,#ec4899)}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Tajawal,system-ui,sans-serif;background:radial-gradient(circle at 10% 0,rgba(139,92,246,.11),transparent 28%),var(--bg);color:var(--ink)}button,input,textarea{font:inherit}.lib-top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;padding:12px max(14px,env(safe-area-inset-right)) 12px max(14px,env(safe-area-inset-left));background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}.lib-top>div{flex:1}.lib-top b{display:block;font-size:18px}.lib-top small{color:var(--mut)}.back{text-decoration:none;color:#514bb8;font-weight:800}.iconbtn,.reader button,.section-head button,.settings button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 12px;cursor:pointer}.shell{max-width:1280px;margin:auto;padding:24px 18px 80px}.hero{display:grid;grid-template-columns:1.6fr .8fr;gap:18px;align-items:stretch}.hero>div,.upload,.settings,.grid>.book,.section-head{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 50px -35px rgba(79,70,229,.5)}.hero>div{padding:26px}.hero h1{margin:10px 0 8px;font-size:clamp(28px,5vw,52px);background:var(--grad);-webkit-background-clip:text;color:transparent}.hero p{font-size:17px;line-height:1.8;color:var(--mut)}.tag{display:inline-block;background:#f2efff;color:#574fc0;border-radius:999px;padding:7px 11px;font-weight:800}.upload{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;background:linear-gradient(145deg,#fff,#f7f4ff)}.upload input{display:none}.upload b{font-size:21px;color:#514bb8}.upload small{margin-top:7px;color:var(--mut)}.settings{margin:18px 0;padding:14px;display:flex;gap:10px;align-items:end}.settings label{flex:1;font-weight:700}.settings input{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:11px;padding:10px}.settings span{color:var(--mut);min-width:80px}.section-head{margin:20px 0 12px;padding:16px;display:flex;align-items:center;justify-content:space-between}.section-head h2{margin:0}.section-head p{margin:3px 0;color:var(--mut)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}.book{padding:16px;transition:.18s}.book:hover{transform:translateY(-3px);box-shadow:0 22px 45px -30px rgba(79,70,229,.55)}.book .cover{height:120px;border-radius:14px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:48px}.book h3{margin:12px 0 4px}.book p{margin:0;color:var(--mut)}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.actions button{border:0;border-radius:10px;padding:9px 11px;background:#f3f1ff;color:#514bb8;font-weight:800}.actions .primary,.primary{background:linear-gradient(135deg,var(--i),var(--v))!important;color:#fff!important;border:0!important}.empty{padding:30px;text-align:center;color:var(--mut);grid-column:1/-1}.progress,.mini-progress{position:relative;height:11px;background:#eceaf7;border-radius:999px;overflow:hidden;margin:10px 0}.progress i,.mini-progress i{display:block;height:100%;width:0;background:var(--grad);transition:.2s}.progress span{position:absolute;top:14px;right:0;font-size:12px;color:var(--mut)}.progress{margin-bottom:32px}.hidden{display:none}.reader{position:fixed;inset:0;background:#f4f3fa;z-index:1000;display:none;flex-direction:column}.reader.on{display:flex}.reader>header{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff;border-bottom:1px solid var(--line);padding-top:max(9px,env(safe-area-inset-top))}.reader>header>div:nth-child(2){flex:1}.reader>header b{display:block}.reader>header small{color:var(--mut)}.reader-actions{display:flex;gap:6px}.reader-body{display:grid;grid-template-columns:minmax(330px,36%) 1fr;min-height:0;flex:1}.toolpane{background:#fff;border-left:1px solid var(--line);overflow:auto;padding:12px}.pane-tabs{display:flex;gap:6px;position:sticky;top:0;background:#fff;padding-bottom:10px;z-index:2}.pane-tabs button{flex:1}.pane-tabs button.on{background:#edeaff;color:#4f46e5}.toolpane section{display:none}.toolpane section.on{display:block}.row{display:flex;gap:7px;align-items:center;margin:9px 0}.row label{display:flex;gap:5px;align-items:center}.row input{width:80px}.page-text{white-space:pre-wrap;line-height:1.9;background:#faf9ff;border:1px solid var(--line);border-radius:14px;padding:14px;min-height:230px;max-height:48vh;overflow:auto}.wide{width:100%;padding:12px;border-radius:12px}.quick{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.quick button{background:#f4f2ff;color:#514bb8}.toolpane textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:12px;padding:11px;resize:vertical}.chat{display:flex;flex-direction:column;gap:8px;margin-top:10px}.msg{padding:10px 12px;border-radius:13px;line-height:1.75;white-space:pre-wrap}.msg.user{background:#eeeaff}.msg.ai{background:#f7f7fb;border:1px solid var(--line)}#pdfFrame{width:100%;height:100%;border:0;background:#35343c}#audioElement{width:100%;margin-top:8px}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:5000;background:#2f2c46;color:#fff;border-radius:12px;padding:10px 14px;opacity:0;pointer-events:none;transition:.2s}#toast.on{opacity:1}.note-item{padding:10px;border-bottom:1px solid var(--line)}
+.mixer-dock{position:fixed;right:16px;bottom:18px;z-index:1600;border:0;border-radius:999px;background:var(--grad);color:#fff;padding:12px 14px;font-weight:900;box-shadow:0 14px 30px -15px rgba(79,70,229,.7)}.mixer-shade{position:fixed;inset:0;z-index:1700;background:rgba(20,18,40,.55);display:none;align-items:flex-end;justify-content:center}.mixer-shade.on{display:flex}.mixer-sheet{width:min(760px,100%);max-height:90dvh;overflow:auto;background:#fff;border-radius:24px 24px 0 0;padding:18px}.mixer-sheet header{display:flex;justify-content:space-between;align-items:flex-start}.mx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.mx-layer{border:1px solid var(--line);border-radius:13px;padding:9px}.mx-toggle{width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:7px}.mx-toggle.on{background:#eeebff;border-radius:10px}.mx-layer label{display:flex;gap:8px;align-items:center}.mx-layer input{flex:1}.mx-master,.mx-duck{display:grid;gap:9px;margin:12px 0}.mx-master label,.mx-duck label{display:flex;align-items:center;gap:10px}.mx-master input,.mx-duck input{flex:1}.mx-foot{display:flex;gap:8px;margin-top:12px}.mx-foot button{flex:1;padding:11px;border-radius:11px;border:1px solid var(--line)}
+@media(max-width:820px){.hero{grid-template-columns:1fr}.settings{align-items:stretch;flex-direction:column}.reader-body{display:flex;flex-direction:column}.toolpane{order:2;border:0;border-top:1px solid var(--line);max-height:42dvh}.reader-actions{overflow:auto}.reader>header{flex-wrap:wrap}.reader>header>div:nth-child(2){min-width:150px}.mx-grid{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.shell{padding-inline:10px}.hero>div{padding:18px}#pdfFrame{min-height:52dvh}}
+</style></head><body>
+<header class="lib-top"><a href="/" class="back">← Kosif</a><div><b>مكتبة Kosif الذكية</b><small>قارئ PDF · تحويل ذكي · Gemini TTS · سؤال الكتاب · Mixer</small></div><button id="mixOpen" class="iconbtn">🎚️</button></header>
+<main class="shell">
+<section class="hero"><div><span class="tag">مبني على محرك مفاتيح الثروة v33</span><h1>كل كتبك… جوه التطبيق</h1><p>ارفع PDF مرة واحدة، يفضل موجود على السحابة لكل مستخدمي Kosif. افتحه مباشرة، أو حوّله لكتاب ذكي: نص قابل للبحث، ملخصات وفصول، سؤال الكتاب، وصوت Gemini.</p></div><label class="upload"><input id="pdfInput" type="file" accept="application/pdf,.pdf"><b>＋ إضافة كتاب PDF</b><small>رفع مجزأ للكتب الكبيرة · قابل للاستكمال</small></label></section>
+<section class="settings"><label>مفتاح Gemini <input id="geminiKey" type="password" autocomplete="off" placeholder="يُحفظ على جهازك فقط"></label><button id="saveKey">حفظ المفتاح</button><span id="cloudStatus">جاهز</span></section>
+<section><div class="section-head"><div><h2>المكتبة</h2><p>الكتب المحفوظة على Cloudflare ومتاحة لكل مستخدمي الرابط.</p></div><button id="refreshBooks">تحديث</button></div><div id="uploadProgress" class="progress hidden"><i></i><span></span></div><div id="bookGrid" class="grid"><div class="empty">جاري تحميل المكتبة…</div></div></section>
+</main>
+<div id="reader" class="reader" aria-hidden="true"><header><button id="closeReader">✕</button><div><b id="readerTitle">الكتاب</b><small id="readerMeta"></small></div><div class="reader-actions"><button id="bookmarkBtn">🔖</button><button id="notesBtn">📝</button><button id="aiBtn">🧠</button><button id="listenBtn">🔊</button><button id="mixReaderBtn">🎚️</button></div></header><div class="reader-body"><aside id="toolPane" class="toolpane"><div class="pane-tabs"><button data-pane="text" class="on">النص</button><button data-pane="ai">افهم كتابي</button><button data-pane="notes">ملاحظاتي</button></div><section data-panel="text" class="on"><div class="row"><label>صفحة <input id="pageNo" type="number" min="1" value="1"></label><button id="loadPageText">تحميل النص</button></div><div id="pageText" class="page-text">لو الكتاب اتحول ذكيًا، نص الصفحة هيظهر هنا.</div><div class="row"><button id="speakPage" class="primary">▶ اقرأ الصفحة بـGemini</button><button id="stopAudio">■ إيقاف</button></div><audio id="audioElement" controls playsinline></audio></section><section data-panel="ai"><button id="convertBook" class="primary wide">✦ تحويل الكتاب لكتاب ذكي</button><div id="convertProgress" class="mini-progress"><i></i></div><p id="convertStatus">التحويل يقسم الـPDF إلى أجزاء ≤ 12MB، يستخرج النص/OCR ويخزن النتيجة للكتاب.</p><div class="quick"><button data-q="لخص الكتاب في نقاط عملية مع ذكر الصفحات.">ملخص</button><button data-q="ما أهم الأفكار والمفاهيم في الكتاب؟ اذكر الصفحات.">أهم الأفكار</button><button data-q="ما المتطلبات والإجراءات العملية المذكورة في الكتاب؟ اذكر الصفحات.">الإجراءات</button></div><textarea id="question" placeholder="اسأل الكتاب…"></textarea><button id="askBook" class="primary wide">اسأل الكتاب</button><div id="chat" class="chat"></div></section><section data-panel="notes"><textarea id="noteText" placeholder="اكتب ملاحظتك على الكتاب…"></textarea><button id="saveNote">حفظ الملاحظة</button><div id="notesList"></div></section></aside><iframe id="pdfFrame" title="قارئ PDF"></iframe></div></div>
+<div id="toast"></div>
+<script>(()=>{'use strict';
+const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)],fmt=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
+let books=[],active=null,audioUrl='',pdfLibPromise=null,convertCancel=false;
+const toast=t=>{const x=q('#toast');x.textContent=t;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),2400)};
+function key(){return q('#geminiKey').value.trim()||localStorage.getItem('kosif_gemini_key')||''}q('#geminiKey').value=localStorage.getItem('kosif_gemini_key')||'';q('#saveKey').onclick=()=>{localStorage.setItem('kosif_gemini_key',q('#geminiKey').value.trim());toast('تم حفظ المفتاح على الجهاز فقط')};
+async function api(path,opt){const r=await fetch(path,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j}
+async function loadBooks(){const d=await api('/api/library');books=d.books||[];renderBooks()}
+function renderBooks(){q('#bookGrid').innerHTML=books.length?books.map(b=>`<article class="book"><div class="cover">📕</div><h3>${esc(b.name)}</h3><p>${fmt(b.size)} · ${b.intelReady?'كتاب ذكي ✓':'PDF'}</p><div class="actions"><button class="primary" data-open="${b.id}">فتح</button><button data-convert="${b.id}">🧠 تحويل ذكي</button></div></article>`).join(''):'<div class="empty">المكتبة فاضية حاليًا. ارفع أول كتاب PDF.</div>';qa('[data-open]').forEach(b=>b.onclick=()=>openBook(b.dataset.open));qa('[data-convert]').forEach(b=>b.onclick=()=>{openBook(b.dataset.convert);setPane('ai');convertBook()})}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+q('#refreshBooks').onclick=loadBooks;q('#pdfInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;await uploadBook(f).catch(x=>toast(x.message));e.target.value=''};
+async function uploadBook(file){if(!/pdf/i.test(file.type)&&!file.name.toLowerCase().endsWith('.pdf'))throw new Error('اختار ملف PDF');const CH=8*1024*1024,count=Math.ceil(file.size/CH),p=q('#uploadProgress');p.classList.remove('hidden');const start=await api('/api/library/start',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:file.name,type:file.type||'application/pdf',size:file.size,chunkSize:CH,chunkCount:count})});for(let i=0;i<count;i++){const blob=file.slice(i*CH,Math.min(file.size,(i+1)*CH));const r=await fetch(`/api/library/chunk/${start.id}/${i}`,{method:'PUT',headers:{'content-type':'application/octet-stream'},body:blob});if(!r.ok)throw new Error('تعذر رفع الجزء '+(i+1));const pct=Math.round((i+1)*100/count);q('i',p).style.width=pct+'%';q('span',p).textContent=`رفع ${i+1}/${count} · ${pct}%`}await api('/api/library/finish',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:start.id})});q('span',p).textContent='تم رفع الكتاب ✓';toast('الكتاب أصبح متاحًا لكل المستخدمين');await loadBooks();setTimeout(()=>p.classList.add('hidden'),1800)}
+function openBook(id){active=books.find(x=>x.id===id);if(!active)return;q('#readerTitle').textContent=active.name;q('#readerMeta').textContent=`${fmt(active.size)} · ${active.intelReady?'كتاب ذكي':'PDF'}`;q('#pdfFrame').src=`/library/files/${id}#page=1&zoom=page-width`;q('#reader').classList.add('on');q('#reader').setAttribute('aria-hidden','false');q('#pageNo').value=1;loadPageText();renderNotes()}
+q('#closeReader').onclick=()=>{q('#reader').classList.remove('on');q('#pdfFrame').src='about:blank';stopAudio()};q('#pageNo').onchange=()=>{const n=Math.max(1,+q('#pageNo').value||1);q('#pdfFrame').src=`/library/files/${active.id}#page=${n}&zoom=page-width`;loadPageText()};
+function setPane(n){qa('[data-pane]').forEach(x=>x.classList.toggle('on',x.dataset.pane===n));qa('[data-panel]').forEach(x=>x.classList.toggle('on',x.dataset.panel===n))}qa('[data-pane]').forEach(x=>x.onclick=()=>setPane(x.dataset.pane));q('#notesBtn').onclick=()=>setPane('notes');q('#aiBtn').onclick=()=>setPane('ai');q('#listenBtn').onclick=()=>{setPane('text');speakPage()};
+async function loadPageText(){if(!active)return;const n=Math.max(1,+q('#pageNo').value||1);try{const d=await api(`/api/library/pages?id=${encodeURIComponent(active.id)}&from=${n}&to=${n}`);q('#pageText').textContent=d.pages?.[0]?.text||'الصفحة لم تُستخرج بعد. اضغط «تحويل الكتاب لكتاب ذكي».'}catch{q('#pageText').textContent='الصفحة لم تُستخرج بعد.'}}q('#loadPageText').onclick=loadPageText;
+function stopAudio(){const a=q('#audioElement');a.pause();a.removeAttribute('src');if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl='';document.dispatchEvent(new CustomEvent('mafateeh:narration',{detail:{active:false}}))}q('#stopAudio').onclick=stopAudio;q('#speakPage').onclick=speakPage;
+async function speakPage(){const text=q('#pageText').textContent.trim();if(!text||text.includes('لم تُستخرج'))return toast('حوّل الكتاب أو حمّل نص الصفحة الأول');const k=key();if(!k)return toast('أدخل مفتاح Gemini');stopAudio();toast('جاري تجهيز الصوت…');const r=await fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json','x-gemini-key':k},body:JSON.stringify({text:text.slice(0,9000),voice:'Kore'})});if(!r.ok){const d=await r.json().catch(()=>({}));return toast(d.error||'تعذر الصوت')}audioUrl=URL.createObjectURL(await r.blob());const a=q('#audioElement');a.src=audioUrl;a.onplay=()=>document.dispatchEvent(new CustomEvent('mafateeh:narration',{detail:{active:true}}));a.onpause=()=>document.dispatchEvent(new CustomEvent('mafateeh:narration',{detail:{active:false}}));await a.play().catch(()=>{})}
+function noteKey(){return 'kosif_notes_'+(active?.id||'')};function renderNotes(){if(!active)return;const a=JSON.parse(localStorage.getItem(noteKey())||'[]');q('#notesList').innerHTML=a.map((n,i)=>`<div class="note-item"><b>ص ${n.page}</b><div>${esc(n.text)}</div><button data-del-note="${i}">حذف</button></div>`).join('')||'<p>لا توجد ملاحظات.</p>';qa('[data-del-note]').forEach(b=>b.onclick=()=>{a.splice(+b.dataset.delNote,1);localStorage.setItem(noteKey(),JSON.stringify(a));renderNotes()})}q('#saveNote').onclick=()=>{const t=q('#noteText').value.trim();if(!t||!active)return;const a=JSON.parse(localStorage.getItem(noteKey())||'[]');a.unshift({page:+q('#pageNo').value||1,text:t,at:Date.now()});localStorage.setItem(noteKey(),JSON.stringify(a));q('#noteText').value='';renderNotes();toast('تم حفظ الملاحظة')};q('#bookmarkBtn').onclick=()=>{if(!active)return;const n=+q('#pageNo').value||1;localStorage.setItem('kosif_bookmark_'+active.id,String(n));toast('تم حفظ الصفحة '+n)};
+function ensurePdfLib(){if(window.PDFLib?.PDFDocument)return Promise.resolve(window.PDFLib);if(pdfLibPromise)return pdfLibPromise;pdfLibPromise=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';s.onload=()=>window.PDFLib?.PDFDocument?res(window.PDFLib):rej(new Error('تعذر تشغيل مقسم PDF'));s.onerror=()=>rej(new Error('تعذر تحميل pdf-lib'));document.head.appendChild(s)});return pdfLibPromise}
+async function makePart(doc,start,endHint,name){const lib=await ensurePdfLib();let end=endHint;for(;;){const out=await lib.PDFDocument.create(),idx=[];for(let p=start-1;p<end;p++)idx.push(p);(await out.copyPages(doc,idx)).forEach(p=>out.addPage(p));const bytes=await out.save({useObjectStreams:true,objectsPerTick:40});if(bytes.byteLength<=12*1024*1024||end===start){if(bytes.byteLength>12*1024*1024)throw new Error('صفحة واحدة أكبر من 12MB');return {file:new File([bytes],name.replace(/\.pdf$/i,'')+`.part-${start}-${end}.pdf`,{type:'application/pdf'}),start,end,count:end-start+1}}end=start+Math.max(1,Math.floor((end-start+1)/2))-1}}
+async function pdfUpload(file){const fd=new FormData();fd.append('action','upload');fd.append('file',file);const r=await fetch('/api/library-ai/pdf',{method:'POST',headers:{'x-gemini-key':key()},body:fd});const j=await r.json();if(!r.ok)throw new Error(j.error||'upload failed');return j.file}async function pdfAction(body){return api('/api/library-ai/pdf',{method:'POST',headers:{'content-type':'application/json','x-gemini-key':key()},body:JSON.stringify(body)})}
+q('#convertBook').onclick=convertBook;
+async function convertBook(){if(!active)return;const k=key();if(!k)return toast('أدخل مفتاح Gemini الأول');const st=q('#convertStatus'),bar=q('#convertProgress i');convertCancel=false;q('#convertBook').disabled=true;try{st.textContent='تحميل PDF من مكتبة Kosif…';const blob=await fetch(`/library/files/${active.id}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('تعذر تحميل PDF');return r.blob()});const lib=await ensurePdfLib(),doc=await lib.PDFDocument.load(await blob.arrayBuffer(),{updateMetadata:false}),pages=doc.getPageCount();let meta={title:active.name.replace(/\.pdf$/i,''),author:'',pageCount:pages,chapters:[],summary:'',warnings:[]};await api('/api/library/intel',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'meta',id:active.id,meta})});for(let next=1;next<=pages;){const part=await makePart(doc,next,Math.min(pages,next+79),active.name);st.textContent=`تحليل الصفحات ${part.start}–${part.end}…`;const remote=await pdfUpload(part.file);try{const an=await pdfAction({action:'analyze',fileUri:remote.uri,mimeType:remote.mimeType});const off=part.start-1,aa=an.analysis||{};meta.summary=meta.summary||aa.summary||'';meta.author=meta.author||aa.author||'';meta.chapters.push(...(aa.chapters||[]).map(c=>({...c,startPage:(+c.startPage||1)+off,endPage:(+c.endPage||1)+off})));for(let s=1;s<=part.count;s+=20){const e=Math.min(part.count,s+19);st.textContent=`استخراج/OCR الصفحات ${off+s}–${off+e} من ${pages}…`;const ex=await pdfAction({action:'extract',fileUri:remote.uri,mimeType:remote.mimeType,startPage:s,endPage:e});const mapped=(ex.pages||[]).map(p=>({page:off+(+p.page||0),title:p.title||'',text:String(p.text||'')}));await api('/api/library/intel',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'pages',id:active.id,pages:mapped})});bar.style.width=Math.round((off+e)*100/pages)+'%'}}finally{await pdfAction({action:'delete',fileName:remote.name}).catch(()=>{})}next=part.end+1}await api('/api/library/intel',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'meta',id:active.id,meta:{...meta,ready:true}})});st.textContent=`تم تحويل الكتاب ✓ · ${pages} صفحة`;bar.style.width='100%';active.intelReady=true;renderBooks();loadPageText()}catch(e){st.textContent='توقف التحويل: '+e.message}finally{q('#convertBook').disabled=false}}
+qa('[data-q]').forEach(b=>b.onclick=()=>q('#question').value=b.dataset.q);q('#askBook').onclick=async()=>{if(!active)return;const qu=q('#question').value.trim();if(!qu)return;const k=key();if(!k)return toast('أدخل مفتاح Gemini');addMsg('user',qu);q('#question').value='';try{const s=await api(`/api/library/search?id=${encodeURIComponent(active.id)}&q=${encodeURIComponent(qu)}`);if(!s.pages?.length)throw new Error('لا يوجد نص مستخرج بعد');const ctx=s.pages.map(p=>`[ص. ${p.page}]\n${p.text.slice(0,5000)}`).join('\n\n');const d=await api('/api/library-ai/chat',{method:'POST',headers:{'content-type':'application/json','x-gemini-key':k},body:JSON.stringify({system:'أجب فقط من مقتطفات الكتاب التالية، واكتب مرجع الصفحة [ص. N] بعد كل معلومة مهمة. إذا لم تجد الإجابة قل إنها غير موجودة في المقاطع المسترجعة.\n\n'+ctx,message:qu})});addMsg('ai',d.text)}catch(e){addMsg('ai','تعذر السؤال: '+e.message)}};function addMsg(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;q('#chat').prepend(d)}
+q('#mixOpen').onclick=q('#mixReaderBtn').onclick=()=>window.MafateehMixer?.open?.();loadBooks().catch(e=>q('#bookGrid').innerHTML='<div class="empty">'+esc(e.message)+'</div>');
+})();
+</script><script>/* مفاتيح الثروة — Professional Multi-Layer Audio Mixer v22 */
+(function(){
+  'use strict';
+  const $=(s,r=document)=>r.querySelector(s);
+  const LAYERS={
+    rain:{icon:'🌧️',name:'مطر',kind:'rain',level:38},
+    waves:{icon:'🌊',name:'أمواج',kind:'waves',level:42},
+    wind:{icon:'💨',name:'رياح',kind:'wind',level:24},
+    river:{icon:'💧',name:'نهر',kind:'river',level:28},
+    fire:{icon:'🔥',name:'نار',kind:'fire',level:22},
+    forest:{icon:'🌲',name:'غابة',kind:'forest',level:25},
+    thunder:{icon:'⛈️',name:'رعد',kind:'thunder',level:32},
+    lightning:{icon:'⚡',name:'برق',kind:'lightning',level:18}
+  };
+  const saved=(()=>{try{return JSON.parse(localStorage.getItem('mafateehMixerV22')||'{}')}catch{return {}}})();
+  const state={
+    context:null, master:null, active:new Map(), timers:new Map(),
+    masterLevel:Number.isFinite(+saved.masterLevel)?+saved.masterLevel:75,
+    narratorLevel:Number.isFinite(+saved.narratorLevel)?+saved.narratorLevel:100,
+    ducking:saved.ducking!==false, duckLevel:Number.isFinite(+saved.duckLevel)?+saved.duckLevel:28,
+    levels:{...Object.fromEntries(Object.entries(LAYERS).map(([k,v])=>[k,v.level])),...(saved.levels||{})},
+    enabled:new Set(Array.isArray(saved.enabled)?saved.enabled:[]), narration:false
+  };
+  function persist(){
+    localStorage.setItem('mafateehMixerV22',JSON.stringify({masterLevel:state.masterLevel,narratorLevel:state.narratorLevel,ducking:state.ducking,duckLevel:state.duckLevel,levels:state.levels,enabled:[...state.enabled]}));
+  }
+  function ensureContext(){
+    if(state.context) return state.context;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) throw new Error('Web Audio غير مدعوم على هذا الجهاز');
+    state.context=new AC();
+    state.master=state.context.createGain();
+    state.master.connect(state.context.destination);
+    applyMaster(true);
+    return state.context;
+  }
+  function resume(){const c=ensureContext();if(c.state==='suspended') return c.resume();return Promise.resolve();}
+  function noiseBuffer(kind='white',seconds=8){
+    const c=ensureContext(),len=Math.floor(c.sampleRate*seconds),b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0);
+    let last=0,b0=0,b1=0,b2=0;
+    for(let i=0;i<len;i++){
+      const w=Math.random()*2-1;
+      if(kind==='brown'){last=(last+0.02*w)/1.02;d[i]=last*3.2;}
+      else if(kind==='pink'){b0=.99765*b0+w*.099046;b1=.963*b1+w*.2965164;b2=.57*b2+w*1.0526913;d[i]=(b0+b1+b2+w*.1848)*.2;}
+      else d[i]=w*.48;
+    }
+    return b;
+  }
+  function noise(kind='white'){const c=ensureContext(),s=c.createBufferSource();s.buffer=noiseBuffer(kind);s.loop=true;return s;}
+  function chain(nodes,gain){
+    const c=ensureContext(),g=c.createGain();g.gain.value=gain;
+    let last=nodes[0];for(let i=1;i<nodes.length;i++){last.connect(nodes[i]);last=nodes[i];}
+    last.connect(g).connect(state.master);return g;
+  }
+  function periodicBurst(layerKey,{min=6,max=16,thunder=false,lightning=false}={}){
+    const schedule=()=>{
+      if(!state.enabled.has(layerKey)) return;
+      const delay=(min+Math.random()*(max-min))*1000;
+      const id=setTimeout(()=>{burst();schedule();},delay);state.timers.set(layerKey,id);
+    };
+    const burst=()=>{
+      if(!state.enabled.has(layerKey)) return;
+      const c=ensureContext(),now=c.currentTime;
+      if(thunder){
+        const s=noise('brown'),f=c.createBiquadFilter(),g=c.createGain();f.type='lowpass';f.frequency.value=260+Math.random()*180;
+        const level=(state.levels[layerKey]||30)/100*.8;g.gain.setValueAtTime(.001,now);g.gain.exponentialRampToValueAtTime(Math.max(.01,level),now+.08);g.gain.exponentialRampToValueAtTime(.001,now+2.6+Math.random()*1.8);
+        s.connect(f).connect(g).connect(state.master);s.start(now);s.stop(now+4.8);
+      }
+      if(lightning){
+        const s=noise('white'),hi=c.createBiquadFilter(),g=c.createGain();hi.type='highpass';hi.frequency.value=2200;
+        const level=(state.levels[layerKey]||18)/100*.45;g.gain.setValueAtTime(.001,now);g.gain.exponentialRampToValueAtTime(Math.max(.008,level),now+.008);g.gain.exponentialRampToValueAtTime(.001,now+.12);
+        s.connect(hi).connect(g).connect(state.master);s.start(now);s.stop(now+.18);
+      }
+    };
+    burst();schedule();
+  }
+  function createLayer(key){
+    const c=ensureContext(),level=(state.levels[key]||30)/100;
+    if(key==='thunder'){periodicBurst(key,{min:9,max:22,thunder:true});return {nodes:[],gain:null};}
+    if(key==='lightning'){periodicBurst(key,{min:7,max:19,lightning:true});return {nodes:[],gain:null};}
+    const nodes=[];let gainNode;
+    if(key==='rain'){
+      const a=noise('white'),hp=c.createBiquadFilter(),lp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=900;lp.type='lowpass';lp.frequency.value=7600;gainNode=chain([a,hp,lp],level*.58);nodes.push(a);a.start();
+    } else if(key==='waves'){
+      const a=noise('brown'),lp=c.createBiquadFilter(),g=c.createGain(),osc=c.createOscillator(),lfo=c.createGain();lp.type='lowpass';lp.frequency.value=650;g.gain.value=.55;osc.frequency.value=.075;lfo.gain.value=.35;osc.connect(lfo).connect(g.gain);gainNode=chain([a,lp,g],level*.9);nodes.push(a,osc);a.start();osc.start();
+    } else if(key==='wind'){
+      const a=noise('pink'),bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=580;bp.Q.value=.65;gainNode=chain([a,bp],level*.65);nodes.push(a);a.start();
+    } else if(key==='river'){
+      const a=noise('white'),bp=c.createBiquadFilter(),lp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1450;bp.Q.value=.35;lp.type='lowpass';lp.frequency.value=5200;gainNode=chain([a,bp,lp],level*.48);nodes.push(a);a.start();
+    } else if(key==='fire'){
+      const a=noise('brown'),bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=720;bp.Q.value=.7;gainNode=chain([a,bp],level*.45);nodes.push(a);a.start();
+    } else if(key==='forest'){
+      const a=noise('pink'),lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2100;gainNode=chain([a,lp],level*.28);nodes.push(a);a.start();
+      const chirp=()=>{if(!state.enabled.has(key))return;const o=c.createOscillator(),g=c.createGain(),now=c.currentTime;o.type='sine';o.frequency.setValueAtTime(1400+Math.random()*900,now);o.frequency.exponentialRampToValueAtTime(2200+Math.random()*1000,now+.12);g.gain.setValueAtTime(.001,now);g.gain.exponentialRampToValueAtTime(level*.09+.002,now+.02);g.gain.exponentialRampToValueAtTime(.001,now+.22);o.connect(g).connect(state.master);o.start(now);o.stop(now+.25);state.timers.set(key,setTimeout(chirp,3000+Math.random()*7000));};chirp();
+    }
+    return {nodes,gain:gainNode};
+  }
+  function stopLayer(key){
+    const item=state.active.get(key);if(item){for(const n of item.nodes||[]){try{n.stop?.()}catch{}try{n.disconnect?.()}catch{}}try{item.gain?.disconnect()}catch{}state.active.delete(key);}
+    const t=state.timers.get(key);if(t){clearTimeout(t);state.timers.delete(key);}
+  }
+  async function setLayer(key,on){
+    if(!LAYERS[key])return;
+    if(on){
+      await resume();
+      const wasEnabled=state.enabled.has(key);state.enabled.add(key);
+      if(!state.active.has(key) && key!=='thunder' && key!=='lightning') state.active.set(key,createLayer(key));
+      else if((key==='thunder'||key==='lightning')&&!wasEnabled) createLayer(key);
+    } else {state.enabled.delete(key);stopLayer(key);}
+    persist();render();
+  }
+  function setLayerLevel(key,value){state.levels[key]=+value;const item=state.active.get(key);if(item?.gain){const scale=key==='rain'?.58:key==='waves'?.9:key==='wind'?.65:key==='river'?.48:key==='fire'?.45:key==='forest'?.28:1;item.gain.gain.setTargetAtTime((+value/100)*scale,state.context.currentTime,.05);}persist();renderValues();}
+  function applyMaster(immediate=false){
+    if(!state.master)return;const target=(state.masterLevel/100)*(state.narration&&state.ducking?state.duckLevel/100:1);const now=state.context.currentTime;
+    if(immediate) state.master.gain.setValueAtTime(target,now); else state.master.gain.setTargetAtTime(target,now,state.narration?.08:.45);
+  }
+  function applyNarratorVolume(){const a=$('#audioElement');if(a)a.volume=Math.max(0,Math.min(1,state.narratorLevel/100));}
+  function setNarrationActive(active){state.narration=!!active;applyMaster();document.dispatchEvent(new CustomEvent('mafateeh:mixer-duck',{detail:{active:state.narration,ducking:state.ducking}}));}
+  function renderValues(){
+    $('#mxMasterVal')&&($('#mxMasterVal').textContent=state.masterLevel+'%');$('#mxNarratorVal')&&($('#mxNarratorVal').textContent=state.narratorLevel+'%');$('#mxDuckVal')&&($('#mxDuckVal').textContent=state.duckLevel+'%');
+    for(const key of Object.keys(LAYERS)){const el=$(`[data-mx-val="${key}"]`);if(el)el.textContent=state.levels[key]+'%';}
+  }
+  function render(){
+    for(const key of Object.keys(LAYERS)){const b=$(`[data-mx-toggle="${key}"]`);if(b){b.classList.toggle('on',state.enabled.has(key));b.setAttribute('aria-pressed',String(state.enabled.has(key)));}}
+    $('#mxDucking')?.classList.toggle('on',state.ducking);renderValues();
+  }
+  function open(){shade.classList.add('on');shade.setAttribute('aria-hidden','false');document.documentElement.classList.add('mixer-open');render();}
+  function close(){shade.classList.remove('on');shade.setAttribute('aria-hidden','true');document.documentElement.classList.remove('mixer-open');}
+
+  const rows=Object.entries(LAYERS).map(([key,l])=>`<div class="mx-layer"><button type="button" class="mx-toggle" data-mx-toggle="${key}" aria-pressed="false"><span>${l.icon}</span><b>${l.name}</b><i></i></button><label><input data-mx-range="${key}" type="range" min="0" max="100" step="1" value="${state.levels[key]}"><small data-mx-val="${key}">${state.levels[key]}%</small></label></div>`).join('');
+  document.body.insertAdjacentHTML('beforeend',`<button id="mixerDock" class="mixer-dock" type="button"><span>🎚️</span><b>Mix</b></button><div id="mixerShade" class="mixer-shade" aria-hidden="true"><section class="mixer-sheet" role="dialog" aria-modal="true"><div class="mixer-handle"></div><header><div><h2>🎚️ Mixer الصوت</h2><p>شغّل أكثر من مؤثر في نفس الوقت وتحكم في كل طبقة بصورة مستقلة.</p></div><button id="mixerClose" type="button" aria-label="إغلاق">✕</button></header><div class="mx-master"><label><span>صوت الكتاب <b id="mxNarratorVal">${state.narratorLevel}%</b></span><input id="mxNarrator" type="range" min="0" max="100" value="${state.narratorLevel}"></label><label><span>مستوى الأجواء <b id="mxMasterVal">${state.masterLevel}%</b></span><input id="mxMaster" type="range" min="0" max="100" value="${state.masterLevel}"></label></div><div class="mx-grid">${rows}</div><div class="mx-duck"><button id="mxDucking" type="button"><span><b>🎙️ Ducking احترافي</b><small>اخفض المؤثرات تلقائيًا أثناء كلام الراوي ثم أعدها بسلاسة.</small></span><i></i></button><label><span>الأجواء أثناء الكلام <b id="mxDuckVal">${state.duckLevel}%</b></span><input id="mxDuck" type="range" min="8" max="70" value="${state.duckLevel}"></label></div><div class="mx-foot"><button id="mxStopAll" type="button">إيقاف كل المؤثرات</button><button id="mxDone" class="primary" type="button">تم</button></div></section></div>`);
+  const shade=$('#mixerShade');
+  const oldAmbiencePlay=$('#ambientSound');if(oldAmbiencePlay&&!$('#openProfessionalMixer')){oldAmbiencePlay.insertAdjacentHTML('afterend','<button id="openProfessionalMixer" type="button" class="ambience-play" style="margin-top:8px"><i>🎚️</i><span>فتح Mixer متعدد الطبقات</span><small>مطر + أمواج + رياح + رعد… معًا</small></button>');$('#openProfessionalMixer').onclick=open;}
+  $('#mixerDock').onclick=open;$('#mixerClose').onclick=close;$('#mxDone').onclick=close;shade.onclick=e=>{if(e.target===shade)close();};
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-mx-toggle]');if(b)setLayer(b.dataset.mxToggle,!state.enabled.has(b.dataset.mxToggle));});
+  document.addEventListener('input',e=>{
+    if(e.target.matches('[data-mx-range]'))setLayerLevel(e.target.dataset.mxRange,e.target.value);
+    if(e.target.id==='mxMaster'){state.masterLevel=+e.target.value;applyMaster();persist();renderValues();}
+    if(e.target.id==='mxNarrator'){state.narratorLevel=+e.target.value;applyNarratorVolume();persist();renderValues();}
+    if(e.target.id==='mxDuck'){state.duckLevel=+e.target.value;applyMaster();persist();renderValues();}
+  });
+  $('#mxDucking').onclick=()=>{state.ducking=!state.ducking;applyMaster();persist();render();};
+  $('#mxStopAll').onclick=()=>{for(const key of [...state.enabled]){state.enabled.delete(key);stopLayer(key);}persist();render();};
+
+  const bookAudio=$('#audioElement');
+  if(bookAudio){bookAudio.addEventListener('playing',()=>{applyNarratorVolume();setNarrationActive(true)});bookAudio.addEventListener('pause',()=>setNarrationActive(false));bookAudio.addEventListener('ended',()=>setNarrationActive(false));applyNarratorVolume();}
+  document.addEventListener('mafateeh:narration',e=>setNarrationActive(!!e.detail?.active));
+  window.MafateehMixer={open,close,setNarrationActive,getNarratorVolume:()=>state.narratorLevel/100,setNarratorVolume:v=>{state.narratorLevel=Math.round(Math.max(0,Math.min(1,+v))*100);applyNarratorVolume();persist();renderValues();},layers:LAYERS};
+
+  // Restore previously enabled layers only after first user gesture (iOS audio rule).
+  if(state.enabled.size){const wanted=[...state.enabled];state.enabled.clear();const restore=async()=>{document.removeEventListener('pointerdown',restore,true);for(const key of wanted)await setLayer(key,true).catch(()=>{});};document.addEventListener('pointerdown',restore,true);}
+})();
+</script></body></html>

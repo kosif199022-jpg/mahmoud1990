@@ -1,0 +1,111 @@
+{
+  "name": "kosif",
+  "exportedAt": "2026-08-16T14:05:47.466Z",
+  "worker": "mahmoud-eldesouky",
+  "deploymentId": "12818f4d-5d80-476e-8744-6e78cb75ddf6",
+  "versionId": "2fe00bb6-7497-4f12-8905-5ed4d2fcaf89",
+  "traffic": [
+    {
+      "version_id": "2fe00bb6-7497-4f12-8905-5ed4d2fcaf89",
+      "percentage": 100
+    }
+  ],
+  "compatibilityDate": "2026-08-15",
+  "download": {
+    "zip": "/6ff6b51050ba881059c63e74/kosif-full-source.zip",
+    "txt": "/6ff6b51050ba881059c63e74/kosif-full-source.txt",
+    "json": "/6ff6b51050ba881059c63e74/kosif-project.json"
+  },
+  "security": {
+    "secretsIncluded": false,
+    "userAiKeyRequired": true,
+    "userAiKeyPersistence": "memory-only; cleared on reload",
+    "encryptedCompanies": "AES-GCM 256 client-side + PBKDF2 SHA-256 210000 iterations",
+    "adminOverrideEncryptedCompanies": false
+  },
+  "features": {
+    "brand": "kosif",
+    "workspaceVersion": "KOSIF_WORKSPACE_V8_2026_08_16",
+    "clientVersion": "KOSIF_CLIENT_V8_2026_08_16",
+    "splashMinMs": 2300,
+    "systemFontStack": true,
+    "externalGoogleFonts": false,
+    "staggerReveal": true,
+    "ambientMotion": true,
+    "ripple": true,
+    "heroGradientMotion": true,
+    "progressETA": true,
+    "mobileBottomNav": [
+      "الرئيسية",
+      "الميزان",
+      "الجولات",
+      "المطالبات",
+      "المزيد"
+    ],
+    "companyModes": [
+      "public",
+      "encrypted"
+    ],
+    "aiProviders": [
+      "Gemini",
+      "OpenAI",
+      "Claude/Anthropic"
+    ],
+    "aiDefaultConnected": false,
+    "officialSourceRefreshBeforeRounds": true,
+    "referenceLayers": [
+      "official-current",
+      "standards-library",
+      "books-library"
+    ],
+    "standardsReady": true
+  },
+  "bindings": [
+    {
+      "type": "kv_namespace",
+      "name": "DATA"
+    },
+    {
+      "type": "service",
+      "name": "MAFATEEH",
+      "service": "mafateeh-al-tharwa3",
+      "environment": "production"
+    },
+    {
+      "type": "service",
+      "name": "STANDARDS",
+      "service": "kosif-standards-library",
+      "environment": "production"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "file": "worker.js",
+      "bytes": 87995
+    },
+    {
+      "file": "library-module.js",
+      "bytes": 25429
+    },
+    {
+      "file": "professional-upgrade.js",
+      "bytes": 49918
+    },
+    {
+      "file": "standards-mafateeh.js",
+      "bytes": 31211
+    },
+    {
+      "file": "kosif-workspace.js",
+      "bytes": 87424
+    },
+    {
+      "file": "app-base.html",
+      "bytes": 401096
+    },
+    {
+      "file": "library-base.html",
+      "bytes": 38044
+    }
+  ]
+}
