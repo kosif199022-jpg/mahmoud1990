@@ -51,3 +51,4 @@ jobs:
             kosif-v36-3-mobile.png
             kosif-v36-3-council-v2.png
           if-no-files-found: ignore
+# 2026-08-18 history-restoration release browser gate
