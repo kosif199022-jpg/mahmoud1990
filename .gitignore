@@ -9,6 +9,10 @@ package-lock.json
 .dev.vars
 .dev.vars.*
 
+# Gemini CLI local/runtime state
+.gemini/
+gha-creds-*.json
+
 # Runtime-verifier artefacts
 kosif-v36-3-mobile.png
 *.local.png
