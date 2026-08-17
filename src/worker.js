@@ -20,13 +20,14 @@ async function saveSession(env,s){const ttl=Math.max(60,Math.ceil((Number(s.data
 function publicVerified(s){const out={};for(const [provider,x] of Object.entries(s?.data?.verified||{}))out[provider]={model:x.model,testedAt:x.testedAt};return out}
 async function authStatus(req,env){const s=await session(req,env);return j({unlocked:!!s,expiresAt:s?.data?.expiresAt||null,ownerEmailMasked:'m••••••57@gmail.com',verified:publicVerified(s)})}
 async function authLogin(req,env){
-  if(!env?.DATA||!env?.AI_GATE_HASH)return j({error:'AI gate is not configured. Access remains locked.'},503);
+  const gateHash=String(env?.KOSIF_AI_GATE_HASH||env?.AI_GATE_HASH||'');
+  if(!env?.DATA||!gateHash)return j({error:'AI gate is not configured. Access remains locked.'},503);
   const ip=req.headers.get('cf-connecting-ip')||req.headers.get('x-forwarded-for')||'unknown';
   const rlKey='kosif:ai:login:'+await sha256(ip);const now=Date.now();let rl=await env.DATA.get(rlKey,'json')||{count:0};
   if(rl.blockedUntil&&rl.blockedUntil>now)return j({error:'تم إيقاف المحاولات مؤقتًا. حاول بعد عدة دقائق.'},429);
   let body={};try{body=await req.json()}catch{return j({error:'طلب غير صالح'},400)}
   const password=String(body.password||'');if(!password||password.length>200)return j({error:'الباسورد مطلوب'},400);
-  const got=await sha256(password),expected=String(env.AI_GATE_HASH||'');
+  const got=await sha256(password),expected=gateHash;
   if(!safeEq(got,expected)){
     const count=(rl.count||0)+1,blockedUntil=count>=MAX_ATTEMPTS?now+15*60*1000:null;
     await env.DATA.put(rlKey,JSON.stringify({count:blockedUntil?0:count,blockedUntil}),{expirationTtl:15*60});
