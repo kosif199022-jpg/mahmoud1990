@@ -23,6 +23,8 @@ ok('Claude chairs only when verified and participating',/const claude=configs\.f
 ok('Council V2 is jurisdiction-aware',/KosifEngagementGovernance\?\.load/.test(council)&&/jurisdiction:g\.jurisdiction\|\|'other'/.test(council)&&/framework:g\.framework/.test(council));
 ok('Council V2 preserves human decision requirement',/humanDecisionRequired:true/.test(council)&&/Human-in-the-loop/.test(council));
 ok('Council V2 does not persist raw provider key maps',!council.includes('JSON.stringify(KEYS)')&&!council.includes('JSON.stringify(VERIFIED)')&&!council.includes("localStorage.setItem('cv2"));
+ok('Council context includes live PBC workflow state',/const s=stateRef\(\),v=s\?\.v36\|\|\{\},status=v\.pbc\|\|\{\}/.test(zai)&&/status\[d\.id\]\?\.status\|\|'Missing'/.test(zai));
+ok('Council context includes reviewer notes without raw keys',/reviewerNotes:notes/.test(zai)&&/v\.notes\|\|\[\]/.test(zai)&&!/councilStructuredContext[\s\S]{0,3000}kai-key/.test(zai));
 ok('engagement owns jurisdiction and framework state',/jurisdiction:'saudi'/.test(eng)&&/framework:'full-ifrs'/.test(eng)&&/kosif-engagement-change/.test(eng));
 ok('Master Requirements retain country anti-silent-fallback rule',/must not silently continue Saudi|لا.*السعود/i.test(req)||(/jurisdiction/i.test(req)&&/Saudi/i.test(req)&&/other/i.test(req)));
 ok('Master Requirements retain PBC lifecycle',/PBC/.test(req)&&/Requested/.test(req)&&/Received/.test(req)&&/Need Clarification/.test(req));

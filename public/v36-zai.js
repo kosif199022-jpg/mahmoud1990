@@ -1,12 +1,26 @@
 /* Kosif v36.3 — Z.ai / GLM provider bridge + verified test workflow */
 (()=>{'use strict';
 if(window.KosifZAI)return;
-const LS='kosif_ai_settings_v1',DEFAULT_MODEL='glm-5.1';
+const LS='kosif_ai_settings_v1',DEFAULT_MODEL='glm-5.1',COUNCIL_CTX_MARK='\n\n--- KOSIF_STRUCTURED_CONTEXT_V36 ---\n';
 const $=s=>document.querySelector(s);
 function readSettings(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}catch{return{}}}
 function provider(){return String(readSettings().provider||'').toLowerCase()}
 function isZai(v){return ['zai','z.ai','z-ai','z_ai','zhipu','glm'].includes(String(v||'').trim().toLowerCase())}
 function normalizeProvider(v){v=String(v||'').trim().toLowerCase();if(v==='claude')return'anthropic';if(isZai(v))return'zai';return v}
+function stateRef(){try{return typeof state!=='undefined'?state:null}catch{return null}}
+function councilStructuredContext(){
+  const s=stateRef(),v=s?.v36||{},status=v.pbc||{},requests=[];
+  for(const round of (s?.rounds||[]))for(const d of (round?.parsed?.document_requests||[]))requests.push({id:d.id||'',title:d.title||d.name||'',reason:d.reason||'',round:round.no,status:status[d.id]?.status||'Missing',statusAt:status[d.id]?.at||null,standard_refs:d.standard_refs||d.refs||[]});
+  const notes=(v.notes||[]).slice(-30).map(n=>({at:n.at||null,text:String(n.text||'').slice(0,4000)}));
+  return {kind:'kosif-audit-context',generatedAt:new Date().toISOString(),pbc:requests.slice(0,240),reviewerNotes:notes,pbcSummary:requests.reduce((a,x)=>(a[x.status]=(a[x.status]||0)+1,a),{})};
+}
+function injectCouncilContext(){
+  const task=$('#cv2-task');if(!task)return false;
+  const base=String(task.value||'').split(COUNCIL_CTX_MARK)[0].trimEnd(),ctx=councilStructuredContext();
+  task.value=base+COUNCIL_CTX_MARK+JSON.stringify(ctx,null,2);
+  setTimeout(()=>{if(task.isConnected&&String(task.value||'').includes(COUNCIL_CTX_MARK))task.value=String(task.value).split(COUNCIL_CTX_MARK)[0].trimEnd()},0);
+  return true;
+}
 function loadCouncilV2(){
   if(window.KosifCouncilV2||document.querySelector('script[data-kosif-council-v2="1"]'))return;
   const s=document.createElement('script');s.src='/v36-council-v2.js?v=36.3-council2';s.defer=true;s.dataset.kosifCouncilV2='1';document.head.appendChild(s);
@@ -95,6 +109,7 @@ document.addEventListener('change',e=>{
 document.addEventListener('click',e=>{
   const council=e.target.closest?.('#kosif-council-open');
   if(council){e.preventDefault();e.stopImmediatePropagation();openCouncilV2();return}
+  if(e.target.closest?.('#cv2-run'))injectCouncilContext();
   const test=e.target.closest?.('#kai-test');
   if(test){e.preventDefault();e.stopImmediatePropagation();testMainProvider(test);return}
   if(e.target.closest?.('#kosif-ai-open,#kosif-ai-status'))setTimeout(()=>{bindFormObserver();patch()},30);
@@ -102,7 +117,7 @@ document.addEventListener('click',e=>{
 window.addEventListener('kosif-ai-gate-change',()=>setTimeout(patchLabels,0));
 window.addEventListener('storage',e=>{if(e.key===LS)setTimeout(patch,0)});
 let tries=0,t=setInterval(()=>{patch();if((bindFormObserver()||bindLabelObservers())&&++tries>12)clearInterval(t);else if(++tries>80)clearInterval(t)},250);
-window.KosifZAI={version:'1.3.1',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider,loadCouncilV2,openCouncilV2};
+window.KosifZAI={version:'1.3.2',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider,loadCouncilV2,openCouncilV2,councilStructuredContext,injectCouncilContext};
 document.documentElement.dataset.kosifZai='ready';
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patch,{once:true});else patch();
 })();
