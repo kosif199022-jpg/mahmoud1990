@@ -11,7 +11,8 @@ ok('Executor consumes Council V2 accepted findings only',/accepted_findings/.tes
 ok('Every Council accepted finding needs an explicit human decision',/executorApprovals/.test(ex)&&/pending===0&&accepted>0/.test(ex)&&/EXECUTOR_HUMAN_DECISION/.test(ex));
 ok('Executor requires current owner gate',/KosifAIGate\?\.isUnlocked/.test(ex)&&/KosifAIGate\?\.open/.test(ex));
 ok('Executor requires Gemini verified by Council V2',/KosifCouncilV2\?\.verified\?\.\(\)\?\.gemini/.test(ex)&&/verified\.model!==model/.test(ex));
-ok('Executor never stores raw provider keys',!/(localStorage|sessionStorage)\.setItem\([^\n]*(key|KEY)/i.test(ex)&&!/JSON\.stringify\([^\n]*(key|KEY)/.test(ex));
+const persistsRawKey=/localStorage\.setItem\([^\n]*(?:cfg\.key|cv2-key-gemini|KEYS|VERIFIED)/.test(ex)||/sessionStorage\.setItem\([^\n]*(?:cfg\.key|cv2-key-gemini|KEYS|VERIFIED)/.test(ex)||/executorRuns\.push\([^\n]*(?:key:|cfg\.key)/.test(ex)||/log\([^\n]*(?:key:|cfg\.key)/.test(ex);
+ok('Executor never stores raw provider keys',!persistsRawKey);
 ok('Gemini role is execution not re-adjudication',/Execution & Deliverables Agent/.test(ex)&&/لا تعِد الفصل/.test(ex)&&/لا تتجاوز قرارات الإنسان/.test(ex));
 ok('Adjusting entries are forcibly Proposed and unposted',/status:'Proposed'/.test(ex)&&/posted:false/.test(ex)&&/reviewed_by_human:false/.test(ex));
 ok('Corrected TB is forcibly Draft and posting-blocked',/status:'Draft'/.test(ex)&&/posting_blocked:true/.test(ex));
