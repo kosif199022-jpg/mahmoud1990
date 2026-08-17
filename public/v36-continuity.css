@@ -1,0 +1,46 @@
+/* Kosif v36.3 — accessibility, dialog and release-continuity contract */
+:root{--kosif-font-scale-v36-3:1;--k363-icon:22px;--k363-focus:#7c3aed}
+html{font-size:calc(16px * var(--kosif-font-scale-v36-3,1))}
+body{font-size:.9375rem!important;overflow-wrap:anywhere}
+button,input,select,textarea{font-size:inherit}
+.card,.kpi,.step,.field,.kosif-action,.kosif-company-item,.note,.round,.finding,.docreq{min-width:0}
+.card-h,.kosif-row,.top-status{min-width:0}
+.card-h>*{min-width:0}
+.kosif-action{white-space:normal!important;line-height:1.55!important;overflow-wrap:anywhere!important}
+.kosif-action small{display:block;line-height:1.45;margin-top:3px}
+#kosif-bottom-nav button{min-width:0!important;line-height:1.2!important;overflow:visible!important}
+#kosif-bottom-nav svg{width:var(--k363-icon)!important;height:var(--k363-icon)!important;min-width:var(--k363-icon)!important;max-width:var(--k363-icon)!important;flex:0 0 var(--k363-icon)!important;stroke:currentColor!important;fill:none!important;stroke-width:1.8!important}
+#kosif-more,#kosif-company-sheet,#kosif-ai-sheet,#kosif-command-sheet,#kosif-font-sheet{overscroll-behavior:contain}
+#kosif-more.show,#kosif-company-sheet.show,#kosif-ai-sheet.show,#kosif-command-sheet.show,#kosif-font-sheet.show{overflow:auto!important;-webkit-overflow-scrolling:touch}
+#kosif-more>.kosif-sheet,#kosif-company-sheet>.kosif-sheet,#kosif-ai-sheet>.kosif-sheet,#kosif-command-sheet>.kosif-sheet,#kosif-font-sheet>.kosif-sheet{max-height:min(88dvh,900px)!important;overflow:auto!important;overscroll-behavior:contain;scrollbar-gutter:stable;min-width:0}
+.kosif-sheet-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))!important}
+.kosif-sheet input,.kosif-sheet select,.kosif-sheet textarea{min-width:0;max-width:100%}
+#kosif-skip{position:fixed;z-index:2147483647;top:8px;inset-inline-start:8px;transform:translateY(-160%);padding:9px 14px;border-radius:10px;background:#111827;color:#fff;text-decoration:none;font-weight:800}
+#kosif-skip:focus{transform:none}
+#kosif-release-banner{position:fixed;z-index:2147483500;left:12px;right:12px;bottom:max(82px,calc(env(safe-area-inset-bottom) + 74px));margin:auto;max-width:720px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:16px;padding:12px 14px;box-shadow:0 18px 50px rgba(15,23,42,.18);font-size:.84rem;line-height:1.55}
+#kosif-build-card code{direction:ltr;unicode-bidi:embed;font-size:.78em;word-break:break-all}
+#kosif-live-region{position:fixed!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}
+:focus-visible{outline:3px solid var(--k363-focus)!important;outline-offset:3px!important}
+.twrap{max-width:100%;-webkit-overflow-scrolling:touch}
+table.data th:first-child,table.data td:first-child{position:sticky;inset-inline-start:0;z-index:2;background:var(--surface,#fff)}
+table.data th:first-child{z-index:4}
+html[data-theme="dark"] #kosif-release-banner{background:#2a1c10;color:#fed7aa;border-color:#9a3412}
+html[data-theme="dark"] table.data th:first-child,html[data-theme="dark"] table.data td:first-child{background:#151b2e!important}
+@media(max-width:720px){
+  main{min-width:0;max-width:100%;overflow-x:clip}
+  .grid,.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)!important}
+  #kosif-bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  #kosif-bottom-nav button{font-size:.69rem!important;padding-inline:2px!important;gap:3px!important}
+  .topbar,.topbar-inner,.brand,.top-status{max-width:100%;min-width:0}
+  .pill{max-width:100%;white-space:normal!important}
+  .brand-sub{overflow-wrap:anywhere}
+}
+@media(min-width:721px) and (max-width:1023px){.kosif-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media print{
+  #kosif-bottom-nav,#kosif-more,#kosif-company-sheet,#kosif-ai-sheet,#kosif-command-sheet,#kosif-font-sheet,#kosif-release-banner,#kosif-motion-bg{display:none!important}
+  body{background:#fff!important;color:#000!important;font-size:10.5pt!important}
+  .card,.kpi,.step{box-shadow:none!important;break-inside:avoid;border-color:#bbb!important}
+  table{break-inside:auto} tr{break-inside:avoid;break-after:auto}
+  @page{margin:15mm 12mm}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}#kosif-release-banner{transition:none!important}}
