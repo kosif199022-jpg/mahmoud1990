@@ -1,0 +1,25 @@
+import fs from 'node:fs';
+const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
+const ex=read('public/v36-executor.js'),zai=read('public/v36-zai.js'),sw=read('public/sw.js'),doc=read('docs/KOSIF_EXECUTOR_CONTRACT_2026-08-17.md');
+const failures=[];const ok=(name,v)=>{console.log((v?'✅':'❌')+' '+name);if(!v)failures.push(name)};
+const expected=['final_findings_register','proposed_adjusting_entries','missing_document_requests','additional_audit_procedures','account_to_standard_matrix','disclosure_corrections','management_questions','client_action_plan','corrected_trial_balance_draft','audit_completion_checklist','draft_audit_report','management_letter','executive_summary','engagement_completion_package'];
+const m=ex.match(/const OUTPUT_KEYS=\[([^\]]+)\]/),actual=m?[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]):[];
+ok('Executor exposes exactly the historical 14 deliverables',actual.length===14&&JSON.stringify(actual)===JSON.stringify(expected));
+ok('Executor is dynamically loaded beside Council V2',/function loadExecutor\(/.test(zai)&&zai.includes('/v36-executor.js?v=36.3-executor1')&&/loadCouncilV2\(\);loadExecutor\(\)/.test(zai));
+ok('Executor is available offline through PWA precache',sw.includes("'/v36-executor.js'"));
+ok('Executor consumes Council V2 accepted findings only',/accepted_findings/.test(ex)&&/latestCouncil\(\)/.test(ex)&&/adjudication\?\.parsed/.test(ex));
+ok('Every Council accepted finding needs an explicit human decision',/executorApprovals/.test(ex)&&/pending===0&&accepted>0/.test(ex)&&/EXECUTOR_HUMAN_DECISION/.test(ex));
+ok('Executor requires current owner gate',/KosifAIGate\?\.isUnlocked/.test(ex)&&/KosifAIGate\?\.open/.test(ex));
+ok('Executor requires Gemini verified by Council V2',/KosifCouncilV2\?\.verified\?\.\(\)\?\.gemini/.test(ex)&&/verified\.model!==model/.test(ex));
+const persistsRawKey=/localStorage\.setItem\([^\n]*(?:cfg\.key|cv2-key-gemini|KEYS|VERIFIED)/.test(ex)||/sessionStorage\.setItem\([^\n]*(?:cfg\.key|cv2-key-gemini|KEYS|VERIFIED)/.test(ex)||/executorRuns\.push\([^\n]*(?:key:|cfg\.key)/.test(ex)||/log\([^\n]*(?:key:|cfg\.key)/.test(ex);
+ok('Executor never stores raw provider keys',!persistsRawKey);
+ok('Gemini role is execution not re-adjudication',/Execution & Deliverables Agent/.test(ex)&&/لا تعِد الفصل/.test(ex)&&/لا تتجاوز قرارات الإنسان/.test(ex));
+ok('Adjusting entries are forcibly Proposed and unposted',/status:'Proposed'/.test(ex)&&/posted:false/.test(ex)&&/reviewed_by_human:false/.test(ex));
+ok('Corrected TB is forcibly Draft and posting-blocked',/status:'Draft'/.test(ex)&&/posting_blocked:true/.test(ex));
+ok('Execution record is draft-only and posting-blocked',/draftOnly:true/.test(ex)&&/postingBlocked:true/.test(ex)&&/humanDecisionRequired:true/.test(ex));
+ok('Deterministic debit-credit balance gate rejects bad adjustments',/Math\.abs\(debit-credit\)>\.005/.test(ex)&&/غير متوازن/.test(ex));
+ok('Executor does not directly mutate original TB or auto-post adjustments',!/state(?:Ref\(\))?\?*\.tb\.accounts\s*=/.test(ex)&&!/adjusting_entries\.push\(/.test(ex)&&!/POSTED|Posted Externally/.test(ex));
+ok('Evidence gaps remain open tasks rather than accepted misstatements',/evidenceGaps/.test(ex)&&/فجوات الأدلة تُعامل كمهام مفتوحة/.test(ex));
+ok('Audit trail records human decisions, draft creation and export',/EXECUTOR_HUMAN_DECISION/.test(ex)&&/GEMINI_EXECUTOR_DRAFT_CREATED/.test(ex)&&/GEMINI_EXECUTOR_EXPORTED/.test(ex));
+ok('Executor contract documents no-posting boundary',/لا يتم الترحيل|no automatic posting|لا يرحّل/i.test(doc)&&/14/.test(doc)&&/Proposed/.test(doc)&&/Posted Externally/.test(doc));
+console.log(`KOSIF_EXECUTOR_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}
