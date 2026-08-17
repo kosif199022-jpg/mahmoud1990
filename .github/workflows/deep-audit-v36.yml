@@ -1,8 +1,8 @@
-name: Kosif v36.2.1 Deep Audit
+name: Kosif v36.3 Deep Audit
 
 on:
   push:
-    branches: [main, v36-2-library-motion-hardening]
+    branches: [main]
     paths:
       - 'src/**'
       - 'frontend/**'
@@ -24,13 +24,16 @@ jobs:
       - name: Run complete syntax, payload and deep-audit gate
         run: npm run check
       - name: Bundle Worker
-        run: npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/kosif-v36-2-1-worker.mjs >/dev/null
-      - name: Verify release invariants
+        run: npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/kosif-v36-3-worker.mjs >/dev/null
+      - name: Verify v36.3 release invariants
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "native-v36-2-1-library-hardening" src/worker.js
-          grep -q "version:'v36.2.1'" src/worker.js
+          grep -q "version:'v36.3'" src/worker.js
+          grep -q "buildId:'2026.08.17-v36.3-master-requirements'" src/worker.js
+          grep -q "AI_PROVIDERS=new Set(\['gemini','openai','anthropic','zai'\])" src/worker.js
+          grep -q "https://api.z.ai/api/paas/v4/chat/completions" src/zai-provider.js
+          ! grep -q "api.z.ai/api/coding/" src/zai-provider.js
           test "$(find public/standards/data/b4 -maxdepth 1 -name '*.json' | wc -l)" -eq 46
           node - <<'NODE'
           const fs=require('fs'),z=require('zlib');
@@ -41,12 +44,12 @@ jobs:
           if(/"book"\s*:\s*"b4"/.test(index))throw Error('development book leaked into professional index');
           const nums=fs.readdirSync('public/standards/data/b4').filter(x=>/^\d+\.json$/.test(x)).map(x=>+x.replace('.json','')).sort((a,b)=>a-b);
           if(nums.length!==46||!nums.every((n,i)=>n===i+1))throw Error('b4 chapter sequence failed');
-          console.log('V36_2_1_INVARIANTS_OK',b4);
+          console.log('V36_3_INVARIANTS_OK',b4);
           NODE
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-v36-2-1-deep-audit
+          name: kosif-v36-3-deep-audit
           path: /tmp/kosif-v36-deep-audit.md
           if-no-files-found: error
