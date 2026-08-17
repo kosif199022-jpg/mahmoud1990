@@ -1,0 +1,54 @@
+name: Finalize Kosif v36.3 B
+on:
+  push:
+    branches: [v36-3-history-continuity]
+    paths: ['.github/workflows/finalize-v36-3b.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  final:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-3-history-continuity
+      - name: Build and gates
+        run: |
+          python3 scripts/patch-v36-3-shortcuts.py
+          python3 scripts/apply-v36-3-history.py
+          npm run check
+          node --check public/v36-history-continuity.js
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/v363.mjs >/dev/null
+      - name: Browser setup
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2 >/dev/null
+          npx playwright install chromium >/dev/null
+          nohup npx --yes wrangler@4 dev --local --port 8793 >/tmp/wrangler-v363.log 2>&1 &
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8793/__health >/dev/null 2>&1 && exit 0; sleep 1; done
+          cat /tmp/wrangler-v363.log; exit 1
+      - name: Runtime
+        run: |
+          cat > /tmp/test.cjs <<'NODE'
+          const {chromium}=require(process.cwd()+'/node_modules/playwright'),ok=(v,m)=>{if(!v)throw Error(m)};
+          (async()=>{const b=await chromium.launch({headless:true});const m=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),p=await m.newPage(),bad=[],err=[];p.on('pageerror',e=>err.push(String(e)));p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});await p.goto('http://127.0.0.1:8793/?v=36.3',{waitUntil:'domcontentloaded'});await p.waitForTimeout(1400);ok(await p.evaluate(()=>!!KosifHistoryContinuity),'module');await p.evaluate(()=>KosifHistoryContinuity.openMore());ok((await p.locator('#kosif-more-sheet').innerText()).includes('البحث والأوامر'),'more');await p.locator('[data-kosif-action="search"]').click();ok(await p.locator('#kosif-command-palette.show').count()===1,'mobile palette');await p.keyboard.press('Escape');await p.evaluate(()=>KosifHistoryContinuity.setFontScale(2));ok(await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth)<=4,'font overflow');await p.evaluate(()=>localStorage.setItem('kosif_session_doc_meta_v2',JSON.stringify({docs:[{name:'evidence.pdf'}]})));await p.reload({waitUntil:'domcontentloaded'});await p.waitForTimeout(700);ok(await p.evaluate(()=>KosifHistoryContinuity.docsUnavailable()),'continuity');ok(await p.locator('#kosif-doc-warning').count()===1,'warning');await p.screenshot({path:'kosif-v36-3-final.png',fullPage:true});const dc=await b.newContext({viewport:{width:1366,height:768}}),d=await dc.newPage();await d.goto('http://127.0.0.1:8793/?desktop=1&v=36.3',{waitUntil:'domcontentloaded'});await d.waitForTimeout(1000);await d.keyboard.press('Alt+K');await d.waitForTimeout(100);ok(await d.locator('#kosif-command-palette.show').count()===1,'AltK');ok(await d.evaluate(()=>document.activeElement?.id==='kosif-command-input'),'focus');await d.keyboard.press('Escape');await d.keyboard.press('Control+/');await d.waitForTimeout(100);ok(await d.locator('#kosif-command-palette.show').count()===1,'CtrlSlash');ok(!bad.length,'bad '+bad);ok(!err.some(x=>/ReferenceError|TypeError|SyntaxError/.test(x)),'errors '+err);await b.close();console.log('KOSIF_V36_3_FINAL_OK')})().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
+          node /tmp/test.cjs
+      - name: Commit release
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/v36-history-continuity.js public/index.html frontend/index.html public/sw.js src/worker.js package.json scripts/deep-audit-v36.mjs
+          git diff --cached --quiet && exit 0
+          git commit -m 'Finalize Kosif v36.3 historical continuity release'
+          git pull --rebase origin v36-3-history-continuity
+          git push origin HEAD:v36-3-history-continuity
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kosif-v36-3-final
+          path: |
+            kosif-v36-3-final.png
+            /tmp/wrangler-v363.log
+          if-no-files-found: ignore
