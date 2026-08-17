@@ -5,14 +5,12 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-assets.mjs",
-    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run contract && npm run audit",
+    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run contract && npm run history-parity && npm run audit",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
     "legacy-regressions": "node scripts/check-legacy-regressions.mjs",
     "audit": "node scripts/deep-audit-v36.mjs",
-    "contract": "node scripts/check-v36-3-contract.mjs"
-  },
-  "devDependencies": {
-    "wrangler": "^4.0.0"
+    "contract": "node scripts/check-v36-3-contract.mjs",
+    "history-parity": "node scripts/check-history-parity-v36-3.mjs"
   }
 }
