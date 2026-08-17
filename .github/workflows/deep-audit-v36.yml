@@ -26,7 +26,7 @@ jobs:
       - name: Import b4 and apply reviewed hardening
         run: |
           set -euo pipefail
-          node scripts/import-mafateeh-book.mjs /tmp/mafateeh-reader.html
+          node scripts/import-mafateeh-book-v2.mjs /tmp/mafateeh-reader.html
           node scripts/apply-v36-2-attachment-hardening.mjs
       - name: Run complete release gate
         run: npm run check
@@ -42,7 +42,7 @@ jobs:
           if(!b||b.chapters!==46||b.words!==34700||b.professionalAuthority!==false)throw Error('b4 metadata gate');
           const idx=z.gunzipSync(fs.readFileSync('public/standards/data/search-index.json.gz')).toString();if(/"book"\s*:\s*"b4"/.test(idx))throw Error('b4 leaked into professional index');
           const c=JSON.parse(fs.readFileSync('public/standards/data/b4/1.json','utf8'));if(!c.study?.key||!c.study?.idea||!c.study?.application||!c.study?.weeklyTask||!c.study?.questions?.length)throw Error('study layer incomplete');
-          console.log('B4_GATE_OK',b.id,b.chapters,b.words,c.part,c.title,c.body.length,c.study.questions.length);
+          console.log('B4_GATE_OK',b.id,b.parts,b.chapters,b.words,c.part,c.title,c.body.length,c.study.questions.length);
           NODE
       - name: Commit verified application changes
         shell: bash
