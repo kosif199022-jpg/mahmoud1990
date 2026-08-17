@@ -43,7 +43,7 @@ r=await edgeWorker.fetch(new Request('https://kosif.test/api/library',{headers:{
 ok('Owner can administer all smart-library books',d.scope==='owner'&&d.books?.some(x=>x.id==='foreign')&&d.books?.some(x=>x.id===mine&&x.auditTrusted===true));
 
 ok('AI edge filters library metadata through explicit audit-trust markers',/function trustedLibraryData\(data\)/.test(edge)&&/opts\?\.prefix\|\|''\)!=='library:meta:'/.test(edge)&&/kosif:library:audit-trusted:/.test(edge)&&/isAIPath\(u\.pathname\)\?aiEnv\(env\):env/.test(edge));
-ok('Stored PDF, OCR, search and chunk routes are device-gated',/library\/files/.test(edge)&&/api\\\/library\\\/chunk/.test(edge)&&edge.includes("'/api/library/intel'")&&edge.includes("'/api/library/search'"));
+ok('Stored PDF, OCR, search and chunk routes are device-gated',edge.includes('function isStoredLibraryRoute')&&edge.includes('library/files')&&edge.includes('api/library/chunk')&&edge.includes("'/api/library/intel'")&&edge.includes("'/api/library/search'"));
 ok('Upload-start abuse gets an hourly server-side rate limit',/LIBRARY_UPLOAD_RATE_LIMIT/.test(edge)&&/count>=10/.test(edge));
 
 console.log(`KOSIF_LIBRARY_PRIVACY ${failures.length?'FAILED':'OK'} failures=${failures.length}`);
