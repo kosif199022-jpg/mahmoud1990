@@ -1,0 +1,88 @@
+name: '🔀 Gemini Dev Agent Dispatch'
+
+on:
+  issue_comment:
+    types:
+      - 'created'
+  pull_request_review_comment:
+    types:
+      - 'created'
+  pull_request_review:
+    types:
+      - 'submitted'
+
+defaults:
+  run:
+    shell: 'bash'
+
+jobs:
+  dispatch:
+    if: |-
+      github.event.sender.type == 'User' &&
+      startsWith(github.event.comment.body || github.event.review.body || '', '@gemini-cli') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association || github.event.review.author_association)
+    runs-on: 'ubuntu-latest'
+    permissions:
+      contents: 'read'
+      issues: 'write'
+      pull-requests: 'write'
+    outputs:
+      command: '${{ steps.extract_command.outputs.command }}'
+      additional_context: '${{ steps.extract_command.outputs.additional_context }}'
+    steps:
+      - name: 'Extract command'
+        id: 'extract_command'
+        uses: 'actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea'
+        env:
+          REQUEST: '${{ github.event.comment.body || github.event.review.body }}'
+        with:
+          script: |
+            const request = process.env.REQUEST || '';
+            if (request.startsWith('@gemini-cli /approve')) {
+              core.setOutput('command', 'approve');
+              core.setOutput('additional_context', '');
+            } else if (request.startsWith('@gemini-cli')) {
+              core.setOutput('command', 'invoke');
+              core.setOutput('additional_context', request.replace(/^@gemini-cli/, '').trim());
+            } else {
+              core.setOutput('command', 'fallthrough');
+              core.setOutput('additional_context', '');
+            }
+
+      - name: 'Acknowledge request'
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
+          REPOSITORY: '${{ github.repository }}'
+          MESSAGE: |-
+            🤖 Gemini development agent received the request. Track progress in Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |-
+          gh issue comment "${ISSUE_NUMBER}" --body "${MESSAGE}" --repo "${REPOSITORY}"
+
+  invoke:
+    needs: 'dispatch'
+    if: |-
+      ${{ needs.dispatch.outputs.command == 'invoke' }}
+    uses: './.github/workflows/gemini-invoke.yml'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      issues: 'write'
+      pull-requests: 'write'
+    with:
+      additional_context: '${{ needs.dispatch.outputs.additional_context }}'
+    secrets: 'inherit'
+
+  plan-execute:
+    needs: 'dispatch'
+    if: |-
+      ${{ needs.dispatch.outputs.command == 'approve' }}
+    uses: './.github/workflows/gemini-plan-execute.yml'
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      issues: 'write'
+      pull-requests: 'write'
+    with:
+      additional_context: '${{ needs.dispatch.outputs.additional_context }}'
+    secrets: 'inherit'
