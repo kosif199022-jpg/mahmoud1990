@@ -1,0 +1,1 @@
+Kosif v36 release gate revision 2 — existing view integration fixed.
