@@ -1,0 +1,75 @@
+name: Polish Kosif v36 UI
+
+on:
+  push:
+    branches: [v36-consolidated]
+    paths: ['.github/workflows/polish-v36-ui.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-consolidated
+      - name: Wire v36 style/output layers and remove stale dependencies
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for fn in ['frontend/index.html','public/index.html']:
+            p=Path(fn);s=p.read_text(encoding='utf8')
+            s=re.sub(r'\s*<link[^>]+(?:fonts\.googleapis\.com|fonts\.gstatic\.com)[^>]*>','',s,flags=re.I)
+            s=s.replace('Math.max(0,2300-elapsed)','Math.max(0,700-elapsed)')
+            s=re.sub(r'(?m)^500;600;700;800;900&family=Plus\+Jakarta\+Sans[^\n]*\n?','',s)
+            s=s.replace('/* KOSIF_NATIVE_V35_PRO_COMPAT */','/* KOSIF_NATIVE_V36_PRO_COMPAT */').replace('version:"35.0.0"','version:"36.0.0"')
+            css='<link rel="stylesheet" href="/v36.css?v=36">'
+            if css not in s:s=s.replace('</head>',css+'</head>')
+            out='<script src="/v36-outputs.js?v=36"></script>'
+            anchor='<script src="/v36-features.js?v=36"></script>'
+            if out not in s:s=s.replace(anchor,anchor+'\n'+out)
+            p.write_text(s,encoding='utf8')
+          p=Path('src/kosif-workspace.js');s=p.read_text(encoding='utf8')
+          s=s.replace('Math.max(0,2300-elapsed)','Math.max(0,700-elapsed)')
+          s=re.sub(r'(?m)^500;600;700;800;900&family=Plus\+Jakarta\+Sans[^\n]*\n?','',s)
+          p.write_text(s,encoding='utf8')
+          PY
+      - name: Validate UI build
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/v36-features.js
+          node --check public/v36-outputs.js
+          python3 - <<'PY'
+          import re,pathlib,subprocess,os
+          for fn in ['frontend/index.html','public/index.html']:
+            s=pathlib.Path(fn).read_text()
+            assert 'fonts.googleapis.com' not in s and 'fonts.gstatic.com' not in s
+            assert '/v36.css?v=36' in s and '/v36-outputs.js?v=36' in s
+            assert '2300-elapsed' not in s
+            for i,x in enumerate(re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',s,re.I)):
+              f=f'/tmp/{pathlib.Path(fn).name}-{i}.js';pathlib.Path(f).write_text(x);subprocess.check_call(['node','--check',f],stdout=subprocess.DEVNULL)
+          refs=re.findall(r'<(?:script|link)\b[^>]*(?:src|href)=["\']([^"\']+)',pathlib.Path('public/index.html').read_text(),re.I)
+          missing=[]
+          for u in refs:
+            if not u.startswith('/'):continue
+            clean=u.split('?')[0].split('#')[0]
+            if clean=='/' or clean.startswith('/api/'):continue
+            if not os.path.exists('public'+clean):missing.append(clean)
+          print('MISSING',missing);assert not missing
+          PY
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+      - name: Commit polished candidate
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add frontend/index.html public/index.html src/kosif-workspace.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Polish v36 mobile UI and restore output actions'
+          git push origin HEAD:v36-consolidated
