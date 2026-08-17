@@ -26,6 +26,9 @@ ok('Council V2 does not persist raw provider key maps',!council.includes('JSON.s
 ok('Council context includes live PBC workflow state',/const s=stateRef\(\),v=s\?\.v36\|\|\{\},status=v\.pbc\|\|\{\}/.test(zai)&&/status\[d\.id\]\?\.status\|\|'Missing'/.test(zai));
 ok('Council context includes reviewer notes without raw keys',/reviewerNotes:notes/.test(zai)&&/v\.notes\|\|\[\]/.test(zai)&&!/councilStructuredContext[\s\S]{0,3000}kai-key/.test(zai));
 ok('engagement owns jurisdiction and framework state',/jurisdiction:'saudi'/.test(eng)&&/framework:'full-ifrs'/.test(eng)&&/kosif-engagement-change/.test(eng));
+ok('unknown jurisdiction never silently becomes Saudi at AI edge',/function normalizeJurisdiction\(v\)/.test(worker)&&/return'other'/.test(worker)&&/agent\.jurisdiction='international'/.test(worker)&&/لا تفترض أي متطلب سعودي/.test(worker));
+ok('unknown jurisdiction source refresh/status is neutralized before workspace fallback',/function neutralJurisdictionSources\(/.test(worker)&&/sources\/refresh/.test(worker)&&/sources\/status/.test(worker)&&/target\.searchParams\.set\('jurisdiction','international'\)/.test(worker));
+ok('unknown jurisdiction response discloses reference-only mode',/referenceJurisdiction:'international'/.test(worker)&&/localAuthorityVerified:false/.test(worker)&&/لم يتم تطبيق مصادر سعودية/.test(worker));
 ok('Master Requirements retain country anti-silent-fallback rule',/must not silently continue Saudi|لا.*السعود/i.test(req)||(/jurisdiction/i.test(req)&&/Saudi/i.test(req)&&/other/i.test(req)));
 ok('Master Requirements retain PBC lifecycle',/PBC/.test(req)&&/Requested/.test(req)&&/Received/.test(req)&&/Need Clarification/.test(req));
 ok('Master Requirements retain evidence and reviewer-note requirements',/reviewer/i.test(req)&&/voice/i.test(req)&&/evidence/i.test(req));

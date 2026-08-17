@@ -45,6 +45,21 @@ async function authLogout(req,env){const s=await session(req,env);if(s)await env
 function aiPath(p){return /^\/api\/(?:kosif\/)?(?:ai|gemini|openai|anthropic|claude|zai|z-ai|zhipu|glm|council)(?:\/|$)/i.test(p)}
 function normalProvider(v){v=String(v||'').trim().toLowerCase();if(v==='claude')return'anthropic';if(isZaiProvider(v))return'zai';return v}
 function providerFrom(path,b){const p=normalProvider(b?.provider);if(p)return AI_PROVIDERS.has(p)?p:'';if(/gemini/i.test(path))return'gemini';if(/openai/i.test(path))return'openai';if(/anthropic|claude/i.test(path))return'anthropic';if(/z(?:\.?ai|-ai)|zhipu|glm/i.test(path))return'zai';return''}
+function normalizeJurisdiction(v){v=String(v||'saudi').trim().toLowerCase();if(v==='saudi'||v==='sa'||v==='ksa')return'saudi';if(v==='international'||v==='intl'||v==='global')return'international';return'other'}
+function jurisdictionSafeAIRequest(req,b){
+  const raw=b?.agent?.jurisdiction;const jurisdiction=normalizeJurisdiction(raw);if(jurisdiction!=='other')return req;
+  const agent={...(b.agent||{})};
+  const warning='تنبيه اختصاص إلزامي: الولاية المختارة ليست السعودية ولم تُجهز لها حزمة مصادر محلية موثقة داخل Kosif بعد. استخدم IFRS/IAASB كمراجع دولية فقط حيث تنطبق، ولا تفترض أي متطلب سعودي أو محلي. أي حكم يعتمد على قانون أو معيار محلي يجب أن يُعلّق حتى تقديم مصدر رسمي خاص بالولاية والتحقق منه.';
+  agent.jurisdiction='international';agent.rolePrompt=[String(agent.rolePrompt||'').trim(),warning].filter(Boolean).join('\n\n');agent.requestedJurisdiction=String(raw||'other');agent.localAuthorityVerified=false;
+  return new Request(req.url,{method:'POST',headers:req.headers,body:JSON.stringify({...b,agent})});
+}
+async function neutralJurisdictionSources(req,env,ctx,u){
+  if(req.method!=='GET'||!['/api/kosif/sources/refresh','/api/kosif/sources/status'].includes(u.pathname))return null;
+  const requested=normalizeJurisdiction(u.searchParams.get('jurisdiction')||'saudi');if(requested!=='other')return null;
+  const target=new URL(u);target.searchParams.set('jurisdiction','international');
+  const upstream=await legacyWorker.fetch(new Request(target,req),env,ctx);let data=null;try{data=await upstream.clone().json()}catch{return upstream}
+  return j({...data,jurisdiction:'other',referenceJurisdiction:'international',localAuthorityVerified:false,jurisdictionWarning:'لم يتم تطبيق مصادر سعودية. المراجع الدولية هنا مرجع محايد فقط حتى إضافة مصادر رسمية للولاية المختارة والتحقق منها.'},upstream.status);
+}
 async function keyFingerprint(provider,model,key){return sha256([normalProvider(provider),String(model||'').trim(),String(key||'').trim()].join('\n'))}
 async function parseBody(req){try{return await req.clone().json()}catch{return null}}
 async function testAI(req,env,ctx){
@@ -86,7 +101,8 @@ export default{async fetch(req,env,ctx){
   if(u.pathname==='/api/kosif/auth/login'&&req.method==='POST')return authLogin(req,env);
   if(u.pathname==='/api/kosif/auth/logout'&&req.method==='POST')return authLogout(req,env);
   if(u.pathname==='/api/kosif/ai/test'&&req.method==='POST')return testAI(req,env,ctx);
-  if(aiPath(u.pathname)){const gate=await requireVerifiedAI(req,env);if(gate.response)return gate.response;if(gate.provider==='zai')return handleZaiAI(req,env);return legacyWorker.fetch(req,env,ctx)}
+  if(aiPath(u.pathname)){const gate=await requireVerifiedAI(req,env);if(gate.response)return gate.response;const safeReq=jurisdictionSafeAIRequest(req,gate.body);if(gate.provider==='zai')return handleZaiAI(safeReq,env);return legacyWorker.fetch(safeReq,env,ctx)}
+  const neutralSources=await neutralJurisdictionSources(req,env,ctx,u);if(neutralSources)return neutralSources;
   if(u.pathname==='/standards')return Response.redirect(new URL('/standards/',u),308);
   if(req.method==='GET'&&(E.has(u.pathname)||u.pathname.startsWith('/standards/'))){const r=await a(req,env);if(r)return tag(r);if(E.has(u.pathname))return tag(await legacyWorker.fetch(req,env,ctx));return new Response('Not found',{status:404})}
   if(u.pathname.startsWith('/api/')||req.method!=='GET')return legacyWorker.fetch(req,env,ctx);
