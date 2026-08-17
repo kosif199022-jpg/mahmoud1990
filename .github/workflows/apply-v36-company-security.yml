@@ -1,0 +1,45 @@
+name: Apply Kosif v36 Company Security
+
+on:
+  push:
+    branches: [v36-consolidated]
+    paths: ['.github/workflows/apply-v36-company-security.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  secure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v36-consolidated
+      - name: Apply write-token security
+        run: node scripts/patch-v36-company-security.mjs
+      - name: Validate secured worker and clients
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
+          python3 - <<'PY'
+          import re,pathlib,subprocess
+          for fn in ['frontend/index.html','public/index.html']:
+            s=pathlib.Path(fn).read_text()
+            assert 'newWriteToken()' in s and 'x-kosif-write-token' in s and 'قراءة فقط' in s
+            for i,x in enumerate(re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',s,re.I)):
+              p=pathlib.Path('/tmp')/f'{i}.js';p.write_text(x);subprocess.check_call(['node','--check',str(p)],stdout=subprocess.DEVNULL)
+          PY
+          grep -q 'writeTokenHash' src/kosif-workspace.js
+          grep -q 'canWritePublic' src/kosif-workspace.js
+      - name: Commit security upgrade
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/kosif-workspace.js frontend/index.html public/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Secure public company writes with per-device tokens'
+          git pull --rebase origin v36-consolidated
+          git push origin HEAD:v36-consolidated
