@@ -29,7 +29,13 @@ const ok=(v,m)=>{if(!v)throw Error(m)};
   await page.locator('#kosif-ai-status').click();await page.waitForTimeout(180);
   const key=page.locator('#kai-key');ok(await key.getAttribute('readonly')!==null,'AI key must be locked');ok((await key.inputValue())==='','locked AI key must be empty');ok(await page.locator('#kai-test').isDisabled(),'AI test enabled while locked');
   ok(await page.locator('#kai-provider option[value="zai"]').count()===1,'Z.ai provider option missing');
-  await page.evaluate(()=>go('council'));await page.waitForTimeout(120);ok(await page.locator('#c-key-gemini').getAttribute('readonly')!==null,'Council key must be locked');
+  await page.waitForFunction(()=>window.KosifCouncilV2?.version==='2.0.0');
+  await page.evaluate(()=>window.KosifZAI.openCouncilV2());await page.waitForTimeout(120);
+  ok(await page.locator('#view-council.show').count()===1,'Council V2 navigation failed');
+  for(const id of ['gemini','openai','anthropic','zai']){
+    const ck=page.locator('#cv2-key-'+id);ok(await ck.count()===1,'Council V2 provider missing '+id);ok(await ck.getAttribute('readonly')!==null,'Council V2 key must be locked '+id);ok((await ck.inputValue())==='','Council V2 locked key must be empty '+id);
+  }
+  ok(await page.locator('#cv2-run').isDisabled(),'Council V2 run must be disabled while owner gate is locked');
   await page.evaluate(()=>{document.querySelector('#kosif-ai-sheet')?.classList.remove('show');document.querySelector('#kosif-ai-gate')?.classList.remove('show');go('analytics')});await page.waitForTimeout(220);ok(await page.locator('#ops-lab').count()===1,'Operational lab missing');await page.locator('#ops-sample').click({force:true});await page.waitForTimeout(150);ok(await page.locator('#ops-out .kpi').count()>=4,'Operational KPIs missing');
 
   await page.goto(BASE+'/standards/?v=36.3',{waitUntil:'domcontentloaded'});await page.waitForTimeout(900);
