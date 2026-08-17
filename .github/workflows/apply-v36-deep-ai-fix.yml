@@ -17,44 +17,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: v36-deep-audit-fix
-      - name: Patch AI settings, status and test workflow
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          NEW_SYNC=r'''function aiOwnerUnlocked(){return document.documentElement.dataset.kosifAiUnlocked==='1'}
-function aiVerified(p,m,k){const v=AI_VERIFIED[p];return !!(v&&v.model===String(m||'').trim()&&v.key===String(k||'').trim())}
-function invalidateAI(p){delete AI_VERIFIED[p];syncAI()}
-function syncAI(){const st=settings(),k=apiKey(),p=$('#kosif-ai-status'),connected=aiOwnerUnlocked()&&!!k&&aiVerified(st.provider,st.model,k);try{localStorage.removeItem('tamhees_key')}catch(_){}if(p){p.classList.toggle('on',connected);p.classList.toggle('off',!connected);p.classList.toggle('pending',aiOwnerUnlocked()&&!!k&&!connected);const t=p.querySelector('.kosif-ai-text');let wanted='🔐 AI مقفول';if(aiOwnerUnlocked())wanted=!k?'AI غير مربوط':connected?'AI متصل · '+providerLabel(st.provider):'AI غير مختبر · '+providerLabel(st.provider);if(t&&t.textContent!==wanted)t.textContent=wanted}const rm=$('#rounds-model');if(rm){const rw=connected?'AI متصل: '+providerLabel(st.provider)+' · '+st.model:aiOwnerUnlocked()?'AI غير مختبر':'AI مقفول';if(rm.textContent!==rw)rm.textContent=rw}}
-window.addEventListener('kosif-ai-gate-change',e=>{if(!e.detail?.unlocked){for(const k of Object.keys(AI_KEYS))delete AI_KEYS[k];for(const k of Object.keys(AI_VERIFIED))delete AI_VERIFIED[k]}syncAI()});'''
-          NEW_AI=r'''function openAI(){shells();const s=settings(),p=s.provider,owner=aiOwnerUnlocked();$('#kosif-ai-form').innerHTML=`<div class="kosif-row"><div class="kosif-field" style="flex:1"><label>مزود الذكاء الاصطناعي</label><select id="kai-provider"><option value="gemini" ${p==='gemini'?'selected':''}>Gemini</option><option value="openai" ${p==='openai'?'selected':''}>OpenAI</option><option value="anthropic" ${p==='anthropic'?'selected':''}>Claude / Anthropic</option></select></div><div class="kosif-field" style="flex:1"><label>النموذج</label><input id="kai-model" value="${esc(s.model)}"></div></div><div class="kosif-field"><label>مفتاح API — لا يُقبل إلا بعد باسورد المالك واختبار اتصال ناجح</label><input id="kai-key" type="password" value="${owner?esc(AI_KEYS[p]||''):''}" ${owner?'':'readonly aria-disabled="true" class="kosif-ai-key-locked"'} placeholder="${owner?'أدخل المفتاح ثم اضغط اختبار الاتصال':'🔐 أدخل باسورد المالك أولًا — أُرسل إلى m••••••57@gmail.com'}"><div id="kai-verified-note" class="api-security-note"></div></div><div class="kosif-row"><div class="kosif-field" style="flex:1"><label>الدولة/الاختصاص</label><select id="kai-jur"><option value="saudi" ${s.jurisdiction==='saudi'?'selected':''}>السعودية — افتراضي</option><option value="international" ${s.jurisdiction==='international'?'selected':''}>دولي</option></select></div><div class="kosif-field" style="flex:1"><label>التخصص الصناعي</label><input id="kai-industry" value="${esc(s.industry)}" placeholder="مثال: صناعات غذائية"></div></div><div class="kosif-field"><label>عقل المراجع / تعليمات الوكيل</label><textarea id="kai-role">${esc(s.rolePrompt)}</textarea></div><div class="kosif-field"><label>مصادر رسمية إضافية — رابط HTTPS في كل سطر</label><textarea id="kai-sources" style="min-height:80px">${esc(s.customSources||'')}</textarea></div><div class="kosif-row"><button class="btn primary" id="kai-save">حفظ الإعدادات</button><button class="btn ghost" id="kai-copy">نسخ التعليمات</button><button class="btn ghost" id="kai-test" ${owner?'':'disabled'}>اختبار الاتصال</button></div><div class="note info"><span>🔐</span><span>${owner?'الجلسة مفتوحة. اكتب المفتاح ثم اختبر الاتصال؛ لن تظهر حالة «متصل» ولن يستخدم Kosif المفتاح قبل نجاح الاختبار.':'حقل المفتاح مقفول تمامًا. اضغط عليه لفتح شاشة باسورد المالك المرسل إلى البريد.'}</span></div>`;
- const note=()=>{const np=$('#kai-provider').value,m=$('#kai-model').value.trim(),k=$('#kai-key').value.trim(),ok=aiVerified(np,m,k),n=$('#kai-verified-note');if(n)n.textContent=ok?'✓ تم اختبار هذا المفتاح والنموذج بنجاح في جلسة المالك الحالية.':k?'⚠ المفتاح موجود لكنه غير مختبر — اضغط «اختبار الاتصال».':'لم يُدخل مفتاح بعد.';syncAI()};
- $('#kai-key').addEventListener('pointerdown',e=>{if(!aiOwnerUnlocked()){e.preventDefault();window.KosifAIGate?.open()}});$('#kai-key').addEventListener('focus',()=>{if(!aiOwnerUnlocked()){setTimeout(()=>$('#kai-key')?.blur(),0);window.KosifAIGate?.open()}});
- $('#kai-provider').onchange=()=>{const np=$('#kai-provider').value;$('#kai-key').value=aiOwnerUnlocked()?(AI_KEYS[np]||''):'';$('#kai-model').value=np==='openai'?'gpt-5.6':np==='anthropic'?'claude-sonnet-4-20250514':'gemini-3.6-flash';note()};
- $('#kai-key').oninput=()=>{invalidateAI($('#kai-provider').value);note()};$('#kai-model').oninput=()=>{invalidateAI($('#kai-provider').value);note()};
- $('#kai-save').onclick=()=>{const old=settings(),np=$('#kai-provider').value,k=$('#kai-key').value.trim(),m=$('#kai-model').value.trim();if(!aiOwnerUnlocked()){window.KosifAIGate?.open();return}if(k&&!aiVerified(np,m,k)){toast?.('اختبر اتصال المفتاح بنجاح قبل اعتماده','warn');return}if(k)AI_KEYS[np]=k;else{delete AI_KEYS[np];delete AI_VERIFIED[np]}saveSettings({...old,provider:np,model:m,jurisdiction:$('#kai-jur').value,industry:$('#kai-industry').value.trim()||'عام',rolePrompt:$('#kai-role').value.trim()||DEFAULT_ROLE,customSources:$('#kai-sources').value.trim()});toast?.(k?'تم اعتماد مزود AI بعد اختبار ناجح':'تم حفظ الإعدادات بدون مفتاح AI','ok');$('#kosif-ai-sheet').classList.remove('show')};
- $('#kai-copy').onclick=async()=>{await navigator.clipboard.writeText($('#kai-role').value);toast?.('تم نسخ تعليمات الوكيل','ok')};
- $('#kai-test').onclick=async()=>{if(!aiOwnerUnlocked()){window.KosifAIGate?.open();return}try{const x=readAIForm();if(!x.key)throw Error('أدخل مفتاح API أولًا');showProgress(15,'اختبار اتصال حقيقي','إرسال طلب قصير إلى '+providerLabel(x.provider));const r=await fetch('/api/kosif/ai/test',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({provider:x.provider,model:x.model,key:x.key,agent:x.agent})}),d=await r.json();if(!r.ok)throw Error(d.error||d.message||'فشل الاتصال');AI_KEYS[x.provider]=x.key;AI_VERIFIED[x.provider]={model:x.model,key:x.key,testedAt:d.testedAt||new Date().toISOString()};showProgress(100,'الاتصال ناجح',providerLabel(x.provider)+' متصل ومختبر');await window.KosifAIGate?.refresh?.();syncAI();note();toast?.('تم اختبار الاتصال واعتماد المفتاح لهذه الجلسة','ok');setTimeout(hideProgress,500)}catch(e){hideProgress();invalidateAI($('#kai-provider').value);note();toast?.('فشل اختبار الاتصال: '+(e.message||e),'danger')}};
- note();$('#kosif-ai-sheet').classList.add('show')}
-function readAIForm(){const s=settings(),p=$('#kai-provider')?.value||s.provider;return{provider:p,model:($('#kai-model')?.value||s.model).trim(),key:$('#kai-key')?.value.trim()||'',agent:{jurisdiction:$('#kai-jur')?.value||s.jurisdiction,industry:$('#kai-industry')?.value||s.industry,rolePrompt:$('#kai-role')?.value||s.rolePrompt,customSources:($('#kai-sources')?.value||s.customSources||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)}}}
-async function callAI(contents,opts={}){const s=settings(),k=apiKey();if(!aiOwnerUnlocked()){window.KosifAIGate?.open();throw Error('أدخل باسورد المالك أولًا لفتح AI')}if(!k||!aiVerified(s.provider,s.model,k)){openAI();throw Error('اختبر اتصال مفتاح '+providerLabel(s.provider)+' بنجاح أولًا')}let payload=Array.isArray(contents)?structuredClone(contents):[{role:'user',parts:[{text:String(contents||'')}]}];if(s.provider==='gemini'&&window.KosifStandardsBridge){try{for(let i=payload.length-1;i>=0;i--){const p=(payload[i].parts||[]).find(x=>typeof x?.text==='string');if(p){p.text=await window.KosifStandardsBridge.enrichPrompt(p.text);break}}}catch(e){console.warn('Kosif standards context',e)}}let t=12,iv=setInterval(()=>{t=Math.min(88,t+Math.max(1,(90-t)*.08));showProgress(t,'AI يعمل على المهمة','يفحص الأدلة + المصادر الرسمية + مكتبة المعايير + الكتب')},600);showProgress(8,'تجهيز الذكاء الاصطناعي','بناء سياق المراجع وربط المرفقات');try{const r=await fetch('/api/kosif/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({provider:s.provider,model:s.model,key:k,contents:payload,system:opts.system||'',json:opts.json!==false,tools:opts.tools||null,maxTokens:opts.maxTokens||8192,agent:{jurisdiction:s.jurisdiction,industry:s.industry,rolePrompt:s.rolePrompt,customSources:(s.customSources||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)}})}),d=await r.json();if(!r.ok){if(r.status===401||r.status===428||/AI_LOCKED|AI_NOT_VERIFIED/.test(String(d.error||''))){invalidateAI(s.provider);await window.KosifAIGate?.refresh?.();syncAI()}throw Error(d.message||d.error||'AI error')}showProgress(100,'اكتملت المهمة',d.attachmentsUsed?'تم تحليل الأدلة المرفقة مع المراجع':'تم بناء النتيجة من المراجع المحددة');await sleep(180);hideProgress();return{text:String(d.text||''),data:d.raw||{},meta:d}}finally{clearInterval(iv)}}
-'''
-          for fn in ['public/index.html','frontend/index.html']:
-              p=Path(fn);s=p.read_text(encoding='utf-8')
-              old="const V='KOSIF_CLIENT_V36_2026_08_17',LS='kosif_ai_settings_v1',AI_KEYS=Object.create(null),FONT_KEY='kosif_font_scale_v2';"
-              new="const V='KOSIF_CLIENT_V36_1_2026_08_17',LS='kosif_ai_settings_v1',AI_KEYS=Object.create(null),AI_VERIFIED=Object.create(null),FONT_KEY='kosif_font_scale_v2';"
-              if old not in s and new not in s: raise SystemExit('AI constants anchor missing '+fn)
-              s=s.replace(old,new)
-              a=s.index('function syncAI(){');b=s.index('\n\nfunction fontScale()',a);s=s[:a]+NEW_SYNC+s[b:]
-              a=s.index('function openAI(){');b=s.index('function overrideAI(){',a);s=s[:a]+NEW_AI+s[b:]
-              css='.kosif-ai-pill.pending{background:#fff7ed!important;border-color:#fed7aa!important;color:#c2410c!important}.kosif-ai-pill.pending .dot{background:#f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.14)!important}'
-              marker='#kosif-ai-status{order:99!important;margin-inline-start:0!important}'
-              if css not in s:s=s.replace(marker,css+'\n'+marker)
-              if 'AI Active ·' in s: raise SystemExit('Legacy AI Active remains '+fn)
-              p.write_text(s,encoding='utf-8')
-          PY
-      - name: Validate patched HTML scripts
+      - name: Apply reproducible AI UI patch
+        run: python3 scripts/patch-ai-v36-1.py
+      - name: Validate patched application
         shell: bash
         run: |
           set -euo pipefail
@@ -68,7 +33,9 @@ async function callAI(contents,opts={}){const s=settings(),k=apiKey();if(!aiOwne
           for fn in ['public/index.html','frontend/index.html']:
             s=pathlib.Path(fn).read_text()
             for i,x in enumerate(re.findall(r'<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',s,re.I)):
-              p=pathlib.Path('/tmp')/f'{pathlib.Path(fn).name}-{i}.js';p.write_text(x);subprocess.check_call(['node','--check',str(p)],stdout=subprocess.DEVNULL)
+              p=pathlib.Path('/tmp')/f'{pathlib.Path(fn).name}-{i}.js'
+              p.write_text(x)
+              subprocess.check_call(['node','--check',str(p)],stdout=subprocess.DEVNULL)
           PY
           node --check public/v36-ai-gate.js
           npx --yes esbuild src/worker.js --bundle --format=esm --platform=browser --outfile=/tmp/worker.mjs >/dev/null
@@ -78,6 +45,7 @@ async function callAI(contents,opts={}){const s=settings(),k=apiKey();if(!aiOwne
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/index.html frontend/index.html
+          git diff --cached --quiet && exit 0
           git commit -m 'Require owner unlock and verified AI connection in UI'
           git pull --rebase origin v36-deep-audit-fix
           git push origin HEAD:v36-deep-audit-fix
