@@ -30,7 +30,7 @@ async function authLogin(req,env){
   await env.DATA.delete(rlKey).catch(()=>{});
   const t=token(),hash=await sha256(t),expiresAt=now+AI_SESSION_TTL*1000;
   await env.DATA.put('kosif:ai:session:'+hash,JSON.stringify({createdAt:now,expiresAt}),{expirationTtl:AI_SESSION_TTL});
-  return j({ok:true,unlocked:true,expiresAt},{200,'set-cookie':`${AI_COOKIE}=${encodeURIComponent(t)}; Path=/; Max-Age=${AI_SESSION_TTL}; HttpOnly; Secure; SameSite=Strict`});
+  return j({ok:true,unlocked:true,expiresAt},200,{'set-cookie':`${AI_COOKIE}=${encodeURIComponent(t)}; Path=/; Max-Age=${AI_SESSION_TTL}; HttpOnly; Secure; SameSite=Strict`});
 }
 async function authLogout(req,env){const s=await session(req,env);if(s)await env.DATA.delete(s.key).catch(()=>{});return j({ok:true,unlocked:false},200,{'set-cookie':`${AI_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`})}
 function aiPath(p){return /^\/api\/(?:kosif\/)?(?:ai|gemini|openai|anthropic|claude|council)(?:\/|$)/i.test(p)}
