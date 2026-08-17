@@ -1,10 +1,12 @@
-name: Verify Kosif v36.1 Desktop Fullscreen
+name: Verify Kosif v36.1 Desktop Navigation
 
 on:
   push:
     branches: [main]
     paths:
+      - 'public/v36.css'
       - 'public/v36-ai-gate.js'
+      - 'public/sw.js'
       - '.github/workflows/verify-v36-1-desktop.yml'
   workflow_dispatch:
 
@@ -34,40 +36,78 @@ jobs:
           done
           cat /tmp/wrangler-desktop.log
           exit 1
-      - name: Verify 1366x768 desktop fills viewport
+      - name: Verify desktop choice list and navigation
         shell: bash
         run: |
           cat > /tmp/desktop-probe.cjs <<'NODE'
           const {chromium}=require(process.cwd()+'/node_modules/playwright');
           const ok=(v,m)=>{if(!v)throw Error(m)};
+          const widths=[1024,1366,1920];
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            const context=await browser.newContext({viewport:{width:1366,height:768}});
-            const page=await context.newPage();
-            await page.goto('http://127.0.0.1:8788/?desktop=1366',{waitUntil:'domcontentloaded'});
-            await page.waitForTimeout(1800);
-            const metrics=await page.evaluate(()=>{
-              const box=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,width:r.width,right:r.right}};
-              return {vw:innerWidth,main:box('main'),top:box('.topbar-inner'),tabs:box('.tabs-inner'),body:document.body.scrollWidth,gateVersion:window.KosifAIGate?.version||null};
-            });
-            console.log('DESKTOP_METRICS',metrics);
-            ok(metrics.main&&metrics.main.width>=1260,'main is still constrained on 1366px desktop');
-            ok(metrics.top&&metrics.top.width>=1260,'topbar inner is still constrained');
-            ok(metrics.tabs&&metrics.tabs.width>=1260,'tabs are still constrained');
-            ok(metrics.body<=1366,'desktop layout causes horizontal overflow');
-            ok(metrics.gateVersion==='36.1.1','updated desktop runtime not loaded');
-            await page.screenshot({path:'kosif-v36-1-desktop-1366.png',fullPage:true});
+            for(const width of widths){
+              const context=await browser.newContext({viewport:{width,height:800}});
+              const page=await context.newPage();
+              await page.goto(`http://127.0.0.1:8788/?desktop=${width}`,{waitUntil:'domcontentloaded'});
+              await page.waitForTimeout(1600);
+              const metrics=await page.evaluate(()=>{
+                const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
+                const tabs=[...document.querySelectorAll('#tabbar .tab')];
+                const rows=[...new Set(tabs.map(e=>Math.round(e.getBoundingClientRect().top)))];
+                const overlaps=[];
+                for(let i=0;i<tabs.length;i++)for(let j=i+1;j<tabs.length;j++){
+                  const a=tabs[i].getBoundingClientRect(),b=tabs[j].getBoundingClientRect();
+                  const hit=a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+                  if(hit)overlaps.push([i,j]);
+                }
+                const nav=document.querySelector('.tabs'),bottom=document.querySelector('#kosif-bottom-nav');
+                return {
+                  vw:innerWidth, body:document.body.scrollWidth,
+                  main:rect(document.querySelector('main')), tabsBox:rect(document.querySelector('.tabs-inner')),
+                  tabCount:tabs.length, rows:rows.length, overlaps,
+                  minTabWidth:Math.min(...tabs.map(e=>e.getBoundingClientRect().width)),
+                  navDisplay:getComputedStyle(nav).display,
+                  bottomDisplay:bottom?getComputedStyle(bottom).display:'missing',
+                  gateVersion:window.KosifAIGate?.version||null
+                };
+              });
+              console.log('DESKTOP_METRICS',width,metrics);
+              ok(metrics.main.width>=width*.9,`main constrained at ${width}`);
+              ok(metrics.tabsBox.width>=width*.9,`tabs constrained at ${width}`);
+              ok(metrics.body<=width+1,`horizontal overflow at ${width}`);
+              ok(metrics.tabCount===12,`expected 12 choices, got ${metrics.tabCount}`);
+              ok(metrics.overlaps.length===0,`choice buttons overlap at ${width}`);
+              ok(metrics.minTabWidth>=100,`choice buttons too narrow at ${width}`);
+              ok(metrics.navDisplay!=='none',`desktop tab list hidden at ${width}`);
+              ok(metrics.bottomDisplay==='none'||metrics.bottomDisplay==='missing',`mobile bottom nav visible at ${width}`);
+              ok(metrics.gateVersion==='36.1.2','updated runtime not loaded');
+              if(width<1600)ok(metrics.rows===2,`expected balanced 2-row choice list at ${width}, got ${metrics.rows}`);
+              else ok(metrics.rows===1,`expected single-row choice list at ${width}, got ${metrics.rows}`);
+              const labels=await page.locator('#tabbar .tab').allTextContents();
+              ok(labels.every(x=>x.trim().length>0),'empty choice label');
+              for(const tab of await page.locator('#tabbar .tab').all()){
+                const go=await tab.getAttribute('data-go');
+                await tab.click();
+                await page.waitForTimeout(40);
+                const active=await page.locator(`#view-${go}.show`).count();
+                ok(active===1,`navigation failed for ${go} at ${width}`);
+              }
+              await page.screenshot({path:`kosif-v36-1-desktop-${width}.png`,fullPage:true});
+              await context.close();
+            }
             await browser.close();
-            console.log('KOSIF_V36_1_DESKTOP_FULLSCREEN_OK');
+            console.log('KOSIF_V36_1_DESKTOP_NAV_OK');
           })().catch(e=>{console.error(e.stack||e);process.exit(1)});
           NODE
           node /tmp/desktop-probe.cjs
-      - name: Upload desktop screenshot
+      - name: Upload desktop screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-v36-1-desktop-1366
+          name: kosif-v36-1-desktop-navigation
           path: |
+            kosif-v36-1-desktop-1024.png
             kosif-v36-1-desktop-1366.png
+            kosif-v36-1-desktop-1920.png
             /tmp/wrangler-desktop.log
           if-no-files-found: ignore
