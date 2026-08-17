@@ -149,7 +149,7 @@ async function indexData(env){
 async function bookSummary(env,id){return sj(env,"/data/"+encodeURIComponent(id)+".json")}
 async function rawChapter(env,id,no){return sj(env,"/data/"+encodeURIComponent(id)+"/"+encodeURIComponent(no)+".json")}
 function metaBook(list,id){return (Array.isArray(list)?list:[]).find(x=>String(x.id)===String(id))||null}
-function roleFor(m){if(m?.id==="b3")return "مرجع رسمي أحدث";if(m?.id==="b1")return "مرجع رسمي سابق";return "مرجع تدريبي/مساند"}
+function roleFor(m){if(m?.id==="b3")return "مرجع رسمي أحدث";if(m?.id==="b1")return "مرجع رسمي سابق";if(m?.id==="b4"||m?.kind==="development")return "تطوير — ليس سندًا مهنيًا";return "مرجع تدريبي/مساند"}
 function objectiveFrom(blocks){
   let afterObjective=false;
   for(const b of blocks){if(b.type==="heading"&&/الهدف/.test(norm(b.content))){afterObjective=true;continue}if(afterObjective&&b.type!=="heading"&&b.content.length>30)return b.content.slice(0,320)}
@@ -206,7 +206,7 @@ async function serviceProfessionalSearch(env,q,opt={}){
   try{const r=await env.STANDARDS.fetch(new Request(u.toString(),{headers:{accept:'application/json'}}));if(!r.ok)return[];const d=await r.json();return Array.isArray(d?.hits)?d.hits:[]}catch(_){return[]}
 }
 async function professionalSearch(env,q,opt={}){
-  q=displayClean(q);if(q.length<2)return[];let idx;try{idx=await indexData(env)}catch(_){return serviceProfessionalSearch(env,q,opt)}const terms=expansionTerms(q),list=await library(env),out=[];
+  q=displayClean(q);if(q.length<2)return[];let idx;try{idx=await indexData(env)}catch(_){const svc=await serviceProfessionalSearch(env,q,opt);if(Array.isArray(svc)&&svc.length)return svc;try{idx=await fallbackProfessionalIndex(env)}catch(__){idx=[]}}const terms=expansionTerms(q),list=await library(env),out=[];
   for(const x of Array.isArray(idx)?idx:[]){
     if(opt.book&&String(x.book||x.bookId||"")!==String(opt.book))continue;
     const raw=(x.title||"")+" "+(x.name||"")+" "+(x.text||"");if(isBoiler(raw))continue;

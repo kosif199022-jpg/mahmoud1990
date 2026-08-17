@@ -1,1 +1,44 @@
-[{"id":"b1","title":"المعايير الدولية للتقرير المالي","sub":"النسخة العربية المعتمدة — الهيئة السعودية للمحاسبين القانونيين","year":"2018","dir":"rtl","chapters":66,"words":452855},{"id":"b3","title":"المعايير الدولية للتقرير المالي — النسخة الكاملة المحدَّثة","sub":"ترجمة الهيئة السعودية للمراجعين والمحاسبين","year":"2025","dir":"rtl","chapters":34,"words":649318},{"id":"b2","title":"ACCA DipIFR — Exam Practice Kit","sub":"عدّة التدريب على امتحان الدبلوم الدولي في التقرير المالي · BPP","year":"2025","dir":"ltr","chapters":139,"words":136572}]
+[
+  {
+    "id": "b1",
+    "title": "المعايير الدولية للتقرير المالي",
+    "sub": "النسخة العربية المعتمدة — الهيئة السعودية للمحاسبين القانونيين",
+    "year": "2018",
+    "dir": "rtl",
+    "chapters": 66,
+    "words": 452855
+  },
+  {
+    "id": "b3",
+    "title": "المعايير الدولية للتقرير المالي — النسخة الكاملة المحدَّثة",
+    "sub": "ترجمة الهيئة السعودية للمراجعين والمحاسبين",
+    "year": "2025",
+    "dir": "rtl",
+    "chapters": 34,
+    "words": 649318
+  },
+  {
+    "id": "b2",
+    "title": "ACCA DipIFR — Exam Practice Kit",
+    "sub": "عدّة التدريب على امتحان الدبلوم الدولي في التقرير المالي · BPP",
+    "year": "2025",
+    "dir": "ltr",
+    "chapters": 139,
+    "words": 136572
+  },
+  {
+    "id": "b4",
+    "title": "مفاتيح الثروة",
+    "sub": "من الفكرة إلى النتيجة: منهج عملي في بناء الوعي والعادة والهدف",
+    "author": "حامد بن علي",
+    "year": "2026",
+    "dir": "rtl",
+    "parts": 6,
+    "chapters": 46,
+    "words": 34700,
+    "kind": "development",
+    "professionalAuthority": false,
+    "badge": "تطوير — ليس سندًا مهنيًا",
+    "provenance": "Imported from the original reader D payload; actual source part structure preserved; study fields are not part of the book body."
+  }
+]

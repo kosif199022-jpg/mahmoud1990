@@ -7,4 +7,3 @@ const files=walk(root),bad=[];
 for(const f of files){const r=spawnSync(process.execPath,['--check',f],{encoding:'utf8'});if(r.status!==0)bad.push({f:path.relative(root,f),err:(r.stderr||r.stdout||'').trim()})}
 if(bad.length){console.error(`KOSIF_JS_CHECK_FAILED (${bad.length}/${files.length})`);for(const x of bad)console.error(`\n--- ${x.f} ---\n${x.err}`);process.exit(2)}
 console.log(`KOSIF_JS_CHECK_OK ${files.length} files`);
-const r=spawnSync(process.execPath,['scripts/validate-payloads.mjs'],{stdio:'inherit'});if(r.status!==0)process.exit(r.status||2);

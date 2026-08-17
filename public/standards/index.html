@@ -44,6 +44,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .card{display:block;width:100%;text-align:right;border:1px solid var(--rule);border-radius:14px;
       padding:18px 18px 16px;margin-bottom:14px;background:color-mix(in srgb,var(--paper) 96%,var(--ink) 4%)}
 .card:active{border-color:var(--seal)}
+.card.development{border-style:dashed;border-color:#8B5CC7;background:color-mix(in srgb,var(--paper) 94%,#8B5CC7 6%)}
+.devbadge{display:inline-block;margin-inline-start:8px;padding:2px 9px;border:1px dashed #8B5CC7;border-radius:99px;color:#7343B0;font-size:11px;font-family:var(--ui);font-weight:700}
+.study-wrap{margin-top:28px;border-top:1px solid var(--rule);padding-top:18px;font-family:var(--ui)}
+.study-note{font-size:12px;color:var(--ink2);margin-bottom:10px}.study-box{border:1px dashed #8B5CC7;border-radius:12px;padding:13px 14px;margin:10px 0;background:color-mix(in srgb,var(--paper) 94%,#8B5CC7 6%)}
+.study-box b{display:block;color:#7343B0;margin-bottom:5px}.study-box p{margin:0;line-height:1.75}.study-box ul{margin:6px 0 0;padding-inline-start:22px;line-height:1.8}
 .card .yr{display:inline-block;font-size:11px;letter-spacing:.08em;color:var(--seal);
           border:1px solid var(--seal);border-radius:99px;padding:2px 9px;margin-bottom:10px;font-variant-numeric:tabular-nums}
 .card h3{font-family:var(--font);font-size:19px;margin:0 0 6px;line-height:1.5;font-weight:700}
@@ -262,8 +267,8 @@ async function showLibrary(){
   $('#library').innerHTML=`<h1 class="lib-h">مكتبة المعايير</h1>
     <p class="lib-s">النصوص كما وردت في المصادر الرسمية، بلا تعديل ولا إعادة صياغة.</p>${cont}`+
     LIB.map(b=>{const done=Object.keys(read[b.id]||{}).length;
-      return `<button class="card" data-b="${b.id}">
-        <span class="yr">${AR(b.year)}</span>
+      return `<button class="card ${b.id==='b4'||b.kind==='development'?'development':''}" data-b="${b.id}">
+        <span class="yr">${AR(b.year)}</span>${b.id==='b4'||b.kind==='development'?'<span class="devbadge">تطوير — ليس سندًا مهنيًا</span>':''}
         <h3>${esc(b.title)}</h3><p>${esc(b.sub)}</p>
         <div class="st"><span><b>${AR(b.chapters)}</b> فصلًا</span>
         <span><b>${AR(b.words.toLocaleString('en'))}</b> كلمة</span>
@@ -280,7 +285,7 @@ async function openBook(id,jump){
   $('#crumb').textContent=BOOK.title;
   document.documentElement.dir = BOOK.dir==='ltr' ? 'ltr' : 'rtl';
   const rd=read[id]||{};
-  $('#toc').innerHTML=`<h2 class="tp">${esc(BOOK.title)}</h2>
+  $('#toc').innerHTML=`<h2 class="tp">${esc(BOOK.title)}${BOOK.id==='b4'||BOOK.kind==='development'?'<span class="devbadge">تطوير — ليس سندًا مهنيًا</span>':''}</h2>
     <p class="ts">${esc(BOOK.sub)} · ${AR(BOOK.year)}</p>`+
     BOOK.chapters.map(c=>`<button class="ci ${rd[c.no]>=100?'done':''} ${last&&last.book===id&&last.ch===c.no?'readnow':''}" data-n="${c.no}">
       <span class="n">${AR(c.no)}</span>
@@ -313,6 +318,9 @@ const NUMLEAD=/^((?:\d{1,3}(?:\/\d{1,3})?)|(?:\(\s*[أ-ي\d]{1,3}\s*\))|(?:[أ-�
 
 function render(){
   const mk=(marks[BOOK.id]||{})[CH.no]||[];
+  const pageLabel=Array.isArray(CH.pages)&&CH.pages.length?`صفحات المصدر ${AR(CH.pages[0])}${CH.pages.length>1?'–'+AR(CH.pages[CH.pages.length-1]):''}`:esc([CH.part,CH.partTitle].filter(Boolean).join(' · ')||'بدون ترقيم صفحات');
+  const st=CH.study&&typeof CH.study==='object'?CH.study:null;
+  const study=st&&((st.key||st.idea||st.application||st.weeklyTask)||(Array.isArray(st.questions)&&st.questions.length))?`<aside class="study-wrap"><div class="study-note">طبقة دراسة مساعدة — <b>ليست من متن الكتاب</b></div>${st.key?`<div class="study-box"><b>المفتاح · ليست من متن الكتاب</b><p>${esc(st.key)}</p></div>`:''}${st.idea?`<div class="study-box"><b>الفكرة · ليست من متن الكتاب</b><p>${esc(st.idea)}</p></div>`:''}${Array.isArray(st.questions)&&st.questions.length?`<div class="study-box"><b>الأسئلة · ليست من متن الكتاب</b><ul>${st.questions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}${st.application?`<div class="study-box"><b>التطبيق · ليست من متن الكتاب</b><p>${esc(st.application)}</p></div>`:''}${st.weeklyTask?`<div class="study-box"><b>مهمة الأسبوع · ليست من متن الكتاب</b><p>${esc(st.weeklyTask)}</p></div>`:''}</aside>`:'';
   const html=CH.body.map((b,i)=>{
     if(b[0]==='h') return `<h3 id="b${i}">${esc(b[1])}</h3>`;
     let t=esc(b[1]); const m=b[1].match(NUMLEAD);
@@ -324,8 +332,8 @@ function render(){
   $('#reader').innerHTML=`<header id="chead">
       <div class="k">${esc(BOOK.title)}</div>
       <h1>${esc(CH.title)}</h1>${CH.name?`<h2>${esc(CH.name)}</h2>`:''}
-      <div class="pg">صفحات المصدر ${AR(CH.pages[0])}–${AR(CH.pages[1])} · ${AR(CH.body.length)} فقرة</div>
-    </header><article id="prose">${html}</article>`;
+      <div class="pg">${pageLabel} · ${AR(CH.body.length)} فقرة</div>
+    </header><article id="prose">${html}</article>${study}`;
   applyPrefs();
   $$('.anch').forEach(a=>a.onclick=e=>{e.stopPropagation();cite(a)});
 }
