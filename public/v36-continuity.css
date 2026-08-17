@@ -2,6 +2,7 @@
 :root{--kosif-font-scale-v36-3:1;--k363-icon:22px;--k363-focus:#7c3aed}
 html{font-size:16px}
 body{font-size:calc(.9375rem * var(--kosif-font-scale,1))!important;overflow-wrap:anywhere}
+body[data-kosif-dialog-open="1"]{overflow:hidden!important;position:fixed!important;width:100%!important;inset:0!important}
 button,input,select,textarea{font-size:inherit}
 .card,.kpi,.step,.field,.kosif-action,.kosif-company-item,.note,.round,.finding,.docreq{min-width:0}
 .card-h,.kosif-row,.top-status{min-width:0}

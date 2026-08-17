@@ -9,11 +9,20 @@ function shell(){
  const main=$('main');if(main&&!$('#kosif-main-anchor')){main.id=main.id||'kosif-main-anchor';main.tabIndex=-1}
  ['#kosif-more','#kosif-company-sheet','#kosif-ai-sheet','#kosif-command-sheet','#kosif-font-sheet','#kosif-ai-gate'].forEach(sel=>{const el=$(sel);if(!el)return;el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-hidden',el.classList.contains('show')?'false':'true')});
 }
-function dialogOpen(el){if(!el)return;lastFocus=document.activeElement;el.setAttribute('aria-hidden','false');document.body.dataset.kosifDialogOpen='1';setTimeout(()=>el.querySelector('button,input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus(),30)}
-function dialogClose(el){if(!el)return;el.classList.remove('show');el.setAttribute('aria-hidden','true');delete document.body.dataset.kosifDialogOpen;try{lastFocus?.focus?.()}catch(_){}lastFocus=null}
+function checkAnyOpenDialog(){
+ const hasOpen=['#kosif-ai-gate','#kosif-font-sheet','#kosif-command-sheet','#kosif-ai-sheet','#kosif-company-sheet','#kosif-more','#modal-bg','#drawer','#kosif-voice-guide','.palette'].some(s=>{
+  const x=$(s);return x&&(x.classList.contains('show')||x.classList.contains('open'));
+ });
+ if(hasOpen)document.body.dataset.kosifDialogOpen='1';else delete document.body.dataset.kosifDialogOpen;
+ return hasOpen;
+}
+function dialogOpen(el){if(!el)return;lastFocus=document.activeElement;el.setAttribute('aria-hidden','false');checkAnyOpenDialog();setTimeout(()=>el.querySelector('button,input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus(),30)}
+function dialogClose(el){if(!el)return;el.classList.remove('show');el.setAttribute('aria-hidden','true');checkAnyOpenDialog();try{lastFocus?.focus?.()}catch(_){}lastFocus=null}
 function dialogGuards(){
- document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const el=['#kosif-ai-gate','#kosif-font-sheet','#kosif-command-sheet','#kosif-ai-sheet','#kosif-company-sheet','#kosif-more'].map($).find(x=>x?.classList.contains('show'));if(el){e.preventDefault();dialogClose(el)}},true);
- document.addEventListener('click',e=>{const b=e.target.closest('#kosif-more-btn,#kosif-ai-status,#kosif-font-open,#kosif-command,#kosif-ai-open');if(!b)return;setTimeout(()=>{const el=['#kosif-more','#kosif-ai-sheet','#kosif-font-sheet','#kosif-command-sheet'].map($).find(x=>x?.classList.contains('show'));if(el)dialogOpen(el)},0)},true);
+ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const el=['#kosif-ai-gate','#kosif-font-sheet','#kosif-command-sheet','#kosif-ai-sheet','#kosif-company-sheet','#kosif-more','#kosif-voice-guide'].map($).find(x=>x?.classList.contains('show'));if(el){e.preventDefault();dialogClose(el)}},true);
+ document.addEventListener('click',e=>{const b=e.target.closest('#kosif-more-btn,#kosif-ai-status,#kosif-font-open,#kosif-command,#kosif-ai-open,#kvg-close');if(!b)return;setTimeout(()=>{const el=['#kosif-more','#kosif-ai-sheet','#kosif-font-sheet','#kosif-command-sheet'].map($).find(x=>x?.classList.contains('show'));if(el)dialogOpen(el);else checkAnyOpenDialog()},0)},true);
+ const mo=new MutationObserver(()=>checkAnyOpenDialog());
+ mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 }
 function ensureFont200(){const r=$('#kf-range');if(r){r.max='200';r.min='90';r.step='5'}const help=$('#kosif-font-sheet .kf-help');if(help)help.textContent='تكبير آمن للقراءة من 90% إلى 200% مع ثبات الأيقونات والتنقل.';const a=$('#kosif-more #kosif-font-open small');if(a)a.textContent='90% إلى 200% بدون كسر التخطيط'}
 function selectedAI(){let p=$('#kai-provider')?.value||'gemini',m=$('#kai-model')?.value||'';p=p==='claude'?'anthropic':p;return{provider:p,model:String(m||'').trim()}}
