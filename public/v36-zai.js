@@ -11,7 +11,7 @@ function stateRef(){try{return typeof state!=='undefined'?state:null}catch{retur
 function councilStructuredContext(){
   const s=stateRef(),v=s?.v36||{},status=v.pbc||{},requests=[];
   for(const round of (s?.rounds||[]))for(const d of (round?.parsed?.document_requests||[]))requests.push({id:d.id||'',title:d.title||d.name||'',reason:d.reason||'',round:round.no,status:status[d.id]?.status||'Missing',statusAt:status[d.id]?.at||null,standard_refs:d.standard_refs||d.refs||[]});
-  const notes=(v.notes||[]).slice(-30).map(n=>({at:n.at||null,text:String(n.text||'').slice(0,4000)}));
+  const notes=(v.notes||[]).slice(-30).map(n=>({at:n.at||null,text:String(n.text||'').slice(0,4000),media:n?.media?.id?{kind:n.media.kind||'file',name:String(n.media.name||'').slice(0,240),size:Number(n.media.size)||0,sha256:String(n.media.sha256||'').slice(0,64),durationMs:Number(n.media.durationMs)||0,localOnly:true,rawSentToAI:false}:null}));
   return {kind:'kosif-audit-context',generatedAt:new Date().toISOString(),pbc:requests.slice(0,240),reviewerNotes:notes,pbcSummary:requests.reduce((a,x)=>(a[x.status]=(a[x.status]||0)+1,a),{})};
 }
 function injectCouncilContext(){
@@ -28,6 +28,10 @@ function loadCouncilV2(){
 function loadExecutor(){
   if(window.KosifExecutor||document.querySelector('script[data-kosif-executor="1"]'))return;
   const s=document.createElement('script');s.src='/v36-executor.js?v=36.3-executor1';s.defer=true;s.dataset.kosifExecutor='1';document.head.appendChild(s);
+}
+function loadReviewerMedia(){
+  if(window.KosifReviewerMedia||document.querySelector('script[data-kosif-reviewer-media="1"]'))return;
+  const s=document.createElement('script');s.src='/v36-reviewer-media.js?v=36.3-media1';s.defer=true;s.dataset.kosifReviewerMedia='1';document.head.appendChild(s);
 }
 function openCouncilV2(){
   try{window.KosifCouncilV2?.mount?.()}catch(_){}
@@ -66,7 +70,7 @@ function patchLabels(){
   const r=$('#rounds-model');if(r&&/Gemini/.test(r.textContent||''))r.textContent=r.textContent.replace(/Gemini/g,'Z.ai');
   const stage=$('#kosif-progress .kp-note');if(stage&&/Gemini/.test(stage.textContent||''))stage.textContent=stage.textContent.replace(/Gemini/g,'Z.ai');
 }
-function patch(){addOption();syncNote();patchLabels();bindLabelObservers();loadCouncilV2();loadExecutor()}
+function patch(){addOption();syncNote();patchLabels();bindLabelObservers();loadCouncilV2();loadExecutor();loadReviewerMedia()}
 function bindFormObserver(){
   const form=$('#kosif-ai-form');if(!form)return false;
   if(form.dataset.zaiObserved==='1')return true;
@@ -121,7 +125,7 @@ document.addEventListener('click',e=>{
 window.addEventListener('kosif-ai-gate-change',()=>setTimeout(patchLabels,0));
 window.addEventListener('storage',e=>{if(e.key===LS)setTimeout(patch,0)});
 let tries=0,t=setInterval(()=>{patch();if((bindFormObserver()||bindLabelObservers())&&++tries>12)clearInterval(t);else if(++tries>80)clearInterval(t)},250);
-window.KosifZAI={version:'1.4.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider,loadCouncilV2,loadExecutor,openCouncilV2,councilStructuredContext,injectCouncilContext};
+window.KosifZAI={version:'1.5.0',provider:'zai',defaultModel:DEFAULT_MODEL,endpointMode:'general-api',refresh:patch,isZaiProvider:isZai,testProvider:testMainProvider,loadCouncilV2,loadExecutor,loadReviewerMedia,openCouncilV2,councilStructuredContext,injectCouncilContext};
 document.documentElement.dataset.kosifZai='ready';
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patch,{once:true});else patch();
 })();
