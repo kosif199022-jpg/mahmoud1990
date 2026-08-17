@@ -106,8 +106,58 @@ function parseJournal(text){const lines=String(text||'').trim().split(/\r?\n/).f
 function analyzeJournals(js){const flags=[];const materiality=(()=>{try{return computeMateriality(accounts(),state.mat.basis,state.mat.pct)}catch{return 0}})();const seen=new Map();for(const j of js){const amount=Math.max(j.debit,j.credit),d=new Date(j.date);const reasons=[];if(amount&&amount%10000===0)reasons.push('رقم دائري');if(materiality&&amount>=materiality)reasons.push('يتجاوز الأهمية النسبية');if(!Number.isNaN(d.getTime())&&(d.getDay()===5||d.getDay()===6))reasons.push('قيد عطلة أسبوعية');if(/تسوية|يدوي|manual|إقفال|closing/i.test(j.desc))reasons.push('وصف حساس/يدوي');const key=[j.date,j.account,j.debit,j.credit,j.desc].join('|');if(seen.has(key))reasons.push('قيد مكرر');seen.set(key,1);if(reasons.length)flags.push({...j,amount,reasons})}return flags.sort((a,b)=>b.amount-a.amount)}
 function renderJournals(){const w=q('#v36-je-out');if(!w)return;const j=v36().journals||[],f=v36().journalFlags||[];if(!j.length){w.innerHTML='';return}w.innerHTML=`<div class="note info"><span>J</span><span>${j.length} سطر قيد · ${f.length} استثناء موجّه للاختبار. الاستثناء ليس تحريفًا بحد ذاته.</span></div><div class="twrap"><table class="data"><thead><tr><th>التاريخ</th><th>القيد</th><th>الحساب</th><th>المبلغ</th><th>أسباب الاختيار</th></tr></thead><tbody>${f.slice(0,150).map(x=>`<tr><td>${h(x.date)}</td><td>${h(x.id)}</td><td>${h(x.account)}</td><td>${fmt(x.amount)}</td><td>${h(x.reasons.join('، '))}</td></tr>`).join('')}</tbody></table></div>`}
 function renderMisstatements(){const w=q('#v36-misstatements');if(!w)return;const a=report()?.adjusting_entries||[];if(!a.length){w.innerHTML='<div class="empty">لا توجد تحريفات/قيود تسوية مسجلة في التقرير الحالي.</div>';return}w.innerHTML=`<div class="twrap"><table class="data"><thead><tr><th>رقم</th><th>الوصف</th><th>الأثر</th><th>الحالة</th><th>المرجع</th></tr></thead><tbody>${a.map(x=>{const d=(x.lines||[]).reduce((s,l)=>s+num(l.debit),0);return `<tr><td>${h(x.no)}</td><td>${h(x.description||x.reason)}</td><td>${fmt(d)}</td><td><span class="badge warn">Proposed</span></td><td>${h((x.standard_refs||[]).join(' · '))}</td></tr>`}).join('')}</tbody></table></div>`}
-function category(n){n=String(n);if(/إيراد|مبيعات|Revenue|Sales/i.test(n))return'revenue';if(/مصروف|تكلفة|رواتب|إهلاك|مصاريف|Expense|Cost/i.test(n))return'expense';if(/قرض|دائن|مورد|التزام|زكاة|ضريبة|Lease liability|Payable/i.test(n))return'liability';if(/رأس المال|احتياط|أرباح مبقاة|حقوق|Equity/i.test(n))return'equity';return'asset'}
-function renderFSDraft(){const w=q('#v36-fs-draft');if(!w)return;const a=accounts();if(!a.length){w.innerHTML='<div class="empty">اعتمد ميزانًا لإعداد المسودة.</div>';return}const sums={asset:0,liability:0,equity:0,revenue:0,expense:0};for(const x of a)sums[category(name(x))]+=bal(x);const profit=-(sums.revenue+sums.expense);w.innerHTML=`<div class="grid g2"><div><h4>مسودة قائمة المركز المالي</h4><div class="twrap"><table class="data"><tbody><tr><td>الأصول — تصنيف آلي</td><td>${fmt(sums.asset)}</td></tr><tr><td>الالتزامات — تصنيف آلي</td><td>${fmt(sums.liability)}</td></tr><tr><td>حقوق الملكية — تصنيف آلي</td><td>${fmt(sums.equity)}</td></tr></tbody></table></div></div><div><h4>مسودة الربح أو الخسارة</h4><div class="twrap"><table class="data"><tbody><tr><td>الإيرادات — تصنيف آلي</td><td>${fmt(-sums.revenue)}</td></tr><tr><td>المصروفات — تصنيف آلي</td><td>${fmt(sums.expense)}</td></tr><tr><td><b>نتيجة تقريبية</b></td><td><b>${fmt(profit)}</b></td></tr></tbody></table></div></div></div><div class="note warn"><span>!</span><span>هذه مسودة تصنيف أولي وليست قوائم مالية صالحة للإصدار. يلزم اعتماد التصنيف والتسويات والإفصاحات والتدفقات النقدية يدويًا.</span></div>`}
+/* ── تصنيف الحسابات ──
+   التصنيف يحرّك مسودة القوائم المالية، فالخانة الخاطئة تنقل مبلغًا بين المركز المالي
+   وقائمة الدخل بصمت. لذلك:
+
+   1. رقم الحساب هو الإشارة الأوثق. الدليل المحاسبي يبدأ الأصول بـ1 والالتزامات بـ2
+      وحقوق الملكية بـ3 والإيرادات بـ4 والمصروفات بـ5/6، وهو عرف شبه شامل.
+   2. الاسم مجرد احتياط، وتُفحص فيه المؤهِّلات (مقدمًا، مستحق، مجمع، مخصص) *قبل*
+      الكلمات العامة — فـ«تكلفة المبيعات» تحوي «مبيعات» وكانت تُصنَّف إيرادًا، أي أن
+      أكبر بند مصروف كان ينتقل إلى الدخل.
+   3. التصنيف بالاسم وحده يُعلَّم منخفض الثقة ليراجعه المراجع بدل أن يمرّ صامتًا. */
+const CAT_BY_CODE={'1':'asset','2':'liability','3':'equity','4':'revenue','5':'expense','6':'expense'};
+function categoryFromCode(c){
+  /* Saudi charts are often exported with Arabic-Indic or Eastern-Arabic digits, which
+     would otherwise fall through to the weaker name path. */
+  const western=String(c==null?'':c)
+    .replace(/[\u0660-\u0669]/g,d=>String(d.charCodeAt(0)-0x0660))
+    .replace(/[\u06F0-\u06F9]/g,d=>String(d.charCodeAt(0)-0x06F0));
+  const digits=western.trim().replace(/^[^0-9]+/,'');
+  return digits?(CAT_BY_CODE[digits[0]]||null):null;
+}
+const NAME_RULES=[
+  /* مؤهِّلات تُقلب التصنيف — تُفحص أولًا */
+  [/مجمع\s*(ال)?إهلاك|مجمع\s*(ال)?استهلاك|accumulated\s+depreciation/i,'asset'],
+  [/(مخصص|مجمع)\s*(ال)?(هبوط|انخفاض|ديون مشكوك|خسائر ائتمان)|allowance for|provision for doubtful/i,'asset'],
+  [/(مصروف|مصاريف|مصروفات)[^\n]*(مدفوع|مقدم)|prepaid/i,'asset'],
+  [/(إيراد|ايراد|إيرادات|ايرادات)[^\n]*(مستحق|غير مفوتر|لم تفوتر)|accrued (revenue|income)|unbilled/i,'asset'],
+  [/(إيراد|ايراد|إيرادات|ايرادات)[^\n]*(مقبوض|مؤجل|مقدم)|unearned|deferred revenue/i,'liability'],
+  [/(مصروف|مصاريف|مصروفات)[^\n]*مستحق|accrued (expense|liabilit)/i,'liability'],
+  /* التزامات صريحة */
+  [/أوراق\s*دفع|notes? payable|ذمم دائنة|دائنون|مورد|payable/i,'liability'],
+  [/مخصص|التزام|قرض|تسهيلات|زكاة مستحقة|ضريبة[^\n]*مستحقة|نهاية الخدمة|provision|loan|lease liabilit/i,'liability'],
+  /* حقوق الملكية */
+  [/رأس المال|احتياطي|احتياط|أرباح مبقاة|ارباح مبقاه|خسائر متراكمة|حقوق (الملكية|المساهمين)|equity|retained earnings/i,'equity'],
+  /* تكلفة المبيعات قبل الإيراد، وإلا التقطتها قاعدة «مبيعات» */
+  [/تكلفة[^\n]*(مبيعات|البضاعة|الإيراد)|cost of (sales|goods|revenue)|cogs/i,'expense'],
+  /* إيراد */
+  [/إيراد|ايراد|مبيعات|revenue|sales|turnover/i,'revenue'],
+  /* مصروف */
+  [/مصروف|مصاريف|مصروفات|تكلفة|تكاليف|رواتب|أجور|إهلاك|استهلاك|إطفاء|expense|cost|salar|deprecia|amorti/i,'expense'],
+  /* أصول صريحة */
+  [/نقد|صندوق|بنك|مخزون|ذمم مدينة|مدينون|أوراق قبض|ممتلكات|آلات|معدات|أصل|أصول|حق الاستخدام|cash|bank|inventor|receivable|asset/i,'asset'],
+];
+function classifyAccount(acc){
+  const byCode=categoryFromCode(code(acc));
+  if(byCode) return {cat:byCode,basis:'code'};
+  const n=String(name(acc)||'');
+  for(const [re,cat] of NAME_RULES) if(re.test(n)) return {cat,basis:'name'};
+  return {cat:'asset',basis:'default'};
+}
+/* يبقى التوقيع القديم متاحًا للاسم وحده */
+function category(n){return classifyAccount({name:String(n)}).cat}
+function renderFSDraft(){const w=q('#v36-fs-draft');if(!w)return;const a=accounts();if(!a.length){w.innerHTML='<div class="empty">اعتمد ميزانًا لإعداد المسودة.</div>';return}const sums={asset:0,liability:0,equity:0,revenue:0,expense:0};const clsBasis={code:0,name:0,default:0};for(const x of a){const c=classifyAccount(x);clsBasis[c.basis]++;sums[c.cat]+=bal(x)}const profit=-(sums.revenue+sums.expense);const residual=sums.asset+sums.liability+sums.equity+sums.revenue+sums.expense;const balanced=Math.abs(residual)<.5;const review=clsBasis.name+clsBasis.default;w.innerHTML=`<div class="grid g2"><div><h4>مسودة قائمة المركز المالي</h4><div class="twrap"><table class="data"><tbody><tr><td>الأصول — تصنيف آلي</td><td>${fmt(sums.asset)}</td></tr><tr><td>الالتزامات — تصنيف آلي</td><td>${fmt(-sums.liability)}</td></tr><tr><td>حقوق الملكية — تصنيف آلي</td><td>${fmt(-sums.equity)}</td></tr><tr><td><b>الالتزامات وحقوق الملكية والنتيجة</b></td><td><b>${fmt(-(sums.liability+sums.equity)+profit)}</b></td></tr></tbody></table></div></div><div><h4>مسودة الربح أو الخسارة</h4><div class="twrap"><table class="data"><tbody><tr><td>الإيرادات — تصنيف آلي</td><td>${fmt(-sums.revenue)}</td></tr><tr><td>المصروفات — تصنيف آلي</td><td>${fmt(sums.expense)}</td></tr><tr><td><b>نتيجة تقريبية</b></td><td><b>${fmt(profit)}</b></td></tr></tbody></table></div></div></div><div class="note ${balanced?'ok':'danger'}"><span>${balanced?'=':'≠'}</span><span><b>فحص معادلة الميزانية:</b> ${balanced?'الأصول تساوي الالتزامات وحقوق الملكية والنتيجة.':`لا تتوازن — الفرق ${fmt(residual)}. راجع الميزان أو تصنيف الحسابات قبل الاعتماد.`}</span></div><div class="note ${review?'warn':'info'}"><span>${review?'!':'✓'}</span><span><b>أساس التصنيف:</b> ${fmt(clsBasis.code)} حسابًا بأرقام الدليل، و${fmt(clsBasis.name)} بالاسم فقط${clsBasis.default?`، و${fmt(clsBasis.default)} بلا مطابقة (صُنِّفت أصولًا افتراضًا)`:''}. ${review?'الحسابات المصنَّفة بالاسم أو افتراضًا تحتاج مراجعة يدوية.':'كل الحسابات صُنِّفت من أرقام الدليل.'}</span></div><div class="note warn"><span>!</span><span>هذه مسودة تصنيف أولي وليست قوائم مالية صالحة للإصدار. يلزم اعتماد التصنيف والتسويات والإفصاحات والتدفقات النقدية يدويًا.</span></div>`}
 function renderAllV36(){try{v36();renderTB();renderAnalytics();renderPBC();renderNotes();renderTemplates();renderAcceptance();renderPrior();renderMatLog();renderJournals();renderMisstatements();renderFSDraft()}catch(e){console.error('Kosif v36 render',e)}}
 function bind(){
   const a=q('#v36-accept-save');if(a)a.onclick=()=>{const x=v36().acceptance;Object.assign(x,{independence:q('#v36-ind').checked,conflicts:q('#v36-conf').checked,clientIntegrity:q('#v36-int').checked,terms:q('#v36-terms').checked,note:q('#v36-accept-note').value.trim()});x.accepted=x.independence&&x.conflicts&&x.clientIntegrity&&x.terms;x.at=now();saveV36();renderAllV36();try{renderRounds()}catch(_){ }toastV(x.accepted?'تم اعتماد قرار القبول/الاستمرار':'استكمل جميع عناصر القبول','ok')};

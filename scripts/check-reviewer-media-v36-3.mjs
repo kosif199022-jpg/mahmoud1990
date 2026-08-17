@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
+const media=read('public/v36-reviewer-media.js'),bridge=read('public/v36-zai.js'),sw=read('public/sw.js');
+const failures=[];const ok=(name,v)=>{console.log((v?'✅':'❌')+' '+name);if(!v)failures.push(name)};
+ok('Reviewer media module is offline precached',sw.includes("'/v36-reviewer-media.js'"));
+ok('Bridge loads reviewer media independently of reviewer view timing',/function loadReviewerMedia\(/.test(bridge)&&bridge.includes('/v36-reviewer-media.js?v=36.3-media1')&&/loadReviewerMedia\(\)/.test(bridge));
+ok('Reviewer media blobs live in IndexedDB',media.includes("const DB='kosif-reviewer-media-v1'")&&/indexedDB\.open/.test(media)&&/objectStore\(STORE\)\.put/.test(media));
+ok('Reviewer media does not upload through fetch or legacy storage APIs',!/(fetch\s*\(|\/api\/|\/files\/|\/office\/)/.test(media));
+ok('Reviewer workspace persists metadata JSON, not raw blobs',media.includes("localStorage.setItem('kosif_v36_workspace_v1',JSON.stringify(x))"));
+ok('Reviewer note stores a media reference and integrity metadata only',/x\.notes\.push\(\{at:createdAt,text,source:'reviewer-local-media',media:\{id:mid,kind,mime,name:/.test(media)&&/size:blob\.size,sha256:sha,durationMs,localOnly:true,rawSentToAI:false/.test(media));
+ok('Reviewer note schema has no raw blob field',!/media:\{[^}]*[,\{]\s*blob\s*:/i.test(media)&&!/media:\{[^}]*[,\{]\s*data\s*:/i.test(media)&&!/media:\{[^}]*[,\{]\s*arrayBuffer\s*:/i.test(media)&&!/media:\{[^}]*[,\{]\s*base64\s*:/i.test(media));
+ok('Media metadata explicitly marks raw content as local-only and not sent to AI',/localOnly:true/.test(media)&&/rawSentToAI:false/.test(media));
+ok('Council context exposes integrity metadata only',/sha256:String\(n\.media\.sha256/.test(bridge)&&/localOnly:true,rawSentToAI:false/.test(bridge)&&!/reviewerNotes:[^\n]*(blob|base64|data:)/i.test(bridge));
+ok('Audio and video recording use browser permission-scoped MediaRecorder',/getUserMedia/.test(media)&&/new MediaRecorder/.test(media)&&/kind==='video'/.test(media));
+ok('Recordings stop automatically after bounded duration',/MAX_RECORD_MS=5\*60\*1000/.test(media)&&/setTimeout\(\(\)=>\{if\(active\)stop\(\)\},MAX_RECORD_MS\)/.test(media));
+ok('Local attachment size is bounded',/MAX_FILE=75\*1024\*1024/.test(media)&&/blob\.size>MAX_FILE/.test(media));
+ok('Every stored media blob gets SHA-256 integrity digest',/crypto\.subtle\.digest\('SHA-256'/.test(media)&&/sha256:sha/.test(media));
+ok('Media notes support audio video and files',/start\('audio'\)/.test(media)&&/start\('video'\)/.test(media)&&/attachFile/.test(media));
+ok('Raw media is not automatically trusted as semantic transcript',/لم يُضف تفريغ نصي/.test(media)&&/لم يُضف وصف نصي/.test(media));
+ok('Deleting media removes both local blob and linked note metadata',/await del\(mid\)/.test(media)&&/filter\(n=>n\?\.media\?\.id!==mid\)/.test(media));
+ok('UI discloses device-local retention and transfer limitation',/الوسائط الخام لا تنتقل تلقائيًا/.test(media)&&/لا يُرسل إلى مجلس AI/.test(media));
+console.log(`KOSIF_REVIEWER_MEDIA ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}

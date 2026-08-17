@@ -86,6 +86,14 @@ const architecture={
  'Standards SW scoped to standards':/pathname\.startsWith\('\/standards\/'\)/.test(src.stdSw),
  'Public company writes authenticated':/writeTokenHash|canWritePublic|authorization/i.test(src.workspace),
  'Private company encryption retained':/AES-GCM|AES_GCM|crypto\.subtle/i.test(all),
+ /* Feature-presence gates cannot see wrong arithmetic. The account classifier drives
+  * the draft statements, and a wrong bucket still leaves the accounting equation
+  * balanced, so only real assertions catch it. */
+ 'Accounting engine has arithmetic tests':fs.existsSync('scripts/check-accounting-v36.mjs')&&/npm run accounting/.test(src.pkg),
+ 'Account classification prefers the chart code':/CAT_BY_CODE/.test(src.features)&&/classifyAccount/.test(src.features)&&/basis:'code'/.test(src.features),
+ /* The draft must disclose how each account was bucketed; name-only matches are the
+  * ones an auditor has to re-check. */
+ 'Draft discloses classification basis':/أساس التصنيف/.test(src.features)&&/clsBasis/.test(src.features),
  /* The brand was a <div>, so the document had no h1 at all and screen-reader heading
   * navigation — a primary AT mode — had no top-level anchor. */
  'App shell exposes a top-level h1':/<h1 class="brand-name">/.test(src.pub)&&/<h1 class="brand-name">/.test(src.html),
