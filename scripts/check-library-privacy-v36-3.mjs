@@ -30,7 +30,13 @@ const other='kosif_library_device='+'A'.repeat(43);
 r=await edgeWorker.fetch(new Request('https://kosif.test/api/library',{headers:{cookie:other}}),env,{});d=await r.json();
 ok('Different device cannot enumerate another device book',d.books?.length===0);
 r=await edgeWorker.fetch(new Request('https://kosif.test/api/library/intel/status?id='+encodeURIComponent(mine),{headers:{cookie:other}}),env,{});
-ok('Different device receives non-disclosing 404 for stored-book APIs',r.status===404);
+ok('Different device receives non-disclosing 404 for OCR status',r.status===404);
+r=await edgeWorker.fetch(new Request('https://kosif.test/api/library/chunk/'+encodeURIComponent(mine)+'/0',{method:'PUT',headers:{cookie:other,'content-type':'application/octet-stream'},body:new Uint8Array([1,2,3])}),env,{});
+ok('Different device cannot overwrite PDF chunks',r.status===404);
+r=await edgeWorker.fetch(new Request('https://kosif.test/library/files/'+encodeURIComponent(mine),{headers:{cookie:other}}),env,{});
+ok('Different device cannot download stored PDF',r.status===404);
+r=await edgeWorker.fetch(new Request('https://kosif.test/api/library/search?id='+encodeURIComponent(mine)+'&q=test',{headers:{cookie:other}}),env,{});
+ok('Different device cannot search another device OCR',r.status===404);
 
 r=await edgeWorker.fetch(new Request('https://kosif.test/api/kosif/library/trust',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:mine,trusted:true})}),env,{});
 ok('Professional trust changes require owner session',r.status===401);
@@ -43,7 +49,7 @@ r=await edgeWorker.fetch(new Request('https://kosif.test/api/library',{headers:{
 ok('Owner can administer all smart-library books',d.scope==='owner'&&d.books?.some(x=>x.id==='foreign')&&d.books?.some(x=>x.id===mine&&x.auditTrusted===true));
 
 ok('AI edge filters library metadata through explicit audit-trust markers',/function trustedLibraryData\(data\)/.test(edge)&&/opts\?\.prefix\|\|''\)!=='library:meta:'/.test(edge)&&/kosif:library:audit-trusted:/.test(edge)&&/isAIPath\(u\.pathname\)\?aiEnv\(env\):env/.test(edge));
-ok('Stored PDF, OCR, search and chunk routes are device-gated',edge.includes('function isStoredLibraryRoute')&&edge.includes('library/files')&&edge.includes('api/library/chunk')&&edge.includes("'/api/library/intel'")&&edge.includes("'/api/library/search'"));
+ok('Stored library guard resolves book ids before delegation',edge.includes('function isStoredLibraryRoute')&&edge.includes('function libraryRequestBookId'));
 ok('Upload-start abuse gets an hourly server-side rate limit',/LIBRARY_UPLOAD_RATE_LIMIT/.test(edge)&&/count>=10/.test(edge));
 
 console.log(`KOSIF_LIBRARY_PRIVACY ${failures.length?'FAILED':'OK'} failures=${failures.length}`);
