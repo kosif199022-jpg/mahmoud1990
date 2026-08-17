@@ -1,0 +1,42 @@
+name: Import v35 base from preview
+
+on:
+  push:
+    branches: [a1990-v35-import]
+    paths: [.github/workflows/import-v35-preview.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a1990-v35-import
+          fetch-depth: 1
+      - name: Retrieve source from stable version preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for prefix in 8e3b7199 8e3b7199f188 8e3b7199-f188; do
+            url="https://${prefix}-mahmoud-eldesouky.kosif199022.workers.dev/6ff6b51050ba881059c63e74/kosif-full-source.zip"
+            echo "Trying $url"
+            code=$(curl -sS -L --connect-timeout 20 --max-time 90 -o /tmp/source.zip -w '%{http_code}' "$url" || true)
+            echo "HTTP $code; bytes $(wc -c </tmp/source.zip 2>/dev/null || echo 0)"
+            if [ "$code" = 200 ] && unzip -tq /tmp/source.zip >/dev/null 2>&1; then ok=1; break; fi
+          done
+          test "$ok" = 1
+          rm -rf _v35_base && mkdir _v35_base
+          unzip -q /tmp/source.zip -d _v35_base
+          find _v35_base -maxdepth 2 -type f -printf '%p %s bytes\n' | sort | head -100
+      - name: Commit base
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add _v35_base
+          git diff --cached --quiet && exit 0
+          git commit -m 'Import stable Kosif source for Native v35 [skip ci]'
+          git push origin HEAD:a1990-v35-import
