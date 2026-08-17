@@ -1,4 +1,5 @@
 import legacyWorker from './legacy-worker.js';
+import {handleAudio} from './audio-proxy.js';
 import {handleZaiAI,isZaiProvider} from './zai-provider.js';
 
 const E=new Set(['/manifest.webmanifest','/sw.js','/icon.svg','/migrate-v35.js']);
@@ -103,6 +104,9 @@ export default{async fetch(req,env,ctx){
   if(u.pathname==='/api/kosif/ai/test'&&req.method==='POST')return testAI(req,env,ctx);
   if(aiPath(u.pathname)){const gate=await requireVerifiedAI(req,env);if(gate.response)return gate.response;const safeReq=jurisdictionSafeAIRequest(req,gate.body);if(gate.provider==='zai')return handleZaiAI(safeReq,env);return legacyWorker.fetch(safeReq,env,ctx)}
   const neutralSources=await neutralJurisdictionSources(req,env,ctx,u);if(neutralSources)return neutralSources;
+  /* Narration is proxied from mafateeh-al-tharwa, so it must be matched before the
+   * static-asset branch below, which would otherwise 404 it. */
+  if(u.pathname.startsWith('/standards/audio/')){const r=await handleAudio(req,env);if(r)return r}
   if(u.pathname==='/standards')return Response.redirect(new URL('/standards/',u),308);
   if(req.method==='GET'&&(E.has(u.pathname)||u.pathname.startsWith('/standards/'))){const r=await a(req,env);if(r)return tag(r);if(E.has(u.pathname))return tag(await legacyWorker.fetch(req,env,ctx));return new Response('Not found',{status:404})}
   if(u.pathname.startsWith('/api/')||req.method!=='GET')return legacyWorker.fetch(req,env,ctx);

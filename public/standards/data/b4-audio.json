@@ -1,0 +1,259 @@
+{
+  "book": "b4",
+  "title": "مفاتيح الثروة — النسخة الصوتية الكاملة",
+  "synthesized": true,
+  "voices": [
+    "gemini-3.1-flash-tts-preview",
+    "gemini-3.1-and-2.5-flash-tts-preview",
+    "gemini-2.5-flash-tts-preview"
+  ],
+  "generatedAt": "2026-08-11T00:19:37.492Z",
+  "sourceRepo": "kosif199022-jpg/mafateeh-al-tharwa",
+  "totalDuration": 17361,
+  "coverage": {
+    "narrated": 34,
+    "chapters": 46,
+    "from": 13,
+    "to": 46
+  },
+  "tracks": [
+    {
+      "chapter": 13,
+      "track": 1,
+      "title": "الامتنان: بداية الزيادة",
+      "duration": 378,
+      "bytes": 1513528
+    },
+    {
+      "chapter": 14,
+      "track": 2,
+      "title": "النية: من الإرادة إلى العمل",
+      "duration": 317,
+      "bytes": 1270176
+    },
+    {
+      "chapter": 15,
+      "track": 3,
+      "title": "فكّ الارتباط: المفهوم والأساس",
+      "duration": 305,
+      "bytes": 1218724
+    },
+    {
+      "chapter": 16,
+      "track": 4,
+      "title": "فكّ الارتباط عن الأفكار والاعتقادات",
+      "duration": 322,
+      "bytes": 1286512
+    },
+    {
+      "chapter": 17,
+      "track": 5,
+      "title": "فكّ الارتباط عن الأشخاص السلبيين",
+      "duration": 314,
+      "bytes": 1255498
+    },
+    {
+      "chapter": 18,
+      "track": 6,
+      "title": "فكّ الارتباط عن الأهداف المتحققة",
+      "duration": 298,
+      "bytes": 1191370
+    },
+    {
+      "chapter": 19,
+      "track": 7,
+      "title": "الأهداف المؤجلة والمعلّقة والملغاة",
+      "duration": 300,
+      "bytes": 1199150
+    },
+    {
+      "chapter": 20,
+      "track": 8,
+      "title": "وضع الأهداف الذكية",
+      "duration": 305,
+      "bytes": 1221870
+    },
+    {
+      "chapter": 21,
+      "track": 9,
+      "title": "ترسيخ الهدف بالصورة والنية",
+      "duration": 320,
+      "bytes": 1282366
+    },
+    {
+      "chapter": 22,
+      "track": 10,
+      "title": "خطة الدراسة ومنهج التطبيق",
+      "duration": 182,
+      "bytes": 727964
+    },
+    {
+      "chapter": 23,
+      "track": 11,
+      "title": "مقدمة التفكير المؤدي للنتائج",
+      "duration": 556,
+      "bytes": 2226242
+    },
+    {
+      "chapter": 24,
+      "track": 12,
+      "title": "الدرس الأول: وضع الأهداف",
+      "duration": 459,
+      "bytes": 1836954
+    },
+    {
+      "chapter": 25,
+      "track": 13,
+      "title": "الدرس الثاني: الفجوة بين القول والفعل",
+      "duration": 622,
+      "bytes": 2489300
+    },
+    {
+      "chapter": 26,
+      "track": 14,
+      "title": "الدرس الثالث: النموذج الفكري (البرادايم) وتغيير العادات",
+      "duration": 653,
+      "bytes": 2612024
+    },
+    {
+      "chapter": 27,
+      "track": 15,
+      "title": "الدرس الرابع: المارد السحري - نموذج رجل العصا",
+      "duration": 612,
+      "bytes": 2448132
+    },
+    {
+      "chapter": 28,
+      "track": 16,
+      "title": "الدرس الخامس: الملكات العقلية الست",
+      "duration": 583,
+      "bytes": 2330990
+    },
+    {
+      "chapter": 29,
+      "track": 17,
+      "title": "الدرس السادس: الصورة الذهنية",
+      "duration": 743,
+      "bytes": 2970530
+    },
+    {
+      "chapter": 30,
+      "track": 18,
+      "title": "الدرس السابع: كسر حاجز الرهبة",
+      "duration": 595,
+      "bytes": 2379460
+    },
+    {
+      "chapter": 31,
+      "track": 19,
+      "title": "الدرس الثامن: الإيمان",
+      "duration": 573,
+      "bytes": 2293044
+    },
+    {
+      "chapter": 32,
+      "track": 20,
+      "title": "الدرس التاسع: الموقف السلوكي",
+      "duration": 925,
+      "bytes": 3701858
+    },
+    {
+      "chapter": 33,
+      "track": 21,
+      "title": "الدرس العاشر: القيادة",
+      "duration": 1020,
+      "bytes": 4079988
+    },
+    {
+      "chapter": 34,
+      "track": 22,
+      "title": "الدرس الحادي عشر: ترك الآخرين بشعور الزيادة",
+      "duration": 1109,
+      "bytes": 4436480
+    },
+    {
+      "chapter": 35,
+      "track": 23,
+      "title": "الدرس الثاني عشر: العقل المدبر",
+      "duration": 1198,
+      "bytes": 4793382
+    },
+    {
+      "chapter": 36,
+      "track": 24,
+      "title": "القرار الأول",
+      "duration": 165,
+      "bytes": 661890
+    },
+    {
+      "chapter": 37,
+      "track": 25,
+      "title": "القرار الثاني",
+      "duration": 145,
+      "bytes": 581444
+    },
+    {
+      "chapter": 38,
+      "track": 26,
+      "title": "القرار الثالث",
+      "duration": 153,
+      "bytes": 611876
+    },
+    {
+      "chapter": 39,
+      "track": 27,
+      "title": "القرار الرابع",
+      "duration": 140,
+      "bytes": 560324
+    },
+    {
+      "chapter": 40,
+      "track": 28,
+      "title": "القرار الخامس",
+      "duration": 137,
+      "bytes": 549764
+    },
+    {
+      "chapter": 41,
+      "track": 29,
+      "title": "القرار السادس",
+      "duration": 152,
+      "bytes": 608996
+    },
+    {
+      "chapter": 42,
+      "track": 30,
+      "title": "الغاية والرؤية والأهداف",
+      "duration": 1474,
+      "bytes": 5895352
+    },
+    {
+      "chapter": 43,
+      "track": 31,
+      "title": "المخاطرة",
+      "duration": 446,
+      "bytes": 1785850
+    },
+    {
+      "chapter": 44,
+      "track": 32,
+      "title": "درس كرسي الحلاق",
+      "duration": 947,
+      "bytes": 3789192
+    },
+    {
+      "chapter": 45,
+      "track": 33,
+      "title": "قصة هيرب كيلهير",
+      "duration": 355,
+      "bytes": 1420392
+    },
+    {
+      "chapter": 46,
+      "track": 34,
+      "title": "تربل 333",
+      "duration": 558,
+      "bytes": 2233882
+    }
+  ]
+}

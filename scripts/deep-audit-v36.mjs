@@ -6,7 +6,7 @@ const root=process.cwd();
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
 const json=p=>{try{return JSON.parse(read(p))}catch{return null}};
 const src={
- html:read('frontend/index.html'),pub:read('public/index.html'),workspace:read('src/kosif-workspace.js'),worker:read('src/worker.js'),legacy:read('src/legacy-worker.js'),sw:read('public/sw.js'),stdHtml:read('public/standards/index.html'),stdPro:read('public/standards/reader-pro-v36.js'),stdSw:read('public/standards/sw.js'),gov:read('public/v36-governance.js'),gate:read('public/v36-ai-gate.js'),features:read('public/v36-features.js'),outputs:read('public/v36-outputs.js'),readiness:read('public/v36-standards-readiness.js'),ops:read('public/v36-operations.js'),motion:read('public/v36-motion.css'),pkg:read('package.json'),checker:read('scripts/check-all.mjs'),zai:read('src/zai-provider.js')
+ html:read('frontend/index.html'),pub:read('public/index.html'),workspace:read('src/kosif-workspace.js'),worker:read('src/worker.js'),legacy:read('src/legacy-worker.js'),sw:read('public/sw.js'),stdHtml:read('public/standards/index.html'),stdPro:read('public/standards/reader-pro-v36.js'),stdSw:read('public/standards/sw.js'),gov:read('public/v36-governance.js'),gate:read('public/v36-ai-gate.js'),features:read('public/v36-features.js'),outputs:read('public/v36-outputs.js'),readiness:read('public/v36-standards-readiness.js'),ops:read('public/v36-operations.js'),motion:read('public/v36-motion.css'),pkg:read('package.json'),checker:read('scripts/check-all.mjs'),zai:read('src/zai-provider.js'),audio:read('src/audio-proxy.js'),stdSwSrc:read('public/standards/sw.js')
 };
 const all=Object.values(src).join('\n');
 function walk(dir,out=[]){if(!fs.existsSync(dir))return out;for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(e.name==='.git'||e.name==='node_modules')continue;const p=path.join(dir,e.name);e.isDirectory()?walk(p,out):out.push(p)}return out}
@@ -86,6 +86,31 @@ const architecture={
  'Standards SW scoped to standards':/pathname\.startsWith\('\/standards\/'\)/.test(src.stdSw),
  'Public company writes authenticated':/writeTokenHash|canWritePublic|authorization/i.test(src.workspace),
  'Private company encryption retained':/AES-GCM|AES_GCM|crypto\.subtle/i.test(all),
+ /* The narration lives in mafateeh-al-tharwa (~66MB). Copying it here would bloat every
+  * clone and fork the source of truth, so the worker proxies it instead. */
+ 'Narration proxied, not copied into the repo':(()=>{
+  const hit=[];const walkAudio=d=>{if(!fs.existsSync(d))return;for(const e of fs.readdirSync(d,{withFileTypes:true})){if(e.name==='.git'||e.name==='node_modules')continue;const p=path.join(d,e.name);e.isDirectory()?walkAudio(p):(/\.(mp3|m4a|ogg|wav|aac)$/i.test(e.name)&&hit.push(p))}};
+  walkAudio(root);return hit.length===0;
+ })(),
+ /* iOS Safari sends a Range probe before playing any audio and rejects a plain 200, so a
+  * proxy that drops Range silently breaks playback on the primary target device. */
+ 'Audio proxy forwards Range requests':!src.audio||/['"]range['"]/.test(src.audio)&&/content-range/.test(src.audio),
+ /* Caching 66MB of MP3 would exhaust the origin quota, and replaying a cached 206 as a
+  * full response breaks seeking. */
+ 'Audio excluded from Service Worker caching':/standards\/audio\//.test(src.stdSwSrc),
+ /* The recording is TTS, not a human reading; the reader must not imply otherwise. */
+ 'Synthesized narration disclosed in the reader':/مُولَّدة آليًا|synthesized/.test(src.stdHtml),
+ 'Audio index matches chapters carrying a track':(()=>{
+  const idx=json('public/standards/data/b4-audio.json');if(!idx)return true;
+  const tracks=new Map((idx.tracks||[]).map(t=>[t.chapter,t.track]));
+  for(let n=1;n<=46;n++){
+   const f='public/standards/data/b4/'+n+'.json';if(!fs.existsSync(f))return false;
+   const ch=json(f);const has=ch?.study?.track!=null;
+   if(has!==tracks.has(n))return false;
+   if(has&&tracks.get(n)!==ch.study.track)return false;
+  }
+  return tracks.size===34;
+ })(),
  /* A connection probe skips all standards/professional context and swaps in a
   * "you are testing a connection" system prompt. Deciding that from the prompt text
   * meant a real audit question containing "connected" silently lost its grounding and
