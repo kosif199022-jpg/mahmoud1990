@@ -1,4 +1,4 @@
-/* Kosif v36.3 — Z.ai / GLM provider bridge + verified test workflow */
+/* Kosif v36.4 — Z.ai / GLM provider bridge + verified test workflow + restored feature reachability */
 (()=>{'use strict';
 if(window.KosifZAI)return;
 const LS='kosif_ai_settings_v1',DEFAULT_MODEL='glm-5.1',COUNCIL_CTX_MARK='\n\n--- KOSIF_STRUCTURED_CONTEXT_V36 ---\n';

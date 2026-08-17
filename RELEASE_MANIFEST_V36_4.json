@@ -1,0 +1,35 @@
+{
+  "version": "v36.4",
+  "buildId": "2026.08.18-v36.4-mobile-release-integrity",
+  "release": "Mobile Modal Integrity, Reader Auto-scroll Guard & Cache Generation",
+  "schemaVersion": 14,
+  "appCache": "kosif-native-v36-4-app",
+  "standardsCache": "kosif-native-v36-4-standards",
+  "sourceRepo": "kosif199022-jpg/mahmoud1990",
+  "baseCommit": "f841db57a2d9468b096d62ac81179b09c3ba5f9a",
+  "releaseDate": "2026-08-18",
+  "preserves": [
+    "Kosif native shell and historical deterministic audit engine",
+    "Council V2 with Gemini, OpenAI, Claude and Z.ai verified-provider workflow",
+    "Human-approved Gemini Executor and 14 draft deliverables",
+    "Device-isolated smart library and explicit audit-trust control",
+    "Owner-gated legacy shared storage and AI verified-key security",
+    "Jurisdiction fail-safe routing, PBC context and reviewer notes",
+    "Standards library, narration, professional-source separation and development-book exclusion"
+  ],
+  "fixes": [
+    "Rotates app and standards cache generations so post-v36.3 commits cannot run under a stale v36.3 cache identity",
+    "Makes /__version and /__health report one v36.4 release identity at the production edge",
+    "Locks background scrolling with scroll-position restoration while Kosif dialogs are open, including iPhone fixed-body behavior",
+    "Blocks background pointer interaction while a modal is active without blocking the modal's own scroll surface",
+    "Pauses standards auto-scroll while the reader tools/modal body lock is active and resumes without chapter-skipping or scroll jumps",
+    "Preserves the standards reader position while opening and closing its tools sheet",
+    "Replaces the AI Gate whole-document MutationObserver with scoped observers",
+    "Adds a permanent v36.4 regression contract for release identity, caches, modal locking, reader auto-scroll and AI observer scope"
+  ],
+  "verification": {
+    "command": "npm run check",
+    "contract": "scripts/check-v36-4-contract.mjs",
+    "historyParity": "scripts/check-history-parity-v36-3.mjs"
+  }
+}
