@@ -32,7 +32,9 @@ function rounds(){try{return state.rounds||[]}catch{return[]}}
 function report(){try{return state.report||null}catch{return null}}
 function ensureCoreCompat(){
   if(typeof refreshTop==='function'&&!refreshTop.__v36){
+    const old=refreshTop;
     refreshTop=function(){
+      try{old()}catch(_){}
       const e=q('#pill-entity');if(e)e.textContent=state.entity.name?`${state.entity.name} · ${state.entity.period||'فترة غير محددة'}${state.demo?' · عرض توضيحي':''}`:'لم تُحدَّد المنشأة بعد';
       const ok=(()=>{try{return !!getKey()}catch{return false}})();
       const d=q('#api-dot');if(d)d.className='dot '+(ok?'on':'off');
@@ -81,9 +83,8 @@ function renderAnalytics(){
   const w=q('#v36-analytics');if(!w)return;const a=accounts();if(!a.length){w.innerHTML='<div class="empty">اعتمد ميزان المراجعة أولًا.</div>';return}
   const vals=a.map(x=>Math.abs(bal(x))).filter(v=>v>0),roundNums=a.filter(x=>Math.abs(bal(x))>=1000&&Math.abs(bal(x))%10000===0),neg=a.filter(x=>bal(x)<0&&/نقد|بنك|مخزون|أصل|مصروف|عميل|ذمم مدينة/.test(name(x))),zeros=a.filter(x=>Math.abs(bal(x))<.01);
   const freq=Array(10).fill(0);vals.forEach(v=>freq[firstDigit(v)]++);const total=vals.length||1;const expected=[0,.301,.176,.125,.097,.079,.067,.058,.051,.046];const dev=[1,2,3,4,5,6,7,8,9].reduce((s,d)=>s+Math.abs(freq[d]/total-expected[d]),0);
-  const risks=deriveRisks();v36().riskRegister=risks;persist();
+  const risks=deriveRisks();v36().riskRegister=risks;saveV36();
   w.innerHTML=`<div class="grid g4"><div class="kpi"><div class="v">${a.length}</div><div class="l">الحسابات</div></div><div class="kpi"><div class="v">${roundNums.length}</div><div class="l">أرقام دائرية</div></div><div class="kpi"><div class="v">${neg.length}</div><div class="l">أرصدة بإشارة غير معتادة</div></div><div class="kpi"><div class="v">${zeros.length}</div><div class="l">أرصدة صفرية</div></div></div><div class="note ${dev>.35?'warn':'info'}"><span>∑</span><span><b>Benford — مؤشر استكشافي:</b> مجموع الانحراف ${dev.toFixed(3)}. المؤشر لا يثبت وجود تحريف ويُستخدم لتوجيه إجراءات إضافية فقط.</span></div><div class="twrap"><table class="data"><thead><tr><th>الرقم الأول</th><th>فعلي</th><th>متوقع</th></tr></thead><tbody>${[1,2,3,4,5,6,7,8,9].map(d=>`<tr><td>${d}</td><td>${(freq[d]/total*100).toFixed(1)}%</td><td>${(expected[d]*100).toFixed(1)}%</td></tr>`).join('')}</tbody></table></div>`;
-  renderRiskRegister();
 }
 function renderRiskRegister(){const w=q('#v36-risk-register');if(!w)return;const r=v36().riskRegister||deriveRisks();w.innerHTML=r.length?`<div class="twrap"><table class="data"><thead><tr><th>المجال</th><th>الدرجة</th><th>التأكيدات</th><th>المصدر/السبب</th></tr></thead><tbody>${r.map(x=>`<tr><td>${h(x.area)}</td><td><span class="badge ${x.score>=75?'danger':x.score>=50?'warn':'info'}">${x.score}</span></td><td>${h(x.assertions)}</td><td>${h(x.source+' — '+x.reason)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">لا توجد مخاطر مشتقة بعد.</div>'}
 function allRequests(){const arr=[];for(const r of rounds())for(const d of (r.parsed?.document_requests||[]))arr.push({...d,round:r.no});return arr}
@@ -162,13 +163,14 @@ function renderFSDraft(){const w=q('#v36-fs-draft');if(!w)return;const a=account
 let _v36RenderPending=false;
 function scheduleRenderV36(){
   if(_v36RenderPending)return;
+  if(typeof state==='undefined')return;
   _v36RenderPending=true;
   requestAnimationFrame(()=>{
     _v36RenderPending=false;
     renderAllV36();
   });
 }
-function renderAllV36(){try{v36();renderTB();renderAnalytics();renderPBC();renderNotes();renderTemplates();renderAcceptance();renderPrior();renderMatLog();renderJournals();renderMisstatements();renderFSDraft()}catch(e){console.error('Kosif v36 render',e)}}
+function renderAllV36(){try{v36();renderTB();renderAnalytics();renderRiskRegister();renderPBC();renderNotes();renderTemplates();renderAcceptance();renderPrior();renderMatLog();renderJournals();renderMisstatements();renderFSDraft()}catch(e){console.error('Kosif v36 render',e)}}
 function bind(){
   const a=q('#v36-accept-save');if(a)a.onclick=()=>{const x=v36().acceptance;Object.assign(x,{independence:q('#v36-ind').checked,conflicts:q('#v36-conf').checked,clientIntegrity:q('#v36-int').checked,terms:q('#v36-terms').checked,note:q('#v36-accept-note').value.trim()});x.accepted=x.independence&&x.conflicts&&x.clientIntegrity&&x.terms;x.at=now();saveV36();scheduleRenderV36();try{renderRounds()}catch(_){ }toastV(x.accepted?'تم اعتماد قرار القبول/الاستمرار':'استكمل جميع عناصر القبول','ok')};
   const pf=q('#v36-prior-file');if(pf)pf.onchange=async()=>{try{v36().priorTB=await readPriorFile(pf.files[0]);saveV36();scheduleRenderV36();toastV('تم تحميل سنة المقارنة','ok')}catch(e){toastV(e.message,'danger')}};
