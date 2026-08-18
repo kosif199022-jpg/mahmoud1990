@@ -1,0 +1,371 @@
+/* Aghnam Al-Wadi v6 Design System for Kosif v36.4 */
+:root {
+  /* Core Visual Tokens */
+  --aghnam-bg: #f8fafc;
+  --aghnam-surface: #ffffff;
+  --aghnam-ink: #1e293b;
+  --aghnam-muted: #64748b;
+  --aghnam-border: #eef2f7;
+  
+  --aghnam-indigo: #6366f1;
+  --aghnam-violet: #a855f7;
+  --aghnam-purple: #8b5cf6;
+  --aghnam-pink: #ec4899;
+  --aghnam-cyan: #06b6d4;
+  --aghnam-green: #10b981;
+  --aghnam-amber: #f59e0b;
+  --aghnam-rose: #f43f5e;
+  
+  --aghnam-grad: linear-gradient(135deg, var(--aghnam-indigo) 0%, var(--aghnam-violet) 55%, var(--aghnam-pink) 100%);
+  --aghnam-grad-2: linear-gradient(135deg, var(--aghnam-indigo), var(--aghnam-violet));
+  --aghnam-grad-soft: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.04));
+  
+  --aghnam-shadow: 0 4px 24px -6px rgba(99, 102, 241, 0.12);
+  --aghnam-shadow-hover: 0 12px 40px -8px rgba(99, 102, 241, 0.22);
+  
+  --aghnam-radius: 16px;
+  --aghnam-radius-lg: 24px;
+  --aghnam-radius-sm: 10px;
+  
+  --aghnam-ease: cubic-bezier(.2, .8, .2, 1);
+  --aghnam-spring: cubic-bezier(.16, 1, .3, 1);
+  
+  /* Kosif Semantic Mappings */
+  --ink: var(--aghnam-ink);
+  --muted: var(--aghnam-muted);
+  --paper: var(--aghnam-bg);
+  --surface: var(--aghnam-surface);
+  --line: var(--aghnam-border);
+  --line2: #e2e8f0;
+  
+  --pine: #312e81;
+  --pine2: #4338ca;
+  --pinesoft: #eef2ff;
+  
+  --viridian: var(--aghnam-indigo);
+  --viridian2: var(--aghnam-indigo);
+  --virsoft: #eef2ff;
+  
+  --seal: var(--aghnam-violet);
+  --seal2: var(--aghnam-purple);
+  --sealsoft: #f5f3ff;
+  --sealline: #ddd6fe;
+  
+  --danger: var(--aghnam-rose);
+  --dangersoft: #fff1f2;
+  --warn: var(--aghnam-amber);
+  --warnsoft: #fffbeb;
+  --info: var(--aghnam-cyan);
+  --infosoft: #ecfeff;
+  --ok: var(--aghnam-green);
+  --oksoft: #ecfdf5;
+  
+  --kosif-font-scale: 1;
+  --f-body: "Tajawal", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Arabic", "Segoe UI", Roboto, sans-serif;
+  --f-head: "Tajawal", sans-serif;
+}
+
+/* Dark Mode Adaptation */
+html[data-theme="dark"] {
+  --aghnam-bg: #0b1020;
+  --aghnam-surface: #151b2e;
+  --aghnam-ink: #e2e8f0;
+  --aghnam-muted: #94a3b8;
+  --aghnam-border: rgba(148, 163, 184, 0.16);
+  
+  --aghnam-grad-soft: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(139, 92, 246, 0.08));
+  --aghnam-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.5);
+  --aghnam-shadow-hover: 0 20px 48px -14px rgba(0, 0, 0, 0.6);
+  
+  --pine: #c7d2fe;
+  --pine2: #a5b4fc;
+  --pinesoft: rgba(99, 102, 241, 0.12);
+  --virsoft: rgba(99, 102, 241, 0.12);
+  --line2: rgba(148, 163, 184, 0.22);
+}
+
+/* Base resets and typography */
+html { scroll-behavior: smooth; background: var(--aghnam-bg) !important; color-scheme: light dark; }
+body {
+  font-family: var(--f-body) !important;
+  background: var(--aghnam-bg) !important;
+  color: var(--aghnam-ink) !important;
+  font-size: calc(15px * var(--kosif-font-scale)) !important;
+  line-height: 1.7;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  background: 
+    radial-gradient(circle at 90% -10%, rgba(99, 102, 241, 0.08), transparent 40%),
+    radial-gradient(circle at 10% 10%, rgba(168, 85, 247, 0.06), transparent 40%);
+}
+
+h1, h2, h3, h4, h5, h6 { font-family: var(--f-head) !important; font-weight: 800; color: var(--pine); }
+
+/* Shell: Topbar */
+.topbar {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid var(--aghnam-border) !important;
+  padding: 14px 22px !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  color: var(--aghnam-ink) !important;
+  box-shadow: 0 1px 12px -4px rgba(0,0,0,0.05) !important;
+}
+.topbar::after { display: none !important; }
+
+html[data-theme="dark"] .topbar {
+  background: rgba(15, 20, 38, 0.8) !important;
+}
+
+.brand-name {
+  background: var(--aghnam-grad) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  font-family: Tajawal, sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 34px !important;
+  letter-spacing: -1px !important;
+  text-shadow: none !important;
+}
+
+.brand-sub { color: var(--aghnam-muted) !important; font-weight: 600; font-size: 11.5px !important; }
+
+.pill {
+  background: var(--aghnam-bg) !important;
+  border: 1px solid var(--aghnam-border) !important;
+  color: var(--aghnam-muted) !important;
+  border-radius: 99px !important;
+  font-weight: 700 !important;
+}
+
+/* Tabs Navigation */
+.tabs {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--aghnam-border) !important;
+  position: sticky !important;
+  top: 72px !important;
+  z-index: 90 !important;
+}
+
+.tab {
+  color: var(--aghnam-muted) !important;
+  font-weight: 700 !important;
+  transition: all 0.2s var(--aghnam-ease) !important;
+  border-bottom: 3px solid transparent !important;
+}
+
+.tab:hover { color: var(--aghnam-indigo) !important; transform: translateY(-1px); }
+
+.tab.active {
+  color: var(--aghnam-indigo) !important;
+  border-bottom-color: var(--aghnam-indigo) !important;
+}
+
+/* Main Content Area */
+main {
+  max-width: 1440px !important;
+  margin: 0 auto !important;
+  padding: 32px 24px 120px !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Cards & KPI */
+.card, .kpi, .step, .std-card, .finding, .docreq, .upd, .src-card, .pbc-item, .hr-item, .file-row {
+  background: var(--aghnam-surface) !important;
+  border: 1px solid var(--aghnam-border) !important;
+  border-radius: var(--aghnam-radius) !important;
+  box-shadow: var(--aghnam-shadow) !important;
+  transition: transform 0.3s var(--aghnam-spring), box-shadow 0.3s var(--aghnam-ease), border-color 0.2s ease !important;
+}
+
+.card:hover, .kpi:hover, .step:hover, .std-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--aghnam-shadow-hover) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+.card.hero {
+  background: var(--aghnam-grad) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 20px 50px -12px rgba(99, 102, 241, 0.4) !important;
+}
+.card.hero h2, .card.hero h3, .card.hero .hint { color: #fff !important; opacity: 0.9; }
+
+/* KPI Value Emphasis */
+.kpi .v, .stat strong, .kpi strong {
+  font-family: "Plus Jakarta Sans", Tajawal, sans-serif !important;
+  font-weight: 800 !important;
+  background: var(--aghnam-grad-2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+html[data-theme="dark"] .kpi .v {
+  background: linear-gradient(135deg, #a5b4fc, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Buttons */
+.btn {
+  border-radius: var(--aghnam-radius-sm) !important;
+  font-weight: 700 !important;
+  transition: all 0.2s var(--aghnam-ease) !important;
+  padding: 10px 20px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn.primary {
+  background: var(--aghnam-grad-2) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 8px 20px -6px rgba(99, 102, 241, 0.5) !important;
+}
+
+.btn.primary:hover {
+  filter: saturate(1.1) brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.6) !important;
+}
+
+.btn.ghost {
+  background: var(--aghnam-bg) !important;
+  border: 1px solid var(--aghnam-border) !important;
+  color: var(--aghnam-indigo) !important;
+}
+
+.btn.ghost:hover {
+  background: var(--aghnam-surface) !important;
+  border-color: var(--aghnam-indigo) !important;
+}
+
+/* Forms */
+.field input, .field select, .field textarea, .lib-toolbar input {
+  border: 1px solid var(--aghnam-border) !important;
+  border-radius: var(--aghnam-radius-sm) !important;
+  background: var(--aghnam-surface) !important;
+  padding: 12px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--aghnam-indigo) !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+  outline: none !important;
+}
+
+/* Tables */
+.twrap {
+  border: 1px solid var(--aghnam-border) !important;
+  border-radius: var(--aghnam-radius) !important;
+  overflow: hidden !important;
+  background: var(--aghnam-surface) !important;
+}
+
+table.data th {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  font-weight: 700 !important;
+  padding: 14px 16px !important;
+}
+
+table.data td {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid var(--aghnam-border) !important;
+}
+
+table.data tr:hover td {
+  background: rgba(99, 102, 241, 0.04) !important;
+}
+
+/* Bottom Navigation (Mobile) */
+#kosif-bottom-nav {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid rgba(99, 102, 241, 0.12) !important;
+  border-radius: 24px !important;
+  margin: 0 12px 12px !important;
+  padding: 8px !important;
+  box-shadow: 0 12px 40px -12px rgba(15, 23, 42, 0.2) !important;
+}
+
+#kosif-bottom-nav button.active {
+  color: var(--aghnam-indigo) !important;
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* Modals & Sheets */
+.kosif-sheet, .modal {
+  border-radius: var(--aghnam-radius-lg) !important;
+  border: 1px solid var(--aghnam-border) !important;
+  box-shadow: 0 32px 80px -16px rgba(15, 23, 42, 0.3) !important;
+  animation: unifiedPop 0.4s var(--aghnam-spring) both !important;
+}
+
+@keyframes unifiedPop {
+  0% { transform: scale(0.9) translateY(30px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Desktop Navigation (Right-side adaptation) */
+@media(min-width: 1024px) {
+  /* We keep the topbar but can optimize the layout for wider screens */
+  .topbar-inner { max-width: 100% !important; }
+  
+  /* If we wanted a true sidebar, we would need to restructure HTML, 
+     but we can simulate a more 'dashboard' feel with wide cards and clean spacing. */
+  .tabs-inner {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+/* Micro-interactions */
+[data-live="1"] .dot {
+  animation: aghnamPulse 2s infinite !important;
+}
+
+@keyframes aghnamPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+
+/* iOS Safari Safe Areas */
+#kosif-bottom-nav {
+  bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+}
+
+main {
+  padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
