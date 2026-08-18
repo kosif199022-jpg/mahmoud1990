@@ -30,9 +30,6 @@ function readerBookBootstrap(url) {
 }
 
 function exposeReaderGlobals(text) {
-  // The original standalone Mafateeh reader intentionally owns D/CH.  The
-  // uploaded four-book edition changes only their declaration from const to var
-  // so the library layer can swap books, then restore the exact original data.
   return text
     .replace(/\bconst\s+D\s*=\s*/,'var D = ')
     .replace(/\bconst\s+CH\s*=\s*/,'var CH = ');
@@ -56,6 +53,10 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     const bookBoot = readerBookBootstrap(requestUrl);
     const suite = `${bookBoot}<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css"><script src="/wealth/reader-library.js?v=37" defer></script><script src="/suite-shell.js" defer></script>`;
     if (!text.includes('/wealth/reader-library.js')) text = text.replace(/<\/head>/i, `${suite}</head>`);
+  }
+  if (/javascript/i.test(contentType) && requestUrl?.pathname.endsWith('/sw.js')) {
+    text = text.replace(/const\s+OFFLINE_FILES\s*=\s*\[/,
+      'const OFFLINE_FILES = ["/wealth/reader-library.js?v=37","/wealth/books/library.json?v=37",');
   }
   if (/javascript/i.test(contentType) || /html/i.test(contentType)) {
     text = text.replace(/(["'`])\/wealth\/wealth\//g, '$1/wealth/');
