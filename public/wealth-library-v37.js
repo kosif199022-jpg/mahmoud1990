@@ -1,6 +1,6 @@
 /* Kosif v37 four-book library layer.
    Keeps the original Mafateeh book embedded in the upstream reader and lazily
-   loads the three prepared reference/training books from Kosif-owned routes. */
+   loads prepared standards/training chapters from Kosif-owned native data. */
 (()=>{
 'use strict';
 if(window.__KOSIF_WEALTH_LIBRARY__)return;window.__KOSIF_WEALTH_LIBRARY__=true;
@@ -55,6 +55,27 @@ async function render(){
   $$('#libList .lbk').forEach(x=>x.onclick=()=>switchBook(x.dataset.b));
 }
 
+function partLabel(c,id){
+  const t=`${c?.title||''} ${c?.name||''}`;
+  if(id==='dipifr'){if(/ANSWER/i.test(t))return'الإجابات';if(/MOCK/i.test(t))return'الاختبارات التجريبية';if(/QUESTION/i.test(t))return'الأسئلة';return'المقدمة'}
+  if((Number(c?.no)||0)<=2||/إطار مفاهيم|التحول للمعايير|حقوق التأليف/.test(t))return'التمهيد وإطار المفاهيم';
+  if(/معيار المحاسبة الدولي/.test(t))return'معايير المحاسبة الدولية IAS';
+  if(/تفسير|IFRIC|SIC/.test(t))return'التفسيرات';
+  if(/المعيار الدولي للتقرير المالي/.test(t))return'المعايير الدولية للتقرير المالي IFRS';
+  return'إصدارات سعودية مكملة';
+}
+function nativeParts(raw,id){
+  const ch=Array.isArray(raw?.chapters)?raw.chapters:[],out=[];
+  for(const c of ch){const label=partLabel(c,id),no=Number(c.no)||1,last=out[out.length-1];if(!last||last.title!==label)out.push({name:`الباب ${out.length+1}`,title:label,intro:'',from:no,to:no});else last.to=no}
+  return out.length?out:[{name:'الكتاب',title:raw?.title||'الكتاب',intro:'',from:1,to:Math.max(1,ch.length)}];
+}
+function normalizeIndex(raw,info,id){
+  if(Array.isArray(raw?.parts)&&raw.parts.length)return raw;
+  const chapters=(Array.isArray(raw?.chapters)?raw.chapters:[]).map(c=>({...c,no:Number(c.no),title:c.title||'',name:c.name||'',key:c.key||c.name||'',words:Number(c.words)||0,pages:c.pages||null}));
+  const training=id==='dipifr';
+  return {meta:{title:raw?.title||info.title||'',subtitle:raw?.sub||info.subtitle||'',author:info.author||'',role:training?'مادة تدريبية':'مرجع مهني',year:raw?.year||info.year||'',note:training?'مادة تدريبية وتمارين؛ لا تحل محل SOCPA أو IFRS كمصدر اعتماد مهني.':'نسخة مجهزة للقراءة من مكتبة Kosif؛ أولوية الاستشهاد المهني لأحدث مصدر رسمي نافذ.',preface:[training?'هذه المادة للتدريب والممارسة فقط.':'تم الحفاظ على متن الفصل من ملف المصدر المجهز داخل Kosif دون توليد أو إعادة صياغة بالذكاء الاصطناعي.']},parts:nativeParts({title:raw?.title,chapters},id),chapters};
+}
+
 async function switchBook(id){
   if(id===curId){closeLib();return}
   const lib=await load(),info=lib.find(b=>b.id===id);if(!info)return;
@@ -63,8 +84,7 @@ async function switchBook(id){
   try{speechSynthesis.cancel()}catch{}
   if(info.embedded){document.documentElement.dir='rtl';apply(D0,CH0,id);closeLib();say('عُدنا إلى '+info.title);return}
   say('يُحمَّل '+info.title+'…');
-  let idx;try{const r=await fetch(`${BOOK_BASE}/${encodeURIComponent(id)}.json?v=37`,{credentials:'same-origin'});if(!r.ok)throw new Error(String(r.status));idx=cache.get(id)||await r.json()}catch{return say('تعذّر تحميل الكتاب')}
-  cache.set(id,idx);
+  let idx;try{let raw=cache.get(id);if(!raw){const r=await fetch(`${BOOK_BASE}/${encodeURIComponent(id)}.json?v=37`,{credentials:'same-origin'});if(!r.ok)throw new Error(String(r.status));raw=await r.json();cache.set(id,raw)}idx=normalizeIndex(raw,info,id)}catch{return say('تعذّر تحميل الكتاب')}
   const parts=(idx.parts||[]).map(p=>({name:p.name,title:p.title,intro:p.intro||'',chapters:(idx.chapters||[]).filter(c=>c.no>=p.from&&c.no<=p.to).map(c=>({no:c.no,title:c.title,key:c.key||'',name:c.name||'',body:[['p','…']],idea:'',apply:'',qs:[],week:'',audio:null,__lazy:id}))}));
   const D={meta:idx.meta||{},parts,ex:idx?.meta?.ex||['الفكرة التي سأطبّقها من هذا الفصل:','الملف أو ورقة العمل التي سأطبّقها عليها:','الفقرة التي سأستشهد بها:'],note:idx?.meta?.note||''};
   const CH=parts.flatMap(p=>p.chapters.map(c=>({...c,part:p.title,pname:p.name})));
