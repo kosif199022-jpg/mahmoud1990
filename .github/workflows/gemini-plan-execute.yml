@@ -71,7 +71,7 @@ jobs:
           settings: |-
             {
               "model": {
-                "maxSessionTurns": 25
+                "maxSessionTurns": 60
               },
               "telemetry": {
                 "enabled": true,
@@ -113,7 +113,19 @@ jobs:
                 }
               },
               "tools": {
-                "core": ["run_shell_command(echo)"]
+                "core": [
+                  "read_file",
+                  "read_many_files",
+                  "glob",
+                  "grep_search",
+                  "list_directory",
+                  "write_file",
+                  "replace",
+                  "run_shell_command(echo)",
+                  "run_shell_command(npm)",
+                  "run_shell_command(node)",
+                  "run_shell_command(git)"
+                ]
               }
             }
           prompt: '/gemini-plan-execute'
@@ -124,7 +136,8 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
           ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
           REPOSITORY: '${{ github.repository }}'
-          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.gemini_response }}'
+          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.summary }}'
+          GEMINI_ERROR: '${{ steps.run_gemini.outputs.error }}'
           GEMINI_OUTCOME: '${{ steps.run_gemini.outcome }}'
         run: |-
           set -euo pipefail
@@ -141,7 +154,7 @@ jobs:
           PY
           elif [[ "${GEMINI_OUTCOME}" == "success" ]]; then
             cat > "${tmp}" <<'EOF'
-          ⚠️ Gemini execution finished without a publishable result. Verify whether a `gemini/*` branch or Pull Request was created before assuming any code was changed.
+          ⚠️ Gemini execution finished with an empty public summary. Verify that a `gemini/*` branch and Pull Request exist before treating implementation as complete.
           EOF
           else
             cat > "${tmp}" <<'EOF'
