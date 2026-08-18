@@ -7,13 +7,13 @@ ok(edge.includes("modules:{audit:'/audit/',libraries:'/libraries/',wealth:'/weal
 ok(hub.includes('/audit/')&&hub.includes('/libraries/')&&hub.includes('/sales/'),'hub exposes Audit, Libraries and general Sales');
 ok(proxy.includes('env?.MAFATEEH')&&proxy.includes('/wealth/'),'Wealth Keys uses existing service binding under a scoped route');
 ok(proxy.includes("READER_ROOT_ALIASES = ['/reader.html', '/reader', '/']")&&proxy.includes('candidatePaths(path)'),'Wealth Keys tolerates the deployed reader root aliases');
-ok(proxy.includes("h.set('location', '/wealth'")&&proxy.includes("'https://mafateeh.internal'"),'Wealth redirects stay scoped under /wealth');
-ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])")&&proxy.includes("localStorage.setItem('mk_lib_book'"),'prepared standards books deep-link into the unchanged Mafateeh reader');
+ok(proxy.includes("h.set('location', '/wealth'")&&proxy.includes("'https://mafateeh.internal'"),'Mafateeh upstream redirects stay scoped under /wealth');
+ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])")&&proxy.includes("PREPARED_BOOKS = new Set(['std2018', 'std2025', 'dipifr'])")&&proxy.includes('function preparedReaderRedirect(url, path)')&&proxy.includes("new URL('/libraries/reader.html', url.origin)")&&!proxy.includes("localStorage.setItem('mk_lib_book'"),'prepared standards books are isolated from the Mafateeh runtime and old Wealth deep links migrate out');
 ok(edge.includes('OWNER_AUTH_REQUIRED')&&edge.includes('CUSTOM_SOURCE_BLOCKED'),'client data and custom source refresh are owner-gated');
 ok(edge.includes("x-kosif-intent")&&read('public/v37-privacy-guard.js').includes('navigator.userActivation'),'silent company publication is blocked at client and edge');
 ok(!sw.includes('ignoreSearch:true'),'root service worker no longer ignores query identity');
 ok(sw.includes("u.pathname.startsWith('/library/')")&&sw.includes("u.pathname.startsWith('/wealth/')")&&!sw.includes("u.pathname.startsWith('/sales/')"),'protected APIs and Wealth bypass root cache while static Sales can work offline');
-ok(sw.includes('/libraries/index.html')&&sw.includes('/sales/sales-motion-v1.js'),'Libraries and general Sales shells are available offline');
+ok(sw.includes('/libraries/index.html')&&sw.includes('/libraries/reader.html')&&sw.includes('/sales/sales-motion-v1.js'),'Libraries, isolated reader and general Sales shells are available offline');
 ok(out.includes('csvCell')&&out.includes('حساب غير معروف أو اسم غير فريد')&&out.includes('قيد غير متوازن'),'adjusted TB rejects unsafe entries and CSV formulas');
 ok(read('public/v37-audit-safety.js').includes('m?.performance'),'journal testing uses performance materiality');
 ok(bp.blueprint.authoring_principle_ar.includes('لا رقم واحد يخرج من نموذج لغوي'),'deterministic-first accounting principle is codified');
