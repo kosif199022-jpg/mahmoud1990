@@ -8,6 +8,8 @@ const SUITE={
   modules:{audit:'/audit/',wealth:'/wealth/reader.html',sales:'/sales/'},
   designAuthority:'Aghnam Al-Wadi Sales Dashboard 7',
   deterministicEngine:'kosif-blueprint-v3 + ISA opinion tree',
+  aiGate:'owner-password+verified-key',
+  aiProviders:['gemini','openai','anthropic','zai'],
   sourceRepo:'kosif199022-jpg/mahmoud1990'
 };
 const OWNER_COOKIE='kosif_ai_session';
