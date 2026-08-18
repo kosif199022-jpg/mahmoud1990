@@ -19,10 +19,13 @@ ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'd
 ok(proxy.includes("if (!LIBRARY_BOOKS.has(book)) return ''")&&proxy.includes("mk_lib_book"),'Mafateeh is unchanged unless an explicit valid book deep-link is supplied');
 ok(proxy.includes('/wealth-library-v37.js')&&proxy.includes("/reader-library\\.js/i.test(text)"),'Kosif injects its library layer only when the upstream reader lacks one');
 ok(edge.includes("std2018:{source:'b1'")&&edge.includes("std2025:{source:'b3'")&&edge.includes("dipifr:{source:'b2'"),'reader aliases map to the current Kosif standards datasets');
-ok(edge.includes("p==='/wealth/books/library.json'")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\.json$/")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\/(\\d+)\\.json$/"),'library, index and chapter routes are served locally before the Wealth proxy');
-ok(edge.indexOf("p.startsWith('/wealth/books/')")<edge.indexOf("p.startsWith('/wealth/')"),'local book data wins before the legacy Mafateeh upstream proxy');
+ok(edge.includes("p==='/wealth/books/library.json'")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\.json$/")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\/(\\d+)\\.json$/"),'library, index and chapter compatibility routes exist before the Wealth proxy');
+ok(edge.includes("return redirect(req,`/standards/data/${cfg.source}.json`,307)")&&edge.includes("return redirect(req,`/standards/data/${cfg.source}/${n}.json`,307)"),'reader indexes and chapters redirect to native Kosif assets instead of being rebuilt at the edge');
+ok(edge.indexOf("p.startsWith('/wealth/books/')")<edge.indexOf("p.startsWith('/wealth/')"),'local book compatibility routes win before the legacy Mafateeh upstream proxy');
 for(const id of ['b1','b2','b3','b4'])ok(stdLibrary.some(x=>x.id===id),`current standards data contains ${id}`);
 ok(wealthLibrary.includes("const BOOK_BASE='/wealth/books'")&&wealthLibrary.includes("const initialId=LS.get('book','mafateeh')")&&wealthLibrary.includes("let LIB=null,curId='mafateeh'"),'stored or deep-linked book selection is applied after the embedded Mafateeh baseline initializes');
+ok(wealthLibrary.includes('function normalizeIndex(raw,info,id)')&&wealthLibrary.includes('function nativeParts(raw,id)'),'reader normalizes native Kosif indexes and derives parts client-side');
+ok(wealthLibrary.includes("if(Array.isArray(raw?.parts)&&raw.parts.length)return raw"),'reader remains compatible with a future packaged parts index');
 ok(wealthLibrary.includes("info.embedded")&&wealthLibrary.includes('D0,CH0'),'returning to Mafateeh restores the original embedded reader payload');
 ok(wealthLibrary.includes("prefers-reduced-motion:reduce")&&wealthLibrary.includes('min-width:44px'),'library sheet keeps reduced-motion and touch target safeguards');
 ok(!/Math\.random|crypto\.getRandomValues|\/api\/ai|openai|anthropic|gemini/i.test(wealthLibrary),'four-book reader layer has no random or AI inference path');
@@ -34,5 +37,5 @@ ok(motion.includes("Number(r.revenue)||0")&&motion.includes('groupChannels()'),'
 ok(motion.includes("prefers-reduced-motion")&&motion.includes("pointer: coarse")&&motionCss.includes('@media(prefers-reduced-motion:reduce)'),'motion has reduced-motion and touch-device fallbacks');
 ok(motion.includes("data-mode=\"2d\"")||motion.includes("data-mode=\"3d\"")||motion.includes("panel.dataset.mode"),'3D view includes a table fallback mode');
 ok(!/fetch\(|XMLHttpRequest|\/api\//.test(motion),'motion layer has no AI or network request path');
-ok(sw.includes('/libraries/index.html')&&sw.includes('/sales/sales-motion-v1.js'),'Libraries and Sales enhancement assets are PWA cached');
+ok(sw.includes('/libraries/index.html')&&sw.includes('/sales/sales-motion-v1.js')&&sw.includes('/wealth-library-v37.js'),'Libraries, Sales and Wealth compatibility assets are PWA cached');
 console.log('KOSIF_LIBRARIES_SALES_OK');
