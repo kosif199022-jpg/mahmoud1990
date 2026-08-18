@@ -40,7 +40,12 @@ jobs:
             const request = process.env.REQUEST || '';
             if (request.startsWith('@gemini-cli /approve')) {
               core.setOutput('command', 'approve');
-              core.setOutput('additional_context', '');
+              core.setOutput('additional_context', [
+                'The repository owner explicitly approved the latest visible AI Assistant: Plan of Action in this issue.',
+                'Execute only that latest approved plan.',
+                'Create changes on a branch whose name starts with gemini/ and open a Pull Request; never push directly to main and never merge your own Pull Request.',
+                'If no visible AI Assistant: Plan of Action exists in the issue comments, do not modify repository files. Return a clear explanation that approval cannot be executed until the plan is visible.'
+              ].join(' '));
             } else if (request.startsWith('@gemini-cli')) {
               core.setOutput('command', 'invoke');
               core.setOutput('additional_context', request.replace(/^@gemini-cli/, '').trim());

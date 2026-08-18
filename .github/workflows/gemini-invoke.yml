@@ -111,3 +111,35 @@ jobs:
               }
             }
           prompt: '/gemini-invoke'
+
+      - name: 'Publish Gemini response'
+        if: ${{ always() }}
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
+          REPOSITORY: '${{ github.repository }}'
+          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.gemini_response }}'
+          GEMINI_OUTCOME: '${{ steps.run_gemini.outcome }}'
+        run: |-
+          set -euo pipefail
+          tmp="$(mktemp)"
+          trap 'rm -f "${tmp}"' EXIT
+          if [[ "${GEMINI_OUTCOME}" == "success" && -n "${GEMINI_RESPONSE//[[:space:]]/}" ]]; then
+            python - <<'PY' > "${tmp}"
+          import os
+          text = os.environ.get('GEMINI_RESPONSE', '').strip()
+          limit = 58000
+          if len(text) > limit:
+              text = text[:limit] + '\n\n---\n_Response truncated by workflow to stay within GitHub comment limits._'
+          print(text)
+          PY
+          elif [[ "${GEMINI_OUTCOME}" == "success" ]]; then
+            cat > "${tmp}" <<'EOF'
+          ⚠️ Gemini CLI completed successfully, but it returned no publishable response. No approval should be given until a visible plan or result is posted in this issue.
+          EOF
+          else
+            cat > "${tmp}" <<'EOF'
+          ❌ Gemini CLI did not complete successfully. Check the linked Actions run before retrying or approving any implementation.
+          EOF
+          fi
+          gh issue comment "${ISSUE_NUMBER}" --repo "${REPOSITORY}" --body-file "${tmp}"
