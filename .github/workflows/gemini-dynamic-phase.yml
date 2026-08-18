@@ -16,8 +16,8 @@ jobs:
   execute:
     if: |-
       github.event.sender.type == 'User' &&
-      startsWith(github.event.comment.body || '', '@gemini-phase /approve') &&
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == '@gemini-phase /approve'
     runs-on: 'ubuntu-latest'
     timeout-minutes: 60
     permissions:
@@ -32,6 +32,14 @@ jobs:
         with:
           persist-credentials: 'false'
           fetch-depth: 1
+
+      - name: 'Acknowledge dynamic phase'
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.issue.number }}'
+          REPOSITORY: '${{ github.repository }}'
+        run: |-
+          gh issue comment "${ISSUE_NUMBER}" --repo "${REPOSITORY}" --body "🎨 Dynamic Gemini phase started. Run: ${GITHUB_SERVER_URL}/${REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
       - name: 'Prepare dynamic phase context'
         env:
