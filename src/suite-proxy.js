@@ -31,7 +31,7 @@ function rewriteWealthText(input, contentType = '') {
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
     );
-    const suite = '<link rel="stylesheet" href="/suite-shell.css"><script src="/suite-shell.js" defer></script>';
+    const suite = '<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css"><script src="/suite-shell.js" defer></script>';
     if (!text.includes('/suite-shell.css')) text = text.replace(/<\/head>/i, `${suite}</head>`);
   }
   if (/javascript/i.test(contentType) || /html/i.test(contentType)) {
