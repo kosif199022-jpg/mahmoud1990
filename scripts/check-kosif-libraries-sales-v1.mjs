@@ -4,17 +4,28 @@ const ok=(c,m)=>{if(!c)throw new Error('KOSIF_LIBRARIES_SALES_FAIL: '+m);console
 const libraries=read('public/libraries/index.html');
 const proxy=read('src/suite-proxy.js');
 const edge=read('src/suite-edge.js');
+const wealthLibrary=read('public/wealth-library-v37.js');
 const sales=read('public/sales/index.html');
 const boot=read('public/sales/sales-general-bootstrap.js');
 const motion=read('public/sales/sales-motion-v1.js');
 const motionCss=read('public/sales/sales-motion-v1.css');
 const sw=read('public/sw.js');
+const stdLibrary=JSON.parse(read('public/standards/data/library.json'));
 
 ok(edge.includes("libraries:'/libraries/'")&&edge.includes("p==='/libraries'"),'Libraries is a first-class Kosif route');
 for(const id of ['mafateeh','std2025','std2018','dipifr'])ok(libraries.includes(`/wealth/reader.html?book=${id}`),`Libraries exposes prepared reader book ${id}`);
 ok(!/<iframe[^>]+\.pdf/i.test(libraries)&&!libraries.includes('application/pdf'),'standards are not presented as ordinary embedded PDFs');
 ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])"),'reader deep links are allowlisted to prepared books');
 ok(proxy.includes("if (!LIBRARY_BOOKS.has(book)) return ''")&&proxy.includes("mk_lib_book"),'Mafateeh is unchanged unless an explicit valid book deep-link is supplied');
+ok(proxy.includes('/wealth-library-v37.js')&&proxy.includes("/reader-library\\.js/i.test(text)"),'Kosif injects its library layer only when the upstream reader lacks one');
+ok(edge.includes("std2018:{source:'b1'")&&edge.includes("std2025:{source:'b3'")&&edge.includes("dipifr:{source:'b2'"),'reader aliases map to the current Kosif standards datasets');
+ok(edge.includes("p==='/wealth/books/library.json'")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\.json$/")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\/(\\d+)\\.json$/"),'library, index and chapter routes are served locally before the Wealth proxy');
+ok(edge.indexOf("p.startsWith('/wealth/books/')")<edge.indexOf("p.startsWith('/wealth/')"),'local book data wins before the legacy Mafateeh upstream proxy');
+for(const id of ['b1','b2','b3','b4'])ok(stdLibrary.some(x=>x.id===id),`current standards data contains ${id}`);
+ok(wealthLibrary.includes("const BOOK_BASE='/wealth/books'")&&wealthLibrary.includes("const initialId=LS.get('book','mafateeh')")&&wealthLibrary.includes("let LIB=null,curId='mafateeh'"),'stored or deep-linked book selection is applied after the embedded Mafateeh baseline initializes');
+ok(wealthLibrary.includes("info.embedded")&&wealthLibrary.includes('D0,CH0'),'returning to Mafateeh restores the original embedded reader payload');
+ok(wealthLibrary.includes("prefers-reduced-motion:reduce")&&wealthLibrary.includes('min-width:44px'),'library sheet keeps reduced-motion and touch target safeguards');
+ok(!/Math\.random|crypto\.getRandomValues|\/api\/ai|openai|anthropic|gemini/i.test(wealthLibrary),'four-book reader layer has no random or AI inference path');
 ok(sales.includes('<title>تحليل المبيعات | Kosif</title>')&&!sales.includes('أغنام الوادي'),'Sales workspace is general in its visible shell');
 ok(sales.includes('dir="rtl"')&&sales.includes('sales-side'),'general Sales preserves RTL right-side navigation structure');
 ok(boot.includes("d?.meta?.source==='Aghnam v7 native integration'")&&boot.includes("d.sales.every((x,i)=>x?.id===`S-${i+1}`)"),'only the exact historical demo sample is migrated; imported user data is preserved');
