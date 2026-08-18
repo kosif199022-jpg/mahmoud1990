@@ -1,0 +1,56 @@
+import securityEdge from './security-edge.js';
+import { proxyWealth } from './suite-proxy.js';
+
+const SUITE={
+  version:'v37.0.0-root',
+  buildId:'2026.08.18-v37-root-rebuild-aghnam7-mafateeh',
+  architecture:'suite-edge → security-edge → native-worker',
+  modules:{audit:'/audit/',wealth:'/wealth/reader.html',sales:'/sales/'},
+  designAuthority:'Aghnam Al-Wadi Sales Dashboard 7',
+  deterministicEngine:'kosif-blueprint-v3 + ISA opinion tree',
+  sourceRepo:'kosif199022-jpg/mahmoud1990'
+};
+const OWNER_COOKIE='kosif_ai_session';
+
+const enc=new TextEncoder();
+async function sha256(s){const d=await crypto.subtle.digest('SHA-256',enc.encode(String(s||'')));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function cookies(req){const out={};for(const p of String(req.headers.get('cookie')||'').split(';')){const i=p.indexOf('=');if(i>0){try{out[p.slice(0,i).trim()]=decodeURIComponent(p.slice(i+1).trim())}catch{}}}return out}
+async function ownerSession(req,env){if(!env?.DATA)return null;const t=cookies(req)[OWNER_COOKIE];if(!t)return null;const rec=await env.DATA.get('kosif:ai:session:'+await sha256(t),'json');return rec?.expiresAt&&Number(rec.expiresAt)>Date.now()?rec:null}
+function json(body,status=200){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-kosif-suite':SUITE.version}})}
+function redirect(req,path,status=308){return Response.redirect(new URL(path,req.url),status)}
+async function staticAsset(req,env,path){if(!env?.ASSETS)return null;const u=new URL(req.url);u.pathname=path;const r=await env.ASSETS.fetch(new Request(u,{method:'GET',headers:req.headers}));return r.status===404?null:r}
+function sameOriginApi(r,req){const h=new Headers(r.headers);h.delete('access-control-allow-origin');const origin=req.headers.get('origin');if(origin){try{const a=new URL(origin),b=new URL(req.url);if(a.protocol===b.protocol&&a.host===b.host){h.set('access-control-allow-origin',origin);h.set('vary','Origin')}}catch{}}h.set('x-kosif-suite',SUITE.version);h.set('x-content-type-options','nosniff');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
+function decorate(r,kind='module'){const h=new Headers(r.headers);h.set('x-kosif-suite',SUITE.version);h.set('x-kosif-suite-module',kind);h.set('x-content-type-options','nosniff');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
+async function hub(req,env){const r=await staticAsset(req,env,'/hub.html');if(!r)return new Response('Kosif Suite hub unavailable',{status:503});const h=new Headers(r.headers);h.set('cache-control','no-cache');h.set('content-security-policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");h.set('referrer-policy','strict-origin-when-cross-origin');h.set('permissions-policy','camera=(), microphone=(), geolocation=(), payment=()');h.set('x-frame-options','DENY');h.set('x-content-type-options','nosniff');h.set('x-kosif-suite',SUITE.version);return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
+async function auditShell(req,env,ctx){const u=new URL(req.url);u.pathname='/';const r=await securityEdge.fetch(new Request(u,req),env,ctx);if(!r.ok||!/text\/html/i.test(r.headers.get('content-type')||''))return decorate(r,'audit');let text=await r.text();const head='<link rel="stylesheet" href="/suite-shell.css"><script src="/v37-privacy-guard.js"></script><script src="/suite-shell.js" defer></script>';if(!text.includes('/v37-privacy-guard.js'))text=text.replace(/<\/head>/i,head+'</head>');const h=new Headers(r.headers);h.delete('content-length');h.set('content-type','text/html; charset=utf-8');h.set('content-security-policy-report-only',"default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");h.set('x-kosif-suite-module','audit');h.set('x-kosif-suite',SUITE.version);return new Response(text,{status:r.status,statusText:r.statusText,headers:h})}
+
+async function privacyGate(req,env,u){
+  const company=/^\/api\/kosif\/(?:companies(?:\/|$)|company\/private\/)/.test(u.pathname);
+  const sourceRefresh=u.pathname==='/api/kosif/sources/refresh';
+  if(!company&&!sourceRefresh)return null;
+  const owner=await ownerSession(req,env);
+  if(!owner)return json({error:'OWNER_AUTH_REQUIRED',locked:true,message:'بيانات العملاء وتحديث المصادر محمية بجلسة المالك في Kosif v37.'},401);
+  if(sourceRefresh&&(u.searchParams.has('custom')||[...u.searchParams.keys()].some(k=>/^custom/i.test(k))))return json({error:'CUSTOM_SOURCE_BLOCKED',message:'المصادر المخصصة غير الموثقة معطلة. أضف المصدر إلى قائمة السماح في الكود بعد مراجعته.'},400);
+  if(u.pathname==='/api/kosif/companies'&&req.method==='POST'&&req.headers.get('x-kosif-intent')!=='user-create')return json({error:'EXPLICIT_USER_ACTION_REQUIRED',message:'تم منع النشر التلقائي الصامت لبيانات الشركة.'},409);
+  return null;
+}
+
+export default{
+  async fetch(req,env,ctx){
+    const u=new URL(req.url),p=u.pathname;
+    if(p==='/__suite')return json({ok:true,...SUITE});
+    if(p==='/__version')return json({...SUITE,legacyRelease:'v36.4-compatible'});
+    if(p==='/__health')return json({ok:true,name:'Kosif Unified Suite',...SUITE,security:{companyData:'owner-only',customSourceFetch:'allowlist-only',ai:'owner+verified-provider'}});
+    if(req.method==='GET'&&(p==='/'||p==='/hub'||p==='/hub/'))return hub(req,env);
+    if(p==='/audit')return redirect(req,'/audit/');
+    if(req.method==='GET'&&(p==='/audit/'||p==='/audit/index.html'))return auditShell(req,env,ctx);
+    if(p==='/wealth')return redirect(req,'/wealth/reader.html');
+    if(p.startsWith('/wealth/')){const r=await proxyWealth(req,env);if(r)return decorate(r,'wealth')}
+    if(p==='/sales')return redirect(req,'/sales/');
+    if(p==='/modules'||p==='/modules/')return redirect(req,'/sales/modules/');
+    if(p.startsWith('/modules/')){const target='/sales'+p;const r=await staticAsset(req,env,target.endsWith('/')?target+'index.html':target);if(r)return decorate(r,'sales');return new Response('Not found',{status:404})}
+    const blocked=await privacyGate(req,env,u);if(blocked)return blocked;
+    const r=await securityEdge.fetch(req,env,ctx);
+    return p.startsWith('/api/')?sameOriginApi(r,req):decorate(r,p.startsWith('/sales/')?'sales':'kosif');
+  }
+};
