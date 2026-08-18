@@ -66,7 +66,7 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
   return text;
 }
 
-function copyResponseHeaders(upstream) {
+function copyResponseHeaders(upstream, requestUrl = null) {
   const h = new Headers(upstream.headers);
   h.delete('content-length');
   h.delete('content-security-policy');
@@ -75,6 +75,8 @@ function copyResponseHeaders(upstream) {
     try {
       const u = new URL(loc, 'https://mafateeh.internal');
       if (u.origin === 'https://mafateeh.internal' || WEALTH_ORIGINS.includes(u.origin)) {
+        const requestedBook = String(requestUrl?.searchParams?.get('book') || '').trim().toLowerCase();
+        if (LIBRARY_BOOKS.has(requestedBook) && !u.searchParams.has('book')) u.searchParams.set('book', requestedBook);
         h.set('location', '/wealth' + (u.pathname === '/' ? '/' : u.pathname) + u.search + u.hash);
       }
     } catch (_) {}
@@ -105,6 +107,9 @@ async function fetchOrigin(origin, targetPath, url, init) {
 function usable(r) {
   return !!r && r.status !== 404 && r.status !== 502 && r.status !== 503;
 }
+function isRedirect(r) {
+  return !!r && r.status >= 300 && r.status < 400;
+}
 
 async function fetchUpstream(req, env, path) {
   const url = new URL(req.url);
@@ -114,15 +119,23 @@ async function fetchUpstream(req, env, path) {
   const init = { method: req.method, headers, redirect: 'manual' };
   if (!['GET', 'HEAD'].includes(req.method)) init.body = req.body;
 
+  const readerAlias = READER_ROOT_ALIASES.includes(path);
+  let redirectFallback = null;
   for (const targetPath of candidatePaths(path)) {
     const bound = await fetchBinding(req, env, targetPath, url, init);
-    if (usable(bound)) return bound;
+    if (usable(bound)) {
+      if (readerAlias && isRedirect(bound)) redirectFallback ||= bound;
+      else return bound;
+    }
     for (const origin of WEALTH_ORIGINS) {
       const r = await fetchOrigin(origin, targetPath, url, init);
-      if (usable(r)) return r;
+      if (usable(r)) {
+        if (readerAlias && isRedirect(r)) redirectFallback ||= r;
+        else return r;
+      }
     }
   }
-  return null;
+  return redirectFallback;
 }
 
 export async function proxyWealth(req, env) {
@@ -135,11 +148,11 @@ export async function proxyWealth(req, env) {
   if (!upstream) return new Response('Wealth Keys source unavailable', { status: 502 });
   const type = upstream.headers.get('content-type') || '';
   if (req.method === 'HEAD' || !TEXT_TYPES.test(type)) {
-    const h = copyResponseHeaders(upstream);
+    const h = copyResponseHeaders(upstream, u);
     return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: h });
   }
   const text = rewriteWealthText(await upstream.text(), type, u);
-  const h = copyResponseHeaders(upstream);
+  const h = copyResponseHeaders(upstream, u);
   h.set('content-type', type || 'text/plain; charset=utf-8');
   h.set('cache-control', /html/i.test(type) ? 'no-cache' : (h.get('cache-control') || 'public, max-age=3600'));
   return new Response(text, { status: upstream.status, statusText: upstream.statusText, headers: h });
