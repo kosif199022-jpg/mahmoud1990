@@ -72,6 +72,7 @@ jobs:
           const manifest=JSON.parse(fs.readFileSync('RELEASE_MANIFEST_V36_4.json','utf8'));
           const expectedLegacyVersion='v'+String(pkg.version||'').split('.').slice(0,2).join('.');
           const expectedLegacyBuild=String(manifest.buildId||'');
+          const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
           (async()=>{
             const b=await chromium.launch({headless:true});
             const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
@@ -117,6 +118,47 @@ jobs:
             if(suiteMode){
               const hub=await p.request.get('http://127.0.0.1:8788/');ok(hub.status()===200,'hub unavailable');
               const sales=await p.request.get('http://127.0.0.1:8788/sales/');ok(sales.status()===200,'sales workspace unavailable');
+
+              // Browser-level regression for the four-book reader. This proves
+              // the visible original Mafateeh runtime follows each selected
+              // prepared book, not merely that its JSON and bootstrap exist.
+              for(const book of ['std2025','std2018','dipifr']){
+                const indexResponse=await p.request.get(`http://127.0.0.1:8788/wealth/books/${book}.json`);
+                ok(indexResponse.ok(),`book index unavailable ${book}`);
+                const idx=await indexResponse.json();
+                const expectedTitle=clean(idx?.chapters?.[0]?.title);
+                ok(expectedTitle,`missing first chapter title ${book}`);
+                const chapterResponse=await p.request.get(`http://127.0.0.1:8788/wealth/books/${book}/1.json`);
+                ok(chapterResponse.ok(),`book chapter unavailable ${book}`);
+                const chapter=await chapterResponse.json();
+                const expectedBody=clean((chapter?.body||[]).map(x=>x?.[1]).find(Boolean)).slice(0,48);
+                ok(expectedBody,`missing first chapter body ${book}`);
+
+                await p.goto(`http://127.0.0.1:8788/wealth/reader.html?book=${book}&browser-verify=1`,{waitUntil:'domcontentloaded'});
+                await p.waitForFunction(id=>window.__KOSIF_WEALTH_LIBRARY__===true&&JSON.parse(localStorage.getItem('mk_lib_book')||'null')===id,book,{timeout:15000});
+                await p.waitForFunction(title=>{
+                  const h=document.querySelector('#page .chead h2');
+                  const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
+                  return h&&norm(h.textContent).includes(norm(title));
+                },expectedTitle,{timeout:15000});
+                await p.waitForFunction(snippet=>{
+                  const prose=document.querySelector('#prose');
+                  const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
+                  return prose&&norm(prose.textContent).includes(norm(snippet));
+                },expectedBody,{timeout:15000});
+                const visibleTitle=clean(await p.locator('#page .chead h2').textContent());
+                const visibleBody=clean(await p.locator('#prose').textContent());
+                ok(visibleTitle.includes(expectedTitle),`${book} rendered wrong title: ${visibleTitle}`);
+                ok(visibleBody.includes(expectedBody),`${book} rendered Mafateeh/other body instead of selected chapter`);
+                ok(!visibleTitle.includes('الامتنان: بداية الزيادة'),`${book} still visibly renders Mafateeh`);
+              }
+
+              // Mafateeh preserves its own reading position. Verify the restored
+              // embedded model identity, not a particular saved chapter number.
+              await p.goto('http://127.0.0.1:8788/wealth/reader.html?book=mafateeh&browser-verify=1',{waitUntil:'domcontentloaded'});
+              await p.waitForFunction(()=>window.__KOSIF_WEALTH_LIBRARY__===true&&window.D?.meta?.title==='مفاتيح الثروة'&&JSON.parse(localStorage.getItem('mk_lib_book')||'null')==='mafateeh',null,{timeout:15000});
+              ok(await p.evaluate(()=>window.D?.meta?.title==='مفاتيح الثروة'),'return to embedded Mafateeh model failed');
+              console.log('KOSIF_FOUR_BOOK_BROWSER_SWITCH_OK');
             }
             ok(bad.length===0,'HTTP '+bad.join(','));
             ok(!errors.some(x=>/ReferenceError|TypeError|SyntaxError|Kosif boot error/i.test(x)),'runtime '+errors.join('\n'));
