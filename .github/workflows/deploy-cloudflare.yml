@@ -3,8 +3,6 @@ name: Deploy Kosif to Cloudflare
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'deployments/latest.json'
   workflow_dispatch:
 
 concurrency:
@@ -15,7 +13,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +37,6 @@ jobs:
         run: npx --yes wrangler@4 deploy
 
       - name: Verify live v37 suite
-        id: live
         shell: bash
         env:
           LIVE_URL: https://mahmoud-eldesouky.kosif199022.workers.dev
@@ -65,36 +63,41 @@ jobs:
           [ "$ok" = 1 ] || { echo 'Live v37 verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
 
           for path in / /audit/ /sales/ /wealth/reader.html; do
-            code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 25 "$LIVE_URL$path?deploy=$GITHUB_SHA")
+            code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
             case "$code" in 200|204|301|302|307|308) ;; *) echo "Bad live route $path -> $code"; exit 1;; esac
           done
 
-      - name: Record verified deployment
+      - name: Publish successful production verification
+        if: success()
         shell: bash
         env:
+          GH_TOKEN: ${{ github.token }}
           LIVE_URL: https://mahmoud-eldesouky.kosif199022.workers.dev
         run: |
           set -euo pipefail
-          mkdir -p deployments
-          node - <<'NODE'
+          node - <<'NODE' >/tmp/kosif-deploy-status.md
           const fs=require('fs');
           const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
-          const out={
-            verified:true,
-            verifiedAt:new Date().toISOString(),
-            commit:process.env.GITHUB_SHA,
-            liveUrl:process.env.LIVE_URL,
-            version:h.version,
-            buildId:h.buildId,
-            modules:h.modules,
-            designAuthority:h.designAuthority,
-            security:h.security
-          };
-          fs.writeFileSync('deployments/latest.json',JSON.stringify(out,null,2)+'\n');
+          const run=`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- Aghnam Sales: \`${h.modules?.sales}\`\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe workflow executed \`wrangler deploy\`, then fetched the live Worker and validated all three canonical routes.`);
           NODE
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add deployments/latest.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'chore: record verified Cloudflare deployment [skip deploy]'
-          git push origin HEAD:main
+          gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md
+
+      - name: Publish failed production verification
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cat >/tmp/kosif-deploy-status.md <<EOF
+          ## Deployment status
+
+          ❌ **DEPLOYMENT OR LIVE VERIFICATION FAILED**
+
+          - Commit: \`$GITHUB_SHA\`
+          - Workflow run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          The release was not marked verified. Review the failed step before treating the Cloudflare deployment as production-ready.
+          EOF
+          gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md
