@@ -26,16 +26,20 @@ function candidatePaths(path) {
 function readerBookBootstrap(url) {
   const book = String(url?.searchParams?.get('book') || '').trim().toLowerCase();
   if (!LIBRARY_BOOKS.has(book)) return '';
-  // reader-library.js stores the active book as JSON under mk_lib_book.
-  // This one-shot bootstrap only runs for an explicit ?book= deep link and
-  // therefore leaves the normal Mafateeh experience completely unchanged.
   return `<script>(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
+}
+
+function exposeReaderGlobals(text) {
+  // The original standalone Mafateeh reader intentionally owns D/CH.  The
+  // uploaded four-book edition changes only their declaration from const to var
+  // so the library layer can swap books, then restore the exact original data.
+  return text
+    .replace(/\bconst\s+D\s*=\s*/,'var D = ')
+    .replace(/\bconst\s+CH\s*=\s*/,'var CH = ');
 }
 
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
   let text = String(input || '');
-  // Prefix only Mafateeh-owned root assets. API calls intentionally remain at /api/*
-  // so the same Kosif owner gate and provider verification protect AI capabilities.
   for (const p of PATH_PREFIXES) {
     const escaped = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     text = text.replace(new RegExp("([\"'`])\\/" + escaped, 'g'), '$1/wealth/' + p);
@@ -44,13 +48,14 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     text = text.replace(/"scope"\s*:\s*"\/"/g, '"scope":"/wealth/"');
   }
   if (/html/i.test(contentType)) {
+    text = exposeReaderGlobals(text);
     text = text.replace(
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
     );
     const bookBoot = readerBookBootstrap(requestUrl);
-    const suite = `${bookBoot}<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css"><script src="/suite-shell.js" defer></script>`;
-    if (!text.includes('/suite-shell.css')) text = text.replace(/<\/head>/i, `${suite}</head>`);
+    const suite = `${bookBoot}<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css"><script src="/wealth/reader-library.js?v=37" defer></script><script src="/suite-shell.js" defer></script>`;
+    if (!text.includes('/wealth/reader-library.js')) text = text.replace(/<\/head>/i, `${suite}</head>`);
   }
   if (/javascript/i.test(contentType) || /html/i.test(contentType)) {
     text = text.replace(/(["'`])\/wealth\/wealth\//g, '$1/wealth/');
