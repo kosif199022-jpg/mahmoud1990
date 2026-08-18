@@ -1,0 +1,428 @@
+/* Kosif v36.5 — Aghnam Al-Wadi v6 Design System
+   Consolidated visual tokens and shell transformation.
+   Based on docs/design-reference/aghnam-v6/DESIGN_SPEC.md
+*/
+
+:root {
+  /* Visual Tokens - Aghnam v6 */
+  --aghnam-bg: #f8fafc;
+  --aghnam-surface: #ffffff;
+  --aghnam-ink: #1e293b;
+  --aghnam-muted: #64748b;
+  --aghnam-border: #eef2f7;
+  --aghnam-border-hover: #e2e8f0;
+  
+  --aghnam-indigo: #6366f1;
+  --aghnam-violet: #a855f7;
+  --aghnam-purple: #8b5cf6;
+  --aghnam-cyan: #06b6d4;
+  --aghnam-green: #10b981;
+  --aghnam-amber: #f59e0b;
+  --aghnam-rose: #f43f5e;
+  
+  --aghnam-grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --aghnam-grad-hero: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  
+  --aghnam-shadow: 0 4px 24px -6px rgba(99, 102, 241, 0.12);
+  --aghnam-shadow-hover: 0 12px 40px -8px rgba(99, 102, 241, 0.25);
+  
+  --aghnam-radius-lg: 24px;
+  --aghnam-radius-md: 16px;
+  --aghnam-radius-sm: 12px;
+  
+  --aghnam-font-body: 'Tajawal', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --aghnam-font-head: 'Tajawal', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Focus states */
+  --aghnam-focus-ring: 0 0 0 4px rgba(99, 102, 241, 0.15);
+  
+  /* Shared tokens mapped to Kosif */
+  --v36-bg: var(--aghnam-bg);
+  --v36-surface: var(--aghnam-surface);
+  --v36-ink: var(--aghnam-ink);
+  --v36-muted: var(--aghnam-muted);
+}
+
+/* Base Body & Layout */
+body {
+  background-color: var(--aghnam-bg) !important;
+  color: var(--aghnam-ink) !important;
+  font-family: var(--aghnam-font-body) !important;
+  background-image: 
+    radial-gradient(700px 400px at 95% -5%, rgba(99, 102, 241, 0.08), transparent 60%),
+    radial-gradient(600px 400px at -5% 40%, rgba(6, 182, 212, 0.07), transparent 60%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Typography Normalize */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--aghnam-font-head) !important;
+  font-weight: 800 !important;
+  color: var(--aghnam-ink);
+}
+
+/* Components: Cards */
+.card, .kpi, .step, .std-card, .finding, .docreq {
+  background: var(--aghnam-surface) !important;
+  border: 1px solid var(--aghnam-border) !important;
+  border-radius: var(--aghnam-radius-md) !important;
+  box-shadow: var(--aghnam-shadow) !important;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover, .kpi:hover, .step:hover, .std-card:hover {
+  box-shadow: var(--aghnam-shadow-hover) !important;
+  transform: translateY(-3px) !important;
+  border-color: var(--aghnam-border-hover) !important;
+}
+
+/* KPI Strong Numeric Hierarchy */
+.kpi .v {
+  font-size: 32px !important;
+  font-weight: 900 !important;
+  background: var(--aghnam-grad-primary);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  line-height: 1.2 !important;
+  margin-bottom: 4px !important;
+}
+
+.kpi .l {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--aghnam-muted) !important;
+}
+
+/* Hero Section */
+.card.hero {
+  background: var(--aghnam-grad-hero) !important;
+  border: none !important;
+  border-radius: var(--aghnam-radius-lg) !important;
+  color: white !important;
+  box-shadow: 0 16px 48px -12px rgba(139, 92, 246, 0.45) !important;
+  padding: 32px !important;
+}
+
+.card.hero h2, .card.hero h3, .card.hero .hint, .card.hero p {
+  color: white !important;
+}
+
+.card.hero .kpi {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.card.hero .kpi .v {
+  background: none !important;
+  -webkit-text-fill-color: white !important;
+  color: white !important;
+}
+
+.card.hero .kpi .l {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Buttons Normalize */
+.btn {
+  border-radius: var(--aghnam-radius-sm) !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent;
+  padding: 10px 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.btn.primary {
+  background: var(--aghnam-grad-primary) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.42) !important;
+}
+
+.btn.primary:hover {
+  box-shadow: 0 8px 22px -4px rgba(99, 102, 241, 0.55) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn.ghost {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: none !important;
+}
+
+.btn.ghost:hover {
+  background: #e0e7ff !important;
+  color: var(--aghnam-indigo) !important;
+}
+
+/* Inputs Normalize */
+input, select, textarea {
+  border: 1.5px solid var(--aghnam-border-hover) !important;
+  border-radius: var(--aghnam-radius-sm) !important;
+  background: white !important;
+  padding: 12px 16px !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--aghnam-indigo) !important;
+  box-shadow: var(--aghnam-focus-ring) !important;
+  outline: none !important;
+}
+
+/* Topbar transformation */
+.topbar {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+  border-bottom: 1px solid var(--aghnam-border) !important;
+  box-shadow: 0 2px 16px -4px rgba(99, 102, 241, 0.1) !important;
+  padding: 14px 24px !important;
+}
+
+.brand-name {
+  background: var(--aghnam-grad-hero) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  font-weight: 900 !important;
+  font-size: 32px !important;
+}
+
+.brand-seal {
+  background: var(--aghnam-grad-primary) !important;
+  border-radius: 14px !important;
+  padding: 8px !important;
+  box-shadow: 0 8px 20px -8px rgba(99, 102, 241, 0.6) !important;
+}
+
+.top-status .pill {
+  background: white !important;
+  border: 1px solid var(--aghnam-border) !important;
+  border-radius: 999px !important;
+  padding: 6px 14px !important;
+  font-weight: 700 !important;
+  box-shadow: var(--aghnam-shadow) !important;
+  font-size: 13px !important;
+}
+
+/* Desktop Shell: Right-side navigation */
+@media (min-width: 1024px) {
+  #app {
+    display: grid !important;
+    grid-template-columns: 280px 1fr !important;
+    grid-template-rows: auto 1fr !important;
+    grid-template-areas: 
+      "sidebar topbar"
+      "sidebar main" !important;
+    min-height: 100vh !important;
+  }
+
+  .topbar {
+    grid-area: topbar !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 60 !important;
+    width: 100% !important;
+  }
+
+  .tabs {
+    grid-area: sidebar !important;
+    position: fixed !important;
+    inset-inline-start: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    background: var(--aghnam-surface) !important;
+    border-inline-end: 1px solid var(--aghnam-border) !important;
+    border-bottom: none !important;
+    z-index: 70 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 32px 16px !important;
+    overflow-y: auto !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.02) !important;
+  }
+
+  .tabs-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .tab {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    text-align: right !important;
+    padding: 14px 20px !important;
+    border-radius: 14px !important;
+    border: none !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+    color: var(--aghnam-muted) !important;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  
+  .tab::before { content: attr(data-ic) !important; font-size: 20px !important; opacity: 0.7; transition: opacity 0.2s; }
+
+  .tab:hover {
+    background: #f1f5f9 !important;
+    color: var(--aghnam-indigo) !important;
+    transform: translateX(-4px) !important;
+  }
+  .tab:hover::before { opacity: 1; }
+
+  .tab.active {
+    background: var(--aghnam-grad-primary) !important;
+    color: white !important;
+    box-shadow: 0 8px 20px -6px rgba(99, 102, 241, 0.4) !important;
+    transform: none !important;
+  }
+  .tab.active::before { opacity: 1; }
+
+  .tab .n {
+    margin-inline-start: auto !important;
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: var(--aghnam-indigo) !important;
+    padding: 2px 8px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+  }
+
+  .tab.active .n {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+  }
+
+  main {
+    grid-area: main !important;
+    padding: 40px 48px !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+}
+
+/* Mobile: Bottom Navigation */
+@media (max-width: 1023px) {
+  #kosif-bottom-nav {
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border-top: 1px solid var(--aghnam-border) !important;
+    border-radius: 28px 28px 0 0 !important;
+    padding: 10px 10px max(12px, env(safe-area-inset-bottom)) !important;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.05) !important;
+  }
+
+  #kosif-bottom-nav button {
+    border-radius: 16px !important;
+    font-weight: 800 !important;
+  }
+
+  #kosif-bottom-nav button.active {
+    color: var(--aghnam-indigo) !important;
+    background: rgba(99, 102, 241, 0.08) !important;
+  }
+}
+
+/* View Transitions */
+main section {
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+main section:not(.show) {
+  opacity: 0 !important;
+  transform: translateY(12px) !important;
+  pointer-events: none !important;
+  /* Keep display: none if possible but transition requires it to be present.
+     Usually the JS handles display: block/none. We just add the animation. */
+}
+
+main section.show {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Modal Motion */
+.modal-bg.show {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+.modal {
+  border-radius: var(--aghnam-radius-lg) !important;
+  padding: 32px !important;
+  box-shadow: 0 32px 80px -16px rgba(15, 23, 42, 0.3) !important;
+  animation: unifiedPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes unifiedPop {
+  0% { transform: scale(.85) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Shared components: Tables */
+.twrap {
+  border-radius: var(--aghnam-radius-md) !important;
+  border-color: var(--aghnam-border) !important;
+  overflow: hidden !important;
+}
+
+table.data th {
+  background: #f1f5f9 !important;
+  color: var(--aghnam-ink) !important;
+  border-bottom: 2px solid var(--aghnam-border-hover) !important;
+  font-weight: 800 !important;
+  padding: 14px 16px !important;
+}
+
+table.data td {
+  padding: 12px 16px !important;
+  border-bottom-color: var(--aghnam-border) !important;
+}
+
+table.data tr:hover td {
+  background: #f8fafc !important;
+}
+
+/* Status Chips / Badges */
+.badge {
+  padding: 6px 14px !important;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+}
+.badge.ok { background: #ecfdf5 !important; color: var(--aghnam-green) !important; border-color: #a7f3d0 !important; }
+.badge.warn { background: #fffbeb !important; color: var(--aghnam-amber) !important; border-color: #fde68a !important; }
+.badge.danger { background: #fff1f2 !important; color: var(--aghnam-rose) !important; border-color: #fecdd3 !important; }
+.badge.info { background: #ecfeff !important; color: var(--aghnam-cyan) !important; border-color: #a5f3fc !important; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
