@@ -1,4 +1,5 @@
 /* Kosif v36.4 — Phase B: iPhone/Safari sheets, keyboard, safe areas and touch hardening */
+@import url('/v36-polish-phase-d.css?v=36.4-phase-d-1');
 :root{
   --k-vv-height:100dvh;
   --k-vv-top:0px;
