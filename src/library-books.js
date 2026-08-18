@@ -1,0 +1,18 @@
+const SOURCE={std2018:'b1',std2025:'b3',dipifr:'b2'};
+const INFO={
+  std2018:{title:'المعايير الدولية للتقرير المالي',subtitle:'النسخة العربية المعتمدة',author:'الهيئة السعودية للمحاسبين القانونيين',year:'2018',dir:'rtl',authority:'official',note:'مرجع تاريخي. عند الاستشهاد المهني تكون الأولوية للإصدار الرسمي الأحدث الساري.'},
+  std2025:{title:'المعايير الدولية — النسخة الكاملة المحدَّثة',subtitle:'طبعة 2025 المعتمدة في المملكة العربية السعودية',author:'الهيئة السعودية للمراجعين والمحاسبين',year:'2025',dir:'rtl',authority:'official',note:'مصدر مهني رسمي داخل Kosif مع مراعاة تاريخ السريان والتحديثات اللاحقة.'},
+  dipifr:{title:'ACCA DipIFR — عدّة التدريب على الامتحان',subtitle:'Exam Practice Kit',author:'BPP Learning Media',year:'2025',dir:'ltr',authority:'training',note:'مادة تدريبية وليست سنداً مهنياً بديلاً عن SOCPA/IFRS.'}
+};
+
+function assetRequest(path){return new Request(new URL(path,'https://assets.local'),{method:'GET',headers:{accept:'application/json'}})}
+async function asset(env,path){if(!env?.ASSETS)return null;const r=await env.ASSETS.fetch(assetRequest(path));return r.status===404?null:r}
+async function assetJson(env,path){const r=await asset(env,path);if(!r?.ok)return null;try{return await r.json()}catch{return null}}
+function j(body,status=200){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'public, max-age=300','x-content-type-options':'nosniff','x-kosif-suite-module':'libraries'}})}
+function partsCount(id,n){if(id==='dipifr')return 4;if(id==='std2025')return 4;if(id==='std2018')return 5;return 1}
+
+async function manifest(env){const ids=['std2018','std2025','dipifr'];const meta=await Promise.all(ids.map(id=>assetJson(env,`/standards/data/${SOURCE[id]}.json`)));const books=[{id:'mafateeh',title:'مفاتيح الثروة',subtitle:'من الفكرة إلى النتيجة',author:'حامد بن علي',year:'2026',dir:'rtl',parts:6,chapters:46,words:34700,audio:true,embedded:true,authority:'development'}];for(let i=0;i<ids.length;i++){const id=ids[i],m=meta[i],info=INFO[id];const chapters=Array.isArray(m?.chapters)?m.chapters:[];books.push({id,...info,parts:partsCount(id,chapters.length),chapters:chapters.length,words:chapters.reduce((s,c)=>s+(Number(c.words)||0),0),audio:false,embedded:false})}return books}
+
+export async function localLibraryRoute(req,env,pathname){if(req.method!=='GET'&&req.method!=='HEAD')return null;if(pathname==='/wealth/reader-library.js'){const r=await asset(env,'/wealth/reader-library.js');return r||new Response('Reader library unavailable',{status:503})}if(pathname==='/wealth/books/library.json'){const body=await manifest(env);const r=j(body);return req.method==='HEAD'?new Response(null,{status:r.status,headers:r.headers}):r}
+let m=pathname.match(/^\/wealth\/books\/(std2018|std2025|dipifr)\.json$/);if(m){const r=await asset(env,`/standards/data/${SOURCE[m[1]]}.json`);if(!r)return new Response('Book index unavailable',{status:404});const h=new Headers(r.headers);h.set('cache-control','public, max-age=3600');h.set('x-kosif-suite-module','libraries');return new Response(req.method==='HEAD'?null:r.body,{status:r.status,statusText:r.statusText,headers:h})}
+m=pathname.match(/^\/wealth\/books\/(std2018|std2025|dipifr)\/(\d+)\.json$/);if(m){const id=m[1],no=Number(m[2]);if(!Number.isInteger(no)||no<1||no>200)return new Response('Not found',{status:404});const r=await asset(env,`/standards/data/${SOURCE[id]}/${no}.json`);if(!r)return new Response('Chapter not found',{status:404});const h=new Headers(r.headers);h.set('cache-control','public, max-age=86400');h.set('x-kosif-suite-module','libraries');return new Response(req.method==='HEAD'?null:r.body,{status:r.status,statusText:r.statusText,headers:h})}return null}
