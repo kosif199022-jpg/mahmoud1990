@@ -38,7 +38,10 @@ jobs:
         with:
           script: |
             const request = process.env.REQUEST || '';
-            if (request.startsWith('@gemini-cli /approve')) {
+            if (request.startsWith('@gemini-cli /phase')) {
+              core.setOutput('command', 'phase');
+              core.setOutput('additional_context', 'Execute the latest explicit gemini-phase-directive in this issue exactly.');
+            } else if (request.startsWith('@gemini-cli /approve')) {
               core.setOutput('command', 'approve');
               core.setOutput('additional_context', [
                 'The repository owner explicitly approved the latest visible AI Assistant: Plan of Action in this issue.',
@@ -76,6 +79,18 @@ jobs:
       pull-requests: 'write'
     with:
       additional_context: '${{ needs.dispatch.outputs.additional_context }}'
+    secrets: 'inherit'
+
+  phase-execute:
+    needs: 'dispatch'
+    if: |-
+      ${{ needs.dispatch.outputs.command == 'phase' }}
+    uses: './.github/workflows/gemini-phase-execute.yml'
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      issues: 'write'
+      pull-requests: 'write'
     secrets: 'inherit'
 
   plan-execute:
