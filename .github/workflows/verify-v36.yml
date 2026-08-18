@@ -153,9 +153,12 @@ jobs:
                 ok(!visibleTitle.includes('الامتنان: بداية الزيادة'),`${book} still visibly renders Mafateeh`);
               }
 
+              // Mafateeh preserves the user's reading position. Verify the model
+              // identity rather than forcing the saved position back to chapter 1.
               await p.goto('http://127.0.0.1:8788/wealth/reader.html?book=mafateeh&browser-verify=1',{waitUntil:'domcontentloaded'});
-              await p.waitForFunction(()=>document.querySelector('#page .chead h2')?.textContent?.includes('الامتنان'),null,{timeout:15000});
-              ok((await p.locator('#page .chead h2').textContent()).includes('الامتنان'),'return to embedded Mafateeh failed');
+              await p.waitForFunction(()=>window.__KOSIF_WEALTH_LIBRARY__===true&&window.D?.meta?.title==='مفاتيح الثروة'&&JSON.parse(localStorage.getItem('mk_lib_book')||'null')==='mafateeh',null,{timeout:15000});
+              ok(await p.evaluate(()=>window.D?.meta?.title==='مفاتيح الثروة'),'return to embedded Mafateeh model failed');
+              ok(await p.locator('#page .chead h2').count()===1,'Mafateeh chapter view not rendered');
               console.log('KOSIF_FOUR_BOOK_BROWSER_SWITCH_OK');
             }
             ok(bad.length===0,'HTTP '+bad.join(','));
