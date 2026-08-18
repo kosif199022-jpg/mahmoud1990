@@ -99,7 +99,15 @@ jobs:
           grep -q "BOOK_BASE='/wealth/books'" /tmp/kosif-wealth-library.js || { echo 'Missing scoped Wealth library layer'; exit 1; }
           grep -q "function normalizeIndex(raw,info,id)" /tmp/kosif-wealth-library.js || { echo 'Missing native index normalizer'; exit 1; }
 
-          for book in mafateeh std2025 std2018 dipifr; do
+          # Mafateeh is the embedded/default reader. It intentionally does not need
+          # a mk_lib_book bootstrap; requiring one would mutate the original app.
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?book=mafateeh&deploy=$GITHUB_SHA" -o /tmp/kosif-reader-mafateeh.html
+          grep -Eq "wealth-library-v37\.js|reader-library\.js" /tmp/kosif-reader-mafateeh.html || { echo 'Missing reader library layer for Mafateeh'; exit 1; }
+          grep -q "مفاتيح الثروة" /tmp/kosif-reader-mafateeh.html || { echo 'Embedded Mafateeh reader identity missing'; exit 1; }
+          echo 'LIVE_MAFATEEH_DEFAULT_OK'
+
+          # Prepared non-default books must receive an explicit validated bootstrap.
+          for book in std2025 std2018 dipifr; do
             curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?book=$book&deploy=$GITHUB_SHA" -o "/tmp/kosif-reader-$book.html"
             grep -q "mk_lib_book" "/tmp/kosif-reader-$book.html" || { echo "Missing deep-link bootstrap for $book"; exit 1; }
             grep -Eq "wealth-library-v37\.js|reader-library\.js" "/tmp/kosif-reader-$book.html" || { echo "Missing reader library layer for $book"; exit 1; }
@@ -117,7 +125,7 @@ jobs:
           const fs=require('fs');
           const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
           const run=`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Prepared reader books verified: \`mafateeh, std2025, std2018, dipifr\`\n- Native reader indexes + first chapter hydration: **verified live**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe workflow executed \`wrangler deploy\`, fetched the live Worker, validated the canonical routes, checked the four-book library, followed each native Kosif index/chapter redirect, verified the three prepared book payloads, and verified every reader deep-link bootstrap.`);
+          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Prepared reader books verified: \`mafateeh, std2025, std2018, dipifr\`\n- Native reader indexes + first chapter hydration: **verified live**\n- Mafateeh embedded/default identity + reader layer: **verified live**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe workflow executed \`wrangler deploy\`, fetched the live Worker, validated the canonical routes, checked the four-book library, followed each native Kosif index/chapter redirect, verified the three prepared-book bootstraps, and independently verified Mafateeh as the unchanged embedded default reader.`);
           NODE
           gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md
 
