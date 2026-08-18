@@ -17,7 +17,9 @@ for(const id of ['mafateeh','std2025','std2018','dipifr'])ok(libraries.includes(
 ok(!/<iframe[^>]+\.pdf/i.test(libraries)&&!libraries.includes('application/pdf'),'standards are not presented as ordinary embedded PDFs');
 ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])"),'reader deep links are allowlisted to prepared books');
 ok(proxy.includes("if (!LIBRARY_BOOKS.has(book)) return ''")&&proxy.includes("mk_lib_book"),'Mafateeh is unchanged unless an explicit valid book deep-link is supplied');
-ok(proxy.includes('/wealth-library-v37.js')&&proxy.includes("/reader-library\\.js/i.test(text)"),'Kosif injects its library layer only when the upstream reader lacks one');
+ok(proxy.includes('function injectReaderLayers(text, requestUrl)')&&proxy.includes("!text.includes('/wealth-theme-v37.css')")&&proxy.includes("!/reader-library\\.js/i.test(text) && !/wealth-library-v37\\.js/i.test(text)")&&proxy.includes("!text.includes('/suite-shell.js')"),'reader bootstrap, library layer, theme and suite shell are injected independently');
+ok(proxy.includes('text = injectReaderLayers(text, requestUrl)')&&!proxy.includes("if (!text.includes('/suite-shell.css')) text = text.replace"),'pre-existing suite CSS cannot suppress the Wealth library layer');
+ok(proxy.includes('/wealth-library-v37.js'),'Kosif injects its library layer when the upstream reader lacks one');
 ok(edge.includes("std2018:{source:'b1'")&&edge.includes("std2025:{source:'b3'")&&edge.includes("dipifr:{source:'b2'"),'reader aliases map to the current Kosif standards datasets');
 ok(edge.includes("p==='/wealth/books/library.json'")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\.json$/")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\/(\\d+)\\.json$/"),'library, index and chapter compatibility routes exist before the Wealth proxy');
 ok(edge.includes("return redirect(req,`/standards/data/${cfg.source}.json`,307)")&&edge.includes("return redirect(req,`/standards/data/${cfg.source}/${n}.json`,307)"),'reader indexes and chapters redirect to native Kosif assets instead of being rebuilt at the edge');
