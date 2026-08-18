@@ -4,6 +4,8 @@ const ok=(c,m)=>{if(!c)throw new Error('KOSIF_LIBRARIES_SALES_FAIL: '+m);console
 const libraries=read('public/libraries/index.html');
 const proxy=read('src/suite-proxy.js');
 const edge=read('src/suite-edge.js');
+const localBooks=read('src/library-books.js');
+const reader=read('public/wealth/reader-library.js');
 const sales=read('public/sales/index.html');
 const boot=read('public/sales/sales-general-bootstrap.js');
 const motion=read('public/sales/sales-motion-v1.js');
@@ -14,7 +16,13 @@ ok(edge.includes("libraries:'/libraries/'")&&edge.includes("p==='/libraries'"),'
 for(const id of ['mafateeh','std2025','std2018','dipifr'])ok(libraries.includes(`/wealth/reader.html?book=${id}`),`Libraries exposes prepared reader book ${id}`);
 ok(!/<iframe[^>]+\.pdf/i.test(libraries)&&!libraries.includes('application/pdf'),'standards are not presented as ordinary embedded PDFs');
 ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])"),'reader deep links are allowlisted to prepared books');
-ok(proxy.includes("if (!LIBRARY_BOOKS.has(book)) return ''")&&proxy.includes("mk_lib_book"),'Mafateeh is unchanged unless an explicit valid book deep-link is supplied');
+ok(proxy.includes("mk_lib_book")&&proxy.includes("/wealth/reader-library.js?v=37"),'explicit book deep links activate the local four-book layer');
+ok(proxy.includes("replace(/\\bconst\\s+D")&&proxy.includes("replace(/\\bconst\\s+CH"),'proxied Mafateeh only exposes D/CH globals for reversible book switching');
+ok(edge.includes("localLibraryRoute(req,env,p)")&&edge.indexOf('localLibraryRoute(req,env,p)')<edge.indexOf('proxyWealth(req,env)'),'local book data is resolved before the external Wealth proxy');
+ok(localBooks.includes("std2018:'b1'")&&localBooks.includes("std2025:'b3'")&&localBooks.includes("dipifr:'b2'"),'prepared book IDs map to Kosif canonical standards datasets');
+ok(localBooks.includes("/standards/data/${SOURCE[id]}/${no}.json")&&localBooks.includes("/wealth/books/library.json"),'book indexes and chapters are served locally from Kosif assets');
+ok(reader.includes("/wealth/books/library.json")&&reader.includes("/wealth/books/${c.__lazy}/${c.__sourceNo||c.no}.json"),'reader library lazily loads local chapter bodies');
+ok(reader.includes("if(info.embedded)")&&reader.includes('apply(D0,CH0,id)'),'Mafateeh remains the untouched embedded original and can be restored exactly');
 ok(sales.includes('<title>تحليل المبيعات | Kosif</title>')&&!sales.includes('أغنام الوادي'),'Sales workspace is general in its visible shell');
 ok(sales.includes('dir="rtl"')&&sales.includes('sales-side'),'general Sales preserves RTL right-side navigation structure');
 ok(boot.includes("d?.meta?.source==='Aghnam v7 native integration'")&&boot.includes("d.sales.every((x,i)=>x?.id===`S-${i+1}`)"),'only the exact historical demo sample is migrated; imported user data is preserved');
