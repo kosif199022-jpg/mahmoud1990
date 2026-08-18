@@ -13,7 +13,9 @@
 import fs from 'node:fs';
 
 const SRC = 'public/v36-features.js';
-const s = fs.readFileSync(SRC, 'utf8');
+/* CRLF checkout (core.autocrlf=true on Windows) breaks the \n-anchored
+   extraction regexes below; normalize to LF before parsing. */
+const s = fs.readFileSync(SRC, 'utf8').replace(/\r\n/g, '\n');
 
 function fnSource(name) {
   const i = s.indexOf(`function ${name}(`);
