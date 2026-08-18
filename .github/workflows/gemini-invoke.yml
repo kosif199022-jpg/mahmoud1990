@@ -70,7 +70,7 @@ jobs:
           settings: |-
             {
               "model": {
-                "maxSessionTurns": 25
+                "maxSessionTurns": 40
               },
               "telemetry": {
                 "enabled": true,
@@ -107,7 +107,14 @@ jobs:
                 }
               },
               "tools": {
-                "core": ["run_shell_command(echo)"]
+                "core": [
+                  "read_file",
+                  "read_many_files",
+                  "glob",
+                  "grep_search",
+                  "list_directory",
+                  "run_shell_command(echo)"
+                ]
               }
             }
           prompt: '/gemini-invoke'
@@ -118,7 +125,8 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
           ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
           REPOSITORY: '${{ github.repository }}'
-          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.gemini_response }}'
+          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.summary }}'
+          GEMINI_ERROR: '${{ steps.run_gemini.outputs.error }}'
           GEMINI_OUTCOME: '${{ steps.run_gemini.outcome }}'
         run: |-
           set -euo pipefail
@@ -135,7 +143,7 @@ jobs:
           PY
           elif [[ "${GEMINI_OUTCOME}" == "success" ]]; then
             cat > "${tmp}" <<'EOF'
-          ⚠️ Gemini CLI completed successfully, but it returned no publishable response. No approval should be given until a visible plan or result is posted in this issue.
+          ⚠️ Gemini CLI completed successfully, but its public summary was empty. Do not approve implementation until a visible plan is posted in this issue.
           EOF
           else
             cat > "${tmp}" <<'EOF'
