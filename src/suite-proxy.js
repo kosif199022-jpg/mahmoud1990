@@ -51,6 +51,26 @@ function injectHtmlFragments(text, fragments) {
   return text + payload;
 }
 
+function exposeReaderRuntimeBindings(text) {
+  // The original Mafateeh reader is a classic inline script whose render(),
+  // buildTOC(), audio and navigation functions close over lexical `const D`
+  // and `const CH`. Writing window.D/window.CH from the Kosif library layer does
+  // not change those lexical bindings, so every prepared book visually renders
+  // Mafateeh even though its own index/chapter data has loaded correctly.
+  //
+  // In the proxied Kosif copy only, convert the two top-level model declarations
+  // together to classic-script `var` bindings. A top-level var is backed by the
+  // Window global object, therefore the existing library layer's window.D/CH
+  // assignments update the *same* bindings read by the untouched reader
+  // functions. The upstream Mafateeh repository/content remains unchanged.
+  const dConst = /\bconst\s+D\s*=\s*(?=\{)/;
+  const chConst = /\bconst\s+CH\s*=\s*(?=D\.parts\.flatMap)/;
+  if (dConst.test(text) && chConst.test(text)) {
+    return text.replace(dConst, 'var D = ').replace(chConst, 'var CH = ');
+  }
+  return text;
+}
+
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
   let text = String(input || '');
   const htmlLike = isReaderHtmlRequest(contentType, requestUrl);
@@ -64,6 +84,7 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     text = text.replace(/"scope"\s*:\s*"\/"/g, '"scope":"/wealth/"');
   }
   if (htmlLike) {
+    text = exposeReaderRuntimeBindings(text);
     text = text.replace(
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
