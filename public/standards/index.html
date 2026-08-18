@@ -577,8 +577,8 @@ function view(id){['library','toc','reader'].forEach(v=>$('#'+v).classList.toggl
   $('#dock').classList.toggle('hidden',id!=='reader');
   if(id!=='reader'){$('#prog').style.width='0';stopAudio()}}
 
-function openSheet(el){$('#shade').classList.add('on');el.classList.add('on');document.body.style.overflow='hidden'}
-function closeSheets(){$('#shade').classList.remove('on');$$('.sheet').forEach(s=>s.classList.remove('on'));document.body.style.overflow=''}
+function openSheet(el){const shade=$('#shade');if(!shade)return;shade.classList.add('on');el.classList.add('on');if(document.body.style.overflow!=='hidden')document.body.style.overflow='hidden'}
+function closeSheets(){const shade=$('#shade');if(!shade)return;shade.classList.remove('on');$$('.sheet').forEach(s=>s.classList.remove('on'));if(document.body.style.overflow==='hidden')document.body.style.overflow=''}
 
 $('#shade').onclick=closeSheets;
 $$('.sheet [data-close]').forEach(b=>b.onclick=closeSheets);
