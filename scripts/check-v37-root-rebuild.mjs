@@ -6,6 +6,8 @@ ok(/main\s*=\s*"src\/suite-edge\.js"/.test(wr),'unified suite edge is Cloudflare
 ok(edge.includes("modules:{audit:'/audit/',wealth:'/wealth/reader.html',sales:'/sales/'}"),'three suite modules have canonical routes');
 ok(hub.includes('/audit/')&&hub.includes('/wealth/reader.html')&&hub.includes('/sales/'),'hub exposes Audit, Wealth and Sales');
 ok(proxy.includes('env?.MAFATEEH')&&proxy.includes('/wealth/'),'Wealth Keys uses existing service binding under a scoped route');
+ok(proxy.includes("READER_ROOT_ALIASES = ['/reader.html', '/reader', '/']")&&proxy.includes('candidatePaths(path)'),'Wealth Keys tolerates the deployed reader root aliases');
+ok(proxy.includes("h.set('location', '/wealth'")&&proxy.includes("'https://mafateeh.internal'"),'Wealth redirects stay scoped under /wealth');
 ok(edge.includes('OWNER_AUTH_REQUIRED')&&edge.includes('CUSTOM_SOURCE_BLOCKED'),'client data and custom source refresh are owner-gated');
 ok(edge.includes("x-kosif-intent")&&read('public/v37-privacy-guard.js').includes('navigator.userActivation'),'silent company publication is blocked at client and edge');
 ok(!sw.includes('ignoreSearch:true'),'root service worker no longer ignores query identity');
