@@ -12,6 +12,7 @@ on:
       - 'public/sw.js'
       - 'src/worker.js'
       - 'src/security-edge.js'
+      - 'src/suite-edge.js'
       - 'package.json'
       - 'RELEASE_MANIFEST_V36_4.json'
       - '.github/workflows/verify-v36-1-desktop.yml'
@@ -26,6 +27,7 @@ on:
       - 'public/sw.js'
       - 'src/worker.js'
       - 'src/security-edge.js'
+      - 'src/suite-edge.js'
       - 'package.json'
       - 'RELEASE_MANIFEST_V36_4.json'
       - '.github/workflows/verify-v36-1-desktop.yml'
@@ -76,10 +78,11 @@ jobs:
             for(const width of widths){
               const context=await browser.newContext({viewport:{width,height:800}});
               const page=await context.newPage();
-              await page.goto(`http://127.0.0.1:8788/?desktop=${width}&release=${expectedRelease}`,{waitUntil:'domcontentloaded'});
-              await page.waitForTimeout(1600);
+              await page.goto(`http://127.0.0.1:8788/audit/?desktop=${width}&release=${expectedRelease}`,{waitUntil:'domcontentloaded'});
+              await page.waitForSelector('body.kosif-ready',{timeout:15000});
+              await page.waitForTimeout(500);
               const metrics=await page.evaluate(()=>{
-                const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
+                const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
                 const tabs=[...document.querySelectorAll('#tabbar .tab')];
                 const rows=[...new Set(tabs.map(e=>Math.round(e.getBoundingClientRect().top)))];
                 const overlaps=[];
@@ -93,21 +96,21 @@ jobs:
                   vw:innerWidth,body:document.body.scrollWidth,
                   main:rect(document.querySelector('main')),tabsBox:rect(document.querySelector('.tabs-inner')),
                   tabCount:tabs.length,rows:rows.length,overlaps,
-                  minTabWidth:Math.min(...tabs.map(e=>e.getBoundingClientRect().width)),
-                  navDisplay:getComputedStyle(nav).display,
+                  minTabWidth:tabs.length?Math.min(...tabs.map(e=>e.getBoundingClientRect().width)):0,
+                  navDisplay:nav?getComputedStyle(nav).display:'missing',
                   bottomDisplay:bottom?getComputedStyle(bottom).display:'missing',
                   gateVersion:window.KosifAIGate?.version||null,
                   zaiReady:window.KosifZAI?.provider==='zai'&&document.documentElement.dataset.kosifZai==='ready'
                 };
               });
               console.log('DESKTOP_METRICS',width,metrics);
-              ok(metrics.main.width>=width*.9,`main constrained at ${width}`);
-              ok(metrics.tabsBox.width>=width*.9,`tabs constrained at ${width}`);
+              ok(metrics.main&&metrics.main.width>=width*.9,`main constrained at ${width}`);
+              ok(metrics.tabsBox&&metrics.tabsBox.width>=width*.9,`tabs constrained at ${width}`);
               ok(metrics.body<=width+1,`horizontal overflow at ${width}`);
               ok(metrics.tabCount===12,`expected 12 choices, got ${metrics.tabCount}`);
               ok(metrics.overlaps.length===0,`choice buttons overlap at ${width}`);
               ok(metrics.minTabWidth>=100,`choice buttons too narrow at ${width}`);
-              ok(metrics.navDisplay!=='none',`desktop tab list hidden at ${width}`);
+              ok(metrics.navDisplay!=='none'&&metrics.navDisplay!=='missing',`desktop tab list hidden at ${width}`);
               ok(metrics.bottomDisplay==='none'||metrics.bottomDisplay==='missing',`mobile bottom nav visible at ${width}`);
               ok(metrics.gateVersion===expectedGateVersion,`AI gate version mismatch: expected ${expectedGateVersion}, got ${metrics.gateVersion}`);
               ok(metrics.zaiReady,'Z.ai bridge not loaded');
