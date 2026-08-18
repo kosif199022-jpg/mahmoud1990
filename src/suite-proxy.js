@@ -28,12 +28,18 @@ function isReaderHtmlRequest(contentType = '', requestUrl = null) {
   return /html/i.test(contentType) || p === '/wealth/reader.html' || p === '/wealth/reader' || p === '/wealth/';
 }
 
-function readerBookBootstrap(url) {
+function requestedLibraryBook(url) {
   const book = String(url?.searchParams?.get('book') || '').trim().toLowerCase();
-  if (!LIBRARY_BOOKS.has(book)) return '';
+  return LIBRARY_BOOKS.has(book) ? book : '';
+}
+
+function readerBookBootstrap(url) {
+  const book = requestedLibraryBook(url);
+  if (!book) return '';
   // The four-book library stores the active book as JSON under mk_lib_book.
-  // This one-shot bootstrap only runs for an explicit ?book= deep link.
-  return `<script>(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
+  // The data marker is deliberately book-specific: an upstream bootstrap for
+  // another book must never suppress the requested deep link.
+  return `<script data-kosif-book-bootstrap="${book}">(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
 }
 
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
@@ -58,8 +64,10 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     // the Kosif suite shell while still lacking the four-book library layer.
     // Never let one pre-existing integration suppress another one.
     const injections = [];
+    const requestedBook = requestedLibraryBook(requestUrl);
     const bookBoot = readerBookBootstrap(requestUrl);
-    if (bookBoot && !text.includes("localStorage.setItem('mk_lib_book'")) injections.push(bookBoot);
+    const bookMarker = requestedBook ? `data-kosif-book-bootstrap="${requestedBook}"` : '';
+    if (bookBoot && !text.includes(bookMarker)) injections.push(bookBoot);
     if (!text.includes('/wealth-theme-v37.css')) injections.push('<link rel="stylesheet" href="/wealth-theme-v37.css">');
     if (!text.includes('/suite-shell.css')) injections.push('<link rel="stylesheet" href="/suite-shell.css">');
     if (!/reader-library\.js|wealth-library-v37\.js/i.test(text)) injections.push('<script src="/wealth-library-v37.js" defer></script>');
@@ -81,8 +89,8 @@ function copyResponseHeaders(upstream, requestUrl = null) {
     try {
       const u = new URL(loc, 'https://mafateeh.internal');
       if (u.origin === 'https://mafateeh.internal' || WEALTH_ORIGINS.includes(u.origin)) {
-        const requestedBook = String(requestUrl?.searchParams?.get('book') || '').trim().toLowerCase();
-        if (LIBRARY_BOOKS.has(requestedBook) && !u.searchParams.has('book')) u.searchParams.set('book', requestedBook);
+        const requestedBook = requestedLibraryBook(requestUrl);
+        if (requestedBook && !u.searchParams.has('book')) u.searchParams.set('book', requestedBook);
         h.set('location', '/wealth' + (u.pathname === '/' ? '/' : u.pathname) + u.search + u.hash);
       }
     } catch (_) {}
