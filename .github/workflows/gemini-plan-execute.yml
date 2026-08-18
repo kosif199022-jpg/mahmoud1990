@@ -117,3 +117,35 @@ jobs:
               }
             }
           prompt: '/gemini-plan-execute'
+
+      - name: 'Publish Gemini execution result'
+        if: ${{ always() }}
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
+          REPOSITORY: '${{ github.repository }}'
+          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.gemini_response }}'
+          GEMINI_OUTCOME: '${{ steps.run_gemini.outcome }}'
+        run: |-
+          set -euo pipefail
+          tmp="$(mktemp)"
+          trap 'rm -f "${tmp}"' EXIT
+          if [[ "${GEMINI_OUTCOME}" == "success" && -n "${GEMINI_RESPONSE//[[:space:]]/}" ]]; then
+            python - <<'PY' > "${tmp}"
+          import os
+          text = os.environ.get('GEMINI_RESPONSE', '').strip()
+          limit = 58000
+          if len(text) > limit:
+              text = text[:limit] + '\n\n---\n_Response truncated by workflow to stay within GitHub comment limits._'
+          print(text)
+          PY
+          elif [[ "${GEMINI_OUTCOME}" == "success" ]]; then
+            cat > "${tmp}" <<'EOF'
+          ⚠️ Gemini execution finished without a publishable result. Verify whether a `gemini/*` branch or Pull Request was created before assuming any code was changed.
+          EOF
+          else
+            cat > "${tmp}" <<'EOF'
+          ❌ Gemini execution failed. No code change should be treated as completed until the Actions failure is reviewed and a Pull Request is visible.
+          EOF
+          fi
+          gh issue comment "${ISSUE_NUMBER}" --repo "${REPOSITORY}" --body-file "${tmp}"
