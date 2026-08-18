@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f8fafc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="قارئ Kosif المعزول لكتب المعايير والتدريب.">
+  <title>Kosif | القارئ المهني</title>
+  <link rel="stylesheet" href="/suite.css">
+  <link rel="stylesheet" href="/suite-shell.css">
+  <link rel="stylesheet" href="/libraries/reader.css">
+</head>
+<body>
+  <div class="reader-ambient" aria-hidden="true"><i></i><i></i></div>
+  <header class="reader-top">
+    <a class="reader-back" href="/libraries/" aria-label="العودة إلى المكتبات">‹</a>
+    <button id="tocBtn" class="reader-icon" type="button" aria-label="فتح الفهرس">☰</button>
+    <div class="reader-brand"><small id="bookKind">KOSIF PREPARED READER</small><b id="bookTitle">يتم تحميل الكتاب…</b></div>
+    <button id="themeBtn" class="reader-icon" type="button" aria-label="تغيير المظهر">◐</button>
+    <button id="fontBtn" class="reader-icon" type="button" aria-label="تكبير الخط">Aa</button>
+  </header>
+
+  <div id="progress" class="reader-progress" aria-hidden="true"><i></i></div>
+
+  <main class="reader-main">
+    <section class="reader-source" aria-live="polite">
+      <div><span id="sourceBadge" class="reader-badge">مصدر مجهّز</span><span id="bookYear"></span></div>
+      <p id="sourceNote">هذه الصفحة مملوكة لـ Kosif ولا تشغّل قارئ «مفاتيح الثروة» أو Service Worker الخاص به.</p>
+    </section>
+
+    <article id="page" class="reader-page" aria-busy="true">
+      <header class="chapter-head">
+        <p id="chapterMeta" class="chapter-meta"></p>
+        <h1 id="chapterTitle">يتم تحميل الفصل…</h1>
+      </header>
+      <div id="chapterBody" class="chapter-body"></div>
+      <div id="chapterError" class="reader-state" hidden>
+        <b>تعذّر تحميل هذا الفصل.</b>
+        <button id="retryBtn" type="button">إعادة المحاولة</button>
+      </div>
+    </article>
+
+    <nav class="chapter-nav" aria-label="التنقل بين الفصول">
+      <button id="prevBtn" type="button">السابق</button>
+      <span id="chapterCount">—</span>
+      <button id="nextBtn" type="button">التالي</button>
+    </nav>
+  </main>
+
+  <div id="tocShade" class="toc-shade" hidden></div>
+  <aside id="toc" class="toc" aria-hidden="true" aria-label="فهرس الكتاب">
+    <header>
+      <div><small>فهرس الكتاب</small><b id="tocTitle">—</b></div>
+      <button id="tocClose" type="button" aria-label="إغلاق الفهرس">✕</button>
+    </header>
+    <div class="toc-search"><input id="tocSearch" type="search" inputmode="search" autocomplete="off" placeholder="ابحث في عناوين الفصول"></div>
+    <div id="tocList" class="toc-list"></div>
+  </aside>
+
+  <script src="/libraries/reader.js" defer></script>
+  <script src="/suite-shell.js" defer></script>
+</body>
+</html>

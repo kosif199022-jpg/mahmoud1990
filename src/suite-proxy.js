@@ -11,6 +11,7 @@ const PATH_PREFIXES = [
 ];
 const READER_ROOT_ALIASES = ['/reader.html', '/reader', '/'];
 const LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr']);
+const PREPARED_BOOKS = new Set(['std2018', 'std2025', 'dipifr']);
 
 function isPrefixPath(path) {
   const p = String(path || '').replace(/^\//, '');
@@ -33,13 +34,15 @@ function requestedLibraryBook(url) {
   return LIBRARY_BOOKS.has(book) ? book : '';
 }
 
-function readerBookBootstrap(url) {
+function preparedReaderRedirect(url, path) {
+  if (!READER_ROOT_ALIASES.includes(path)) return null;
   const book = requestedLibraryBook(url);
-  if (!book) return '';
-  // The four-book library stores the active book as JSON under mk_lib_book.
-  // The data marker is deliberately book-specific: an upstream bootstrap for
-  // another book must never suppress the requested deep link.
-  return `<script data-kosif-book-bootstrap="${book}">(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
+  if (!PREPARED_BOOKS.has(book)) return null;
+  const target = new URL('/libraries/reader.html', url.origin);
+  target.searchParams.set('book', book);
+  const chapter = Number(url.searchParams.get('ch'));
+  if (Number.isInteger(chapter) && chapter > 0 && chapter < 10000) target.searchParams.set('ch', String(chapter));
+  return target.pathname + target.search;
 }
 
 function injectHtmlFragments(text, fragments) {
@@ -51,24 +54,11 @@ function injectHtmlFragments(text, fragments) {
   return text + payload;
 }
 
-function exposeReaderRuntimeBindings(text) {
-  // The original Mafateeh reader is a classic inline script whose render(),
-  // buildTOC(), audio and navigation functions close over lexical `const D`
-  // and `const CH`. Writing window.D/window.CH from the Kosif library layer does
-  // not change those lexical bindings, so every prepared book visually renders
-  // Mafateeh even though its own index/chapter data has loaded correctly.
-  //
-  // In the proxied Kosif copy only, convert the two top-level model declarations
-  // together to classic-script `var` bindings. A top-level var is backed by the
-  // Window global object, therefore the existing library layer's window.D/CH
-  // assignments update the *same* bindings read by the untouched reader
-  // functions. The upstream Mafateeh repository/content remains unchanged.
-  const dConst = /\bconst\s+D\s*=\s*(?=\{)/;
-  const chConst = /\bconst\s+CH\s*=\s*(?=D\.parts\.flatMap)/;
-  if (dConst.test(text) && chConst.test(text)) {
-    return text.replace(dConst, 'var D = ').replace(chConst, 'var CH = ');
-  }
-  return text;
+function replaceLegacyReaderLibrary(text) {
+  return text.replace(
+    /<script\b[^>]*src=["']\/wealth\/reader-library\.js(?:\?[^"']*)?["'][^>]*><\/script>/gi,
+    '<script src="/wealth-library-v37.js" defer></script>'
+  );
 }
 
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
@@ -84,23 +74,20 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     text = text.replace(/"scope"\s*:\s*"\/"/g, '"scope":"/wealth/"');
   }
   if (htmlLike) {
-    text = exposeReaderRuntimeBindings(text);
     text = text.replace(
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
     );
 
-    // Each integration is independent. An upstream reader may already contain
-    // the Kosif suite shell while still lacking the four-book library layer.
-    // Never let one pre-existing integration suppress another one.
+    // Mafateeh remains the original runtime. Prepared books never mutate its D/CH
+    // model anymore; they are routed to the Kosif-owned /libraries/reader.html.
+    // If an upstream compatibility layer is present, replace it with the Kosif
+    // library router so the in-reader library button follows the same boundary.
+    text = replaceLegacyReaderLibrary(text);
     const injections = [];
-    const requestedBook = requestedLibraryBook(requestUrl);
-    const bookBoot = readerBookBootstrap(requestUrl);
-    const bookMarker = requestedBook ? `data-kosif-book-bootstrap="${requestedBook}"` : '';
-    if (bookBoot && !text.includes(bookMarker)) injections.push(bookBoot);
     if (!text.includes('/wealth-theme-v37.css')) injections.push('<link rel="stylesheet" href="/wealth-theme-v37.css">');
     if (!text.includes('/suite-shell.css')) injections.push('<link rel="stylesheet" href="/suite-shell.css">');
-    if (!/reader-library\.js|wealth-library-v37\.js/i.test(text)) injections.push('<script src="/wealth-library-v37.js" defer></script>');
+    if (!text.includes('/wealth-library-v37.js')) injections.push('<script src="/wealth-library-v37.js" defer></script>');
     if (!text.includes('/suite-shell.js')) injections.push('<script src="/suite-shell.js" defer></script>');
     text = injectHtmlFragments(text, injections);
   }
@@ -188,6 +175,23 @@ export async function proxyWealth(req, env) {
   if (!['GET', 'HEAD'].includes(req.method)) return null;
   let path = u.pathname.slice('/wealth'.length) || '/';
   if (path === '/' || path === '') path = '/reader.html';
+
+  // Architectural boundary: prepared standards/training books are first-party
+  // Kosif reader clients under /libraries/. They never execute inside the
+  // Mafateeh document, never share its global model bindings, and are outside
+  // the /wealth/ service-worker scope. This also makes old deep links migrate
+  // automatically without trusting localStorage or reader bootstrap timing.
+  const redirect = preparedReaderRedirect(u, path);
+  if (redirect) {
+    const h = new Headers({
+      location: redirect,
+      'cache-control': 'no-store, max-age=0',
+      'x-kosif-suite-module': 'prepared-reader',
+      'x-content-type-options': 'nosniff',
+    });
+    return new Response(null, { status: 302, headers: h });
+  }
+
   const upstream = await fetchUpstream(req, env, path);
   if (!upstream) return new Response('Wealth Keys source unavailable', { status: 502 });
   const type = upstream.headers.get('content-type') || '';

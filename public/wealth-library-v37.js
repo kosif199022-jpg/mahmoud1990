@@ -1,19 +1,15 @@
-/* Kosif v37 four-book library layer.
-   Keeps the original Mafateeh book embedded in the upstream reader and lazily
-   loads prepared standards/training chapters from Kosif-owned native data. */
+/* Kosif v37 Mafateeh library router.
+   Mafateeh stays in its original reader. Prepared standards/training books are
+   intentionally opened in the first-party /libraries/reader.html runtime so
+   they cannot share Mafateeh model bindings, service-worker scope or reading state. */
 (()=>{
 'use strict';
-if(window.__KOSIF_WEALTH_LIBRARY__)return;window.__KOSIF_WEALTH_LIBRARY__=true;
+if(window.__KOSIF_WEALTH_LIBRARY_ROUTER__)return;window.__KOSIF_WEALTH_LIBRARY_ROUTER__=true;
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const say=m=>{try{toast(m)}catch(_){}};
-const LS={get(k,d){try{const v=localStorage.getItem('mk_lib_'+k);return v===null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem('mk_lib_'+k,JSON.stringify(v))}catch{}}};
-const D0=window.D,CH0=window.CH;
-const initialId=LS.get('book','mafateeh');
-let LIB=null,curId='mafateeh';
-const cache=new Map();
 const BOOK_BASE='/wealth/books';
+let LIB=null;
 
 const style=document.createElement('style');
 style.textContent=`
@@ -35,68 +31,34 @@ style.textContent=`
 `;
 document.head.appendChild(style);
 
-document.body.insertAdjacentHTML('beforeend',`<div id="libShade"></div><section id="libSheet" role="dialog" aria-modal="true" aria-label="المكتبة" aria-hidden="true"><header><b>مكتبة Kosif</b><button id="libX" aria-label="إغلاق">✕</button></header><div class="body"><p class="lnote">مفاتيح الثروة يبقى بالكتاب والصوت الأصليين. كتب المعايير والتدريب تُحمَّل فصلًا فصلًا داخل نفس تجربة القراءة.</p><div id="libList"></div></div></section>`);
-
+function ensureSheet(){
+  if($('#libSheet'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div id="libShade"></div><section id="libSheet" role="dialog" aria-modal="true" aria-label="المكتبة" aria-hidden="true"><header><b>مكتبة Kosif</b><button id="libX" aria-label="إغلاق">✕</button></header><div class="body"><p class="lnote">«مفاتيح الثروة» يبقى في قارئه الأصلي. كتب المعايير والتدريب تفتح في قارئ Kosif مستقل حتى لا تختلط النماذج أو حالة القراءة أو Service Worker.</p><div id="libList"></div></div></section>`);
+  $('#libX').onclick=closeLib;$('#libShade').onclick=closeLib;
+}
 function addButton(){
+  ensureSheet();
   const bar=$('#top, #bar, .topbar, header');if(!bar||$('#libBtn'))return;
   const b=document.createElement('button');b.id='libBtn';b.className='ic';b.textContent='⌸';b.title='المكتبة';b.setAttribute('aria-label','فتح مكتبة Kosif');b.onclick=openLib;
   const menu=$('#bMenu')||bar.firstElementChild;menu?menu.after(b):bar.appendChild(b);
 }
-function openLib(){const s=$('#libSheet');$('#libShade')?.classList.add('on');s?.classList.add('on');s?.setAttribute('aria-hidden','false');render()}
+function openLib(){ensureSheet();const s=$('#libSheet');$('#libShade')?.classList.add('on');s?.classList.add('on');s?.setAttribute('aria-hidden','false');render()}
 function closeLib(){const s=$('#libSheet');$('#libShade')?.classList.remove('on');s?.classList.remove('on');s?.setAttribute('aria-hidden','true')}
-$('#libX').onclick=closeLib;$('#libShade').onclick=closeLib;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#libSheet')?.classList.contains('on'))closeLib()});
 
-async function load(){if(LIB)return LIB;const r=await fetch(`${BOOK_BASE}/library.json?v=37`,{credentials:'same-origin'});if(!r.ok)throw new Error('library '+r.status);LIB=await r.json();return LIB}
+async function load(){if(LIB)return LIB;const r=await fetch(`${BOOK_BASE}/library.json?v=37-router-1`,{credentials:'same-origin',cache:'no-store'});if(!r.ok)throw new Error('library '+r.status);LIB=await r.json();return LIB}
 async function render(){
   const list=$('#libList');if(!list)return;list.innerHTML='<p style="text-align:center;opacity:.6;padding:26px">…</p>';
   let lib;try{lib=await load()}catch{list.innerHTML='<p style="text-align:center;opacity:.6;padding:26px">تعذّر تحميل المكتبة.</p>';return}
-  list.innerHTML=lib.map(b=>`<button class="lbk" data-b="${esc(b.id)}" aria-current="${b.id===curId}"><span class="lbadge">${AR(b.year||'')}${b.audio?' · صوت':''}</span><h4>${esc(b.title)}</h4><div class="s">${esc(b.subtitle||'')}${b.author?' — '+esc(b.author):''}</div><div class="m"><span><b>${AR(b.parts||1)}</b> أبواب</span><span><b>${AR(b.chapters||0)}</b> فصلًا</span><span><b>${AR(Number(b.words||0).toLocaleString('en'))}</b> كلمة</span></div></button>`).join('');
-  $$('#libList .lbk').forEach(x=>x.onclick=()=>switchBook(x.dataset.b));
+  list.innerHTML=lib.map(b=>`<button class="lbk" data-b="${esc(b.id)}" aria-current="${b.id==='mafateeh'}"><span class="lbadge">${AR(b.year||'')}${b.audio?' · صوت':''}</span><h4>${esc(b.title)}</h4><div class="s">${esc(b.subtitle||'')}${b.author?' — '+esc(b.author):''}</div><div class="m"><span><b>${AR(b.parts||1)}</b> أبواب</span><span><b>${AR(b.chapters||0)}</b> فصلًا</span><span><b>${AR(Number(b.words||0).toLocaleString('en'))}</b> كلمة</span></div></button>`).join('');
+  $$('#libList .lbk').forEach(x=>x.onclick=()=>openBook(x.dataset.b));
+}
+function openBook(id){
+  if(id==='mafateeh'){closeLib();return}
+  if(!['std2025','std2018','dipifr'].includes(id))return;
+  location.assign('/libraries/reader.html?book='+encodeURIComponent(id));
 }
 
-function partLabel(c,id){
-  const t=`${c?.title||''} ${c?.name||''}`;
-  if(id==='dipifr'){if(/ANSWER/i.test(t))return'الإجابات';if(/MOCK/i.test(t))return'الاختبارات التجريبية';if(/QUESTION/i.test(t))return'الأسئلة';return'المقدمة'}
-  if((Number(c?.no)||0)<=2||/إطار مفاهيم|التحول للمعايير|حقوق التأليف/.test(t))return'التمهيد وإطار المفاهيم';
-  if(/معيار المحاسبة الدولي/.test(t))return'معايير المحاسبة الدولية IAS';
-  if(/تفسير|IFRIC|SIC/.test(t))return'التفسيرات';
-  if(/المعيار الدولي للتقرير المالي/.test(t))return'المعايير الدولية للتقرير المالي IFRS';
-  return'إصدارات سعودية مكملة';
-}
-function nativeParts(raw,id){
-  const ch=Array.isArray(raw?.chapters)?raw.chapters:[],out=[];
-  for(const c of ch){const label=partLabel(c,id),no=Number(c.no)||1,last=out[out.length-1];if(!last||last.title!==label)out.push({name:`الباب ${out.length+1}`,title:label,intro:'',from:no,to:no});else last.to=no}
-  return out.length?out:[{name:'الكتاب',title:raw?.title||'الكتاب',intro:'',from:1,to:Math.max(1,ch.length)}];
-}
-function normalizeIndex(raw,info,id){
-  if(Array.isArray(raw?.parts)&&raw.parts.length)return raw;
-  const chapters=(Array.isArray(raw?.chapters)?raw.chapters:[]).map(c=>({...c,no:Number(c.no),title:c.title||'',name:c.name||'',key:c.key||c.name||'',words:Number(c.words)||0,pages:c.pages||null}));
-  const training=id==='dipifr';
-  return {meta:{title:raw?.title||info.title||'',subtitle:raw?.sub||info.subtitle||'',author:info.author||'',role:training?'مادة تدريبية':'مرجع مهني',year:raw?.year||info.year||'',note:training?'مادة تدريبية وتمارين؛ لا تحل محل SOCPA أو IFRS كمصدر اعتماد مهني.':'نسخة مجهزة للقراءة من مكتبة Kosif؛ أولوية الاستشهاد المهني لأحدث مصدر رسمي نافذ.',preface:[training?'هذه المادة للتدريب والممارسة فقط.':'تم الحفاظ على متن الفصل من ملف المصدر المجهز داخل Kosif دون توليد أو إعادة صياغة بالذكاء الاصطناعي.']},parts:nativeParts({title:raw?.title,chapters},id),chapters};
-}
-
-async function switchBook(id){
-  if(id===curId){closeLib();return}
-  const lib=await load(),info=lib.find(b=>b.id===id);if(!info)return;
-  try{if(typeof autoScrollStop==='function')autoScrollStop(false)}catch{}
-  try{if(typeof mediaStop==='function')mediaStop()}catch{}
-  try{speechSynthesis.cancel()}catch{}
-  if(info.embedded){document.documentElement.dir='rtl';apply(D0,CH0,id);closeLib();say('عُدنا إلى '+info.title);return}
-  say('يُحمَّل '+info.title+'…');
-  let idx;try{let raw=cache.get(id);if(!raw){const r=await fetch(`${BOOK_BASE}/${encodeURIComponent(id)}.json?v=37`,{credentials:'same-origin'});if(!r.ok)throw new Error(String(r.status));raw=await r.json();cache.set(id,raw)}idx=normalizeIndex(raw,info,id)}catch{return say('تعذّر تحميل الكتاب')}
-  const parts=(idx.parts||[]).map(p=>({name:p.name,title:p.title,intro:p.intro||'',chapters:(idx.chapters||[]).filter(c=>c.no>=p.from&&c.no<=p.to).map(c=>({no:c.no,title:c.title,key:c.key||'',name:c.name||'',body:[['p','…']],idea:'',apply:'',qs:[],week:'',audio:null,__lazy:id}))}));
-  const D={meta:idx.meta||{},parts,ex:idx?.meta?.ex||['الفكرة التي سأطبّقها من هذا الفصل:','الملف أو ورقة العمل التي سأطبّقها عليها:','الفقرة التي سأستشهد بها:'],note:idx?.meta?.note||''};
-  const CH=parts.flatMap(p=>p.chapters.map(c=>({...c,part:p.title,pname:p.name})));
-  document.documentElement.dir=info.dir==='ltr'?'ltr':'rtl';apply(D,CH,id);closeLib();await hydrate(0);say(info.title+' — '+AR(info.chapters)+' فصلًا');
-}
-function apply(D,CH,id){window.D=D;window.CH=CH;curId=id;LS.set('book',id);try{if(typeof buildTOC==='function')buildTOC()}catch{}try{(typeof go0==='function'?go0:go)(0)}catch{}scrollTo(0,0)}
-async function hydrate(i){
-  const c=window.CH&&window.CH[i];if(!c||!c.__lazy||c.__done)return;
-  try{const r=await fetch(`${BOOK_BASE}/${encodeURIComponent(c.__lazy)}/${c.no}.json?v=37`,{credentials:'same-origin'});if(!r.ok)throw new Error(String(r.status));const full=await r.json();Object.assign(c,{body:full.body||[['p','']],idea:full.idea||'',apply:full.apply||'',qs:full.qs||[],week:full.week||'',pages:full.pages,__done:true});for(const p of window.D.parts){const t=p.chapters.find(x=>x.no===c.no);if(t)Object.assign(t,{body:c.body,idea:c.idea,apply:c.apply,qs:c.qs,week:c.week,pages:c.pages,__done:true})}if(typeof go0==='function')go0(i);else if(typeof go==='function')go(i)}catch{say('تعذّر تحميل الفصل')}
-}
-const go0=window.go;if(typeof go0==='function')window.go=function(i,...rest){const c=window.CH&&window.CH[i];if(c&&c.__lazy&&!c.__done){hydrate(i);return}return go0.call(this,i,...rest)};
 addButton();new MutationObserver(addButton).observe(document.body,{childList:true,subtree:false});
-if(initialId!=='mafateeh')setTimeout(()=>switchBook(initialId),700);
-console.log('[Kosif Wealth Library] ready');
+console.log('[Kosif Wealth Library Router] prepared books isolated');
 })();
