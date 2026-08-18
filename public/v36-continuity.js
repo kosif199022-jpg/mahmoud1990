@@ -2,14 +2,17 @@
 (()=>{'use strict';
 const EXPECTED='v36.4',BUILD='2026.08.18-v36.4-mobile-release-integrity';
 const PHASE_B_CSS='/v36-mobile-phase-b.css?v=36.4-phase-b-1';
+const ANALYTICS_3D_SRC='/v36-analytics-3d.js?v=36.4-phase-c-1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const DIALOG_SELECTORS=['#kosif-more','#kosif-company-sheet','#kosif-ai-sheet','#kosif-command-sheet','#kosif-font-sheet','#kosif-ai-gate'];
 const PROGRESS_STALE_MS=20000;
-let versionInfo=null,lastFocus=null,lockY=0,bodySnapshot=null,rootScrollBehavior='',progressTimer=0,progressObserver=null,progressFingerprint='',viewportRaf=0;
+let versionInfo=null,lastFocus=null,lockY=0,bodySnapshot=null,rootScrollBehavior='',progressTimer=0,progressObserver=null,progressFingerprint='',viewportRaf=0,analytics3DPromise=null;
 function announce(t){const x=$('#kosif-live-region');if(x)x.textContent=String(t||'')}
 function isOpenDialog(el){return !!(el&&el.classList.contains('show'))}
 function openDialogs(){return DIALOG_SELECTORS.map($).filter(isOpenDialog)}
 function loadPhaseBStyles(){if($('#kosif-mobile-phase-b-css'))return;const l=document.createElement('link');l.id='kosif-mobile-phase-b-css';l.rel='stylesheet';l.href=PHASE_B_CSS;document.head.appendChild(l)}
+function loadAnalytics3D(){if(window.KosifAnalytics3D){window.KosifAnalytics3D.mount?.();return Promise.resolve(window.KosifAnalytics3D)}if(analytics3DPromise)return analytics3DPromise;analytics3DPromise=new Promise((resolve,reject)=>{const old=$('#kosif-analytics-3d-script');if(old){old.addEventListener('load',()=>resolve(window.KosifAnalytics3D),{once:true});old.addEventListener('error',reject,{once:true});return}const s=document.createElement('script');s.id='kosif-analytics-3d-script';s.src=ANALYTICS_3D_SRC;s.defer=true;s.dataset.kosifModule='analytics3d';s.onload=()=>{window.KosifAnalytics3D?.mount?.();resolve(window.KosifAnalytics3D)};s.onerror=e=>{analytics3DPromise=null;reject(e)};document.head.appendChild(s)});return analytics3DPromise}
+function analytics3DGuard(){const trigger=()=>{const run=()=>loadAnalytics3D().catch(()=>{});if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:900});else setTimeout(run,30)};window.addEventListener('kosif-view-change',e=>{if(e.detail?.view==='analytics')trigger()});if($('#view-analytics.show'))trigger()}
 function lockBody(){
  if(bodySnapshot)return;
  lockY=Math.max(0,window.scrollY||document.documentElement.scrollTop||0);
@@ -82,7 +85,7 @@ function armProgressSafety(){
 }
 function watchProgressSafety(){const el=$('#kosif-progress');if(!el||el.dataset.kosifProgressSafety==='1')return;el.dataset.kosifProgressSafety='1';progressObserver=new MutationObserver(()=>armProgressSafety());progressObserver.observe(el,{attributes:true,attributeFilter:['class','style'],childList:true,subtree:true,characterData:true});armProgressSafety()}
 function mountWatcher(){const main=$('main');if(!main)return;let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;shell();ensureFont200();buildCard();syncCompany();syncAI();watchProgressSafety()})}).observe(main,{childList:true,subtree:true})}
-function init(){loadPhaseBStyles();shell();visualViewportGuard();dialogGuards();aiGuards();companyGuard();ensureFont200();buildCard();watchProgressSafety();mountWatcher();serviceWorkerContinuity();checkVersion();window.addEventListener('online',()=>{announce('عاد الاتصال');checkVersion()});window.addEventListener('offline',()=>announce('لا يوجد اتصال. سيستخدم Kosif الموارد المتاحة دون تخزين API.'))}
-window.KosifContinuity={version:'36.4',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,syncDialogLock,lockBody,unlockBody,watchProgressSafety,armProgressSafety,syncVisualViewport};
+function init(){loadPhaseBStyles();shell();visualViewportGuard();dialogGuards();aiGuards();companyGuard();analytics3DGuard();ensureFont200();buildCard();watchProgressSafety();mountWatcher();serviceWorkerContinuity();checkVersion();window.addEventListener('online',()=>{announce('عاد الاتصال');checkVersion()});window.addEventListener('offline',()=>announce('لا يوجد اتصال. سيستخدم Kosif الموارد المتاحة دون تخزين API.'))}
+window.KosifContinuity={version:'36.4',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,syncDialogLock,lockBody,unlockBody,watchProgressSafety,armProgressSafety,syncVisualViewport,loadAnalytics3D};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
