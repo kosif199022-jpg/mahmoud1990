@@ -6,19 +6,20 @@
   <meta name="theme-color" content="#f8fafc">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>أغنام الوادي 7 | Kosif</title>
+  <title>تحليل المبيعات | Kosif</title>
   <link rel="stylesheet" href="/suite.css">
   <link rel="stylesheet" href="/sales/sales.css">
+  <link rel="stylesheet" href="/sales/sales-motion-v1.css">
   <link rel="stylesheet" href="/suite-shell.css">
 </head>
 <body>
-  <aside class="sales-side" aria-label="مركز أغنام الوادي">
-    <a class="sales-brand" href="/sales/" aria-label="أغنام الوادي 7">
-      <span class="sales-brand-icon">🐑</span>
-      <span><b>أغنام الوادي</b><small>نظام المبيعات المتكامل</small></span>
+  <aside class="sales-side" aria-label="مركز تحليل المبيعات">
+    <a class="sales-brand" href="/sales/" aria-label="تحليل المبيعات">
+      <span class="sales-brand-icon">📊</span>
+      <span><b>تحليل المبيعات</b><small>Kosif · ذكاء تشغيلي عام</small></span>
     </a>
 
-    <nav class="sales-tabs" aria-label="أقسام لوحة المبيعات">
+    <nav class="sales-tabs" aria-label="أقسام تحليل المبيعات">
       <button data-view="analytics" class="active"><i>📈</i><span>لوحة تحليل المبيعات</span></button>
       <a class="side-link" href="#module-center"><i>🧩</i><span>مركز الوحدات</span></a>
       <em>الوحدات التشغيلية</em>
@@ -32,13 +33,13 @@
     <div class="side-revenue" aria-label="إجمالي الإيرادات">
       <small>إجمالي الإيرادات</small>
       <b id="sideRevenue">—</b>
-      <span>أغنام الوادي · Kosif v37</span>
+      <span>Kosif · تحليل مبيعات عام</span>
     </div>
   </aside>
 
   <div class="sales-shell">
     <header class="sales-top">
-      <div class="sales-mobile-brand"><b>أغنام الوادي 7</b><small>ذكاء المبيعات</small></div>
+      <div class="sales-mobile-brand"><b>تحليل المبيعات</b><small>Kosif · RTL</small></div>
       <div class="sales-actions">
         <label class="btnlike">استيراد بيانات<input id="importFile" type="file" accept=".csv,.json,.tsv" hidden></label>
         <button id="exportBtn">تصدير نسخة</button>
@@ -47,21 +48,21 @@
 
     <main class="sales-main">
       <section class="sales-hero" aria-labelledby="sales-title">
-        <div class="hero-badge"><i></i> 🐑 أغنام الوادي · ذكاء المبيعات</div>
+        <div class="hero-badge"><i></i> ◈ Kosif · ذكاء المبيعات</div>
         <h1 id="sales-title">لوحة تحليل المبيعات</h1>
-        <p>رحلة من البيانات إلى القرار — التحليل، الربحية، العملاء، الجودة والإدارة في مساحة تشغيلية واحدة.</p>
+        <p>من البيانات إلى القرار — التحليل، الربحية، العملاء، الجودة والإدارة في مساحة عامة تصلح لأي نشاط.</p>
         <div class="hero-facts">
           <span><b id="heroRevenue">—</b><small>إجمالي الإيراد</small></span>
-          <span><b id="heroInvoices">—</b><small>فاتورة</small></span>
+          <span><b id="heroInvoices">—</b><small>عملية بيع</small></span>
           <span><b id="heroClients">—</b><small>عميل</small></span>
-          <span><b id="heroProducts">—</b><small>صنف</small></span>
+          <span><b id="heroProducts">—</b><small>منتج / خدمة</small></span>
         </div>
-        <div class="hero-deco" aria-hidden="true"><i>🥩</i><i>✨</i><i>📈</i></div>
+        <div class="hero-deco" aria-hidden="true"><i>◈</i><i>✨</i><i>📈</i></div>
       </section>
 
       <section id="module-center" class="chapter-head">
         <div class="chapter-icon">💓</div>
-        <div><small>الفصل ٠١</small><h2>النبض المالي</h2><p>المؤشرات الحيوية للنشاط التجاري — أرقام حية تُحدّث من البيانات المستوردة.</p></div>
+        <div><small>الوحدة ٠١</small><h2>النبض المالي</h2><p>المؤشرات الحيوية للنشاط — أرقام حية تُحدّث من البيانات المستوردة.</p></div>
       </section>
 
       <section class="health-ribbon" aria-label="سلامة البيانات">
@@ -73,6 +74,7 @@
     </main>
   </div>
 
+  <script src="/sales/sales-general-bootstrap.js"></script>
   <script src="/sales/sales.js"></script>
   <script>
   (()=>{
@@ -82,6 +84,7 @@
     paint();addEventListener('storage',paint);document.addEventListener('click',e=>{if(e.target.closest('.sales-tabs button'))setTimeout(paint,0)});
   })();
   </script>
+  <script src="/sales/sales-motion-v1.js" defer></script>
   <script src="/suite-shell.js" defer></script>
 </body>
 </html>

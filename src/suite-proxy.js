@@ -10,6 +10,7 @@ const PATH_PREFIXES = [
   'downloads/'
 ];
 const READER_ROOT_ALIASES = ['/reader.html', '/reader', '/'];
+const LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr']);
 
 function isPrefixPath(path) {
   const p = String(path || '').replace(/^\//, '');
@@ -22,7 +23,16 @@ function candidatePaths(path) {
   return [p, ...READER_ROOT_ALIASES.filter((x) => x !== p)];
 }
 
-function rewriteWealthText(input, contentType = '') {
+function readerBookBootstrap(url) {
+  const book = String(url?.searchParams?.get('book') || '').trim().toLowerCase();
+  if (!LIBRARY_BOOKS.has(book)) return '';
+  // reader-library.js stores the active book as JSON under mk_lib_book.
+  // This one-shot bootstrap only runs for an explicit ?book= deep link and
+  // therefore leaves the normal Mafateeh experience completely unchanged.
+  return `<script>(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
+}
+
+function rewriteWealthText(input, contentType = '', requestUrl = null) {
   let text = String(input || '');
   // Prefix only Mafateeh-owned root assets. API calls intentionally remain at /api/*
   // so the same Kosif owner gate and provider verification protect AI capabilities.
@@ -38,7 +48,8 @@ function rewriteWealthText(input, contentType = '') {
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
     );
-    const suite = '<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css"><script src="/suite-shell.js" defer></script>';
+    const bookBoot = readerBookBootstrap(requestUrl);
+    const suite = `${bookBoot}<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css"><script src="/suite-shell.js" defer></script>`;
     if (!text.includes('/suite-shell.css')) text = text.replace(/<\/head>/i, `${suite}</head>`);
   }
   if (/javascript/i.test(contentType) || /html/i.test(contentType)) {
@@ -119,7 +130,7 @@ export async function proxyWealth(req, env) {
     const h = copyResponseHeaders(upstream);
     return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: h });
   }
-  const text = rewriteWealthText(await upstream.text(), type);
+  const text = rewriteWealthText(await upstream.text(), type, u);
   const h = copyResponseHeaders(upstream);
   h.set('content-type', type || 'text/plain; charset=utf-8');
   h.set('cache-control', /html/i.test(type) ? 'no-cache' : (h.get('cache-control') || 'public, max-age=3600'));
