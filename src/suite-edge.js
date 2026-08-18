@@ -4,7 +4,7 @@ import { proxyWealth } from './suite-proxy.js';
 const SUITE={
   productName:'Kosif',
   version:'v37.0.0-root',
-  buildId:'2026.08.18-kosif-libraries-sales-general',
+  buildId:'2026.08.18-v37-root-rebuild-kosif-libraries-sales',
   architecture:'suite-edge → security-edge → native-worker',
   modules:{audit:'/audit/',libraries:'/libraries/',wealth:'/wealth/reader.html',sales:'/sales/'},
   designAuthority:'Aghnam Al-Wadi Sales Dashboard 7',
