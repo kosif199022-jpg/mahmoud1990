@@ -1,4 +1,5 @@
 name: Export Full Kosif JSON
+# refreshed 2026-08-18 to export current main source on merge
 
 on:
   push:
