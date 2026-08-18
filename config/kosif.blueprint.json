@@ -1,0 +1,48 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "blueprint":{"id":"kosif.audit.intelligence.platform","version":"3.0.0","locale":{"primary":"ar-SA","direction":"rtl","currency_default":"SAR"},"authoring_principle_ar":"المحرك الحتمي يملك الأرقام والتصنيفات، والذكاء الاصطناعي يملك السرد والتفسير فقط. لا رقم واحد يخرج من نموذج لغوي."},
+  "normalization":{
+    "arabic_text_pipeline":[
+      {"step":"strip_tatweel","pattern":"\\u0640","replace":""},
+      {"step":"strip_diacritics","pattern":"[\\u064B-\\u065F\\u0670]","replace":""},
+      {"step":"unify_alef","pattern":"[\\u0622\\u0623\\u0625\\u0671]","replace":"ا"},
+      {"step":"unify_yaa","pattern":"[\\u0649\\u064A]","replace":"ي"},
+      {"step":"unify_taa_marbuta","pattern":"[\\u0629]","replace":"ه"},
+      {"step":"collapse_whitespace","pattern":"\\s+","replace":" "},
+      {"step":"trim_punctuation","pattern":"^[\\s\\-_.:،؛/\\\\]+|[\\s\\-_.:،؛/\\\\]+$","replace":""}
+    ],
+    "numeral_parsing":{
+      "digit_maps":{"arabic_indic":{"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"},"eastern":{"۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9"}},
+      "decimal_separators":[".","٫"],"thousand_separators":[",","٬"," "," ","'"],
+      "negative_forms":[{"pattern":"^\\((.+)\\)$","sign":-1},{"pattern":"^-\\s*(.+)$","sign":-1},{"pattern":"^(.+)-$","sign":-1},{"pattern":"^(.+)\\s*(CR|Cr|دائن|دا)$","sign":-1,"context":"signed_balance_column_only"}],
+      "precision":{"storage":"integer_minor_units","scale":2,"rounding":"half_even"}
+    }
+  },
+  "taxonomy":{"normal_balance":{"assets":"debit","expenses":"debit","liabilities":"credit","equity":"credit","revenue":"credit","contra_asset":"credit","contra_liability":"debit"}},
+  "classification_engine":{
+    "match_mode":{"engine":"regex_unicode","flags":"u","token_boundary_left":"(?<![\\p{L}\\p{M}])","token_boundary_right":"(?![\\p{L}\\p{M}])"},
+    "resolution":{"on_no_match":{"class":"unclassified","risk_floor":55,"requires_human":true}},
+    "rules":[
+      {"id":"R-SUSP-01","priority":950,"label_ar":"حسابات معلقة ووسيطة","match":{"any":["حساب معلق","معلقه","وسيط","suspense","clearing"]},"fsli":"other_receivables","class":"assets","assertions":["existence","classification","valuation"],"standards":["IAS_1"],"inherent_risk":95,"expected_closing_balance":0,"pbc_pack":"PBC.SUSPENSE","procedure_pack":"PROC.SUSPENSE"},
+      {"id":"R-RP-01","priority":920,"label_ar":"الأطراف ذات العلاقة","match":{"any":["طرف ذو علاقه","اطراف ذات علاقه","الشريك","المالك","جاري الشركاء","related part","shareholder current"]},"fsli":"due_from_related_parties","class":"assets","assertions":["existence","rights_obligations","presentation","completeness"],"standards":["IAS_24"],"inherent_risk":92,"always_significant_risk":true,"pbc_pack":"PBC.RP","procedure_pack":"PROC.RP"},
+      {"id":"R-ECL-01","priority":905,"label_ar":"مخصص الخسائر الائتمانية المتوقعة","match":{"any":["مخصص ديون","مخصص خسائر ائتمانيه","هبوط قيمه الذمم","allowance for ecl","expected credit loss"]},"fsli":"trade_receivables","class":"contra_asset","assertions":["valuation","completeness"],"standards":["IFRS_9","IFRS_7"],"inherent_risk":85,"is_estimate":true,"pbc_pack":"PBC.ECL","procedure_pack":"PROC.ESTIMATE"},
+      {"id":"R-ACCDEP-01","priority":895,"label_ar":"مجمع الإهلاك","match":{"any":["مجمع الاهلاك","مجمع اهلاك","الاهلاك المتراكم","accumulated depreciation"]},"fsli":"ppe","class":"contra_asset","assertions":["valuation","accuracy"],"standards":["IAS_16"],"inherent_risk":45,"pbc_pack":"PBC.FA","procedure_pack":"PROC.DEP_RECALC"},
+      {"id":"R-AR-01","priority":890,"label_ar":"الذمم المدينة التجارية","match":{"any":["ذمم مدينه","عملاء","مدينون","ذمم تجاريه","trade receivable","accounts receivable"],"not":["مخصص","هبوط","خسائر ائتمانيه"]},"fsli":"trade_receivables","class":"assets","assertions":["existence","valuation","rights_obligations","cutoff"],"standards":["IFRS_15","IFRS_9"],"inherent_risk":75,"fraud_relevant":true,"pbc_pack":"PBC.AR","procedure_pack":"PROC.AR"},
+      {"id":"R-AP-01","priority":885,"label_ar":"الذمم الدائنة التجارية","match":{"any":["ذمم دائنه","دائنون","موردون","trade payable","accounts payable"]},"fsli":"trade_payables","class":"liabilities","assertions":["completeness","cutoff","accuracy"],"standards":["IFRS_9"],"inherent_risk":62,"pbc_pack":"PBC.AP","procedure_pack":"PROC.AP"},
+      {"id":"R-DEFREV-01","priority":910,"label_ar":"الإيرادات المؤجلة / التزامات العقود","match":{"any":["ايرادات مؤجله","دفعات مقدمه من عملاء","التزامات العقود","deferred revenue","contract liability","unearned"]},"fsli":"contract_liabilities","class":"liabilities","assertions":["completeness","cutoff","classification"],"standards":["IFRS_15"],"inherent_risk":85,"pbc_pack":"PBC.REV","procedure_pack":"PROC.REV_CUTOFF"},
+      {"id":"R-REV-01","priority":900,"label_ar":"الإيرادات","match":{"any":["ايرادات","ايراد","مبيعات","revenue","sales"],"not":["مؤجل","تكلفه"]},"fsli":"revenue","class":"revenue","assertions":["occurrence","cutoff","accuracy","completeness"],"standards":["IFRS_15","IFRS_18"],"inherent_risk":90,"presumed_fraud_risk":true,"pbc_pack":"PBC.REV","procedure_pack":"PROC.REV"},
+      {"id":"R-COGS-01","priority":835,"label_ar":"تكلفة الإيرادات","match":{"any":["تكلفه المبيعات","تكلفه الايرادات","تكلفه البضاعه","cost of sales","cost of revenue","cogs"]},"fsli":"cost_of_revenue","class":"expenses","assertions":["occurrence","accuracy","cutoff","completeness"],"standards":["IAS_2","IFRS_15"],"inherent_risk":70,"pbc_pack":"PBC.COGS","procedure_pack":"PROC.GP_ANALYTICS"},
+      {"id":"R-CASH-01","priority":880,"label_ar":"النقدية وما في حكمها","match":{"any":["نقد","نقدي","صندوق","خزينه","خزينة","بنك","cash","bank","petty cash"],"not":["قرض بنكي","تسهيلات"]},"fsli":"cash_and_equivalents","class":"assets","assertions":["existence","rights_obligations","completeness","cutoff"],"standards":["IAS_7","IFRS_9"],"inherent_risk":55,"fraud_relevant":true,"pbc_pack":"PBC.CASH","procedure_pack":"PROC.CASH"}
+    ]
+  },
+  "materiality_engine":{
+    "benchmarks":[{"id":"revenue","label_ar":"الإيرادات","range":[0.005,0.01]},{"id":"profit_before_tax","label_ar":"الربح قبل الضريبة/الزكاة","range":[0.03,0.05]},{"id":"assets","label_ar":"إجمالي الأصول","range":[0.005,0.01]}],
+    "performance_materiality":{"factor_by_risk":{"low":0.75,"moderate":0.65,"high":0.55,"significant":0.5}},
+    "clearly_trivial":{"default":0.05}
+  },
+  "risk_engine":{"bands":[{"id":"low","label_ar":"منخفضة","from":0,"to":39},{"id":"moderate","label_ar":"متوسطة","from":40,"to":64},{"id":"high","label_ar":"مرتفعة","from":65,"to":84},{"id":"significant","label_ar":"جوهرية","from":85,"to":100}]},
+  "deterministic_checks":{"trial_balance":[{"id":"TB-01","label_ar":"عدم توازن إجمالي المدين والدائن","severity":"critical"},{"id":"TB-02","label_ar":"أرقام حسابات مكررة","severity":"critical"},{"id":"TB-03","label_ar":"رصيد غير طبيعي مقابل طبيعة الحساب","severity":"high"},{"id":"TB-07","label_ar":"تغير جوهري عن السنة السابقة","severity":"high"},{"id":"TB-09","label_ar":"حسابات معلقة برصيد قائم","severity":"high"}]},
+  "opinion_engine":{"decision_tree":{"root":"q_source","nodes":{"q_source":{"question_ar":"هل يوجد تحريف جوهري أو تعذر الحصول على أدلة كافية؟","options":[{"value":"material_misstatement","next":"q_ms_pervasive"},{"value":"inability_to_obtain_evidence","next":"q_ev_pervasive"},{"value":"none","next":"q_going_concern"}]},"q_ms_pervasive":{"question_ar":"هل التحريف الجوهري منتشر؟","yes":"res_adverse","no":"res_qualified_ms"},"q_ev_pervasive":{"question_ar":"هل آثار تعذر الحصول على الأدلة قد تكون جوهرية ومنتشرة؟","yes":"res_disclaimer","no":"res_qualified_ev"},"q_going_concern":{"question_ar":"ما حالة عدم التأكد المتعلق بالاستمرارية؟","options":[{"value":"uncertainty_exists_and_adequately_disclosed","next":"res_unmodified_gc"},{"value":"no_uncertainty","next":"q_other_matters"}]},"q_other_matters":{"question_ar":"هل توجد مسألة أخرى تعدل الرأي؟","yes":"res_qualified_ms","no":"res_unmodified"}},"results":{"res_qualified_ms":{"opinion":"qualified","label_ar":"رأي متحفظ","isa_ref":"ISA_705.7"},"res_adverse":{"opinion":"adverse","label_ar":"رأي معاكس","isa_ref":"ISA_705.8"},"res_qualified_ev":{"opinion":"qualified","label_ar":"رأي متحفظ لقصور الأدلة","isa_ref":"ISA_705.7"},"res_disclaimer":{"opinion":"disclaimer","label_ar":"امتناع عن إبداء الرأي","isa_ref":"ISA_705.9"},"res_unmodified_gc":{"opinion":"unmodified","label_ar":"غير معدل مع فقرة عدم تأكد جوهري متعلق بالاستمرارية","isa_ref":"ISA_570.22"},"res_unmodified":{"opinion":"unmodified","label_ar":"رأي غير معدل","isa_ref":"ISA_700"}}}},
+  "ai_layer":{"tasks":[{"id":"T.FINDING_NARRATIVE","schema_id":"finding_narrative_v1","temperature":0.2},{"id":"T.ADVISOR","schema_id":"advisor_v1","temperature":0.2},{"id":"T.COUNCIL","schema_id":"council_v2","temperature":0.1}]},
+  "self_tests":{"parser_fixtures":[{"input":"1,234.56","expect_minor_units":123456},{"input":"١٬٢٣٤٫٥٦","expect_minor_units":123456},{"input":"(1,234.56)","expect_minor_units":-123456},{"input":"1234-","expect_minor_units":-123400}]}
+}
