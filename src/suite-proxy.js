@@ -26,10 +26,21 @@ function candidatePaths(path) {
 function readerBookBootstrap(url) {
   const book = String(url?.searchParams?.get('book') || '').trim().toLowerCase();
   if (!LIBRARY_BOOKS.has(book)) return '';
-  // The four-book library stores the active book as JSON under mk_lib_book.
-  // This one-shot bootstrap only runs for an explicit ?book= deep link and
-  // therefore leaves the normal Mafateeh experience completely unchanged.
+  // This runs only for an explicit allow-listed ?book= deep link. A normal
+  // /wealth/reader.html request therefore leaves Mafateeh state untouched.
   return `<script>(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
+}
+
+function injectReaderLayers(text, requestUrl) {
+  const additions = [];
+  const bookBoot = readerBookBootstrap(requestUrl);
+  if (bookBoot && !text.includes('mk_lib_book')) additions.push(bookBoot);
+  if (!text.includes('/wealth-theme-v37.css')) additions.push('<link rel="stylesheet" href="/wealth-theme-v37.css">');
+  if (!text.includes('/suite-shell.css')) additions.push('<link rel="stylesheet" href="/suite-shell.css">');
+  if (!/reader-library\.js/i.test(text) && !/wealth-library-v37\.js/i.test(text)) additions.push('<script src="/wealth-library-v37.js" defer></script>');
+  if (!text.includes('/suite-shell.js')) additions.push('<script src="/suite-shell.js" defer></script>');
+  if (!additions.length) return text;
+  return text.replace(/<\/head>/i, additions.join('') + '</head>');
 }
 
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
@@ -48,10 +59,10 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
     );
-    const bookBoot = readerBookBootstrap(requestUrl);
-    const libraryLayer = /reader-library\.js/i.test(text) ? '' : '<script src="/wealth-library-v37.js" defer></script>';
-    const suite = `${bookBoot}<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css">${libraryLayer}<script src="/suite-shell.js" defer></script>`;
-    if (!text.includes('/suite-shell.css')) text = text.replace(/<\/head>/i, `${suite}</head>`);
+    // Do not use one previously-injected stylesheet as a sentinel for all other
+    // layers. The upstream Worker can already contain suite-shell.css while the
+    // book bootstrap/library script is still missing.
+    text = injectReaderLayers(text, requestUrl);
   }
   if (/javascript/i.test(contentType) || /html/i.test(contentType)) {
     text = text.replace(/(["'`])\/wealth\/wealth\//g, '$1/wealth/');
