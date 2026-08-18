@@ -13,11 +13,12 @@ function store(){try{return JSON.parse(localStorage.getItem(V36_KEY)||'{}')}catc
 function persist(){try{localStorage.setItem(V36_KEY,JSON.stringify(v36()))}catch(_){}}
 function v36(){
   if(typeof state==='undefined') return store();
+  if(state.v36) return state.v36;
   const saved=store();
   state.v36=Object.assign({
     acceptance:{accepted:false,independence:false,conflicts:false,clientIntegrity:false,terms:false,at:null,note:''},
     pbc:{},notes:[],priorTB:[],materialityLog:[],journals:[],journalFlags:[],templates:[],riskRegister:[]
-  },saved,state.v36||{});
+  },saved);
   return state.v36;
 }
 function saveV36(){persist();try{if(typeof save==='function')save()}catch(_){}}
@@ -91,7 +92,7 @@ function renderPBC(){
   if(!req.length){w.innerHTML='<div class="empty">لا توجد مطالبات حتى الآن. ستُنشأ تلقائيًا من جولات المراجعة ويمكن تتبع حالتها هنا.</div>';return}
   const opts=['Missing','Requested','Received','Under Review','Accepted','Rejected','Need Clarification'];
   w.innerHTML=req.map(d=>{const s=st[d.id]?.status||'Missing';return `<div class="docreq"><h5>${h(d.title||d.id)} <span class="badge mut">الجولة ${d.round}</span></h5><p>${h(d.reason||'')}</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select class="v36-pbc-status" data-id="${h(d.id)}">${opts.map(o=>`<option ${o===s?'selected':''}>${o}</option>`).join('')}</select><span class="round-meta">${h((d.standard_refs||[]).join(' · '))}</span></div></div>`}).join('');
-  qa('.v36-pbc-status').forEach(x=>x.onchange=()=>{v36().pbc[x.dataset.id]={status:x.value,at:now()};saveV36();renderPBC()});
+  qa('.v36-pbc-status').forEach(x=>x.onchange=()=>{v36().pbc[x.dataset.id]={status:x.value,at:now()};saveV36();scheduleRenderV36()});
 }
 function renderNotes(){const w=q('#v36-notes');if(!w)return;const notes=v36().notes||[];const n=q('#n-reviewer');if(n)n.textContent=notes.length;w.innerHTML=notes.length?notes.slice().reverse().map((x,i)=>`<div class="finding"><h5>${new Date(x.at).toLocaleString('ar-SA')}</h5><p>${h(x.text)}</p></div>`).join(''):'<div class="empty">لا توجد ملاحظات بعد.</div>';const extra=q('#extra-notes');if(extra&&!extra.dataset.v36Injected){extra.dataset.v36Injected='1';const latest=notes.slice(-5).map(x=>x.text).join('\n');if(latest)extra.value=(extra.value?extra.value+'\n':'')+'ملاحظات المراجع المحفوظة:\n'+latest}}
 const BUILTIN_TEMPLATES=[['مذكرة التخطيط','الهدف:\nفهم المنشأة والبيئة:\nالمخاطر المهمة:\nاستجابة المراجعة:\nالاستنتاج:'],['مذكرة الإيرادات','دورة الإيرادات:\nنقاط التحكم:\nاختبارات القطع والحدوث:\nالعينة:\nالاستنتاج:'],['مذكرة المخزون','مواقع المخزون:\nالجرد والملاحظة:\nالتسعير وصافي القيمة القابلة للتحقق:\nالقطع:\nالاستنتاج:'],['مذكرة التقديرات','التقدير المحاسبي:\nطريقة الإدارة:\nالبيانات والافتراضات:\nاختبار الحساسية:\nالتحيز المحتمل:\nالاستنتاج:'],['مذكرة الإقفال','الأحداث اللاحقة:\nالاستمرارية:\nالتحريفات غير المصححة:\nالإقرارات المكتوبة:\nالاستنتاج النهائي:']];
@@ -158,19 +159,28 @@ function classifyAccount(acc){
 /* يبقى التوقيع القديم متاحًا للاسم وحده */
 function category(n){return classifyAccount({name:String(n)}).cat}
 function renderFSDraft(){const w=q('#v36-fs-draft');if(!w)return;const a=accounts();if(!a.length){w.innerHTML='<div class="empty">اعتمد ميزانًا لإعداد المسودة.</div>';return}const sums={asset:0,liability:0,equity:0,revenue:0,expense:0};const clsBasis={code:0,name:0,default:0};for(const x of a){const c=classifyAccount(x);clsBasis[c.basis]++;sums[c.cat]+=bal(x)}const profit=-(sums.revenue+sums.expense);const residual=sums.asset+sums.liability+sums.equity+sums.revenue+sums.expense;const balanced=Math.abs(residual)<.5;const review=clsBasis.name+clsBasis.default;w.innerHTML=`<div class="grid g2"><div><h4>مسودة قائمة المركز المالي</h4><div class="twrap"><table class="data"><tbody><tr><td>الأصول — تصنيف آلي</td><td>${fmt(sums.asset)}</td></tr><tr><td>الالتزامات — تصنيف آلي</td><td>${fmt(-sums.liability)}</td></tr><tr><td>حقوق الملكية — تصنيف آلي</td><td>${fmt(-sums.equity)}</td></tr><tr><td><b>الالتزامات وحقوق الملكية والنتيجة</b></td><td><b>${fmt(-(sums.liability+sums.equity)+profit)}</b></td></tr></tbody></table></div></div><div><h4>مسودة الربح أو الخسارة</h4><div class="twrap"><table class="data"><tbody><tr><td>الإيرادات — تصنيف آلي</td><td>${fmt(-sums.revenue)}</td></tr><tr><td>المصروفات — تصنيف آلي</td><td>${fmt(sums.expense)}</td></tr><tr><td><b>نتيجة تقريبية</b></td><td><b>${fmt(profit)}</b></td></tr></tbody></table></div></div></div><div class="note ${balanced?'ok':'danger'}"><span>${balanced?'=':'≠'}</span><span><b>فحص معادلة الميزانية:</b> ${balanced?'الأصول تساوي الالتزامات وحقوق الملكية والنتيجة.':`لا تتوازن — الفرق ${fmt(residual)}. راجع الميزان أو تصنيف الحسابات قبل الاعتماد.`}</span></div><div class="note ${review?'warn':'info'}"><span>${review?'!':'✓'}</span><span><b>أساس التصنيف:</b> ${fmt(clsBasis.code)} حسابًا بأرقام الدليل، و${fmt(clsBasis.name)} بالاسم فقط${clsBasis.default?`، و${fmt(clsBasis.default)} بلا مطابقة (صُنِّفت أصولًا افتراضًا)`:''}. ${review?'الحسابات المصنَّفة بالاسم أو افتراضًا تحتاج مراجعة يدوية.':'كل الحسابات صُنِّفت من أرقام الدليل.'}</span></div><div class="note warn"><span>!</span><span>هذه مسودة تصنيف أولي وليست قوائم مالية صالحة للإصدار. يلزم اعتماد التصنيف والتسويات والإفصاحات والتدفقات النقدية يدويًا.</span></div>`}
+let _v36RenderPending=false;
+function scheduleRenderV36(){
+  if(_v36RenderPending)return;
+  _v36RenderPending=true;
+  requestAnimationFrame(()=>{
+    _v36RenderPending=false;
+    renderAllV36();
+  });
+}
 function renderAllV36(){try{v36();renderTB();renderAnalytics();renderPBC();renderNotes();renderTemplates();renderAcceptance();renderPrior();renderMatLog();renderJournals();renderMisstatements();renderFSDraft()}catch(e){console.error('Kosif v36 render',e)}}
 function bind(){
-  const a=q('#v36-accept-save');if(a)a.onclick=()=>{const x=v36().acceptance;Object.assign(x,{independence:q('#v36-ind').checked,conflicts:q('#v36-conf').checked,clientIntegrity:q('#v36-int').checked,terms:q('#v36-terms').checked,note:q('#v36-accept-note').value.trim()});x.accepted=x.independence&&x.conflicts&&x.clientIntegrity&&x.terms;x.at=now();saveV36();renderAllV36();try{renderRounds()}catch(_){ }toastV(x.accepted?'تم اعتماد قرار القبول/الاستمرار':'استكمل جميع عناصر القبول','ok')};
-  const pf=q('#v36-prior-file');if(pf)pf.onchange=async()=>{try{v36().priorTB=await readPriorFile(pf.files[0]);saveV36();renderPrior();toastV('تم تحميل سنة المقارنة','ok')}catch(e){toastV(e.message,'danger')}};
-  const add=q('#v36-note-add');if(add)add.onclick=()=>{const t=q('#v36-note').value.trim();if(!t)return;v36().notes.push({at:now(),text:t});q('#v36-note').value='';saveV36();renderNotes()};
+  const a=q('#v36-accept-save');if(a)a.onclick=()=>{const x=v36().acceptance;Object.assign(x,{independence:q('#v36-ind').checked,conflicts:q('#v36-conf').checked,clientIntegrity:q('#v36-int').checked,terms:q('#v36-terms').checked,note:q('#v36-accept-note').value.trim()});x.accepted=x.independence&&x.conflicts&&x.clientIntegrity&&x.terms;x.at=now();saveV36();scheduleRenderV36();try{renderRounds()}catch(_){ }toastV(x.accepted?'تم اعتماد قرار القبول/الاستمرار':'استكمل جميع عناصر القبول','ok')};
+  const pf=q('#v36-prior-file');if(pf)pf.onchange=async()=>{try{v36().priorTB=await readPriorFile(pf.files[0]);saveV36();scheduleRenderV36();toastV('تم تحميل سنة المقارنة','ok')}catch(e){toastV(e.message,'danger')}};
+  const add=q('#v36-note-add');if(add)add.onclick=()=>{const t=q('#v36-note').value.trim();if(!t)return;v36().notes.push({at:now(),text:t});q('#v36-note').value='';saveV36();scheduleRenderV36()};
   const dict=q('#v36-note-dictate');if(dict)dict.onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return toastV('الإملاء الصوتي غير مدعوم في هذا المتصفح','warn');const r=new R();r.lang='ar-SA';r.onresult=e=>q('#v36-note').value+=(q('#v36-note').value?' ':'')+e.results[0][0].transcript;r.start()};
-  const tn=q('#v36-template-new');if(tn)tn.onclick=()=>{const name=prompt('اسم القالب');if(!name)return;const body=prompt('محتوى القالب الأولي')||'';v36().templates.push({name,body});saveV36();renderTemplates()};
-  const jr=q('#v36-je-run');if(jr)jr.onclick=()=>{const js=parseJournal(q('#v36-je-paste').value);v36().journals=js;v36().journalFlags=analyzeJournals(js);saveV36();renderJournals();toastV(`تم تحليل ${js.length} سطر قيد`,'ok')};
+  const tn=q('#v36-template-new');if(tn)tn.onclick=()=>{const name=prompt('اسم القالب');if(!name)return;const body=prompt('محتوى القالب الأولي')||'';v36().templates.push({name,body});saveV36();scheduleRenderV36()};
+  const jr=q('#v36-je-run');if(jr)jr.onclick=()=>{const js=parseJournal(q('#v36-je-paste').value);v36().journals=js;v36().journalFlags=analyzeJournals(js);saveV36();scheduleRenderV36();toastV(`تم تحليل ${js.length} سطر قيد`,'ok')};
   const sm=q('#v36-je-sample');if(sm)sm.onclick=()=>{const f=(v36().journalFlags||[]),j=(v36().journals||[]);const sample=[...f.slice(0,20),...j.filter((_,i)=>i%Math.max(1,Math.floor(j.length/20))===0).slice(0,20)];toastV(`عينة مقترحة: ${sample.length} سطر — تجمع الاستثناءات مع اختيار منهجي. راجع تصميم العينة قبل الاعتماد.`,'info');};
-  const se=q('#btn-save-entity');if(se&&!se.dataset.v36Bound){se.dataset.v36Bound='1';se.addEventListener('click',()=>setTimeout(()=>{logMateriality();renderMatLog()},0))}
+  const se=q('#btn-save-entity');if(se&&!se.dataset.v36Bound){se.dataset.v36Bound='1';se.addEventListener('click',()=>setTimeout(()=>{logMateriality();scheduleRenderV36()},0))}
 }
-function patchNavigation(){if(typeof go==='function'&&!go.__v36){const old=go;go=function(v,...a){if(v==='adj-tb'){old('outputs',...a);setTimeout(()=>q('#adj-card')?.scrollIntoView({behavior:'smooth'}),50);return}const r=old(v,...a);setTimeout(renderAllV36,0);return r};go.__v36=true}}
-function patchRefresh(){if(typeof refreshAll==='function'&&!refreshAll.__v36extra){const old=refreshAll;refreshAll=function(...a){let r;try{r=old.apply(this,a)}finally{renderAllV36()}return r};refreshAll.__v36extra=true}}
+function patchNavigation(){if(typeof go==='function'&&!go.__v36){const old=go;go=function(v,...a){if(v==='adj-tb'){old('outputs',...a);setTimeout(()=>q('#adj-card')?.scrollIntoView({behavior:'smooth'}),50);return}const r=old(v,...a);scheduleRenderV36();return r};go.__v36=true}}
+function patchRefresh(){if(typeof refreshAll==='function'&&!refreshAll.__v36extra){const old=refreshAll;refreshAll=function(...a){let r;try{r=old.apply(this,a)}finally{scheduleRenderV36()}return r};refreshAll.__v36extra=true}}
 function init(){ensureCoreCompat();ensureViews();ensureAcceptance();ensurePriorAndMateriality();ensureOutputs();patchRoundGate();patchNavigation();patchRefresh();v36();bind();logMateriality();renderAllV36();document.documentElement.dataset.kosifV36='consolidated'}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
