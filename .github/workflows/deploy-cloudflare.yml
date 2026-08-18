@@ -64,7 +64,7 @@ jobs:
           done
           [ "$ok" = 1 ] || { echo 'Live Kosif verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
 
-          for path in / /audit/ /libraries/ /sales/ /wealth/reader.html; do
+          for path in / /audit/ /libraries/ /sales/ /wealth/reader.html /wealth/reader-library.js; do
             code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
             case "$code" in 200|204|301|302|307|308) ;; *) echo "Bad live route $path -> $code"; exit 1;; esac
           done
@@ -73,14 +73,35 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const lib=JSON.parse(fs.readFileSync('/tmp/kosif-library.json','utf8'));
-          const ids=new Set((Array.isArray(lib)?lib:[]).map(x=>x.id));
-          for(const id of ['mafateeh','std2025','std2018','dipifr'])if(!ids.has(id))throw new Error('Missing prepared library book '+id);
-          console.log('LIVE_KOSIF_LIBRARY_OK', [...ids].join(','));
+          const map=new Map((Array.isArray(lib)?lib:[]).map(x=>[x.id,x]));
+          for(const id of ['mafateeh','std2025','std2018','dipifr'])if(!map.has(id))throw new Error('Missing prepared library book '+id);
+          if(!map.get('mafateeh')?.embedded || !map.get('mafateeh')?.audio) throw new Error('Mafateeh lost embedded/audio identity');
+          for(const id of ['std2025','std2018'])if(map.get(id)?.authority!=='official')throw new Error(id+' must remain official');
+          if(map.get('dipifr')?.authority!=='training')throw new Error('DipIFR must remain training-only');
+          console.log('LIVE_KOSIF_LIBRARY_OK', [...map.keys()].join(','));
           NODE
+
+          curl -fsS "$LIVE_URL/wealth/reader-library.js?deploy=$GITHUB_SHA" -o /tmp/kosif-reader-library.js
+          grep -q "__KOSIF_READER_LIBRARY__" /tmp/kosif-reader-library.js || { echo 'Reader library layer missing'; exit 1; }
+
+          for book in std2025 std2018 dipifr; do
+            curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/$book.json?deploy=$GITHUB_SHA" -o "/tmp/kosif-index-$book.json"
+            curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/$book/1.json?deploy=$GITHUB_SHA" -o "/tmp/kosif-chapter-$book.json"
+            BOOK="$book" node - <<'NODE'
+          const fs=require('fs'),book=process.env.BOOK;
+          const idx=JSON.parse(fs.readFileSync(`/tmp/kosif-index-${book}.json`,'utf8'));
+          const ch=JSON.parse(fs.readFileSync(`/tmp/kosif-chapter-${book}.json`,'utf8'));
+          if(!Array.isArray(idx?.chapters)||idx.chapters.length<10)throw new Error(book+' index is incomplete');
+          if(!Array.isArray(ch?.body)||!ch.body.length)throw new Error(book+' chapter body is incomplete');
+          console.log('LIVE_BOOK_DATA_OK',book,idx.chapters.length,ch.title||'chapter-1');
+          NODE
+          done
 
           for book in mafateeh std2025 std2018 dipifr; do
             curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?book=$book&deploy=$GITHUB_SHA" -o "/tmp/kosif-reader-$book.html"
             grep -q "mk_lib_book" "/tmp/kosif-reader-$book.html" || { echo "Missing deep-link bootstrap for $book"; exit 1; }
+            grep -q "/wealth/reader-library.js" "/tmp/kosif-reader-$book.html" || { echo "Missing reader library activation for $book"; exit 1; }
+            grep -q "var D =" "/tmp/kosif-reader-$book.html" || { echo "Reader globals not safely exposed for $book"; exit 1; }
           done
 
       - name: Publish successful production verification
@@ -95,7 +116,7 @@ jobs:
           const fs=require('fs');
           const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
           const run=`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Prepared reader books verified: \`mafateeh, std2025, std2018, dipifr\`\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe workflow executed \`wrangler deploy\`, fetched the live Worker, validated the canonical routes, checked the live four-book reader index, and verified each deep-link bootstrap.`);
+          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Reader books verified: \`mafateeh, std2025, std2018, dipifr\`\n- Local book indexes + first chapter bodies: **verified**\n- Mafateeh embedded/audio identity: **preserved**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe workflow executed \`wrangler deploy\`, fetched the live Worker, validated canonical routes, the four-book manifest, the local multi-book reader layer, every book deep-link, and real chapter data for each non-embedded book.`);
           NODE
           gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md
 
