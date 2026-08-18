@@ -1,0 +1,244 @@
+name: '🎨 Gemini Phase Execute'
+
+on:
+  workflow_call:
+
+concurrency:
+  group: '${{ github.workflow }}-phase-${{ github.event.issue.number }}'
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: 'bash'
+
+jobs:
+  phase-execute:
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      issues: 'write'
+      pull-requests: 'write'
+
+    steps:
+      - name: 'Checkout Code'
+        uses: 'actions/checkout@v4'
+        with:
+          persist-credentials: 'false'
+          fetch-depth: 1
+
+      - name: 'Prepare exact phase directive'
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.issue.number }}'
+          REPOSITORY: '${{ github.repository }}'
+        run: |-
+          set -euo pipefail
+          comments_file="$(mktemp)"
+          trap 'rm -f "${comments_file}"' EXIT
+          gh api "repos/${REPOSITORY}/issues/${ISSUE_NUMBER}/comments?per_page=100" > "${comments_file}"
+
+          phase_comment="$(jq -c '[.[] | select((.body // "") | contains("gemini-phase-directive:"))] | last // {}' "${comments_file}")"
+          phase_directive="$(jq -r '.body // ""' <<< "${phase_comment}")"
+          phase_id="$(jq -r '.id // ""' <<< "${phase_comment}")"
+
+          if [[ -z "${phase_directive//[[:space:]]/}" ]] || [[ -z "${phase_id}" ]]; then
+            echo 'No approved gemini-phase-directive was found.' >&2
+            exit 1
+          fi
+
+          echo "Selected phase directive comment: ${phase_id}"
+          jq -n \
+            --arg repository "${REPOSITORY}" \
+            --arg issue_number "${ISSUE_NUMBER}" \
+            --arg phase_directive "${phase_directive}" \
+            --arg phase_directive_comment_id "${phase_id}" \
+            '{repository:$repository, issue_number:$issue_number, phase_directive:$phase_directive, phase_directive_comment_id:$phase_directive_comment_id, approved:true}' > gemini-context.json
+
+      - name: 'Run Gemini exact phase'
+        id: 'run_gemini'
+        uses: 'google-github-actions/run-gemini-cli@v0'
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
+        with:
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
+          gemini_cli_version: '0.40.0'
+          gemini_debug: 'false'
+          gemini_model: 'gemini-3-flash-preview'
+          upload_artifacts: 'false'
+          workflow_name: 'gemini-phase-execute'
+          github_issue_number: '${{ github.event.issue.number }}'
+          settings: |-
+            {
+              "model": {"maxSessionTurns": 140},
+              "telemetry": {"enabled": false},
+              "tools": {
+                "core": [
+                  "read_file",
+                  "read_many_files",
+                  "glob",
+                  "grep_search",
+                  "list_directory",
+                  "write_file",
+                  "replace"
+                ]
+              }
+            }
+          prompt: |-
+            You are the approved implementation agent for the Kosif repository.
+
+            First read `GEMINI.md` and `gemini-context.json` using `read_file`.
+            The value of `phase_directive` in `gemini-context.json` is the ONLY authoritative implementation task for this run. Execute it exactly. Do not substitute an earlier State/DOM phase, model test, version-alignment task, remembered plan, or unrelated cleanup.
+
+            If the directive references a repository design/specification document, read that document before editing. Inspect the current implementation and relevant repository contracts before changing files.
+
+            Mandatory rules:
+            - Work only in the local checkout; the workflow handles validation and publication.
+            - Do not create commits, branches, remote writes, Issue comments, or Pull Requests yourself.
+            - Do not run shell commands.
+            - Never modify tests, `.github/workflows/`, generated context files, credentials, secrets, logs, release/version/cache/schema identifiers, or historical compatibility identifiers unless the phase directive explicitly requires that exact category.
+            - Never weaken or bypass tests merely to make validation pass.
+            - Preserve deterministic accounting/audit calculations and all current security/privacy controls.
+            - Preserve Arabic-first RTL, accessibility, and iPhone/iOS behavior; improve them only where the exact directive asks.
+            - Prefer reusable root-cause implementation over scattered one-off patches.
+            - If repository evidence does not support a safe change, leave that part unchanged and report it rather than guessing.
+
+            Return a concise final summary containing: phase directive comment ID, files changed, visible/behavioral improvements, technical decisions, remaining risks, and recommended next phase.
+
+      - name: 'Detect implementation changes'
+        id: 'changes'
+        if: ${{ steps.run_gemini.outcome == 'success' }}
+        run: |-
+          set -euo pipefail
+          rm -rf .gemini gemini-artifacts
+          status="$(git status --porcelain --untracked-files=all -- ':!gemini-context.json')"
+          if [[ -z "${status}" ]]; then
+            echo 'has_changes=false' >> "${GITHUB_OUTPUT}"
+            echo 'Gemini produced no application changes.'
+          else
+            echo 'has_changes=true' >> "${GITHUB_OUTPUT}"
+            printf '%s\n' "${status}"
+          fi
+
+      - name: 'Initial deterministic validation'
+        id: 'validate_initial'
+        if: ${{ steps.changes.outputs.has_changes == 'true' }}
+        run: |-
+          set -u
+          git status --porcelain --untracked-files=all -- ':!gemini-context.json' > gemini-changed-files.txt
+          : > gemini-validation.log
+          diff_code=0; build_code=0; check_code=0
+          git diff --check >> gemini-validation.log 2>&1 || diff_code=$?
+          npm run build >> gemini-validation.log 2>&1 || build_code=$?
+          npm run check >> gemini-validation.log 2>&1 || check_code=$?
+          cat gemini-validation.log
+          if [[ ${diff_code} -eq 0 && ${build_code} -eq 0 && ${check_code} -eq 0 ]]; then
+            echo 'passed=true' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'passed=false' >> "${GITHUB_OUTPUT}"
+          fi
+          exit 0
+
+      - name: 'Repair current phase after failed validation'
+        id: 'repair_gemini'
+        if: ${{ steps.changes.outputs.has_changes == 'true' && steps.validate_initial.outputs.passed == 'false' }}
+        uses: 'google-github-actions/run-gemini-cli@v0'
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
+        with:
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
+          gemini_cli_version: '0.40.0'
+          gemini_debug: 'false'
+          gemini_model: 'gemini-3-flash-preview'
+          upload_artifacts: 'false'
+          workflow_name: 'gemini-phase-execute-repair'
+          github_issue_number: '${{ github.event.issue.number }}'
+          settings: |-
+            {
+              "model": {"maxSessionTurns": 70},
+              "telemetry": {"enabled": false},
+              "tools": {
+                "core": ["read_file","read_many_files","glob","grep_search","list_directory","write_file","replace"]
+              }
+            }
+          prompt: |-
+            This is a repair pass for YOUR current implementation, not a new phase.
+            Read `gemini-context.json`, `gemini-validation.log`, and `gemini-changed-files.txt`.
+            Preserve the exact `phase_directive` while fixing only validation failures introduced by your current edits.
+            Do not modify tests, workflows, release/version/cache/schema identifiers, secrets, logs, or compatibility contracts to force validation green. Do not run shell commands or perform remote Git operations.
+            Return a short repair summary.
+
+      - name: 'Final deterministic validation'
+        id: 'validate'
+        if: ${{ steps.changes.outputs.has_changes == 'true' }}
+        run: |-
+          set -euo pipefail
+          rm -rf .gemini gemini-artifacts
+          rm -f gemini-validation.log gemini-changed-files.txt
+          git diff --check
+          npm run build
+          npm run check
+
+      - name: 'Publish validated phase branch'
+        id: 'publish'
+        if: ${{ steps.changes.outputs.has_changes == 'true' && steps.validate.outcome == 'success' }}
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.issue.number }}'
+        run: |-
+          set -euo pipefail
+          branch="gemini/issue-${ISSUE_NUMBER}-phase-${GITHUB_RUN_ID}"
+          rm -f gemini-context.json gemini-validation.log gemini-changed-files.txt
+          rm -rf .gemini gemini-artifacts
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'published=false' >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          git commit -m "feat: implement approved Gemini phase for issue #${ISSUE_NUMBER}"
+          gh auth setup-git
+          git push origin "HEAD:refs/heads/${branch}"
+          echo "branch=${branch}" >> "${GITHUB_OUTPUT}"
+          echo 'published=true' >> "${GITHUB_OUTPUT}"
+
+      - name: 'Publish phase result'
+        if: ${{ always() }}
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.issue.number }}'
+          REPOSITORY: '${{ github.repository }}'
+          GEMINI_OUTCOME: '${{ steps.run_gemini.outcome }}'
+          HAS_CHANGES: '${{ steps.changes.outputs.has_changes }}'
+          INITIAL_PASSED: '${{ steps.validate_initial.outputs.passed }}'
+          FINAL_OUTCOME: '${{ steps.validate.outcome }}'
+          BRANCH: '${{ steps.publish.outputs.branch }}'
+          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.summary }}'
+          REPAIR_RESPONSE: '${{ steps.repair_gemini.outputs.summary }}'
+        run: |-
+          set -euo pipefail
+          tmp="$(mktemp)"; trap 'rm -f "${tmp}"' EXIT
+          if [[ "${GEMINI_OUTCOME}" != 'success' ]]; then
+            echo '❌ Gemini exact phase failed before publication.' > "${tmp}"
+          elif [[ "${HAS_CHANGES}" != 'true' ]]; then
+            echo '⚠️ Gemini exact phase produced no repository changes.' > "${tmp}"
+          elif [[ "${FINAL_OUTCOME}" != 'success' ]]; then
+            echo '❌ Gemini exact phase still failed deterministic validation after the repair pass. Nothing was pushed.' > "${tmp}"
+          else
+            {
+              echo '✅ Gemini exact phase was implemented, validated, and pushed for review.'
+              echo
+              echo "Branch: \`${BRANCH}\`"
+              echo "Initial validation passed: \`${INITIAL_PASSED}\`"
+              echo 'Final validation: `git diff --check`, `npm run build`, `npm run check` ✅'
+              if [[ -n "${GEMINI_RESPONSE//[[:space:]]/}" ]]; then
+                echo; echo '### Gemini summary'; printf '%s\n' "${GEMINI_RESPONSE}"
+              fi
+              if [[ -n "${REPAIR_RESPONSE//[[:space:]]/}" ]]; then
+                echo; echo '### Repair summary'; printf '%s\n' "${REPAIR_RESPONSE}"
+              fi
+            } > "${tmp}"
+          fi
+          gh issue comment "${ISSUE_NUMBER}" --repo "${REPOSITORY}" --body-file "${tmp}"
