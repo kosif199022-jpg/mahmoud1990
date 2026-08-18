@@ -9,10 +9,17 @@ const PATH_PREFIXES = [
   'piper-worker.js', 'manifest.webmanifest', 'sw.js', 'reader.html',
   'downloads/'
 ];
+const READER_ROOT_ALIASES = ['/reader.html', '/reader', '/'];
 
 function isPrefixPath(path) {
   const p = String(path || '').replace(/^\//, '');
   return PATH_PREFIXES.some((x) => p === x || p.startsWith(x));
+}
+
+function candidatePaths(path) {
+  const p = path || '/';
+  if (!READER_ROOT_ALIASES.includes(p)) return [p];
+  return [p, ...READER_ROOT_ALIASES.filter((x) => x !== p)];
 }
 
 function rewriteWealthText(input, contentType = '') {
@@ -44,32 +51,57 @@ function copyResponseHeaders(upstream) {
   const h = new Headers(upstream.headers);
   h.delete('content-length');
   h.delete('content-security-policy');
+  const loc = h.get('location');
+  if (loc) {
+    try {
+      const u = new URL(loc, 'https://mafateeh.internal');
+      if (u.origin === 'https://mafateeh.internal' || WEALTH_ORIGINS.includes(u.origin)) {
+        h.set('location', '/wealth' + (u.pathname === '/' ? '/' : u.pathname) + u.search + u.hash);
+      }
+    } catch (_) {}
+  }
   h.set('x-kosif-suite-module', 'wealth-keys');
   h.set('x-content-type-options', 'nosniff');
   return h;
 }
 
+async function fetchBinding(req, env, targetPath, url, init) {
+  if (!env?.MAFATEEH) return null;
+  try {
+    const u = new URL('https://mafateeh.internal' + targetPath + url.search);
+    return await env.MAFATEEH.fetch(new Request(u, init));
+  } catch (_) {
+    return null;
+  }
+}
+
+async function fetchOrigin(origin, targetPath, url, init) {
+  try {
+    return await fetch(origin + targetPath + url.search, init);
+  } catch (_) {
+    return null;
+  }
+}
+
+function usable(r) {
+  return !!r && r.status !== 404 && r.status !== 502 && r.status !== 503;
+}
+
 async function fetchUpstream(req, env, path) {
   const url = new URL(req.url);
-  const targetPath = path || '/';
   const headers = new Headers(req.headers);
   headers.delete('cookie');
   headers.delete('authorization');
   const init = { method: req.method, headers, redirect: 'manual' };
   if (!['GET', 'HEAD'].includes(req.method)) init.body = req.body;
 
-  if (env?.MAFATEEH) {
-    try {
-      const u = new URL('https://mafateeh.internal' + targetPath + url.search);
-      const r = await env.MAFATEEH.fetch(new Request(u, init));
-      if (r.status !== 404 && r.status !== 502 && r.status !== 503) return r;
-    } catch (_) {}
-  }
-  for (const origin of WEALTH_ORIGINS) {
-    try {
-      const r = await fetch(origin + targetPath + url.search, init);
-      if (r.status !== 404 && r.status !== 502 && r.status !== 503) return r;
-    } catch (_) {}
+  for (const targetPath of candidatePaths(path)) {
+    const bound = await fetchBinding(req, env, targetPath, url, init);
+    if (usable(bound)) return bound;
+    for (const origin of WEALTH_ORIGINS) {
+      const r = await fetchOrigin(origin, targetPath, url, init);
+      if (usable(r)) return r;
+    }
   }
   return null;
 }
