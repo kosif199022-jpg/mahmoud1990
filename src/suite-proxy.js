@@ -23,6 +23,11 @@ function candidatePaths(path) {
   return [p, ...READER_ROOT_ALIASES.filter((x) => x !== p)];
 }
 
+function isReaderHtmlRequest(contentType = '', requestUrl = null) {
+  const p = String(requestUrl?.pathname || '');
+  return /html/i.test(contentType) || p === '/wealth/reader.html' || p === '/wealth/reader' || p === '/wealth/';
+}
+
 function readerBookBootstrap(url) {
   const book = String(url?.searchParams?.get('book') || '').trim().toLowerCase();
   if (!LIBRARY_BOOKS.has(book)) return '';
@@ -33,6 +38,7 @@ function readerBookBootstrap(url) {
 
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
   let text = String(input || '');
+  const htmlLike = isReaderHtmlRequest(contentType, requestUrl);
   // Prefix only Mafateeh-owned root assets. API calls intentionally remain at /api/*
   // so the same Kosif owner gate and provider verification protect AI capabilities.
   for (const p of PATH_PREFIXES) {
@@ -42,7 +48,7 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
   if (/manifest/i.test(contentType)) {
     text = text.replace(/"scope"\s*:\s*"\/"/g, '"scope":"/wealth/"');
   }
-  if (/html/i.test(contentType)) {
+  if (htmlLike) {
     text = text.replace(
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
@@ -60,7 +66,7 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     if (!text.includes('/suite-shell.js')) injections.push('<script src="/suite-shell.js" defer></script>');
     if (injections.length) text = text.replace(/<\/head>/i, `${injections.join('')}</head>`);
   }
-  if (/javascript/i.test(contentType) || /html/i.test(contentType)) {
+  if (/javascript/i.test(contentType) || htmlLike) {
     text = text.replace(/(["'`])\/wealth\/wealth\//g, '$1/wealth/');
   }
   return text;
@@ -134,14 +140,19 @@ export async function proxyWealth(req, env) {
   const upstream = await fetchUpstream(req, env, path);
   if (!upstream) return new Response('Wealth Keys source unavailable', { status: 502 });
   const type = upstream.headers.get('content-type') || '';
-  if (req.method === 'HEAD' || !TEXT_TYPES.test(type)) {
+  const htmlLike = isReaderHtmlRequest(type, u);
+  if (req.method === 'HEAD' || (!htmlLike && !TEXT_TYPES.test(type))) {
     const h = copyResponseHeaders(upstream);
+    if (htmlLike) {
+      h.set('content-type', 'text/html; charset=utf-8');
+      h.set('cache-control', 'no-cache');
+    }
     return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: h });
   }
   const text = rewriteWealthText(await upstream.text(), type, u);
   const h = copyResponseHeaders(upstream);
-  h.set('content-type', type || 'text/plain; charset=utf-8');
-  h.set('cache-control', /html/i.test(type) ? 'no-cache' : (h.get('cache-control') || 'public, max-age=3600'));
+  h.set('content-type', htmlLike ? 'text/html; charset=utf-8' : (type || 'text/plain; charset=utf-8'));
+  h.set('cache-control', htmlLike ? 'no-cache' : (h.get('cache-control') || 'public, max-age=3600'));
   return new Response(text, { status: upstream.status, statusText: upstream.statusText, headers: h });
 }
 
