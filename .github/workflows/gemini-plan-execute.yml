@@ -128,7 +128,28 @@ jobs:
                 ]
               }
             }
-          prompt: '/gemini-plan-execute'
+          prompt: |-
+            You are the approved implementation agent for this GitHub repository.
+
+            First read `GEMINI.md` and `.gemini/context.json`. Then use the GitHub MCP `issue_read` capability to read the current Issue and its comments using the repository and issue_number from `.gemini/context.json`.
+
+            Locate the latest substantive Issue comment whose plan heading is `AI Assistant: Plan of Action` and that appears before the owner's current `@gemini-cli /approve` trigger. The short placeholder plan that only asks for clarification or says context is empty is not an approved implementation plan. If no substantive visible plan exists, do not modify any files; return a clear final response explaining that execution is blocked until a substantive plan is published and approved.
+
+            If a substantive plan exists and the current context confirms explicit owner approval, execute only that approved plan while following `GEMINI.md`.
+
+            Mandatory implementation rules:
+            - Never push or write directly to `main`.
+            - Create a dedicated branch beginning with `gemini/`, preferably `gemini/issue-<number>-<short-topic>`.
+            - Preserve existing valuable functionality and avoid unrelated rewrites.
+            - Make the code changes on the dedicated branch.
+            - Run the relevant validation, including `npm run build` and `npm run check` when the repository supports them. Do not claim they pass unless they actually pass.
+            - Open a Pull Request targeting `main`. Never merge your own Pull Request.
+            - If implementation is too large for one safe PR, implement the first coherent approved phase and state clearly what remains for later PRs rather than creating an unreviewable mega-change.
+            - Do not expose secrets, API keys, private uploaded documents, or private user data.
+
+            Use local edit tools for working-tree changes and GitHub MCP write tools for the remote branch/PR as needed. `actions/checkout` intentionally has no persisted push credentials; do not attempt to bypass that safeguard or push directly to `main`.
+
+            Return a final execution summary as the Gemini response, including branch, Pull Request, files changed, tests run/results, what was completed, and anything still pending. The workflow will publish that final response back to the Issue.
 
       - name: 'Publish Gemini execution result'
         if: ${{ always() }}
