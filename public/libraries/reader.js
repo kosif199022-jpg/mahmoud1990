@@ -13,7 +13,7 @@ const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const noStore={credentials:'same-origin',cache:'no-store',headers:{'cache-control':'no-cache'}};
 let library=[],info=null,index=null,chapters=[],current=0,requestSeq=0,aborter=null;
 
-window.__KOSIF_PREPARED_READER__={isolated:true,book:BOOK,route:location.pathname,version:'v37-isolated-1'};
+window.__KOSIF_PREPARED_READER__={isolated:true,book:BOOK,route:location.pathname,version:'v37-isolated-2',wealthServiceWorkerDetached:false,legacyReaderCacheCleared:false};
 
 document.documentElement.dataset.theme=read('kosif_prepared_reader:theme','light');
 const savedSize=Math.max(17,Math.min(30,Number(read('kosif_prepared_reader:font',20))||20));
@@ -25,13 +25,53 @@ function sourceLabel(){
   return{badge:'SOCPA · نسخة 2018 المرجعية',note:'نسخة مرجعية تاريخية مستقلة. لا تُعامل تلقائيًا باعتبارها أحدث مصدر نافذ.'};
 }
 
+async function releaseLegacyWealthState(){
+  // The old integration stored the selected prepared book in one shared Wealth
+  // key and ran it under /wealth/. Clear only that legacy selector; all new
+  // reading position is namespaced per prepared book below.
+  try{localStorage.removeItem('mk_lib_book')}catch{}
+
+  // A stale iOS/Safari /wealth/ Service Worker can answer an old deep link
+  // before the edge sees it. Prepared books live outside that scope, so retire
+  // only the /wealth/ registration here. Mafateeh will register it again when
+  // the original Mafateeh reader is explicitly opened later.
+  if('serviceWorker' in navigator&&typeof navigator.serviceWorker.getRegistrations==='function'){
+    try{
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const reg of regs){
+        const scope=new URL(reg.scope);
+        if(scope.origin===location.origin&&scope.pathname.startsWith('/wealth/'))await reg.unregister();
+      }
+      window.__KOSIF_PREPARED_READER__.wealthServiceWorkerDetached=true;
+    }catch{}
+  }
+
+  // Unregistering does not remove CacheStorage. Delete only cached reader-shell
+  // requests that could replay the obsolete in-process book bootstrap; leave
+  // Mafateeh audio/book assets and every unrelated Kosif cache untouched.
+  if('caches' in window){
+    try{
+      const stalePaths=new Set(['/wealth/','/wealth/reader','/wealth/reader.html','/wealth/reader-library.js']);
+      for(const cacheName of await caches.keys()){
+        const cache=await caches.open(cacheName);
+        for(const req of await cache.keys()){
+          const u=new URL(req.url);
+          if(u.origin===location.origin&&stalePaths.has(u.pathname))await cache.delete(req);
+        }
+      }
+      window.__KOSIF_PREPARED_READER__.legacyReaderCacheCleared=true;
+    }catch{}
+  }
+}
+
 async function json(url){const r=await fetch(url,noStore);if(!r.ok)throw new Error(`${url} ${r.status}`);return r.json()}
 
 async function boot(){
   try{
+    await releaseLegacyWealthState();
     [library,index]=await Promise.all([
-      json('/wealth/books/library.json?reader=v37-isolated-1'),
-      json(`/wealth/books/${encodeURIComponent(BOOK)}.json?reader=v37-isolated-1`)
+      json('/wealth/books/library.json?reader=v37-isolated-2'),
+      json(`/wealth/books/${encodeURIComponent(BOOK)}.json?reader=v37-isolated-2`)
     ]);
     info=(Array.isArray(library)?library:[]).find(x=>x.id===BOOK)||{};
     chapters=Array.isArray(index?.chapters)?index.chapters:[];
@@ -45,11 +85,12 @@ async function boot(){
     $('#bookKind').textContent=BOOK==='dipifr'?'KOSIF TRAINING READER':'KOSIF STANDARDS READER';
     document.title=(index?.title||info.title||'القارئ المهني')+' | Kosif';
     renderToc('');
-    const requested=Math.max(1,Number(qs.get('ch'))||0);
+    const rawRequested=Number(qs.get('ch'));
+    const requested=Number.isInteger(rawRequested)&&rawRequested>0?rawRequested:0;
     const saved=Math.max(1,Number(read(key('chapter'),1))||1);
     const start=requested||saved;
-    const pos=Math.max(0,chapters.findIndex(c=>Number(c.no)===start));
-    await go(pos<0?0:pos,false);
+    const found=chapters.findIndex(c=>Number(c.no)===start);
+    await go(found>=0?found:0,false);
   }catch(err){showFatal(err)}
 }
 
@@ -104,7 +145,7 @@ async function go(i,push=true){
   if(push){const u=new URL(location.href);u.searchParams.set('book',BOOK);u.searchParams.set('ch',String(no));history.pushState({book:BOOK,ch:no},'',u)}
   renderToc($('#tocSearch').value||'');
   try{
-    const r=await fetch(`/wealth/books/${encodeURIComponent(BOOK)}/${no}.json?reader=v37-isolated-1`,{...noStore,signal:aborter.signal});
+    const r=await fetch(`/wealth/books/${encodeURIComponent(BOOK)}/${no}.json?reader=v37-isolated-2`,{...noStore,signal:aborter.signal});
     if(!r.ok)throw new Error(String(r.status));const full=await r.json();
     if(seq!==requestSeq)return;
     const body=Array.isArray(full?.body)?full.body:[];
@@ -114,7 +155,7 @@ async function go(i,push=true){
     $('#page').setAttribute('aria-busy','false');
     window.__KOSIF_PREPARED_READER__.chapter=no;
     window.__KOSIF_PREPARED_READER__.title=clean(c.title||c.name||'');
-    scrollTo({top:0,behavior:'instant'});
+    window.scrollTo(0,0);
   }catch(err){if(err?.name==='AbortError')return;$('#page').setAttribute('aria-busy','false');$('#chapterBody').textContent='';$('#chapterError').hidden=false;console.error('[Kosif Prepared Reader chapter]',err)}
 }
 
