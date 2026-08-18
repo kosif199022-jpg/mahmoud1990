@@ -1,0 +1,27 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const ok=(c,m)=>{if(!c)throw new Error('KOSIF_LIBRARIES_SALES_FAIL: '+m);console.log('  ✅ '+m)};
+const libraries=read('public/libraries/index.html');
+const proxy=read('src/suite-proxy.js');
+const edge=read('src/suite-edge.js');
+const sales=read('public/sales/index.html');
+const boot=read('public/sales/sales-general-bootstrap.js');
+const motion=read('public/sales/sales-motion-v1.js');
+const motionCss=read('public/sales/sales-motion-v1.css');
+const sw=read('public/sw.js');
+
+ok(edge.includes("libraries:'/libraries/'")&&edge.includes("p==='/libraries'"),'Libraries is a first-class Kosif route');
+for(const id of ['mafateeh','std2025','std2018','dipifr'])ok(libraries.includes(`/wealth/reader.html?book=${id}`),`Libraries exposes prepared reader book ${id}`);
+ok(!/<iframe[^>]+\.pdf/i.test(libraries)&&!libraries.includes('application/pdf'),'standards are not presented as ordinary embedded PDFs');
+ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])"),'reader deep links are allowlisted to prepared books');
+ok(proxy.includes("if (!LIBRARY_BOOKS.has(book)) return ''")&&proxy.includes("mk_lib_book"),'Mafateeh is unchanged unless an explicit valid book deep-link is supplied');
+ok(sales.includes('<title>تحليل المبيعات | Kosif</title>')&&!sales.includes('أغنام الوادي'),'Sales workspace is general in its visible shell');
+ok(sales.includes('dir="rtl"')&&sales.includes('sales-side'),'general Sales preserves RTL right-side navigation structure');
+ok(boot.includes("d?.meta?.source==='Aghnam v7 native integration'")&&boot.includes("d.sales.every((x,i)=>x?.id===`S-${i+1}`)"),'only the exact historical demo sample is migrated; imported user data is preserved');
+ok(!/Math\.random|crypto\.getRandomValues/.test(motion),'3D visualization never synthesizes random business data');
+ok(motion.includes("Number(r.revenue)||0")&&motion.includes('groupChannels()'),'3D channel heights come only from recorded deterministic revenue');
+ok(motion.includes("prefers-reduced-motion")&&motion.includes("pointer: coarse")&&motionCss.includes('@media(prefers-reduced-motion:reduce)'),'motion has reduced-motion and touch-device fallbacks');
+ok(motion.includes("data-mode=\"2d\"")||motion.includes("data-mode=\"3d\"")||motion.includes("panel.dataset.mode"),'3D view includes a table fallback mode');
+ok(!/fetch\(|XMLHttpRequest|\/api\//.test(motion),'motion layer has no AI or network request path');
+ok(sw.includes('/libraries/index.html')&&sw.includes('/sales/sales-motion-v1.js'),'Libraries and Sales enhancement assets are PWA cached');
+console.log('KOSIF_LIBRARIES_SALES_OK');
