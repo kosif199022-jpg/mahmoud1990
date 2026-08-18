@@ -26,7 +26,7 @@ function candidatePaths(path) {
 function readerBookBootstrap(url) {
   const book = String(url?.searchParams?.get('book') || '').trim().toLowerCase();
   if (!LIBRARY_BOOKS.has(book)) return '';
-  // reader-library.js stores the active book as JSON under mk_lib_book.
+  // The four-book library stores the active book as JSON under mk_lib_book.
   // This one-shot bootstrap only runs for an explicit ?book= deep link and
   // therefore leaves the normal Mafateeh experience completely unchanged.
   return `<script>(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
@@ -49,7 +49,8 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
     );
     const bookBoot = readerBookBootstrap(requestUrl);
-    const suite = `${bookBoot}<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css"><script src="/suite-shell.js" defer></script>`;
+    const libraryLayer = /reader-library\.js/i.test(text) ? '' : '<script src="/wealth-library-v37.js" defer></script>';
+    const suite = `${bookBoot}<link rel="stylesheet" href="/wealth-theme-v37.css"><link rel="stylesheet" href="/suite-shell.css">${libraryLayer}<script src="/suite-shell.js" defer></script>`;
     if (!text.includes('/suite-shell.css')) text = text.replace(/<\/head>/i, `${suite}</head>`);
   }
   if (/javascript/i.test(contentType) || /html/i.test(contentType)) {
