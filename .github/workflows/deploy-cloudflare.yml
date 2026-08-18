@@ -3,6 +3,8 @@ name: Deploy Kosif to Cloudflare
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'deployments/latest.json'
   workflow_dispatch:
 
 concurrency:
@@ -13,7 +15,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,3 +36,65 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
           CLOUDFLARE_ACCOUNT_ID: 9ff3d8494afab356ecbf95a2a231a6b5
         run: npx --yes wrangler@4 deploy
+
+      - name: Verify live v37 suite
+        id: live
+        shell: bash
+        env:
+          LIVE_URL: https://mahmoud-eldesouky.kosif199022.workers.dev
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 30); do
+            if curl -fsS --connect-timeout 10 --max-time 20 "$LIVE_URL/__health?deploy=$GITHUB_SHA" -o /tmp/kosif-live-health.json; then
+              if node - <<'NODE'
+          const fs=require('fs');
+          const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
+          const ok=h?.version==='v37.0.0-root' &&
+            h?.modules?.audit==='/audit/' &&
+            h?.modules?.wealth==='/wealth/reader.html' &&
+            h?.modules?.sales==='/sales/' &&
+            h?.designAuthority==='Aghnam Al-Wadi Sales Dashboard 7';
+          if(!ok){ console.error('Unexpected live health',h); process.exit(2); }
+          console.log('LIVE_KOSIF_V37_OK',h.version,h.buildId);
+          NODE
+              then ok=1; break; fi
+            fi
+            sleep 4
+          done
+          [ "$ok" = 1 ] || { echo 'Live v37 verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
+
+          for path in / /audit/ /sales/ /wealth/reader.html; do
+            code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 25 "$LIVE_URL$path?deploy=$GITHUB_SHA")
+            case "$code" in 200|204|301|302|307|308) ;; *) echo "Bad live route $path -> $code"; exit 1;; esac
+          done
+
+      - name: Record verified deployment
+        shell: bash
+        env:
+          LIVE_URL: https://mahmoud-eldesouky.kosif199022.workers.dev
+        run: |
+          set -euo pipefail
+          mkdir -p deployments
+          node - <<'NODE'
+          const fs=require('fs');
+          const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
+          const out={
+            verified:true,
+            verifiedAt:new Date().toISOString(),
+            commit:process.env.GITHUB_SHA,
+            liveUrl:process.env.LIVE_URL,
+            version:h.version,
+            buildId:h.buildId,
+            modules:h.modules,
+            designAuthority:h.designAuthority,
+            security:h.security
+          };
+          fs.writeFileSync('deployments/latest.json',JSON.stringify(out,null,2)+'\n');
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add deployments/latest.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'chore: record verified Cloudflare deployment [skip deploy]'
+          git push origin HEAD:main
