@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import vm from 'node:vm';
 const read=p=>fs.readFileSync(p,'utf8');
 const ok=(c,m)=>{if(!c)throw new Error('KOSIF_LIBRARIES_SALES_FAIL: '+m);console.log('  ✅ '+m)};
 const libraries=read('public/libraries/index.html');
@@ -22,6 +23,12 @@ ok(proxy.includes('if (bookBoot && !text.includes(bookMarker)) injections.push(b
 ok(proxy.includes('function injectHtmlFragments(text, fragments)')&&proxy.includes('return text.replace(/<\\/body>/i')&&proxy.includes('return text.replace(/<\\/html>/i')&&proxy.includes('return text + payload')&&proxy.includes('text = injectHtmlFragments(text, injections)'),'reader layers still inject when the upstream HTML has no closing head tag');
 ok(proxy.includes('/wealth-library-v37.js')&&proxy.includes('/reader-library\\.js|wealth-library-v37\\.js/i.test(text)'),'Kosif injects its library layer only when neither native nor compatibility library already exists');
 ok(proxy.includes('const injections = []')&&proxy.includes("if (!text.includes('/suite-shell.css')) injections.push")&&proxy.includes("if (!/reader-library\\.js|wealth-library-v37\\.js/i.test(text)) injections.push")&&!proxy.includes("if (!text.includes('/suite-shell.css')) text = text.replace"),'suite shell, deep-link and reader-library injections are independent');
+ok(proxy.includes('function exposeReaderRuntimeBindings(text)')&&proxy.includes("const dConst = /\\bconst\\s+D")&&proxy.includes("const chConst = /\\bconst\\s+CH")&&proxy.includes("replace(dConst, 'var D = ')")&&proxy.includes("replace(chConst, 'var CH = ')")&&proxy.includes('text = exposeReaderRuntimeBindings(text)'),'proxied reader converts original D/CH lexical constants into shared mutable global bindings');
+ok(wealthLibrary.includes('window.D=D;window.CH=CH;curId=id'),'book switch writes the prepared model into the same global D/CH bindings used by the reader');
+const runtime=vm.createContext({});
+vm.runInContext("var D={meta:{title:'Mafateeh'}};var CH=[{title:'M'}];function readerTitle(){return D.meta.title};function readerChapter(){return CH[0].title}",runtime);
+runtime.D={meta:{title:'Standards 2025'}};runtime.CH=[{title:'IFRS 1'}];
+ok(vm.runInContext('readerTitle()',runtime)==='Standards 2025'&&vm.runInContext('readerChapter()',runtime)==='IFRS 1','classic-script var bindings update existing reader functions when window/global D and CH change');
 ok(proxy.includes('function isReaderHtmlRequest(contentType = \'\', requestUrl = null)')&&proxy.includes("p === '/wealth/reader.html'")&&proxy.includes("p === '/wealth/reader'")&&proxy.includes("p === '/wealth/'"),'canonical Wealth reader routes are recognized as HTML without trusting upstream MIME');
 ok(proxy.includes('const htmlLike = isReaderHtmlRequest(type, u)')&&proxy.includes('(!htmlLike && !TEXT_TYPES.test(type))'),'known reader HTML is never bypassed by a non-HTML upstream content type');
 ok(proxy.includes("h.set('content-type', htmlLike ? 'text/html; charset=utf-8'")&&proxy.includes("h.set('cache-control', htmlLike ? 'no-cache'"),'reader responses are normalized to HTML and no-cache after rewriting');
