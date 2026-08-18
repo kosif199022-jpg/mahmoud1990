@@ -35,7 +35,9 @@ ok(preparedHtml.includes('/libraries/reader.js')&&preparedHtml.includes('/librar
 ok(preparedHtml.includes('viewport-fit=cover')&&preparedCss.includes('env(safe-area-inset-top)')&&preparedCss.includes('env(safe-area-inset-bottom)'),'isolated reader is iPhone safe-area aware');
 ok(preparedCss.includes('@media(prefers-reduced-motion:reduce)')&&preparedCss.includes('width:44px')&&preparedCss.includes('height:44px'),'isolated reader preserves reduced motion and touch targets');
 ok(preparedJs.includes("const ALLOWED=new Set(['std2025','std2018','dipifr'])")&&preparedJs.includes("const BOOK=String(qs.get('book')||'').toLowerCase()"),'URL book identity is authoritative and allowlisted');
-ok(preparedJs.includes('kosif_prepared_reader:${BOOK}:${s}')&&!preparedJs.includes('mk_lib_book'),'reading position is namespaced per prepared book with no shared Wealth book key');
+ok(preparedJs.includes('kosif_prepared_reader:${BOOK}:${s}')&&preparedJs.includes("localStorage.removeItem('mk_lib_book')")&&!preparedJs.includes("localStorage.setItem('mk_lib_book'"),'reading position is namespaced per prepared book and the obsolete shared Wealth selector is only removed');
+ok(preparedJs.includes("navigator.serviceWorker.getRegistrations")&&preparedJs.includes("scope.pathname.startsWith('/wealth/')")&&preparedJs.includes('reg.unregister()'),'prepared reader retires stale iOS/Safari Wealth service-worker registrations');
+ok(preparedJs.includes("stalePaths=new Set(['/wealth/','/wealth/reader','/wealth/reader.html','/wealth/reader-library.js'])")&&preparedJs.includes('cache.delete(req)'),'prepared reader removes only obsolete cached Wealth reader shells, not book/audio caches');
 ok(preparedJs.includes("cache:'no-store'")&&preparedJs.includes("'cache-control':'no-cache'"),'prepared book index/chapter fetches bypass stale browser HTTP cache');
 ok(preparedJs.includes('AbortController')&&preparedJs.includes('requestSeq'),'chapter switching aborts stale in-flight fetches and ignores races');
 ok(preparedJs.includes("window.__KOSIF_PREPARED_READER__={isolated:true")&&preparedJs.includes("route:location.pathname"),'browser tests can prove the isolated runtime is active');
