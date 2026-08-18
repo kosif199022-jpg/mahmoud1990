@@ -1,5 +1,4 @@
 name: Export Full Kosif JSON
-# refreshed 2026-08-18 to export current main source on merge
 
 on:
   push:
@@ -9,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   export:
@@ -24,20 +23,20 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import os, json, base64, hashlib, subprocess, mimetypes
+          import json, base64, hashlib, subprocess, mimetypes
           from pathlib import Path
 
           root = Path('.')
+          target_name = 'Kosif-Full-Application-Source.json'
           commit = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
           files = {}
-          skipped = []
           total_bytes = 0
 
           for p in sorted(root.rglob('*')):
               if not p.is_file():
                   continue
               rel = p.as_posix()
-              if rel.startswith('.git/'):
+              if rel.startswith('.git/') or rel == target_name:
                   continue
               data = p.read_bytes()
               total_bytes += len(data)
@@ -71,13 +70,13 @@ jobs:
               'file_count': len(files),
               'source_bytes': total_bytes,
               'notes': [
-                  'Complete repository snapshot excluding only .git metadata.',
+                  'Complete repository snapshot excluding .git metadata and the previously generated JSON export itself.',
                   'UTF-8 files are stored verbatim; binary files are Base64 encoded.',
                   'No GitHub Actions secrets are included because repository checkout cannot read secret values.'
               ],
               'files': files,
           }
-          target = Path('Kosif-Full-Application-Source.json')
+          target = Path(target_name)
           target.write_text(json.dumps(out, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
           print('commit=', commit)
           print('files=', len(files))
@@ -105,3 +104,12 @@ jobs:
           path: Kosif-Full-Application-Source.json
           compression-level: 9
           retention-days: 7
+
+      - name: Publish JSON on main
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Kosif-Full-Application-Source.json
+          git commit -m 'chore: publish current full source JSON [skip ci]'
+          git push origin HEAD:main
