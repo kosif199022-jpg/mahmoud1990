@@ -33,7 +33,6 @@ jobs:
       - name: 'Prepare prompt context'
         shell: 'bash'
         run: |-
-          mkdir -p .gemini
           jq -n \
             --arg title "${TITLE}" \
             --arg desc "${DESCRIPTION}" \
@@ -42,7 +41,7 @@ jobs:
             --arg num "${ISSUE_NUMBER}" \
             --arg repo "${REPOSITORY}" \
             --arg context "${ADDITIONAL_CONTEXT}" \
-            '{title: $title, description: $desc, event_name: $event, is_pull_request: $pr, issue_number: $num, repository: $repo, additional_context: $context}' > .gemini/context.json
+            '{title: $title, description: $desc, event_name: $event, is_pull_request: $pr, issue_number: $num, repository: $repo, additional_context: $context}' > gemini-context.json
         env:
           TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
           DESCRIPTION: '${{ github.event.pull_request.body || github.event.issue.body }}'
@@ -70,7 +69,7 @@ jobs:
           settings: |-
             {
               "model": {
-                "maxSessionTurns": 40
+                "maxSessionTurns": 60
               },
               "telemetry": {
                 "enabled": true,
@@ -112,21 +111,22 @@ jobs:
                   "read_many_files",
                   "glob",
                   "grep_search",
-                  "list_directory",
-                  "run_shell_command(echo)"
+                  "list_directory"
                 ]
               }
             }
           prompt: |-
             You are the read-only analysis and planning agent for this GitHub repository.
 
-            First, use read_file to read `GEMINI.md` and `.gemini/context.json`. The JSON file is the authoritative trigger context for this run and contains the Issue/PR title, full description, repository, issue number, and the user's latest additional_context. Do not claim that the request context is empty unless you actually read `.gemini/context.json` and the relevant fields are empty.
+            First, use `read_file` to read `GEMINI.md` and `gemini-context.json`. The generated JSON file is the authoritative trigger context for this run and contains the Issue/PR title, full description, repository, issue number, and the user's latest `additional_context`.
 
-            Treat `description` plus `additional_context` from `.gemini/context.json` as the user's task. Inspect the repository broadly enough to answer that task accurately. Use only read-only repository tools during this workflow. You may use the GitHub MCP read tools when useful, including reading the current Issue and its comments.
+            Never modify or include `gemini-context.json` in repository changes. This workflow is planning-only and must not create a branch, commit, Pull Request, or file modification.
 
-            Do not modify, create, replace, or delete repository files. Do not create a branch, commit, or Pull Request. Do not execute an approved implementation in this workflow.
+            Treat `description` plus `additional_context` from `gemini-context.json` as the user's task. Inspect the repository broadly enough to answer accurately using read-only local tools.
 
-            Return your substantive response as the final Gemini response so the workflow can publish it back to the Issue. Do not rely on calling `add_issue_comment` as the only way to communicate the answer.
+            If GitHub Issue/PR context is additionally useful, the registered MCP read tools use names prefixed with `mcp_github_` (for example `mcp_github_issue_read`, `mcp_github_get_file_contents`, and `mcp_github_pull_request_read`). Do not call unregistered aliases such as `github:issue_read` or plain `issue_read`.
+
+            Return your substantive response as the final Gemini response so the workflow can publish it back to the Issue. Do not rely on an MCP comment as the only output.
 
             When the request asks for a development plan or repository audit, the final response must begin exactly with:
             ## AI Assistant: Plan of Action
