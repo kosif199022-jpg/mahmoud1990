@@ -44,10 +44,10 @@ jobs:
           set -euo pipefail
           npm run check
           npx --yes esbuild src/suite-edge.js --bundle --format=esm --platform=browser --outfile=/tmp/suite-edge.mjs >/dev/null
-      - name: Install Chromium
+      - name: Install Chromium and WebKit
         run: |
           npm install --no-save --package-lock=false playwright@1.54.2 >/dev/null
-          npx playwright install chromium >/dev/null
+          npx playwright install --with-deps chromium webkit >/dev/null
       - name: Start local Worker
         shell: bash
         run: |
@@ -65,7 +65,7 @@ jobs:
         shell: bash
         run: |
           cat > /tmp/probe.cjs <<'NODE'
-          const {chromium}=require(process.cwd()+'/node_modules/playwright');
+          const {chromium,webkit}=require(process.cwd()+'/node_modules/playwright');
           const fs=require('fs');
           const ok=(x,m)=>{if(!x)throw Error(m)};
           const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
@@ -73,6 +73,46 @@ jobs:
           const expectedLegacyVersion='v'+String(pkg.version||'').split('.').slice(0,2).join('.');
           const expectedLegacyBuild=String(manifest.buildId||'');
           const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
+          const BASE='http://127.0.0.1:8788';
+
+          async function preparedExpectations(page,book){
+            const indexResponse=await page.request.get(`${BASE}/wealth/books/${book}.json`);
+            ok(indexResponse.ok(),`book index unavailable ${book}`);
+            const idx=await indexResponse.json();
+            const expectedTitle=clean(idx?.chapters?.[0]?.title);
+            ok(expectedTitle,`missing first chapter title ${book}`);
+            const chapterResponse=await page.request.get(`${BASE}/wealth/books/${book}/1.json`);
+            ok(chapterResponse.ok(),`book chapter unavailable ${book}`);
+            const chapter=await chapterResponse.json();
+            const expectedBody=clean((chapter?.body||[]).map(x=>x?.[1]).find(Boolean)).slice(0,48);
+            ok(expectedBody,`missing first chapter body ${book}`);
+            return {expectedTitle,expectedBody};
+          }
+
+          async function verifyPreparedReader(page,book,label){
+            const {expectedTitle,expectedBody}=await preparedExpectations(page,book);
+            await page.goto(`${BASE}/wealth/reader.html?book=${book}&browser-verify=${encodeURIComponent(label)}`,{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(id=>location.pathname==='/libraries/reader.html'&&window.__KOSIF_PREPARED_READER__?.isolated===true&&window.__KOSIF_PREPARED_READER__?.book===id,book,{timeout:15000});
+            await page.waitForFunction(title=>{
+              const h=document.querySelector('#chapterTitle');
+              const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
+              return h&&norm(h.textContent).includes(norm(title));
+            },expectedTitle,{timeout:15000});
+            await page.waitForFunction(snippet=>{
+              const prose=document.querySelector('#chapterBody');
+              const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
+              return prose&&norm(prose.textContent).includes(norm(snippet));
+            },expectedBody,{timeout:15000});
+            const visibleTitle=clean(await page.locator('#chapterTitle').textContent());
+            const visibleBody=clean(await page.locator('#chapterBody').textContent());
+            ok(visibleTitle.includes(expectedTitle),`${label}:${book} rendered wrong title: ${visibleTitle}`);
+            ok(visibleBody.includes(expectedBody),`${label}:${book} rendered wrong body instead of selected chapter`);
+            ok(!visibleTitle.includes('الامتنان: بداية الزيادة'),`${label}:${book} still visibly renders Mafateeh`);
+            ok(await page.evaluate(()=>typeof window.D==='undefined'&&typeof window.CH==='undefined'),`${label}:${book} leaked Mafateeh D/CH globals`);
+            ok(await page.evaluate(()=>localStorage.getItem('mk_lib_book')===null),`${label}:${book} legacy shared Wealth selector survived migration`);
+            ok(await page.evaluate(()=>window.__KOSIF_PREPARED_READER__?.wealthServiceWorkerDetached===true),`${label}:${book} did not retire Wealth service-worker registration`);
+          }
+
           (async()=>{
             const b=await chromium.launch({headless:true});
             const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
@@ -80,7 +120,7 @@ jobs:
             p.on('pageerror',e=>errors.push(String(e.stack||e)));
             p.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
             p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
-            const health=await (await p.request.get('http://127.0.0.1:8788/__health')).json();
+            const health=await (await p.request.get(`${BASE}/__health`)).json();
             const suiteMode=/^v37\./.test(String(health.version||''));
             const auditPath=suiteMode?'/audit/':'/';
             if(suiteMode){
@@ -91,7 +131,7 @@ jobs:
               ok(health.buildId===expectedLegacyBuild,`wrong health build: expected ${expectedLegacyBuild}, got ${health.buildId}`);
             }
             ok(Array.isArray(health.aiProviders)&&health.aiProviders.includes('zai'),'Z.ai missing from health providers');
-            const version=await (await p.request.get('http://127.0.0.1:8788/__version')).json();
+            const version=await (await p.request.get(`${BASE}/__version`)).json();
             if(suiteMode){
               ok(version.version===health.version,'suite version endpoint mismatch');
               ok(version.buildId===health.buildId,'suite build endpoint mismatch');
@@ -100,7 +140,7 @@ jobs:
               ok(version.version===expectedLegacyVersion,`wrong version endpoint: expected ${expectedLegacyVersion}, got ${version.version}`);
               ok(version.buildId===expectedLegacyBuild,`wrong build id: expected ${expectedLegacyBuild}, got ${version.buildId}`);
             }
-            await p.goto(`http://127.0.0.1:8788${auditPath}?verify=${encodeURIComponent(expectedLegacyVersion)}`,{waitUntil:'domcontentloaded'});
+            await p.goto(`${BASE}${auditPath}?verify=${encodeURIComponent(expectedLegacyVersion)}`,{waitUntil:'domcontentloaded'});
             await p.waitForTimeout(1800);
             ok(await p.locator('body').evaluate(e=>e.classList.contains('kosif-ready')),'not ready');
             ok(await p.locator('#kosif-boot').count()===0,'boot overlay');
@@ -116,59 +156,38 @@ jobs:
             ok(await p.locator('#adj-body tbody tr').count()>=100,'adjusted TB missing');
             ok(await p.locator('#kosif-bottom-nav button').count()===5,'nav count');
             if(suiteMode){
-              const hub=await p.request.get('http://127.0.0.1:8788/');ok(hub.status()===200,'hub unavailable');
-              const sales=await p.request.get('http://127.0.0.1:8788/sales/');ok(sales.status()===200,'sales workspace unavailable');
-              const preparedShell=await p.request.get('http://127.0.0.1:8788/libraries/reader.html?book=std2025');ok(preparedShell.status()===200,'prepared reader shell unavailable');
+              const hub=await p.request.get(`${BASE}/`);ok(hub.status()===200,'hub unavailable');
+              const sales=await p.request.get(`${BASE}/sales/`);ok(sales.status()===200,'sales workspace unavailable');
+              const preparedShell=await p.request.get(`${BASE}/libraries/reader.html?book=std2025`);ok(preparedShell.status()===200,'prepared reader shell unavailable');
 
-              // Browser-level regression for the permanent isolation boundary.
-              // Start from the legacy Wealth deep link to prove migration, then
-              // verify the browser is visibly rendering the selected book in a
-              // first-party /libraries/ reader with no Mafateeh model globals.
-              for(const book of ['std2025','std2018','dipifr']){
-                const indexResponse=await p.request.get(`http://127.0.0.1:8788/wealth/books/${book}.json`);
-                ok(indexResponse.ok(),`book index unavailable ${book}`);
-                const idx=await indexResponse.json();
-                const expectedTitle=clean(idx?.chapters?.[0]?.title);
-                ok(expectedTitle,`missing first chapter title ${book}`);
-                const chapterResponse=await p.request.get(`http://127.0.0.1:8788/wealth/books/${book}/1.json`);
-                ok(chapterResponse.ok(),`book chapter unavailable ${book}`);
-                const chapter=await chapterResponse.json();
-                const expectedBody=clean((chapter?.body||[]).map(x=>x?.[1]).find(Boolean)).slice(0,48);
-                ok(expectedBody,`missing first chapter body ${book}`);
-
-                await p.goto(`http://127.0.0.1:8788/wealth/reader.html?book=${book}&browser-verify=1`,{waitUntil:'domcontentloaded'});
-                await p.waitForFunction(id=>location.pathname==='/libraries/reader.html'&&window.__KOSIF_PREPARED_READER__?.isolated===true&&window.__KOSIF_PREPARED_READER__?.book===id,book,{timeout:15000});
-                await p.waitForFunction(title=>{
-                  const h=document.querySelector('#chapterTitle');
-                  const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
-                  return h&&norm(h.textContent).includes(norm(title));
-                },expectedTitle,{timeout:15000});
-                await p.waitForFunction(snippet=>{
-                  const prose=document.querySelector('#chapterBody');
-                  const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
-                  return prose&&norm(prose.textContent).includes(norm(snippet));
-                },expectedBody,{timeout:15000});
-                const visibleTitle=clean(await p.locator('#chapterTitle').textContent());
-                const visibleBody=clean(await p.locator('#chapterBody').textContent());
-                ok(visibleTitle.includes(expectedTitle),`${book} rendered wrong title: ${visibleTitle}`);
-                ok(visibleBody.includes(expectedBody),`${book} rendered wrong body instead of selected chapter`);
-                ok(!visibleTitle.includes('الامتنان: بداية الزيادة'),`${book} still visibly renders Mafateeh`);
-                ok(await p.evaluate(()=>typeof window.D==='undefined'&&typeof window.CH==='undefined'),'prepared reader leaked Mafateeh D/CH globals');
-                ok(await p.evaluate(()=>localStorage.getItem('mk_lib_book')===null),'legacy shared Wealth selector survived migration');
-                ok(await p.evaluate(()=>window.__KOSIF_PREPARED_READER__?.wealthServiceWorkerDetached===true),'prepared reader did not retire Wealth service-worker registration');
-              }
+              for(const book of ['std2025','std2018','dipifr'])await verifyPreparedReader(p,book,'chromium');
 
               // Mafateeh remains its original document/runtime and can re-register
               // its own /wealth/ offline worker when the user explicitly opens it.
-              await p.goto('http://127.0.0.1:8788/wealth/reader.html?book=mafateeh&browser-verify=1',{waitUntil:'domcontentloaded'});
+              await p.goto(`${BASE}/wealth/reader.html?book=mafateeh&browser-verify=chromium`,{waitUntil:'domcontentloaded'});
               await p.waitForFunction(()=>window.__KOSIF_WEALTH_LIBRARY_ROUTER__===true&&document.title.includes('مفاتيح الثروة'),null,{timeout:15000});
               ok((await p.title()).includes('مفاتيح الثروة'),'return to original Mafateeh document failed');
               ok(await p.evaluate(()=>window.__KOSIF_WEALTH_LIBRARY_ROUTER__===true),'Mafateeh library router missing');
-              console.log('KOSIF_PREPARED_READER_ISOLATION_BROWSER_OK');
+              console.log('KOSIF_PREPARED_READER_CHROMIUM_OK');
             }
             ok(bad.length===0,'HTTP '+bad.join(','));
             ok(!errors.some(x=>/ReferenceError|TypeError|SyntaxError|Kosif boot error/i.test(x)),'runtime '+errors.join('\n'));
             await b.close();
+
+            if(suiteMode){
+              // Playwright WebKit is not a physical iPhone, but it exercises the
+              // WebKit engine path that previously diverged from Chromium/Safari.
+              const wb=await webkit.launch({headless:true});
+              const wp=await wb.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+              const werrors=[];
+              wp.on('pageerror',e=>werrors.push(String(e.stack||e)));
+              wp.on('console',m=>{if(m.type()==='error')werrors.push(m.text())});
+              for(const book of ['std2025','std2018','dipifr'])await verifyPreparedReader(wp,book,'webkit');
+              ok(!werrors.some(x=>/ReferenceError|TypeError|SyntaxError/i.test(x)),'WebKit runtime '+werrors.join('\n'));
+              await wb.close();
+              console.log('KOSIF_PREPARED_READER_WEBKIT_OK');
+            }
+
             console.log('KOSIF_PRODUCTION_VERIFY_OK',suiteMode?health.version:expectedLegacyVersion,suiteMode?health.buildId:expectedLegacyBuild);
           })().catch(e=>{console.error(e.stack||e);process.exit(1)});
           NODE
