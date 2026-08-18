@@ -42,6 +42,15 @@ function readerBookBootstrap(url) {
   return `<script data-kosif-book-bootstrap="${book}">(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));}catch(e){}})();</script>`;
 }
 
+function injectHtmlFragments(text, fragments) {
+  if (!fragments.length) return text;
+  const payload = fragments.join('');
+  if (/<\/head>/i.test(text)) return text.replace(/<\/head>/i, `${payload}</head>`);
+  if (/<\/body>/i.test(text)) return text.replace(/<\/body>/i, `${payload}</body>`);
+  if (/<\/html>/i.test(text)) return text.replace(/<\/html>/i, `${payload}</html>`);
+  return text + payload;
+}
+
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
   let text = String(input || '');
   const htmlLike = isReaderHtmlRequest(contentType, requestUrl);
@@ -72,7 +81,7 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     if (!text.includes('/suite-shell.css')) injections.push('<link rel="stylesheet" href="/suite-shell.css">');
     if (!/reader-library\.js|wealth-library-v37\.js/i.test(text)) injections.push('<script src="/wealth-library-v37.js" defer></script>');
     if (!text.includes('/suite-shell.js')) injections.push('<script src="/suite-shell.js" defer></script>');
-    if (injections.length) text = text.replace(/<\/head>/i, `${injections.join('')}</head>`);
+    text = injectHtmlFragments(text, injections);
   }
   if (/javascript/i.test(contentType) || htmlLike) {
     text = text.replace(/(["'`])\/wealth\/wealth\//g, '$1/wealth/');
