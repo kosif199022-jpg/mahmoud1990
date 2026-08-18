@@ -23,6 +23,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Build production assets
+        run: npm run build
+
       - name: Verify repository contract
         run: npm run check
 

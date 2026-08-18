@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const ok=(c,m)=>{if(!c)throw new Error('V37_ROOT_REBUILD_FAIL: '+m);console.log('  ✅ '+m)};
+const wr=read('wrangler.toml'),edge=read('src/suite-edge.js'),proxy=read('src/suite-proxy.js'),hub=read('public/hub.html'),sw=read('public/sw.js'),out=read('public/v36-outputs.js'),bp=JSON.parse(read('config/kosif.blueprint.json'));
+ok(/main\s*=\s*"src\/suite-edge\.js"/.test(wr),'unified suite edge is Cloudflare entrypoint');
+ok(edge.includes("modules:{audit:'/audit/',wealth:'/wealth/reader.html',sales:'/sales/'}"),'three suite modules have canonical routes');
+ok(hub.includes('/audit/')&&hub.includes('/wealth/reader.html')&&hub.includes('/sales/'),'hub exposes Audit, Wealth and Sales');
+ok(proxy.includes('env?.MAFATEEH')&&proxy.includes('/wealth/'),'Wealth Keys uses existing service binding under a scoped route');
+ok(edge.includes('OWNER_AUTH_REQUIRED')&&edge.includes('CUSTOM_SOURCE_BLOCKED'),'client data and custom source refresh are owner-gated');
+ok(edge.includes("x-kosif-intent")&&read('public/v37-privacy-guard.js').includes('navigator.userActivation'),'silent company publication is blocked at client and edge');
+ok(!sw.includes('ignoreSearch:true'),'root service worker no longer ignores query identity');
+ok(sw.includes("u.pathname.startsWith('/library/')")&&sw.includes("u.pathname.startsWith('/wealth/')")&&sw.includes("u.pathname.startsWith('/sales/')"),'protected/embedded modules bypass root cache');
+ok(out.includes('csvCell')&&out.includes('حساب غير معروف أو اسم غير فريد')&&out.includes('قيد غير متوازن'),'adjusted TB rejects unsafe entries and CSV formulas');
+ok(read('public/v37-audit-safety.js').includes('m?.performance'),'journal testing uses performance materiality');
+ok(bp.blueprint.authoring_principle_ar.includes('لا رقم واحد يخرج من نموذج لغوي'),'deterministic-first accounting principle is codified');
+ok(fs.existsSync('src/engine/kosif.engine.mjs')&&fs.existsSync('tests/kosif.engine.test.mjs'),'behavioral accounting engine and tests are present');
+console.log('V37_ROOT_REBUILD_OK');

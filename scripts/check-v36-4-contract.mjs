@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
-const edge=read('src/security-edge.js'),wrangler=read('wrangler.toml'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),reader=read('public/standards/reader-pro-v36.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),gate=read('public/v36-ai-gate.js'),zai=read('public/v36-zai.js'),reviewer=read('public/v36-reviewer-media.js'),voice=read('public/v36-voice-guide.js'),pkg=read('package.json'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
+const edge=read('src/security-edge.js'),suite=read('src/suite-edge.js'),wrangler=read('wrangler.toml'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),reader=read('public/standards/reader-pro-v36.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),gate=read('public/v36-ai-gate.js'),zai=read('public/v36-zai.js'),reviewer=read('public/v36-reviewer-media.js'),voice=read('public/v36-voice-guide.js'),pkg=read('package.json'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
 const failures=[];const ok=(name,v)=>{console.log((v?'✅':'❌')+' '+name);if(!v)failures.push(name)};
-ok('production enters fail-closed security edge',/main\s*=\s*"src\/security-edge\.js"/.test(wrangler));
+ok('production enters v37 suite edge then fail-closed security edge',/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler)&&/import securityEdge from '.\/security-edge\.js'/.test(suite)&&/securityEdge\.fetch/.test(suite));
 ok('v36.4 version endpoint is owned by security edge',/version:'v36\.4'/.test(edge)&&/2026\.08\.18-v36\.4-mobile-release-integrity/.test(edge)&&/u\.pathname==='\/__version'/.test(edge));
 ok('v36.4 health endpoint shares release identity',/u\.pathname==='\/__health'/.test(edge)&&/BUILD_INFO\.version/.test(edge)&&/BUILD_INFO\.buildId/.test(edge));
 ok('security edge exposes release headers on JSON diagnostics',/x-kosif-release/.test(edge)&&/native-v36-4-mobile-release-integrity/.test(edge)&&/x-kosif-build-id/.test(edge));
@@ -27,12 +27,12 @@ ok('runtime wires historical voice guide instead of leaving it as dead code',/fu
 ok('runtime wires history restoration independently of view timing',/function loadHistoryRestore\(\)/.test(zai)&&/\/v36-history-restore\.js\?v=36\.3-history1/.test(zai)&&/loadHistoryRestore\(\)/.test(zai));
 ok('historical Council loader identifier remains stable',/\/v36-council-v2\.js\?v=36\.3-council2/.test(zai));
 ok('shared guarded module loader prevents duplicate injections',/function loadModule\(globalName,selector,src,datasetKey\)/.test(zai)&&/window\[globalName\]\|\|document\.querySelector\(selector\)/.test(zai));
-ok('app SW cache generation is v36.4',/const C='kosif-native-v36-4-app'/.test(sw));
+ok('root app SW cache generation is v37 while preserving v36.4 migration',/const C='kosif-native-v37-root-app'/.test(sw)&&/kosif-native-v/.test(sw));
 ok('standards SW cache generation is v36.4',/const C='kosif-native-v36-4-standards'/.test(stdSw));
 ok('reviewer media voice guide and history restoration are available offline',/\/v36-reviewer-media\.js/.test(sw)&&/\/v36-voice-guide\.js/.test(sw)&&/\/v36-history-restore\.js/.test(sw));
 ok('app SW excludes APIs and release diagnostics',/pathname\.startsWith\('\/api\/'\)/.test(sw)&&/u\.pathname==='\/__version'/.test(sw)&&/u\.pathname==='\/__health'/.test(sw));
 ok('old Kosif and Tamhees caches remain purgeable',/tamhees/i.test(sw)&&/kosif-native-v/.test(sw)&&/tamhees/i.test(stdSw));
-ok('package declares v36.4 and this contract',/"version"\s*:\s*"36\.4\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
+ok('package declares v36.4 compatibility and this contract',/"version"\s*:\s*"36\.4\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
 ok('all restored regression gates remain in full CI',/npm run reviewer-media/.test(pkg)&&/npm run history-restoration/.test(pkg)&&/npm run feature-reachability/.test(pkg)&&/npm run accounting/.test(pkg));
 ok('master anti-regressions still require iPhone modal and autoscroll safety',/iPhone/.test(req)&&/auto-scroll continuing while a modal\/body lock is active/.test(req)&&/body-scroll\/modal-scroll conflicts/.test(req));
 console.log(`KOSIF_V36_4_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}
