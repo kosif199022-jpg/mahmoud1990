@@ -23,7 +23,7 @@ try{
  * v38 release-integrity bridge.
  * v36-continuity is intentionally retained as a legacy UI/runtime layer, but its
  * historical EXPECTED=v36.4 check must not flag a healthy v38 suite as a mixed
- * deployment.  We never hide a real mismatch: the old banner is removed only
+ * deployment. We never hide a real mismatch: the old banner is removed only
  * after the authoritative no-store /__version endpoint proves that the complete
  * v38 root identity is live.
  */
@@ -31,9 +31,19 @@ const CURRENT={version:'v38.0.0-root',buildId:'2026.08.19-v38-trusted-audit-os'}
 let identity=null,checking=null;
 const falseWarning='يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.';
 
-function current(info){
-  return !!(info&&info.productName==='Kosif'&&info.version===CURRENT.version&&info.buildId===CURRENT.buildId);
+function installMobileSafeArea(){
+  if(document.getElementById('kosif-v38-ios-bottom-safe'))return;
+  const s=document.createElement('style');
+  s.id='kosif-v38-ios-bottom-safe';
+  s.textContent=`@media(max-width:720px){
+    main{padding-bottom:calc(158px + env(safe-area-inset-bottom,0px))!important;scroll-padding-bottom:calc(158px + env(safe-area-inset-bottom,0px))!important}
+    #kosif-bottom-nav{bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}
+    .toast-wrap,#kosif-v38-toasts{bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}
+  }
+  html[data-kosif-keyboard="open"] main{padding-bottom:24px!important}`;
+  document.head.appendChild(s);
 }
+function current(info){return !!(info&&info.productName==='Kosif'&&info.version===CURRENT.version&&info.buildId===CURRENT.buildId)}
 function scrub(){
   if(!current(identity))return;
   const b=document.getElementById('kosif-release-banner');
@@ -65,6 +75,7 @@ async function verify(){
   return checking;
 }
 function watch(){
+  installMobileSafeArea();
   const root=document.documentElement;
   new MutationObserver(()=>scrub()).observe(root,{childList:true,subtree:true,characterData:true});
   verify();
