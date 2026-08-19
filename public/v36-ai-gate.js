@@ -24,6 +24,6 @@ function guards(){document.addEventListener('pointerdown',e=>{const el=e.target.
 function watchScopedRoots(){['#view-ai','#view-council','#kosif-ai-sheet','#kosif-more'].forEach(sel=>{const root=$(sel);if(!root||root.dataset.kosifAiGateWatch==='1')return;root.dataset.kosifAiGateWatch='1';new MutationObserver(()=>lockFields()).observe(root,{childList:true,subtree:true})})}
 function message(text,type='info'){try{toast?.(text,type==='error'?'danger':type)}catch(_){const e=$('#kosif-ai-gate-error');if(e)e.textContent=text}}
 function init(){shell();guards();status(true);watchScopedRoots();let n=0,t=setInterval(()=>{addButton();watchScopedRoots();lockFields();if(++n>100)clearInterval(t)},100)}
-window.KosifAIGate={version:'36.4.0',status,requireUnlock,open:openGate,logout,isUnlocked:()=>unlocked,verified:()=>({...verified}),refresh:()=>status(true),message};
+window.KosifAIGate={version:'38.0.0',status,requireUnlock,open:openGate,logout,isUnlocked:()=>unlocked,verified:()=>({...verified}),refresh:()=>status(true),message};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

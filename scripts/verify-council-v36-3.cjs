@@ -6,7 +6,7 @@ const fail=(m,x)=>{throw new Error(m+(x!==undefined?' '+JSON.stringify(x):''))};
   const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   const health=await (await page.request.get(base+'/__health?cb='+Date.now())).json();
-  const auditPath=/^v37\./.test(String(health.version||''))?'/audit/':'/';
+  const auditPath=/^v\d+\.\d+\.\d+-root$/.test(String(health.version||''))?'/audit/':'/';
   await page.goto(base+auditPath+'?council-v2='+Date.now(),{waitUntil:'networkidle'});
   await page.waitForSelector('body.kosif-ready',{timeout:15000});
   await page.waitForFunction(()=>window.KosifCouncilV2?.version==='2.0.0',{timeout:15000});
