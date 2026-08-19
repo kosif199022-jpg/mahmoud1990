@@ -34,6 +34,14 @@ function companyIdOf(u, b) {
   const id = String(u.searchParams.get('company') || b?.company || '').trim();
   return /^[A-Za-z0-9._:-]{1,80}$/.test(id) ? id : '';
 }
+function apiMoney(value, exp = 2) {
+  return core.parseMoney(value == null || value === '' ? '0' : value, { exp });
+}
+function apiRate(value, fallback) {
+  if (value == null || value === '') return { ok: true, value: fallback };
+  const n = Number(core.normalizeDigits(value));
+  return Number.isFinite(n) && n >= 0 && n <= 100 ? { ok: true, value: n } : { ok: false, error: 'RATE_INVALID' };
+}
 
 /* ---------- مخزن رسم الأدلة (KV لكل شركة) ---------- */
 const GRAPH_KEY = id => `kosif:v38:co:${id}:graph`;
@@ -164,12 +172,25 @@ export async function handleV38(req, env, u, owner) {
         return json({ ok: true, flags: r.flags, maxLine: r.maxLine.minor.toString(), total: r.total.minor.toString(), exp: r.maxLine.exp });
       }
       case 'vat': {
-        const r = core.computeVat({ taxableSuppliesMinor: BigInt(Math.round(Number(b?.taxableSupplies || 0) * 100)), zeroRatedMinor: BigInt(Math.round(Number(b?.zeroRated || 0) * 100)), exemptMinor: BigInt(Math.round(Number(b?.exempt || 0) * 100)), inputVatMinor: BigInt(Math.round(Number(b?.inputVat || 0) * 100)), exp: 2, ratePct: Number(b?.ratePct) || 15 });
-        return json({ ok: true, ratePct: r.ratePct, outputVat: r.standardRated.vat.minor.toString(), inputVat: r.inputVat.minor.toString(), netPayable: r.netPayable.minor.toString(), direction: r.direction, taxableBase: r.standardRated.base.minor.toString(), zeroRated: r.zeroRated.minor.toString(), exempt: r.exempt.minor.toString(), method: r.method });
+        const taxable = apiMoney(b?.taxableSupplies, 2);
+        const zeroRated = apiMoney(b?.zeroRated, 2);
+        const exempt = apiMoney(b?.exempt, 2);
+        const inputVat = apiMoney(b?.inputVat, 2);
+        const amounts = [['taxableSupplies', taxable], ['zeroRated', zeroRated], ['exempt', exempt], ['inputVat', inputVat]];
+        const invalid = amounts.find(([, parsed]) => !parsed.ok);
+        if (invalid) return err('VAT_AMOUNT_INVALID', `${invalid[0]}: ${invalid[1].error}`);
+        const rate = apiRate(b?.ratePct, 15);
+        if (!rate.ok) return err('VAT_RATE_INVALID', 'VAT rate must be between 0 and 100.');
+        const r = core.computeVat({ taxableSuppliesMinor: taxable.minor, zeroRatedMinor: zeroRated.minor, exemptMinor: exempt.minor, inputVatMinor: inputVat.minor, exp: 2, ratePct: rate.value });
+        return json({ ok: true, ratePct: r.ratePct, outputVat: r.standardRated.vat.minor.toString(), inputVat: r.inputVat.minor.toString(), netPayable: r.netPayable.minor.toString(), direction: r.direction, taxableBase: r.standardRated.base.minor.toString(), zeroRated: r.zeroRated.minor.toString(), exempt: r.exempt.minor.toString(), exp: 2, inputPrecision: 'minor-unit-bigint', method: r.method });
       }
       case 'zakat': {
-        const r = core.estimateZakat({ basisMinor: BigInt(Math.round(Number(b?.basis || 0) * 100)), exp: 2, ratePct: Number(b?.ratePct) || 2.5 });
-        return json({ ok: true, basis: r.basis.minor.toString(), estimatedZakat: r.estimatedZakat.minor.toString(), ratePct: r.ratePct, calendar: r.calendar, disclaimer: r.disclaimer });
+        const basis = apiMoney(b?.basis, 2);
+        if (!basis.ok) return err('ZAKAT_BASIS_INVALID', `basis: ${basis.error}`);
+        const rate = apiRate(b?.ratePct, 2.5);
+        if (!rate.ok) return err('ZAKAT_RATE_INVALID', 'Zakat rate must be between 0 and 100.');
+        const r = core.estimateZakat({ basisMinor: basis.minor, exp: 2, ratePct: rate.value });
+        return json({ ok: true, basis: r.basis.minor.toString(), estimatedZakat: r.estimatedZakat.minor.toString(), ratePct: r.ratePct, calendar: r.calendar, exp: 2, inputPrecision: 'minor-unit-bigint', disclaimer: r.disclaimer });
       }
       default: return err('V38_ACCOUNTING_ROUTE_NOT_FOUND', null, 404);
     }
