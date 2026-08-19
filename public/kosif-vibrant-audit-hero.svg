@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-label="KOSIF audit analytics illustration">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff2bb5"/><stop offset=".46" stop-color="#8a2cff"/><stop offset="1" stop-color="#00d7ff"/></linearGradient>
+  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#37f3ff"/><stop offset="1" stop-color="#5f76ff"/></linearGradient>
+  <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff64c8"/><stop offset="1" stop-color="#7a3cff"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd36a"/><stop offset="1" stop-color="#ff8b36"/></linearGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#1a075e" flood-opacity=".45"/></filter>
+</defs>
+<rect width="720" height="420" rx="42" fill="url(#bg)" opacity=".12"/>
+<g opacity=".22"><path d="M0 330 C170 245 240 385 400 305 C525 242 585 286 720 198" fill="none" stroke="#40efff" stroke-width="3"/><path d="M0 360 C155 295 268 380 418 338 C560 298 622 210 720 235" fill="none" stroke="#ff55c8" stroke-width="3"/></g>
+<g filter="url(#shadow)" transform="translate(70 42)">
+  <rect x="88" y="22" width="285" height="310" rx="30" fill="#f9fbff"/>
+  <rect x="130" y="0" width="205" height="52" rx="20" fill="#c7d2ff"/>
+  <rect x="153" y="15" width="158" height="14" rx="7" fill="#7b65ff" opacity=".55"/>
+  <circle cx="172" cy="124" r="58" fill="none" stroke="url(#pink)" stroke-width="25" stroke-dasharray="210 165" transform="rotate(-38 172 124)"/>
+  <rect x="255" y="77" width="30" height="110" rx="12" fill="url(#cyan)"/>
+  <rect x="297" y="104" width="30" height="83" rx="12" fill="url(#pink)"/>
+  <rect x="339" y="55" width="30" height="132" rx="12" fill="url(#gold)"/>
+  <rect x="125" y="221" width="207" height="13" rx="7" fill="#dbe3ff"/>
+  <rect x="125" y="250" width="168" height="13" rx="7" fill="#e7ebff"/>
+  <rect x="125" y="279" width="132" height="13" rx="7" fill="#eff2ff"/>
+  <g transform="translate(327 185)">
+    <circle cx="85" cy="85" r="69" fill="#0f123a" stroke="#71f0ff" stroke-width="13"/>
+    <circle cx="85" cy="85" r="48" fill="#15205f"/>
+    <path d="M58 86l18 18 37-47" fill="none" stroke="#49f4dd" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="133" y="132" width="112" height="33" rx="17" fill="#17215d" transform="rotate(43 133 132)"/>
+  </g>
+  <g transform="translate(348 244)">
+    <rect x="0" y="0" width="155" height="118" rx="26" fill="#28156f" stroke="#875dff" stroke-width="4"/>
+    <rect x="26" y="22" width="103" height="24" rx="8" fill="#8b69ff" opacity=".65"/>
+    <g fill="#66e7ff"><rect x="25" y="63" width="24" height="18" rx="6"/><rect x="57" y="63" width="24" height="18" rx="6"/><rect x="89" y="63" width="24" height="18" rx="6"/><rect x="25" y="88" width="24" height="18" rx="6"/><rect x="57" y="88" width="24" height="18" rx="6"/><rect x="89" y="88" width="24" height="18" rx="6"/></g>
+  </g>
+  <g transform="translate(5 270)"><ellipse cx="70" cy="38" rx="70" ry="23" fill="#6030c6"/><rect x="0" y="20" width="140" height="28" rx="14" fill="#7d39ef"/><ellipse cx="70" cy="20" rx="70" ry="23" fill="#9b52ff"/><text x="70" y="29" font-family="Arial" font-size="24" font-weight="700" text-anchor="middle" fill="#ffe0ff">$</text></g>
+  <g transform="translate(42 309)"><ellipse cx="70" cy="38" rx="70" ry="23" fill="#2b67cc"/><rect x="0" y="20" width="140" height="28" rx="14" fill="#3576ed"/><ellipse cx="70" cy="20" rx="70" ry="23" fill="#46a6ff"/><text x="70" y="29" font-family="Arial" font-size="24" font-weight="700" text-anchor="middle" fill="#fff">$</text></g>
+</g>
+<g opacity=".9"><circle cx="616" cy="82" r="7" fill="#39f5ff"/><circle cx="661" cy="120" r="5" fill="#ff5cc8"/><circle cx="606" cy="338" r="6" fill="#ffd36a"/><path d="M590 64l8 18 19 8-19 8-8 19-8-19-18-8 18-8z" fill="#fff" opacity=".85"/><path d="M632 292l7 15 15 7-15 7-7 15-7-15-15-7 15-7z" fill="#50f0ff" opacity=".8"/></g>
+</svg>
