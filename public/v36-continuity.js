@@ -3,14 +3,24 @@
 const EXPECTED='v36.4',BUILD='2026.08.18-v36.4-mobile-release-integrity';
 const PHASE_B_CSS='/v36-mobile-phase-b.css?v=36.4-phase-b-1';
 const ANALYTICS_3D_SRC='/v36-analytics-3d.js?v=36.4-phase-c-1';
+const CANVA_PREMIUM_CSS='/kosif-canva-premium-v2.css?v=2026.08.20-canva-premium-1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const DIALOG_SELECTORS=['#kosif-more','#kosif-company-sheet','#kosif-ai-sheet','#kosif-command-sheet','#kosif-font-sheet','#kosif-ai-gate'];
 const PROGRESS_STALE_MS=20000;
-let versionInfo=null,lastFocus=null,lockY=0,bodySnapshot=null,rootScrollBehavior='',progressTimer=0,progressObserver=null,progressFingerprint='',viewportRaf=0,analytics3DPromise=null;
+let versionInfo=null,lastFocus=null,lockY=0,bodySnapshot=null,rootScrollBehavior='',progressTimer=0,progressObserver=null,progressFingerprint='',viewportRaf=0,analytics3DPromise=null,premiumObserver=null;
 function announce(t){const x=$('#kosif-live-region');if(x)x.textContent=String(t||'')}
 function isOpenDialog(el){return !!(el&&el.classList.contains('show'))}
 function openDialogs(){return DIALOG_SELECTORS.map($).filter(isOpenDialog)}
 function loadPhaseBStyles(){if($('#kosif-mobile-phase-b-css'))return;const l=document.createElement('link');l.id='kosif-mobile-phase-b-css';l.rel='stylesheet';l.href=PHASE_B_CSS;document.head.appendChild(l)}
+function loadCanvaPremiumStyles(){
+ if($('#kosif-canva-premium-runtime'))return;
+ const st=document.createElement('style');st.id='kosif-canva-premium-runtime';st.textContent=`@import url("${CANVA_PREMIUM_CSS}");`;
+ (document.body||document.documentElement).appendChild(st);
+ document.documentElement.dataset.kosifVisual='canva-premium-v2';
+ const metas=[...document.querySelectorAll('meta[name="theme-color"]')];
+ if(metas.length)metas.forEach(m=>m.setAttribute('content','#06101f'));else{const m=document.createElement('meta');m.name='theme-color';m.content='#06101f';document.head.appendChild(m)}
+ try{if(!localStorage.getItem('kosif_theme'))document.documentElement.dataset.theme='dark'}catch(_){document.documentElement.dataset.theme='dark'}
+}
 function loadAnalytics3D(){if(window.KosifAnalytics3D){window.KosifAnalytics3D.mount?.();return Promise.resolve(window.KosifAnalytics3D)}if(analytics3DPromise)return analytics3DPromise;analytics3DPromise=new Promise((resolve,reject)=>{const old=$('#kosif-analytics-3d-script');if(old){old.addEventListener('load',()=>resolve(window.KosifAnalytics3D),{once:true});old.addEventListener('error',reject,{once:true});return}const s=document.createElement('script');s.id='kosif-analytics-3d-script';s.src=ANALYTICS_3D_SRC;s.defer=true;s.dataset.kosifModule='analytics3d';s.onload=()=>{window.KosifAnalytics3D?.mount?.();resolve(window.KosifAnalytics3D)};s.onerror=e=>{analytics3DPromise=null;reject(e)};document.head.appendChild(s)});return analytics3DPromise}
 function analytics3DGuard(){const trigger=()=>{const run=()=>loadAnalytics3D().catch(()=>{});if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:900});else setTimeout(run,30)};window.addEventListener('kosif-view-change',e=>{if(e.detail?.view==='analytics')trigger()});const initial=()=>{if($('#view-analytics.show'))trigger()};if(document.readyState==='complete')setTimeout(initial,0);else window.addEventListener('load',initial,{once:true})}
 function lockBody(){
@@ -69,12 +79,44 @@ function syncAI(){
 function aiGuards(){window.addEventListener('kosif-ai-gate-change',()=>setTimeout(syncAI,0));document.addEventListener('input',e=>{if(e.target.matches?.('#kai-provider,#kai-model,#kai-key,#c-model-gemini,#c-model-openai,#c-model-anthropic,#c-model-zai'))setTimeout(syncAI,0)},true);document.addEventListener('change',e=>{if(e.target.matches?.('#kai-provider,#kai-model'))setTimeout(syncAI,0)},true);setTimeout(syncAI,250)}
 function companyName(){const x=$('#pill-entity');const t=(x?.textContent||'').replace(/\s+/g,' ').trim();if(t&&!/اختر|غير محدد|لم تُحد/i.test(t)){localStorage.setItem('kosif_active_company_label_v36_4',t);return t}return localStorage.getItem('kosif_active_company_label_v36_4')||localStorage.getItem('kosif_active_company_label_v36_3')||''}
 function syncCompany(){const n=companyName();document.documentElement.dataset.kosifCompanyState=n||'none';$$('[data-kosif-active-company]').forEach(x=>{if(x!==document.documentElement)x.textContent=n||'لم تُحدد شركة'});return n}
-function companyGuard(){const pill=$('#pill-entity');if(pill)new MutationObserver(()=>syncCompany()).observe(pill,{childList:true,subtree:true,characterData:true});syncCompany();if(typeof window.go==='function'&&!window.go.__k364){const old=window.go;const wrapped=function(...a){const r=old.apply(this,a);queueMicrotask(()=>{syncCompany();syncAI();window.dispatchEvent(new CustomEvent('kosif-view-change',{detail:{view:a[0]}}))});return r};wrapped.__k364=true;window.go=wrapped}}
+function companyGuard(){const pill=$('#pill-entity');if(pill)new MutationObserver(()=>syncCompany()).observe(pill,{childList:true,subtree:true,characterData:true});syncCompany();if(typeof window.go==='function'&&!window.go.__k364){const old=window.go;const wrapped=function(...a){const r=old.apply(this,a);queueMicrotask(()=>{syncCompany();syncAI();premiumMount();window.dispatchEvent(new CustomEvent('kosif-view-change',{detail:{view:a[0]}}))});return r};wrapped.__k364=true;window.go=wrapped}}
 function buildCard(){const host=$('#view-about');if(!host||$('#kosif-build-card'))return;host.insertAdjacentHTML('afterbegin',`<div class="card" id="kosif-build-card"><div class="card-h"><h2>هوية إصدار Kosif</h2><span class="spacer"></span><span class="badge info" id="kosif-build-version">${EXPECTED}</span></div><div class="grid g3"><div class="kpi"><div class="l">Build ID</div><div class="v" style="font-size:1rem"><code data-k-build>جاري التحقق…</code></div></div><div class="kpi"><div class="l">الشركة النشطة</div><div class="v" style="font-size:1rem" data-kosif-active-company>—</div></div><div class="kpi"><div class="l">حالة الإصدار</div><div class="v" style="font-size:1rem" data-k-release-state>جارٍ التحقق</div></div></div><div class="note info" style="margin-top:12px"><span>i</span><span>هذه البطاقة تقارن واجهة المتصفح مع Worker والكاش. إذا ظهر اختلاف، يعرض Kosif تنبيه تحديث بدل تشغيل خليط إصدارات بصمت.</span></div></div>`);syncCompany();renderVersion()}
 function renderVersion(){if(!versionInfo)return;const b=$('[data-k-build]'),s=$('[data-k-release-state]'),v=$('#kosif-build-version');if(b)b.textContent=versionInfo.buildId||versionInfo.version||'—';if(v)v.textContent=versionInfo.version||EXPECTED;if(s)s.textContent=versionInfo.version===EXPECTED&&versionInfo.buildId===BUILD?'متطابق ✓':'غير متطابق'}
 function banner(msg){let x=$('#kosif-release-banner');if(!x){x=document.createElement('button');x.id='kosif-release-banner';x.type='button';x.title='اضغط لإعادة تحميل النسخة الحالية';x.onclick=()=>location.reload();document.body.appendChild(x)}x.textContent=msg}
 async function checkVersion(){try{const r=await fetch('/__version?cb='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);versionInfo=await r.json();window.KosifBuildInfo=versionInfo;document.documentElement.dataset.kosifBuild=versionInfo.version||'unknown';renderVersion();if(versionInfo.version!==EXPECTED||versionInfo.buildId!==BUILD)banner('يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.');else $('#kosif-release-banner')?.remove();return versionInfo}catch(e){banner('تعذر التحقق من هوية الإصدار. اضغط لإعادة المحاولة.');return null}}
 function serviceWorkerContinuity(){if(!('serviceWorker'in navigator))return;if(['localhost','127.0.0.1','::1'].includes(location.hostname))return;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(sessionStorage.getItem('kosif_sw_reload_v36_4'))return;sessionStorage.setItem('kosif_sw_reload_v36_4','1');location.reload()});navigator.serviceWorker.getRegistration().then(r=>r?.update?.()).catch(()=>{})}
+function premiumYear(){
+ const period=String($('#s-period')?.value||'');const m=period.match(/20\d{2}/);return m?.[0]||'2025';
+}
+function premiumTopbar(){
+ const host=$('.top-status');if(!host)return;
+ let year=$('#kosif-premium-year');if(!year){year=document.createElement('span');year.id='kosif-premium-year';year.className='pill';year.innerHTML='<span aria-hidden="true">▣</span><span data-kc-year></span>';host.appendChild(year)}
+ const y=year.querySelector('[data-kc-year]');if(y)y.textContent='السنة المالية '+premiumYear();
+ const brand=$('.brand-name');if(brand&&brand.textContent.trim()!=='KOSIF')brand.textContent='KOSIF';
+}
+function premiumWelcome(){
+ const host=$('#view-overview'),hero=host?.querySelector('.card.hero');if(!host||!hero||$('#kosif-premium-welcome'))return;
+ hero.insertAdjacentHTML('beforebegin','<section id="kosif-premium-welcome" aria-label="مرحبًا بك في Kosif"><div class="kcw-mark" aria-hidden="true"></div><div class="kcw-copy"><h2>مرحبًا بك <span>✦</span></h2><p>بدأت رحلة المراجعة. كل شيء جاهز لتحقيق الامتثال بثقة وكفاءة، مع إبقاء القرار المهني النهائي تحت اعتماد المراجع البشري.</p></div></section>');
+}
+function premiumActions(){
+ const host=$('#view-overview'),hero=host?.querySelector('.card.hero');if(!host||!hero||$('#kosif-premium-actions'))return;
+ hero.insertAdjacentHTML('afterend','<section id="kosif-premium-actions" aria-label="إجراءات سريعة"><div class="kpa-title">إجراءات سريعة</div><div class="kpa-grid"><button type="button" data-kc-go="rounds"><span class="kpa-ic">↻</span><b>الجولات</b><small>المتابعة والإدارة</small></button><button type="button" data-kc-go="pbc"><span class="kpa-ic">▤</span><b>المطالبات</b><small>الأدلة والمستندات</small></button><button type="button" data-kc-go="tb"><span class="kpa-ic">⚖</span><b>الميزان</b><small>التحقق والتحليل</small></button><button type="button" data-kc-go="outputs"><span class="kpa-ic">▥</span><b>التقارير</b><small>المخرجات والتحليل</small></button></div></section>');
+}
+function premiumHeroCTA(){
+ const hero=$('#view-overview>.card.hero'),kpis=$('#view-overview #kpis');if(!hero||!kpis||$('#kosif-premium-rounds-cta'))return;
+ const wrap=document.createElement('div');wrap.id='kosif-premium-rounds-cta';wrap.style.cssText='position:relative;z-index:2;margin-top:14px;display:grid;gap:7px';wrap.innerHTML='<button type="button" class="btn gold" data-kc-go="rounds" style="width:100%;font-size:15px">الانتقال إلى الجولات ←</button><div style="text-align:center;color:#8fa2ba;font-size:11.5px">ملف الارتباط جاهز للمتابعة بعد اكتمال متطلبات الميزان</div>';kpis.after(wrap);
+}
+function premiumNavigation(){
+ document.addEventListener('click',e=>{const b=e.target.closest?.('[data-kc-go]');if(!b)return;const v=b.dataset.kcGo;try{if(typeof window.go==='function')window.go(v);else document.querySelector('[data-go="'+v+'"]')?.click()}catch(_){}},true);
+}
+function premiumMount(){
+ loadCanvaPremiumStyles();premiumTopbar();premiumWelcome();premiumActions();premiumHeroCTA();
+ document.documentElement.dataset.kosifVisual='canva-premium-v2';
+}
+function premiumWatch(){
+ if(premiumObserver||!document.body)return;
+ premiumObserver=new MutationObserver(()=>requestAnimationFrame(premiumMount));premiumObserver.observe(document.body,{childList:true,subtree:true});
+}
 function clearProgressTimer(){if(progressTimer){clearTimeout(progressTimer);progressTimer=0}}
 function progressVisible(el){return !!(el&&el.classList.contains('show'))}
 function progressState(el){if(!el)return'';return [el.querySelector('.kp-ring b')?.textContent||'',el.querySelector('.kp-stage')?.textContent||'',el.querySelector('.kp-note')?.textContent||''].join('|')}
@@ -84,8 +126,8 @@ function armProgressSafety(){
  progressTimer=setTimeout(()=>{progressTimer=0;const cur=$('#kosif-progress');if(!progressVisible(cur))return;const next=progressState(cur);if(next!==progressFingerprint){armProgressSafety();return}releaseStaleProgress(cur)},PROGRESS_STALE_MS);
 }
 function watchProgressSafety(){const el=$('#kosif-progress');if(!el||el.dataset.kosifProgressSafety==='1')return;el.dataset.kosifProgressSafety='1';progressObserver=new MutationObserver(()=>armProgressSafety());progressObserver.observe(el,{attributes:true,attributeFilter:['class','style'],childList:true,subtree:true,characterData:true});armProgressSafety()}
-function mountWatcher(){const main=$('main');if(!main)return;let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;shell();ensureFont200();buildCard();syncCompany();syncAI();watchProgressSafety()})}).observe(main,{childList:true,subtree:true})}
-function init(){loadPhaseBStyles();shell();visualViewportGuard();dialogGuards();aiGuards();companyGuard();analytics3DGuard();ensureFont200();buildCard();watchProgressSafety();mountWatcher();serviceWorkerContinuity();checkVersion();window.addEventListener('online',()=>{announce('عاد الاتصال');checkVersion()});window.addEventListener('offline',()=>announce('لا يوجد اتصال. سيستخدم Kosif الموارد المتاحة دون تخزين API.'))}
-window.KosifContinuity={version:'36.4',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,syncDialogLock,lockBody,unlockBody,watchProgressSafety,armProgressSafety,syncVisualViewport,loadAnalytics3D};
+function mountWatcher(){const main=$('main');if(!main)return;let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;shell();ensureFont200();buildCard();syncCompany();syncAI();premiumMount();watchProgressSafety()})}).observe(main,{childList:true,subtree:true})}
+function init(){loadPhaseBStyles();loadCanvaPremiumStyles();shell();visualViewportGuard();dialogGuards();aiGuards();companyGuard();analytics3DGuard();ensureFont200();buildCard();premiumMount();premiumNavigation();premiumWatch();watchProgressSafety();mountWatcher();serviceWorkerContinuity();checkVersion();window.addEventListener('online',()=>{announce('عاد الاتصال');checkVersion()});window.addEventListener('offline',()=>announce('لا يوجد اتصال. سيستخدم Kosif الموارد المتاحة دون تخزين API.'))}
+window.KosifContinuity={version:'36.4',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,syncDialogLock,lockBody,unlockBody,watchProgressSafety,armProgressSafety,syncVisualViewport,loadAnalytics3D,premiumMount};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
