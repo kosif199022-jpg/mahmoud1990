@@ -1,0 +1,47 @@
+name: Import KOSIF v38 Cloudflare release
+
+on:
+  push:
+    branches:
+      - codex/kosif-v38-cloudflare-release
+    paths:
+      - '.v38-release/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  import-v38:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/kosif-v38-cloudflare-release
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reconstruct release overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .v38-release/part-* | tr -d '\n\r ' | base64 --decode > /tmp/kosif-v38-overlay.tgz
+          echo '0a2d9db1fc7fa50566c11b6a791af32f2b1f31ecaec6b9f61daaf4c3a57e854f  /tmp/kosif-v38-overlay.tgz' | sha256sum -c -
+          tar -xzf /tmp/kosif-v38-overlay.tgz -C .
+      - name: Build and verify KOSIF v38
+        run: |
+          set -euo pipefail
+          npm run build
+          npm run check
+          npx --yes wrangler@4 deploy --dry-run --outdir /tmp/kosif-v38-dry-run
+      - name: Commit verified v38 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm -r --ignore-unmatch .v38-release .github/workflows/import-v38-cloudflare-release.yml
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat: KOSIF v38 Trusted Audit Intelligence OS'
+          git push origin HEAD:codex/kosif-v38-cloudflare-release
