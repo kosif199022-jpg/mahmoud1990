@@ -1,0 +1,20 @@
+{
+  "schema": "kosif-rollback-registry-v1",
+  "entries": [
+    {
+      "review_id": "KOSIF-REV-A-0001",
+      "before_git_sha": "43da9d3f1a5dfd3dbd39f495aa0eb9bb87259843",
+      "before_worker_version": "not-directly-verified-in-run",
+      "before_schema_version": "N/A",
+      "timestamp": "2026-08-19T18:30:00+03:00",
+      "review_branch": "agent/review-a-0001",
+      "production_baseline": {
+        "verified_git_sha": "8644f9b0df7d0b9a2cc3fde4d0b16dd36a03b2b3",
+        "build_id": "2026.08.19-v38-trusted-audit-os",
+        "url": "https://mahmoud-eldesouky.kosif199022.workers.dev",
+        "evidence": "GitHub issue #55 production verifier"
+      },
+      "rollback_policy": "Do not move main or redeploy an older Worker until D1/schema compatibility and user-data safety are verified."
+    }
+  ]
+}
