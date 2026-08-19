@@ -6,10 +6,15 @@
  */
 
 function money(value) {
-  const s = String(value ?? '0').replace(/[,_\s]/g, '');
-  if (!/^-?\d+(\.\d+)?$/.test(s)) return 0n;
-  const [i, f = ''] = s.split('.');
-  return BigInt(i + f.padEnd(2, '0').slice(0, 2));
+  const s = String(value ?? '').trim().replace(/[,_\s]/g, '');
+  if (!/^-?\d+(\.\d{1,2})?$/.test(s)) {
+    throw new TypeError(`Invalid monetary value: ${String(value)}`);
+  }
+  const negative = s.startsWith('-');
+  const unsigned = negative ? s.slice(1) : s;
+  const [i, f = ''] = unsigned.split('.');
+  const minor = BigInt(i) * 100n + BigInt(f.padEnd(2, '0'));
+  return negative ? -minor : minor;
 }
 
 export function analyzeSalesAuditBridge(rows = []) {
