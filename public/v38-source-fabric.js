@@ -14,7 +14,14 @@
     if (s?.tier === 'D') return '<span class="v38-chip ai">مخصص — metadata فقط</span>';
     return '<span class="v38-chip">مرجع أساسي</span>';
   };
-  const safeUrl = s => String(s?.url || '');
+  const safeUrl = s => {
+    const raw = String(s?.url || '').trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw);
+      return url.protocol === 'https:' && !url.username && !url.password ? url.href : '';
+    } catch { return ''; }
+  };
   const catalogRow = s => ({
     id: s.id,
     title: s.title_ar || s.title || s.id,
@@ -53,7 +60,7 @@
             const verified = s.lastVerifiedAt || s.last_verified || '—';
             const context = s.effectiveContext ? '<div class="hint" style="margin-top:3px">' + V.esc(s.effectiveContext) + '</div>' : '';
             const due = s.commentsDue ? '<div class="hint" style="margin-top:3px">آخر تعليق: ' + V.esc(s.commentsDue) + '</div>' : '';
-            return '<tr><td><span class="v38-chip ' + (s.tier === 'A' ? 'fact' : s.tier === 'B' ? 'source' : 'ai') + '">' + V.esc(s.tier || '—') + '</span></td><td><b>' + V.esc(s.title || s.id) + '</b>' + (s.issuer ? '<div class="hint">' + V.esc(s.issuer) + '</div>' : '') + '</td><td>' + statusBadge(s) + context + due + '</td><td>' + V.esc(s.kind || '—') + '</td><td class="num">' + V.esc(verified) + '</td><td>' + (url ? '<a href="' + V.esc(url) + '" target="_blank" rel="noopener" style="font-size:11px;direction:ltr;unicode-bidi:embed">' + V.esc(url.replace(/^https?:\/\//, '').slice(0, 34)) + (url.length > 42 ? '…' : '') + '</a>' : '—') + '</td></tr>';
+            return '<tr><td><span class="v38-chip ' + (s.tier === 'A' ? 'fact' : s.tier === 'B' ? 'source' : 'ai') + '">' + V.esc(s.tier || '—') + '</span></td><td><b>' + V.esc(s.title || s.id) + '</b>' + (s.issuer ? '<div class="hint">' + V.esc(s.issuer) + '</div>' : '') + '</td><td>' + statusBadge(s) + context + due + '</td><td>' + V.esc(s.kind || '—') + '</td><td class="num">' + V.esc(verified) + '</td><td>' + (url ? '<a href="' + V.esc(url) + '" target="_blank" rel="noopener noreferrer" style="font-size:11px;direction:ltr;unicode-bidi:embed">' + V.esc(url.replace(/^https?:\/\//, '').slice(0, 34)) + (url.length > 42 ? '…' : '') + '</a>' : '—') + '</td></tr>';
           }).join('') +
           '</tbody></table></div><div class="v38-note info"><span>🛡️</span><span>' + V.esc('الطبقات: ' + Object.values(TIER_LABEL).join(' · ')) + '</span></div>';
       };

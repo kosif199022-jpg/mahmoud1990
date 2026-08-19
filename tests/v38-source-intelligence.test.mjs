@@ -1,4 +1,5 @@
 /* KOSIF v38 — Source Intelligence Fabric deterministic safety tests */
+import { readFileSync } from 'node:fs';
 import { validateSourceUrl, resolveSafeRedirect, bulkOnboard, loadRegistry } from '../src/v38-source-intelligence.js';
 
 let pass = 0, fail = 0;
@@ -60,6 +61,11 @@ ok(validateSourceUrl('https://[::1]/a') === null, 'IPv6 literal rejected');
 ok(validateSourceUrl('https://localhost/a') === null, 'localhost rejected');
 ok(validateSourceUrl('https://user:pass@example.com/a') === null, 'credential URL rejected');
 ok(validateSourceUrl('https://example.com:8443/a') === null, 'non-standard HTTPS port rejected');
+
+const sourceFabricUi = readFileSync(new URL('../public/v38-source-fabric.js', import.meta.url), 'utf8');
+ok(sourceFabricUi.includes("url.protocol === 'https:'"), 'source registry UI only renders HTTPS links');
+ok(sourceFabricUi.includes('!url.username && !url.password'), 'source registry UI rejects credential-bearing links');
+ok(sourceFabricUi.includes('rel="noopener noreferrer"'), 'external source links isolate opener and referrer');
 
 const relative = resolveSafeRedirect('https://www.ifrs.org/standards', '/issued-standards/');
 ok(relative?.href === 'https://www.ifrs.org/issued-standards/', 'same-origin relative redirect resolved safely');
