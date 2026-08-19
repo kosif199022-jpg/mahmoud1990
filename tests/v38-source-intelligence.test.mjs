@@ -23,6 +23,33 @@ function mockKV() {
   };
 }
 
+function mockAssets() {
+  const catalog = {
+    schema: 'kosif-official-source-catalog-v1',
+    sources: [
+      {
+        id: 'socpa-2026-audit-adoptions-circulars', issuer: 'SOCPA', kind: 'saudi-audit-adoption-circulars', tier: 'A',
+        title_ar: 'تعاميم SOCPA لمكاتب المحاسبة — تحديثات معايير المراجعة 2026',
+        url: 'https://socpa.org.sa/Socpa/Licensed-Accountants/Circulars-to-accounting-firms.aspx',
+        status: 'effective', last_verified: '2026-08-19', requires_verification: false
+      },
+      {
+        id: 'iaasb-isa-330-500-520-ed-2026', issuer: 'IAASB', kind: 'audit-exposure-draft', tier: 'A',
+        title_ar: 'مشروعات تعديلات أدلة المراجعة والاستجابة للمخاطر 2026',
+        url: 'https://www.iaasb.org/publications/proposed-revisions-audit-evidence-risk-response-isa-330-isa-500-isa-520',
+        status: 'exposure-draft', comments_due: '2026-12-15', last_verified: '2026-08-19', requires_verification: false
+      }
+    ]
+  };
+  return {
+    async fetch(req) {
+      const u = new URL(req.url);
+      if (u.pathname !== '/data/kosif-official-sources-2026.json') return new Response('Not found', { status: 404 });
+      return Response.json(catalog);
+    }
+  };
+}
+
 console.log('KOSIF v38 Source Intelligence tests');
 
 const good = validateSourceUrl('https://www.ifrs.org/issued-standards/list-of-standards/');
@@ -41,14 +68,23 @@ ok(sameOriginAbsolute?.href === 'https://socpa.org.sa/b', 'same-origin absolute 
 ok(resolveSafeRedirect('https://socpa.org.sa/a', 'https://evil.example/b') === null, 'cross-origin redirect blocked');
 ok(resolveSafeRedirect('https://socpa.org.sa/a', 'http://socpa.org.sa/b') === null, 'HTTPS downgrade redirect blocked');
 
-const env = { DATA: mockKV() };
+const env = { DATA: mockKV(), ASSETS: mockAssets() };
+const before = await loadRegistry(env);
+ok(before.officialCatalog.loaded === 2, 'official source catalog is loaded through the first-party asset binding');
+const ed = before.core.find(source => source.id === 'iaasb-isa-330-500-520-ed-2026');
+ok(ed?.tier === 'A' && ed.catalog === true, 'catalog source is promoted into runtime Tier A registry');
+ok(ed?.status === 'exposure-draft' && ed?.commentsDue === '2026-12-15', 'exposure-draft status and due date remain explicit runtime metadata');
+ok(before.core.findIndex(source => source.id === 'iaasb-isa-330-500-520-ed-2026') < before.core.findIndex(source => source.id === 'openai-docs'), 'official Tier A catalog records are prioritized before Tier C providers');
+
 let result = await bulkOnboard(env, [
   { id: 'custom-ifrs-notes', title: 'Custom metadata A', url: 'https://example.com/a' },
   { id: 'custom-ifrs-notes', title: 'Duplicate in same batch', url: 'https://example.com/b' },
+  { id: 'iaasb-isa-330-500-520-ed-2026', title: 'Cannot shadow official', url: 'https://example.com/c' },
   { id: 'unsafe-local', title: 'Unsafe', url: 'https://127.0.0.1/private' }
 ]);
-ok(result.accepted === 1, 'only one duplicate id accepted in a batch');
+ok(result.accepted === 1, 'only one safe unique custom source accepted in a batch');
 ok(result.rejected.some(item => item.id === 'custom-ifrs-notes' && item.reason === 'DUPLICATE_ID'), 'same-batch duplicate explicitly rejected');
+ok(result.rejected.some(item => item.id === 'iaasb-isa-330-500-520-ed-2026' && item.reason === 'DUPLICATE_ID'), 'custom source cannot shadow an official catalog id');
 ok(result.rejected.some(item => item.id === 'unsafe-local' && item.reason === 'UNSAFE_OR_INVALID_URL'), 'unsafe custom source rejected');
 
 const registry = await loadRegistry(env);

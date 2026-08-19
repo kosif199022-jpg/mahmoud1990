@@ -1,7 +1,7 @@
 {
   "schema": "kosif-assets-index-v1",
-  "updated_at": "2026-08-19T19:19:00+03:00",
-  "review_id": "KOSIF-REV-B-0002",
+  "updated_at": "2026-08-19T20:50:00+03:00",
+  "review_id": "KOSIF-REV-HOURLY-0001",
   "assets": [
     {
       "repo": "kosif199022-jpg/mahmoud1990",
@@ -11,7 +11,7 @@
       "language": "JavaScript",
       "hash": "branch-head:5ea6bdf1fb02b348a38882c9fe03bc418a130428",
       "reuse_value": "high",
-      "notes_ar": "PR #86 ما زال Draft ومبنياً على lineage أقدم؛ يراجع feature-by-feature فقط ولا يدمج أعمى.",
+      "notes_ar": "PR #86 مبني على lineage أقدم؛ يراجع feature-by-feature فقط ولا يدمج أعمى حتى لا يعيد منطقاً أقدم فوق v38.1.",
       "duplicate_of": null,
       "integration_status": "candidate"
     },
@@ -23,7 +23,7 @@
       "language": "JavaScript",
       "hash": "branch-head:012342f229d187f614dfabc06fc2dde6a3150406",
       "reuse_value": "medium",
-      "notes_ar": "PR #85 Draft وتوجد Realtime 2.1 وطبقات أحدث مدمجة بالفعل في main؛ أي reuse يحتاج مقارنة دقيقة لمنع الرجوع أو التكرار.",
+      "notes_ar": "Realtime 2.1 وطبقات أحدث مدمجة بالفعل في main عبر المسار الموحد؛ أي reuse يحتاج مقارنة دقيقة لمنع الرجوع أو التكرار.",
       "duplicate_of": "main realtime/platform lineage after PR #82/#84",
       "integration_status": "blocked"
     },
@@ -35,9 +35,9 @@
       "language": "JSON/Markdown",
       "hash": "branch-head:fe4349db5e0b090e204d8d118fb873b2b7e8dd49",
       "reuse_value": "high",
-      "notes_ar": "PR #93 يحتوي Review State وRollback Registry وAssets Index وHandoff. تم اعتماد فكرة Assets Index على main انتقائياً، بينما بقية ملفات الحوكمة تحتاج إعادة أساس على HEAD الحالي قبل الإدماج.",
+      "notes_ar": "تمت إعادة استخدام مفاهيم Review State وRollback Registry وAssets Index انتقائياً فوق main الحالي، ثم دمجها ضمن PR #94 بدلاً من دمج PR #93 القديم أعمى.",
       "duplicate_of": null,
-      "integration_status": "candidate"
+      "integration_status": "integrated"
     },
     {
       "repo": "kosif199022-jpg/mahmoud1990",
@@ -45,11 +45,11 @@
       "path": "src/v38-trusted-sales-audit-bridge.mjs",
       "type": "sales-audit-bridge",
       "language": "JavaScript",
-      "hash": "commit:ffe2fbac074093d959a49aa3aa94817529e7c795",
+      "hash": "main-v38.1",
       "reuse_value": "high",
-      "notes_ar": "مُدمج ويستخدم BigInt minor units، لكن Issue #92 ما زال مفتوحاً لأن عقد المخرجات لا يطابق الاختبار والاختبار غير داخل v38-suite. يتطلب قرار حوكمة مالي قبل تغيير التفسير.",
+      "notes_ar": "Issue #92 مغلق كمكتمل. عقد minor-unit BigInt أصبح regression-gated داخل v38-suite، والتحقق الإنتاجي السابق سجل 16/16 لاختبارات جسر المبيعات والمراجعة.",
       "duplicate_of": null,
-      "integration_status": "blocked"
+      "integration_status": "integrated"
     },
     {
       "repo": "kosif199022-jpg/mahmoud1990",
@@ -57,11 +57,23 @@
       "path": "public/data/kosif-official-sources-2026.json",
       "type": "standards-source-catalog",
       "language": "JSON",
-      "hash": "commit:aca719d065efaa0996b585b54330f366e075e86e",
+      "hash": "main-v38.1",
       "reuse_value": "high",
-      "notes_ar": "تم تحديث metadata في Review B بمصادر رسمية حديثة: IFRS Taxonomy 2025 لتقارير 2026، تعاميم SOCPA، وIAASB LCE Exposure Draft، مع last_verified/status/requires_verification.",
+      "notes_ar": "كتالوج metadata رسمي حديث يشمل IFRS/SOCPA/ZATCA/IAASB مع last_verified/status/effective_context/comments_due. التغيير الحالي يربطه بسجل Source Intelligence الحاكم كـTier A مع إبقاء exposure drafts موسومة بوضوح كغير نافذة.",
       "duplicate_of": null,
-      "integration_status": "integrated"
+      "integration_status": "integrating"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "agent/hourly-source-governance-2026-08-19",
+      "path": "src/v38-source-intelligence.js + public/v38-source-fabric.js",
+      "type": "official-source-runtime-integration",
+      "language": "JavaScript",
+      "hash": "pending-pr-head",
+      "reuse_value": "high",
+      "notes_ar": "يعالج توصية الـContinuous Audit: دمج الكتالوج الرسمي مع runtime registry، ترتيب Tier A أولاً، منع المصادر المخصصة من حجب معرفات رسمية، عدم احتساب أول فحص كتغيّر، وإظهار exposure-draft كـ«مشروع للتعليق — غير نافذ» في الواجهة.",
+      "duplicate_of": null,
+      "integration_status": "in-review"
     },
     {
       "repo": "kosif199022-jpg/mahmoud1990",
@@ -69,9 +81,9 @@
       "path": "public/sw.js",
       "type": "service-worker",
       "language": "JavaScript",
-      "hash": "commit:c8398207e9dd49294b17bb1c57a7d3fb926e0619",
+      "hash": "main-v38.1",
       "reuse_value": "high",
-      "notes_ar": "تمت استعادة عقد توافق v36.4/v37 cache generation ثم تحقق Production بنجاح للإصدار v38. يبقى addAll(CORE) نقطة متابعة availability لأن ملف legacy مفقود واحد قد يفشل install بالكامل.",
+      "notes_ar": "عقد cache generation واستبعاد /wealth وواجهات البيانات محمي باختبارات الإنتاج. يبقى addAll(CORE) نقطة متابعة availability: ملف CORE مفقود واحد قد يفشل install بالكامل، لذا أي تعديل لاحق يجب أن يكون باختبار Safari/PWA واضح.",
       "duplicate_of": null,
       "integration_status": "integrated"
     }
