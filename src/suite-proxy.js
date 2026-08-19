@@ -69,7 +69,12 @@ function exposeReaderRuntimeBindings(text) {
   return text;
 }
 
-const READER_DEFAULT_UI = '<style id="kosif-reader-default-ui">#mixerDock,#smartHubDock,#libBtn{display:none!important}</style>';
+const READER_DEFAULT_UI = `<style id="kosif-reader-default-ui">
+#mixerDock,#smartHubDock,#libBtn,#mixLaunch,.mixer-launch,button[onclick*="openMix"],button[aria-label*="Mix"],#smartPebble,.smart-pebble,button[onclick*="openSmart"],button[aria-label*="المكتبة الذكية"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#kosif-reader-home,#kosif-reader-library-home{position:fixed;z-index:2147483000;top:calc(env(safe-area-inset-top,0px) + 10px);min-height:38px;display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid rgba(99,91,255,.18);border-radius:999px;background:rgba(255,255,255,.93);color:#4f46e5;text-decoration:none;font:700 12px/1.2 -apple-system,BlinkMacSystemFont,'SF Arabic',system-ui,sans-serif;box-shadow:0 9px 24px -18px rgba(67,56,202,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#kosif-reader-home{left:8px}#kosif-reader-library-home{right:8px}
+body{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))!important}html,body{min-height:100dvh}
+</style><a id="kosif-reader-home" href="/" aria-label="الرئيسية">⌂ الرئيسية</a><a id="kosif-reader-library-home" href="/libraries/" aria-label="المكتبات">‹ المكتبات</a><script id="kosif-reader-default-ui-script">(function(){if(window.__KOSIF_READER_DEFAULT_UI_V2__)return;window.__KOSIF_READER_DEFAULT_UI_V2__=1;var sel='#mixerDock,#smartHubDock,#libBtn,#mixLaunch,.mixer-launch,button[onclick*="openMix"],button[aria-label*="Mix"],#smartPebble,.smart-pebble,button[onclick*="openSmart"],button[aria-label*="المكتبة الذكية"]';function hide(r){try{(r||document).querySelectorAll(sel).forEach(function(x){x.style.setProperty('display','none','important');x.style.setProperty('visibility','hidden','important');x.style.setProperty('pointer-events','none','important')})}catch(e){}}var dm={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};function digits(r){try{var w=document.createTreeWalker(r||document.body,NodeFilter.SHOW_TEXT);var a=[];while(w.nextNode())a.push(w.currentNode);a.forEach(function(n){var p=n.parentElement;if(!p||/^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|CODE|PRE)$/.test(p.tagName))return;var s=n.nodeValue.replace(/[٠-٩۰-۹]/g,function(c){return dm[c]||c});if(s!==n.nodeValue)n.nodeValue=s})}catch(e){}}function run(){hide(document);digits(document.body)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();new MutationObserver(function(rs){rs.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1){hide(n);digits(n)}else if(n.nodeType===3&&n.parentElement&&!/^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|CODE|PRE)$/.test(n.parentElement.tagName)){var s=n.nodeValue.replace(/[٠-٩۰-۹]/g,function(c){return dm[c]||c});if(s!==n.nodeValue)n.nodeValue=s}})})}).observe(document.documentElement,{childList:true,subtree:true})})();</script>`;
 
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
   let text = String(input || '');
@@ -97,9 +102,8 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     const requested = requestedLibraryBook(requestUrl) || 'mafateeh';
     const bookMarker = `data-kosif-book-bootstrap="${requested}"`;
     if (!text.includes(bookMarker)) injections.push(bookBoot);
-    // Preserve the original navy/gold Mafateeh design. Mixer, Smart Library and
-    // the internal library switcher remain loaded/capable but do not appear on
-    // the default reading screen.
+    // Preserve the original Mafateeh design and full reader runtime. Mixer and
+    // Smart Library stay capable, but are intentionally hidden by default.
     if (!text.includes('id="kosif-reader-default-ui"')) injections.push(READER_DEFAULT_UI);
     if (!text.includes('/wealth-library-v37.js')) injections.push('<script src="/wealth-library-v37.js" defer></script>');
     text = injectHtmlFragments(text, injections);
@@ -204,7 +208,7 @@ export async function proxyWealth(req, env) {
   const text = rewriteWealthText(await upstream.text(), type, u);
   const h = copyResponseHeaders(upstream, u);
   h.set('content-type', htmlLike ? 'text/html; charset=utf-8' : (type || 'text/plain; charset=utf-8'));
-  h.set('cache-control', htmlLike ? 'no-cache' : (h.get('cache-control') || 'public, max-age=3600'));
+  h.set('cache-control', htmlLike ? 'no-cache, no-store, must-revalidate' : (h.get('cache-control') || 'public, max-age=3600'));
   return new Response(text, { status: upstream.status, statusText: upstream.statusText, headers: h });
 }
 
