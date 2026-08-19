@@ -17,6 +17,9 @@
       "title_ar": "معايير IFRS المطلوبة في 1 يناير 2026",
       "url": "https://www.ifrs.org/news-and-events/news/2026/01/now-available-ifrs-accounting-standards-required-2026-two-editions/",
       "effective_context": "Required at 1 January 2026",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
       "notes_ar": "مرجع إصدار 2026 والمتطلبات النافذة في 1 يناير 2026؛ يشمل تعديلات التصنيف والقياس للأدوات المالية والتحسينات السنوية المجلد 11 وعقود الكهرباء المعتمدة على الطبيعة وبيان ممارسة تعليق الإدارة المراجع."
     },
     {
@@ -26,7 +29,23 @@
       "tier": "A",
       "title_ar": "مستكشف معايير IFRS الرسمي",
       "url": "https://www.ifrs.org/issued-standards/list-of-standards/",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
       "notes_ar": "المرجع الرسمي للمعايير والتعديلات والتصحيحات التحريرية ومعلومات النفاذ."
+    },
+    {
+      "id": "ifrs-accounting-taxonomy-2025-current-for-2026",
+      "issuer": "IFRS Foundation / IASB",
+      "kind": "digital-reporting-taxonomy",
+      "tier": "A",
+      "title_ar": "تصنيف IFRS المحاسبي 2025 هو النسخة الحالية لتقارير 2026",
+      "url": "https://www.ifrs.org/news-and-events/news/2026/02/ifrs-accounting-taxonomy-2025-to-remain-current-for-2026/",
+      "effective_context": "Current taxonomy for 2026 reporting periods",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
+      "notes_ar": "أكدت مؤسسة IFRS أن تصنيف IFRS المحاسبي 2025 يظل النسخة الحالية لفترات التقرير في 2026، مع توقع التصنيف السنوي التالي في الربع الأول من 2027."
     },
     {
       "id": "socpa-accounting-standards",
@@ -35,6 +54,9 @@
       "tier": "A",
       "title_ar": "معايير المحاسبة المعتمدة في المملكة",
       "url": "https://socpa.org.sa/Socpa/Professional-standards/Accounting-standards.aspx?lang=ar-sa",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
       "notes_ar": "المرجع السعودي لاعتماد معايير المحاسبة والتحديثات والآراء الفنية المحلية ومعيار المنشآت الصغيرة والمتوسطة."
     },
     {
@@ -44,6 +66,9 @@
       "tier": "A",
       "title_ar": "المعايير المهنية السعودية",
       "url": "https://socpa.org.sa/Socpa/Professional-standards.aspx",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
       "notes_ar": "بوابة معايير المحاسبة والمراجعة والجودة وسلوك وآداب المهنة والتوضيحات التطبيقية والاستفسارات المهنية."
     },
     {
@@ -53,7 +78,22 @@
       "tier": "A",
       "title_ar": "مشاريع المعايير لدى SOCPA",
       "url": "https://socpa.org.sa/Socpa/Professional-standards/2748/4002.aspx",
+      "last_verified": "2026-08-19",
+      "status": "project",
+      "requires_verification": false,
       "notes_ar": "لرصد مشاريع المعايير والتعديلات المفتوحة للمشورة وربطها بمشاريع IASB وIAASB وأخلاقيات المهنة."
+    },
+    {
+      "id": "socpa-2026-audit-adoptions-circulars",
+      "issuer": "SOCPA",
+      "kind": "saudi-audit-adoption-circulars",
+      "tier": "A",
+      "title_ar": "تعاميم SOCPA لمكاتب المحاسبة — تحديثات معايير المراجعة 2026",
+      "url": "https://socpa.org.sa/Socpa/Licensed-Accountants/Circulars-to-accounting-firms.aspx",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
+      "notes_ar": "تظهر صفحة التعاميم الرسمية اعتماد معيار المراجعة الدولي 570 المحدث واعتماد تحديثات تعريف المنشآت المتداولة علناً، كما تعرض طلب المرئيات على معيار 240 المحدث واعتماد النسخة الثالثة من IFRS for SMEs. يجب فصل المعتمد عن البنود المفتوحة للمرئيات عند العرض داخل KOSIF."
     },
     {
       "id": "zatca-vat-law",
@@ -62,6 +102,9 @@
       "tier": "A",
       "title_ar": "نظام ضريبة القيمة المضافة السعودي",
       "url": "https://zatca.gov.sa/ar/RulesRegulations/Taxes/Pages/VATLaw.aspx",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
       "notes_ar": "المرجع النظامي الرسمي لضريبة القيمة المضافة في المملكة."
     },
     {
@@ -71,6 +114,9 @@
       "tier": "A",
       "title_ar": "اللائحة التنفيذية لضريبة القيمة المضافة",
       "url": "https://zatca.gov.sa/ar/RulesRegulations/Taxes/Pages/VATImplementingRegulations.aspx",
+      "last_verified": "2026-08-19",
+      "status": "effective",
+      "requires_verification": false,
       "notes_ar": "مرجع قواعد التنفيذ والامتثال لضريبة القيمة المضافة والتعديلات المعتمدة."
     },
     {
@@ -80,6 +126,9 @@
       "tier": "A",
       "title_ar": "أحدث مشاريع IAASB",
       "url": "https://www.iaasb.org/iaasb-consultations/latest-our-projects",
+      "last_verified": "2026-08-19",
+      "status": "project",
+      "requires_verification": false,
       "notes_ar": "يتضمن مستجدات مشاريع معايير المراجعة، ومنها مشروعات ISA 330 وISA 500 وISA 520 المعدلة في 2026."
     },
     {
@@ -91,7 +140,22 @@
       "url": "https://www.iaasb.org/publications/proposed-revisions-audit-evidence-risk-response-isa-330-isa-500-isa-520",
       "status": "exposure-draft",
       "comments_due": "2026-12-15",
+      "last_verified": "2026-08-19",
+      "requires_verification": false,
       "notes_ar": "مشروعات وليست معايير نافذة؛ يجب عرضها في التطبيق بعلامة «مشروع للتعليق» وعدم استخدامها كمتطلب إلزامي نافذ."
+    },
+    {
+      "id": "iaasb-lce-revised-ed-2026",
+      "issuer": "IAASB",
+      "kind": "audit-exposure-draft",
+      "tier": "A",
+      "title_ar": "مشروع تعديل معيار مراجعة المنشآت الأقل تعقيداً 2026",
+      "url": "https://www.iaasb.org/publications/proposed-international-standard-auditing-audits-financial-statements-less-complex-entities-revised",
+      "status": "exposure-draft",
+      "comments_due": "2026-11-17",
+      "last_verified": "2026-08-19",
+      "requires_verification": false,
+      "notes_ar": "مشروع منشور للتعليق وليس متطلباً نافذاً؛ يتناول الاحتيال والاستمرارية والمنشآت المتداولة علناً والخبراء."
     }
   ],
   "knowledge_notes": [
@@ -106,6 +170,12 @@
       "title_ar": "ISA 330/500/520 Proposed Revisions 2026",
       "fact_ar": "هذه تعديلات مقترحة منشورة للتعليق في أغسطس 2026 وليست متطلبات نافذة بعد.",
       "classification": "exposure-draft"
+    },
+    {
+      "id": "ifrs-taxonomy-2026-reporting",
+      "title_ar": "تصنيف IFRS المحاسبي لفترات 2026",
+      "fact_ar": "تصنيف IFRS المحاسبي 2025 يظل النسخة الحالية لفترات التقرير في 2026 بحسب مؤسسة IFRS.",
+      "classification": "effective-digital-reporting-metadata"
     }
   ]
 }
