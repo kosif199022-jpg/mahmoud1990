@@ -1,6 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 420" role="img" aria-label="KOSIF calm accounting and audit landscape">
-<defs><linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dff4f1"/><stop offset=".48" stop-color="#f6f2df"/><stop offset="1" stop-color="#edf3e4"/></linearGradient><linearGradient id="hill1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#afcaaa"/><stop offset="1" stop-color="#789f82"/></linearGradient><linearGradient id="hill2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8dfbb"/><stop offset="1" stop-color="#a8c1a3"/></linearGradient><linearGradient id="water" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d5eee8"/><stop offset="1" stop-color="#9fd0c4"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e8cb86"/><stop offset="1" stop-color="#b99043"/></linearGradient><filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="13" flood-color="#53715f" flood-opacity=".18"/></filter></defs>
-<rect width="880" height="420" rx="42" fill="url(#sky)"/><circle cx="640" cy="92" r="42" fill="#fff5c8" opacity=".9"/><g fill="#6f8d78" opacity=".62"><path d="M686 74q18-18 36 0q-18-9-36 0z"/><path d="M730 91q12-12 24 0q-12-6-24 0z"/></g><path d="M0 270C95 200 170 214 256 266c84 51 165 29 244-34 76-60 168-69 380 34v154H0z" fill="url(#hill2)"/><path d="M0 305c128-76 219-57 324 5 98 59 179 26 276-35 99-62 177-36 280 15v130H0z" fill="url(#hill1)" opacity=".96"/><path d="M0 335c162-25 312 20 439 19 153-1 287-62 441-30v96H0z" fill="url(#water)"/><path d="M0 372c213-24 389 18 561-2 123-14 210-36 319-26" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
-<g transform="translate(572 138)" filter="url(#shadow)"><path d="M69 126h104l-13-15v-64h-16V19h-17V0h-18v19H92v28H77v64z" fill="#f6efdb" stroke="#b99a61" stroke-width="2"/><rect x="107" y="63" width="26" height="63" rx="11" fill="#b9cab2"/><path d="M93 47h54M101 30h38" stroke="#b99a61" stroke-width="3" stroke-linecap="round"/></g>
-<g transform="translate(58 56)" filter="url(#shadow)"><rect width="282" height="274" rx="28" fill="#fff" opacity=".94"/><rect x="30" y="29" width="118" height="18" rx="9" fill="#dcebe1"/><rect x="30" y="61" width="192" height="12" rx="6" fill="#edf2ed"/><rect x="30" y="85" width="160" height="12" rx="6" fill="#edf2ed"/><g transform="translate(34 132)"><rect y="54" width="32" height="53" rx="8" fill="#8fb99c"/><rect x="46" y="25" width="32" height="82" rx="8" fill="#d4bb75"/><rect x="92" y="42" width="32" height="65" rx="8" fill="#9eb6dc"/><rect x="138" y="2" width="32" height="105" rx="8" fill="#6ca58a"/><path d="M0 40c36-14 61 4 91-22 31-27 53-5 82-35" fill="none" stroke="#315f4a" stroke-width="6" stroke-linecap="round"/><circle cx="173" cy="-17" r="8" fill="#315f4a"/></g><g transform="translate(190 170)"><circle cx="36" cy="36" r="31" fill="#e9f2ec" stroke="#4e856d" stroke-width="7"/><path d="M58 59l36 38" stroke="#4e856d" stroke-width="12" stroke-linecap="round"/><path d="M23 37l10 10 19-24" fill="none" stroke="#315f4a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g></g>
-<g transform="translate(380 297)"><ellipse cx="55" cy="28" rx="55" ry="18" fill="#aa8745" opacity=".26"/><rect y="12" width="110" height="20" rx="10" fill="#d1ad61"/><ellipse cx="55" cy="12" rx="55" ry="18" fill="url(#gold)"/><ellipse cx="85" cy="48" rx="55" ry="18" fill="#98763b" opacity=".18"/><rect x="30" y="32" width="110" height="20" rx="10" fill="#c69d52"/><ellipse cx="85" cy="32" rx="55" ry="18" fill="#dfc278"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 420" role="img" aria-label="KOSIF rose calm accounting and audit still life">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e7b8c0"/><stop offset=".52" stop-color="#cd929d"/><stop offset="1" stop-color="#b97784"/></linearGradient>
+<linearGradient id="vase" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f6e3df"/><stop offset=".45" stop-color="#dfb9b5"/><stop offset="1" stop-color="#c98d91"/></linearGradient>
+<linearGradient id="disc" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7e8e3"/><stop offset="1" stop-color="#d8b8b8"/></linearGradient>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#774b55" flood-opacity=".22"/></filter>
+</defs>
+<rect width="880" height="420" rx="42" fill="url(#bg)"/>
+<circle cx="96" cy="56" r="110" fill="#f5d8da" opacity=".16"/><circle cx="790" cy="350" r="138" fill="#f7e7e7" opacity=".10"/>
+<g transform="translate(78 72)" filter="url(#shadow)">
+  <path d="M42 204c0-50 19-86 53-86s53 36 53 86v78H42z" fill="url(#vase)"/>
+  <path d="M56 135h78" stroke="#f3d7d3" stroke-width="8" stroke-linecap="round" opacity=".7"/>
+  <path d="M65 147v118M82 139v126M100 139v126M118 147v118" stroke="#b87e87" stroke-width="5" opacity=".24"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M95 122C94 72 74 31 43 2" stroke="#7f4f59" stroke-width="4"/>
+    <path d="M98 122C112 62 144 27 178 10" stroke="#6f4651" stroke-width="4"/>
+    <path d="M90 116C64 84 34 65 7 57" stroke="#9d6570" stroke-width="3"/>
+    <path d="M106 118C142 92 173 82 207 86" stroke="#8c5864" stroke-width="3"/>
+  </g>
+  <g fill="#9c5e6d"><ellipse cx="52" cy="19" rx="10" ry="18" transform="rotate(-28 52 19)"/><ellipse cx="71" cy="41" rx="9" ry="17" transform="rotate(24 71 41)"/><ellipse cx="142" cy="33" rx="10" ry="18" transform="rotate(42 142 33)"/><ellipse cx="168" cy="24" rx="9" ry="16" transform="rotate(55 168 24)"/><ellipse cx="190" cy="84" rx="10" ry="18" transform="rotate(83 190 84)"/><ellipse cx="28" cy="59" rx="8" ry="15" transform="rotate(-65 28 59)"/></g>
+  <g fill="#f4d9d8"><circle cx="15" cy="48" r="7"/><circle cx="25" cy="42" r="6"/><circle cx="34" cy="50" r="6"/><circle cx="24" cy="57" r="6"/><circle cx="182" cy="70" r="7"/><circle cx="193" cy="68" r="6"/><circle cx="187" cy="79" r="6"/></g>
+  <ellipse cx="100" cy="290" rx="94" ry="16" fill="#7c4d57" opacity=".16"/>
+</g>
+<g transform="translate(284 104)" filter="url(#shadow)">
+  <ellipse cx="108" cy="230" rx="108" ry="20" fill="#774b55" opacity=".15"/>
+  <circle cx="110" cy="106" r="102" fill="url(#disc)" stroke="#f6dddd" stroke-width="5"/>
+  <circle cx="110" cy="106" r="82" fill="none" stroke="#b57a86" stroke-width="2" opacity=".32"/>
+  <text x="110" y="98" text-anchor="middle" font-family="Georgia,serif" font-size="34" fill="#b07580">KOSIF</text>
+  <g transform="translate(104 116)" fill="#b07580"><path d="M0 0c-16-20-13-37-5-49 17 9 22 28 5 49z"/><path d="M3 0c16-20 13-37 5-49-17 9-22 28-5 49z"/><rect x="-2" y="-5" width="4" height="28" rx="2"/></g>
+</g>
+<circle cx="482" cy="316" r="28" fill="#e6c4bf" opacity=".94"/><circle cx="482" cy="316" r="13" fill="#d5a7a7" opacity=".7"/>
+<path d="M0 355c170-22 324 15 470 2 166-16 276-50 410-21v84H0z" fill="#f8e9e7" opacity=".52"/>
+<path d="M0 376c198-24 375 13 562-2 120-10 211-28 318-20" fill="none" stroke="#fff" stroke-width="3" opacity=".34"/>
+</svg>
