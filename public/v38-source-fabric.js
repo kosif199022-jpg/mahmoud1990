@@ -15,6 +15,20 @@
     return '<span class="v38-chip">مرجع أساسي</span>';
   };
   const safeUrl = s => String(s?.url || '');
+  const catalogRow = s => ({
+    id: s.id,
+    title: s.title_ar || s.title || s.id,
+    issuer: s.issuer || '',
+    kind: s.kind || 'official-metadata',
+    url: s.url || '',
+    tier: 'A',
+    status: s.status || '',
+    effectiveContext: s.effective_context || '',
+    commentsDue: s.comments_due || '',
+    lastVerifiedAt: s.last_verified || '',
+    catalog: true,
+    metadataOnly: true
+  });
 
   V.registerView({
     id: 'v38-sources', title: 'ذكاء المصادر', icon: '🌐', order: 960,
@@ -25,7 +39,7 @@
         '<button class="v38-btn gold sm" id="v38-sf-refresh">فحص المصادر الأساسية الآن</button>' +
         '<button class="v38-btn ghost sm" id="v38-sf-status">سجل الحالة</button></div>' +
         '<div id="v38-sf-out" style="margin-top:10px"></div></div>' +
-        '<div class="v38-card"><div class="v38-cardh"><h3>السجل الحاكم للمصادر</h3><span class="hint">كتالوج 2026 الرسمي + المصادر الأساسية + المصادر المخصصة Tier D</span></div><div id="v38-sf-registry"><div class="v38-loading">تحميل السجل…</div></div></div>';
+        '<div class="v38-card"><div class="v38-cardh"><h3>السجل الحاكم للمصادر</h3><span class="hint">كتالوج 2026 الرسمي + المصادر الأساسية + المصادر المخصصة Tier D بعد فتح جلسة المالك</span></div><div id="v38-sf-registry"><div class="v38-loading">تحميل السجل…</div></div></div>';
 
       const paintRegistry = (sources, catalog) => {
         const rows = Array.isArray(sources) ? sources : [];
@@ -44,10 +58,30 @@
           '</tbody></table></div><div class="v38-note info"><span>🛡️</span><span>' + V.esc('الطبقات: ' + Object.values(TIER_LABEL).join(' · ')) + '</span></div>';
       };
 
+      const publicRegistry = async () => {
+        const [cap, catRes] = await Promise.all([
+          V.api('/api/kosif/v38/capabilities'),
+          fetch('/data/kosif-official-sources-2026.json', { cache: 'no-store' })
+        ]);
+        const cat = catRes.ok ? await catRes.json() : { sources: [] };
+        const official = (cat.sources || []).map(catalogRow);
+        const ids = new Set(official.map(x => x.id));
+        const basics = (cap.coreSources || []).filter(x => !ids.has(x.id)).map(x => ({ ...x, kind: 'core-source', status: '', url: '' }));
+        return { sources: [...official, ...basics], catalog: { path: '/data/kosif-official-sources-2026.json', loaded: official.length, authorityTier: 'A' } };
+      };
+
       V.api('/api/kosif/v38/sources/registry').then(r => {
         const reg = r.registry || {};
         paintRegistry([...(reg.core || []), ...(reg.custom || [])], reg.officialCatalog || {});
-      }).catch(e => { V.$('#v38-sf-registry').innerHTML = '<div class="v38-note danger">' + V.esc(e.message) + '</div>'; });
+      }).catch(async e => {
+        if (e.status !== 401) { V.$('#v38-sf-registry').innerHTML = '<div class="v38-note danger">' + V.esc(e.message) + '</div>'; return; }
+        try {
+          const pub = await publicRegistry();
+          paintRegistry(pub.sources, pub.catalog);
+          const host = V.$('#v38-sf-registry');
+          if (host) host.insertAdjacentHTML('beforeend', '<div class="v38-note info"><span>🔐</span><span>السجل الرسمي ظاهر للقراءة. افتح جلسة المالك لعرض المصادر المخصصة وتشغيل الفحص والتاريخ.</span></div>');
+        } catch (x) { V.$('#v38-sf-registry').innerHTML = '<div class="v38-note danger">' + V.esc(x.message) + '</div>'; }
+      });
 
       V.$('#v38-sf-refresh').onclick = async () => {
         const out = V.$('#v38-sf-out');
@@ -74,7 +108,7 @@
           out.innerHTML = entries.length ? '<div class="v38-scroll"><table class="v38-table"><thead><tr><th>المصدر</th><th class="num">إصدارات محفوظة</th><th>آخر فحص</th><th>بصمة المحتوى</th></tr></thead><tbody>' +
             entries.map(x => '<tr><td>' + V.esc(x.id) + '</td><td class="num">' + x.versions + '</td><td>' + (x.last ? V.esc(String(x.last.checkedAt).slice(0, 19).replace('T', ' ')) : '—') + '</td><td class="num" style="font-size:10px">' + (x.last ? V.esc(String(x.last.contentHash).slice(0, 16)) + '…' : '—') + '</td></tr>').join('') +
             '</tbody></table></div>' : V.empty('لا سجل بعد', 'شغّل فحص التغيّر أولًا لبناء سجل الإصدارات');
-        } catch (e) { out.innerHTML = '<div class="v38-note danger">' + V.esc(e.message) + '</div>'; }
+        } catch (e) { out.innerHTML = '<div class="v38-note danger">' + (e.status === 401 ? 'سجل الفحص يتطلب جلسة المالك.' : V.esc(e.message)) + '</div>'; }
       };
     }
   });
