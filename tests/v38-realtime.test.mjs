@@ -1,6 +1,6 @@
 /* KOSIF v38 — secure OpenAI Realtime server-relay tests */
 import { readFileSync } from 'node:fs';
-import { createRealtimeCall, hangupRealtimeCall, realtimeConfigured } from '../src/v38-realtime.js';
+import { createRealtimeCall, hangupRealtimeCall, realtimeConfigured, DEFAULT_REALTIME_MODEL } from '../src/v38-realtime.js';
 import { handleV38 } from '../src/v38-api.js';
 
 let pass = 0, fail = 0;
@@ -20,7 +20,10 @@ ok(!liveUi.includes('v38-lv-key'), 'voice UI has no browser OpenAI key field');
 ok(!liveUi.includes('api.openai.com'), 'voice UI never calls OpenAI directly');
 ok(liveUi.includes('/api/kosif/v38/realtime/call'), 'voice UI exchanges SDP through KOSIF server relay');
 ok(liveUi.includes('/api/kosif/v38/realtime/hangup'), 'voice UI terminates server-side Realtime calls');
+ok(liveUi.includes('gpt-realtime-2.1') && liveUi.includes('gpt-realtime-2.1-mini'), 'voice UI exposes current Realtime 2.1 family');
+ok(!liveUi.includes('value="gpt-realtime"') && !liveUi.includes('value="gpt-realtime-mini"'), 'deprecated Realtime aliases are hidden from new UI choices');
 
+ok(DEFAULT_REALTIME_MODEL === 'gpt-realtime-2.1', 'current Realtime 2.1 is the default model');
 ok(realtimeConfigured({}) === false, 'server relay reports unconfigured without secret');
 ok(realtimeConfigured({ OPENAI_API_KEY: 'sk-server-secret-1234567890' }) === true, 'server relay detects server secret');
 
@@ -61,12 +64,20 @@ try {
     company: 'demo-co',
     context: 'trial balance risk review'
   });
-  ok(r.ok && r.model === 'gpt-realtime' && r.voice === 'marin', 'model and voice are allowlisted with safe fallback');
+  ok(r.ok && r.model === 'gpt-realtime-2.1' && r.voice === 'marin', 'model and voice are allowlisted with current safe fallback');
   ok(r.callId === 'call_kosif_123' && r.keyExposure === 'none', 'call id captured and key exposure contract is none');
   ok(!JSON.stringify(r).includes('sk-server-secret'), 'server secret never appears in returned call payload');
   ok(captured[0]?.authorization === 'Bearer sk-server-secret-1234567890', 'server secret is used only in upstream authorization');
+  ok(captured[0]?.session?.model === 'gpt-realtime-2.1', 'upstream session receives current default Realtime model');
   ok(captured[0]?.session?.instructions?.includes('advisory-only'), 'advisor session enforces advisory-only authority boundary');
   ok(captured[0]?.session?.audio?.input?.turn_detection?.type === 'semantic_vad', 'semantic VAD configured for interruption-friendly audit conversation');
+  ok(captured[0]?.session?.audio?.output?.voice === 'marin', 'recommended voice remains the safe default');
+
+  r = await createRealtimeCall(env, { sdp: VALID_OFFER, model: 'gpt-realtime-2.1-mini', voice: 'cedar', language: 'ar' });
+  ok(r.ok && r.model === 'gpt-realtime-2.1-mini' && r.voice === 'cedar', 'current cost-efficient Realtime 2.1 mini is allowlisted');
+
+  r = await createRealtimeCall(env, { sdp: VALID_OFFER, model: 'gpt-realtime', voice: 'marin', language: 'en' });
+  ok(r.ok && r.model === 'gpt-realtime', 'legacy saved Realtime alias remains backend-compatible');
 
   r = await hangupRealtimeCall(env, 'call_kosif_123');
   ok(r.ok === true && /call_kosif_123\/hangup$/.test(captured.at(-1)?.target || ''), 'hangup is relayed server-side');
@@ -85,13 +96,14 @@ try {
 
   let api = await route('/api/kosif/v38/realtime/status');
   ok(api.res.status === 200 && api.body.configured === true && api.body.keyExposure === 'none', 'owner can inspect safe realtime status');
+  ok(api.body.model === 'gpt-realtime-2.1', 'status advertises current default Realtime model');
 
   api = await route('/api/kosif/v38/realtime/status', {}, false);
   ok(api.res.status === 401, 'realtime status remains owner-gated');
 
   api = await route('/api/kosif/v38/realtime/call', {
     method: 'POST',
-    body: { sdp: VALID_OFFER, model: 'gpt-realtime', voice: 'cedar', language: 'ar', company: 'demo-co' }
+    body: { sdp: VALID_OFFER, model: 'gpt-realtime-2.1', voice: 'cedar', language: 'ar', company: 'demo-co' }
   });
   ok(api.res.status === 201 && api.body.answerSdp === VALID_ANSWER && api.body.keyExposure === 'none', 'API exchanges SDP through KOSIF server relay');
   ok(!JSON.stringify(api.body).includes('sk-server-secret'), 'API response cannot leak server secret');

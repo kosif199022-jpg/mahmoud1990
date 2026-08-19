@@ -7,9 +7,14 @@
  * OpenAI's server-side WebRTC call endpoint.
  */
 
-export const DEFAULT_REALTIME_MODEL = 'gpt-realtime';
+export const DEFAULT_REALTIME_MODEL = 'gpt-realtime-2.1';
 
 const REALTIME_MODELS = new Set([
+  'gpt-realtime-2.1',
+  'gpt-realtime-2.1-mini',
+  'gpt-realtime-2',
+  'gpt-realtime-1.5',
+  // Backward-compatible aliases retained for existing saved UI state.
   'gpt-realtime',
   'gpt-realtime-mini'
 ]);
