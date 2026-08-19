@@ -1,0 +1,53 @@
+name: Import KOSIF v38 payload
+
+on:
+  push:
+    branches:
+      - codex/kosif-v38-trusted-audit-os
+    paths:
+      - '.v38-import/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  import-v38:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/kosif-v38-trusted-audit-os
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Reconstruct verified payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .v38-import/chunk-*.b64 | base64 --decode > /tmp/kosif-v38-import.tgz
+          echo "3b9aea18891197eb90dfda00224d88ea2ef5aa57dc79f274f4524e3e466b5651  /tmp/kosif-v38-import.tgz" | sha256sum -c -
+          tar -xzf /tmp/kosif-v38-import.tgz -C .
+
+      - name: Verify imported source
+        run: |
+          set -euo pipefail
+          npm run build
+          npm run check
+
+      - name: Commit verified v38 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Synthetic Lab is generated deterministically by prebuild/precheck;
+          # keep generated CSVs out of source control.
+          rm -rf public/demo/v38
+          git rm -r --ignore-unmatch .v38-import .github/workflows/import-v38-payload.yml
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "feat: KOSIF v38 Trusted Audit Intelligence OS"
+          git push origin HEAD:codex/kosif-v38-trusted-audit-os

@@ -49,13 +49,13 @@ jobs:
           const fs=require('fs');
           const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
           const ok=h?.productName==='Kosif' &&
-            h?.version==='v37.0.0-root' &&
+            h?.version==='v38.0.0-root' &&
             h?.modules?.audit==='/audit/' &&
             h?.modules?.libraries==='/libraries/' &&
             h?.modules?.wealth==='/wealth/reader.html' &&
             h?.modules?.sales==='/sales/' &&
             h?.designAuthority==='Aghnam Al-Wadi Sales Dashboard 7';
-          if(!ok){ console.error('Unexpected live health',h); process.exit(2); }
+          if(!ok || !String(h?.buildId||'').includes('v38-trusted-audit-os')){ console.error('Unexpected live health',h); process.exit(2); }
           console.log('LIVE_KOSIF_OK',h.version,h.buildId);
           NODE
               then ok=1; break; fi
@@ -64,10 +64,20 @@ jobs:
           done
           [ "$ok" = 1 ] || { echo 'Live Kosif verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
 
-          for path in / /audit/ /libraries/ /libraries/reader.html /libraries/reader.js /sales/ /wealth/reader.html /wealth-library-v37.js; do
+          for path in / /audit/ /libraries/ /libraries/reader.html /libraries/reader.js /sales/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
             code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
             case "$code" in 200|204|301|302|307|308) ;; *) echo "Bad live route $path -> $code"; exit 1;; esac
           done
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/demo/v38/manifest.json?deploy=$GITHUB_SHA" -o /tmp/kosif-v38-demo.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('/tmp/kosif-v38-demo.json','utf8'));
+          if(d?.seed!==380019 || !d?.counts || d.counts.accounts!==1000 || d.synthetic_only!==true){
+            console.error('Unexpected v38 demo manifest',d);process.exit(2);
+          }
+          console.log('LIVE_KOSIF_V38_DEMO_OK',d.seed,d.counts.accounts);
+          NODE
 
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/library.json?deploy=$GITHUB_SHA" -o /tmp/kosif-library.json
           node - <<'NODE'
