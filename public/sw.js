@@ -1,6 +1,27 @@
 const C='kosif-native-v37-root-app';
 const CORE=['/','/hub.html','/suite.css','/suite.js','/suite-shell.css','/suite-shell.js','/wealth-library-v37.js','/libraries/index.html','/libraries/libraries.css','/libraries/reader.html','/libraries/reader.css','/libraries/reader.js','/sales/index.html','/sales/sales.css','/sales/sales.js','/sales/sales-general-bootstrap.js','/sales/sales-motion-v1.css','/sales/sales-motion-v1.js','/v37-privacy-guard.js','/v37-audit-safety.js','/index.html','/manifest.webmanifest','/icon.svg','/migrate-v35.js','/v36.css','/v36-motion.css','/v36-continuity.js','/v36-engagement.js','/v36-continuity.css','/v36-mobile-phase-b.css','/v36-polish-phase-d.css','/v36-analytics-3d.js','/v36-analytics-3d.css','/legacy/core-v36.js','/v36-features.js','/v36-operations.js','/v36-outputs.js','/v36-governance.js','/v36-standards-readiness.js','/v36-ai-gate.js','/v36-zai.js','/v36-council-v2.js','/v36-executor.js','/v36-reviewer-media.js','/v36-voice-guide.js','/v36-history-restore.js','/standards/bridge.js'];
+const INTEGRITY=new Set(['/migrate-v35.js','/v36-continuity.js','/v36-continuity.css','/v36-mobile-phase-b.css']);
+function integrity(u){return u.origin===location.origin&&INTEGRITY.has(u.pathname)}
 self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(C);await c.addAll(CORE);await self.skipWaiting()})()));
-self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys()){if(k===C)continue;if(/^kosif-native-v[\d-]+(?:-[a-z-]+)?-app$/i.test(k)||/^tamhees/i.test(k)||/^kosif-app-/i.test(k))await caches.delete(k)}await self.clients.claim()})()));
+self.addEventListener('activate',e=>e.waitUntil((async()=>{
+  for(const k of await caches.keys()){
+    if(k===C)continue;
+    if(/^kosif-native-v[\d-]+(?:-[a-z-]+)?-app$/i.test(k)||/^tamhees/i.test(k)||/^kosif-app-/i.test(k))await caches.delete(k)
+  }
+  /* The cache generation name is retained for v36.4 compatibility tests, but
+     release-integrity assets must never survive a production rollout on iOS. */
+  const c=await caches.open(C);
+  for(const req of await c.keys())if(integrity(new URL(req.url)))await c.delete(req);
+  await self.clients.claim();
+})()));
 function bypass(u){return u.origin!==location.origin||u.pathname.startsWith('/api/')||u.pathname.startsWith('/library/')||u.pathname.startsWith('/wealth/')||u.pathname.startsWith('/standards/audio/')||u.pathname==='/__version'||u.pathname==='/__health'||u.pathname==='/__suite'}
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(bypass(u))return;e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});if(r.ok){const c=await caches.open(C);c.put(e.request,r.clone()).catch(()=>{});return r}}catch(_){}const hit=await caches.match(e.request);return hit||Response.error()})())});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  const u=new URL(e.request.url);
+  if(integrity(u)){
+    e.respondWith(fetch(e.request,{cache:'reload'}).then(r=>r).catch(()=>Response.error()));
+    return;
+  }
+  if(bypass(u))return;
+  e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});if(r.ok){const c=await caches.open(C);c.put(e.request,r.clone()).catch(()=>{});return r}}catch(_){}const hit=await caches.match(e.request);return hit||Response.error()})())
+});
