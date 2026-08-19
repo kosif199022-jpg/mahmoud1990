@@ -1,0 +1,111 @@
+{
+  "schema": "kosif-official-source-catalog-v1",
+  "as_of": "2026-08-19",
+  "jurisdiction": "Saudi Arabia",
+  "policy": {
+    "authority_order": ["SOCPA", "ZATCA", "IFRS Foundation / IASB", "IAASB"],
+    "official_sources_only_for_authoritative_updates": true,
+    "copyright": "Store metadata, summaries, effective dates and links; do not republish protected standards text without a licence.",
+    "human_review_required": true
+  },
+  "sources": [
+    {
+      "id": "ifrs-required-2026",
+      "issuer": "IFRS Foundation / IASB",
+      "kind": "accounting-standards",
+      "tier": "A",
+      "title_ar": "معايير IFRS المطلوبة في 1 يناير 2026",
+      "url": "https://www.ifrs.org/news-and-events/news/2026/01/now-available-ifrs-accounting-standards-required-2026-two-editions/",
+      "effective_context": "Required at 1 January 2026",
+      "notes_ar": "مرجع إصدار 2026 والمتطلبات النافذة في 1 يناير 2026؛ يشمل تعديلات التصنيف والقياس للأدوات المالية والتحسينات السنوية المجلد 11 وعقود الكهرباء المعتمدة على الطبيعة وبيان ممارسة تعليق الإدارة المراجع."
+    },
+    {
+      "id": "ifrs-standards-navigator",
+      "issuer": "IFRS Foundation / IASB",
+      "kind": "standards-navigator",
+      "tier": "A",
+      "title_ar": "مستكشف معايير IFRS الرسمي",
+      "url": "https://www.ifrs.org/issued-standards/list-of-standards/",
+      "notes_ar": "المرجع الرسمي للمعايير والتعديلات والتصحيحات التحريرية ومعلومات النفاذ."
+    },
+    {
+      "id": "socpa-accounting-standards",
+      "issuer": "SOCPA",
+      "kind": "saudi-accounting-standards",
+      "tier": "A",
+      "title_ar": "معايير المحاسبة المعتمدة في المملكة",
+      "url": "https://socpa.org.sa/Socpa/Professional-standards/Accounting-standards.aspx?lang=ar-sa",
+      "notes_ar": "المرجع السعودي لاعتماد معايير المحاسبة والتحديثات والآراء الفنية المحلية ومعيار المنشآت الصغيرة والمتوسطة."
+    },
+    {
+      "id": "socpa-professional-standards",
+      "issuer": "SOCPA",
+      "kind": "saudi-professional-standards",
+      "tier": "A",
+      "title_ar": "المعايير المهنية السعودية",
+      "url": "https://socpa.org.sa/Socpa/Professional-standards.aspx",
+      "notes_ar": "بوابة معايير المحاسبة والمراجعة والجودة وسلوك وآداب المهنة والتوضيحات التطبيقية والاستفسارات المهنية."
+    },
+    {
+      "id": "socpa-projects-2026",
+      "issuer": "SOCPA",
+      "kind": "standards-projects",
+      "tier": "A",
+      "title_ar": "مشاريع المعايير لدى SOCPA",
+      "url": "https://socpa.org.sa/Socpa/Professional-standards/2748/4002.aspx",
+      "notes_ar": "لرصد مشاريع المعايير والتعديلات المفتوحة للمشورة وربطها بمشاريع IASB وIAASB وأخلاقيات المهنة."
+    },
+    {
+      "id": "zatca-vat-law",
+      "issuer": "ZATCA",
+      "kind": "saudi-vat-law",
+      "tier": "A",
+      "title_ar": "نظام ضريبة القيمة المضافة السعودي",
+      "url": "https://zatca.gov.sa/ar/RulesRegulations/Taxes/Pages/VATLaw.aspx",
+      "notes_ar": "المرجع النظامي الرسمي لضريبة القيمة المضافة في المملكة."
+    },
+    {
+      "id": "zatca-vat-regulations",
+      "issuer": "ZATCA",
+      "kind": "saudi-vat-regulations",
+      "tier": "A",
+      "title_ar": "اللائحة التنفيذية لضريبة القيمة المضافة",
+      "url": "https://zatca.gov.sa/ar/RulesRegulations/Taxes/Pages/VATImplementingRegulations.aspx",
+      "notes_ar": "مرجع قواعد التنفيذ والامتثال لضريبة القيمة المضافة والتعديلات المعتمدة."
+    },
+    {
+      "id": "iaasb-current-projects-2026",
+      "issuer": "IAASB",
+      "kind": "audit-standards-projects",
+      "tier": "A",
+      "title_ar": "أحدث مشاريع IAASB",
+      "url": "https://www.iaasb.org/iaasb-consultations/latest-our-projects",
+      "notes_ar": "يتضمن مستجدات مشاريع معايير المراجعة، ومنها مشروعات ISA 330 وISA 500 وISA 520 المعدلة في 2026."
+    },
+    {
+      "id": "iaasb-isa-330-500-520-ed-2026",
+      "issuer": "IAASB",
+      "kind": "audit-exposure-draft",
+      "tier": "A",
+      "title_ar": "مشروعات تعديلات أدلة المراجعة والاستجابة للمخاطر 2026",
+      "url": "https://www.iaasb.org/publications/proposed-revisions-audit-evidence-risk-response-isa-330-isa-500-isa-520",
+      "status": "exposure-draft",
+      "comments_due": "2026-12-15",
+      "notes_ar": "مشروعات وليست معايير نافذة؛ يجب عرضها في التطبيق بعلامة «مشروع للتعليق» وعدم استخدامها كمتطلب إلزامي نافذ."
+    }
+  ],
+  "knowledge_notes": [
+    {
+      "id": "ifrs18-effective",
+      "title_ar": "IFRS 18",
+      "fact_ar": "يبدأ نفاذ IFRS 18 للفترات السنوية التي تبدأ في أو بعد 1 يناير 2027، مع السماح بالتطبيق المبكر وفق شروط المعيار.",
+      "classification": "future-effective-standard"
+    },
+    {
+      "id": "audit-ed-not-effective",
+      "title_ar": "ISA 330/500/520 Proposed Revisions 2026",
+      "fact_ar": "هذه تعديلات مقترحة منشورة للتعليق في أغسطس 2026 وليست متطلبات نافذة بعد.",
+      "classification": "exposure-draft"
+    }
+  ]
+}
