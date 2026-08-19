@@ -33,14 +33,19 @@ for (const f of ['v38-ultimate.css', 'v38-ultimate.js', 'v38-io.js', 'v38-report
   ok(fs.existsSync('public/' + f) && read('public/' + f).length > 500, 'client module ' + f + ' exists and is substantial');
 }
 
-ok(edge.includes("version:'v38.1.0-root'"), 'suite version is v38.1.0-root');
-ok(edge.includes('2026.08.19-v38.1-user-polish'), 'v38.1 production build identity is preserved');
+ok(edge.includes("version:'v38.1.1-root'"), 'suite version is v38.1.1-root');
+ok(edge.includes('2026.08.19-v38.1.1-canva-visual-system'), 'Canva visual-system production build identity is preserved');
+ok(edge.includes("designAuthority:'KOSIF v38 Canva navy/gold visual system'"), 'Canva navy/gold design authority is explicit');
 ok(edge.includes('handleRealtimeSession') && edge.indexOf('handleRealtimeSession') < edge.lastIndexOf('handleV38(req'), 'owner-session realtime router runs before legacy v38 handler');
 ok(edge.includes('/v38-live.js?v=38.1.1'), 'audit shell cache-busts the new realtime client');
 ok(edge.includes('/v38-ultimate.js?v=38') && edge.includes('/v38-ultimate.css?v=38'), 'audit shell injects the v38 visual layer');
-ok(edge.includes('/v38-user-polish.js?v=38.1.0') && edge.includes('/v38-user-polish.css?v=38.1.0'), 'audit shell keeps final user polish after v38 core');
+ok(edge.includes('/v38-user-polish.js?v=38.1.0') && edge.includes('/v38-user-polish.css?v=38.1.1-canva'), 'audit shell loads Canva final polish after v38 core');
 ok(edge.includes('v38-io.js') && edge.includes('v38-reports.js') && edge.includes('v38-books.js'), 'audit shell injects v38 workspaces (io/reports/books)');
 ok(edge.includes("'cache-control','no-cache, no-store, must-revalidate'"), 'audit HTML is not allowed to reuse a stale release shell');
+
+const polishCss = read('public/v38-user-polish.css');
+ok(polishCss.includes('Canva-approved visual system') && polishCss.includes('--kup-navy:#0A1F44') && polishCss.includes('--kup-gold:#C9A227'), 'Canva navy/gold visual tokens are present in final polish');
+ok(polishCss.includes('--kup-font-ui:"Tajawal"') && polishCss.includes('--kup-font-display:"Cairo"'), 'Canva-approved Arabic typography hierarchy is present');
 
 const polish = read('public/v38-user-polish.js');
 ok(polish.includes('KosifSecureAIKeys') && polish.includes("zai:'"), 'council provider keys are session-memory only and include Z.ai');
