@@ -27,14 +27,14 @@ ok(fs.existsSync('src/v38-realtime-session.js'), 'owner-session realtime router 
 ok(fs.existsSync('src/v38-source-intelligence.js'), 'source intelligence fabric is present');
 ok(fs.existsSync('src/v38-books.js'), 'books bridge (Open Library gateway) is present');
 ok(fs.existsSync('scripts/generate-v38-demo.mjs'), 'synthetic audit lab generator is present');
-ok(fs.existsSync('public/demo/v38/manifest.json'), 'synthetic lab dataset manifest is generated');
+ok(fs.existsSync('public/demo/v38/manifest.json'), 'synthetic audit lab dataset manifest is generated');
 
 for (const f of ['v38-ultimate.css', 'v38-ultimate.js', 'v38-io.js', 'v38-reports.js', 'v38-accounting.js', 'v38-evidence-graph.js', 'v38-council-v3.js', 'v38-source-fabric.js', 'v38-books.js', 'v38-live.js', 'v38-lab.js', 'v38-user-polish.css', 'v38-user-polish.js']) {
   ok(fs.existsSync('public/' + f) && read('public/' + f).length > 500, 'client module ' + f + ' exists and is substantial');
 }
 
 ok(edge.includes("version:'v38.1.0-root'"), 'suite version is v38.1.0-root');
-ok(edge.includes('2026.08.19-v38.1-realtime-session-key'), 'v38.1 realtime build id is set');
+ok(edge.includes('2026.08.19-v38.1-user-polish'), 'v38.1 production build identity is preserved');
 ok(edge.includes('handleRealtimeSession') && edge.indexOf('handleRealtimeSession') < edge.lastIndexOf('handleV38(req'), 'owner-session realtime router runs before legacy v38 handler');
 ok(edge.includes('/v38-live.js?v=38.1.1'), 'audit shell cache-busts the new realtime client');
 ok(edge.includes('/v38-ultimate.js?v=38') && edge.includes('/v38-ultimate.css?v=38'), 'audit shell injects the v38 visual layer');
