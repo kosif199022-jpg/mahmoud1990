@@ -1,6 +1,7 @@
 (()=>{'use strict';
 const OLD_TEXT='يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.';
 let verified=false,observer=null,timer=0;
+const setText=(el,value)=>{if(el&&el.textContent!==String(value))el.textContent=String(value)};
 function removeLegacyBanner(){
   if(!verified)return;
   const b=document.getElementById('kosif-release-banner');
@@ -8,12 +9,9 @@ function removeLegacyBanner(){
   const card=document.getElementById('kosif-build-card');
   const info=window.KosifBuildInfo;
   if(card&&info){
-    const v=card.querySelector('#kosif-build-version');
-    const id=card.querySelector('[data-k-build]');
-    const state=card.querySelector('[data-k-release-state]');
-    if(v)v.textContent=info.version||'Kosif';
-    if(id)id.textContent=info.buildId||'—';
-    if(state)state.textContent='متطابق ✓';
+    setText(card.querySelector('#kosif-build-version'),info.version||'Kosif');
+    setText(card.querySelector('[data-k-build]'),info.buildId||'—');
+    setText(card.querySelector('[data-k-release-state]'),'متطابق ✓');
   }
 }
 function browserBuild(){return String(window.KosifV38?.buildId||'').trim()}
@@ -26,18 +24,30 @@ async function verify(){
     const isV38=String(x?.version||'').startsWith('v38.')&&x?.productName==='Kosif';
     const sameBuild=!loaded||String(x?.buildId||'')===loaded;
     verified=!!(isV38&&sameBuild);
-    if(verified){window.KosifBuildInfo=x;document.documentElement.dataset.kosifReleaseIntegrity='ok';removeLegacyBanner()}
+    if(verified){
+      window.KosifBuildInfo=x;
+      if(document.documentElement.dataset.kosifReleaseIntegrity!=='ok')document.documentElement.dataset.kosifReleaseIntegrity='ok';
+      removeLegacyBanner();
+    }
     return verified;
   }catch(_){return false}
+}
+function releaseBoot(){
+  const boot=document.getElementById('kosif-boot');
+  if(!boot||boot.classList.contains('error')||boot.classList.contains('done'))return;
+  document.body?.classList.add('kosif-ready');
+  boot.classList.add('done');
+  setTimeout(()=>boot.remove(),650);
 }
 function start(){
   if(observer)return;
   observer=new MutationObserver(removeLegacyBanner);
-  observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+  observer.observe(document.documentElement,{childList:true,subtree:true});
   verify();
-  timer=setInterval(()=>{verify().then(removeLegacyBanner)},1500);
-  setTimeout(()=>{if(timer){clearInterval(timer);timer=0}},15000);
-  window.addEventListener('pageshow',()=>verify().then(removeLegacyBanner),{passive:true});
+  timer=setInterval(()=>verify().then(removeLegacyBanner),1500);
+  setTimeout(()=>{if(timer){clearInterval(timer);timer=0}},12000);
+  setTimeout(releaseBoot,2500);
+  window.addEventListener('pageshow',()=>{verify().then(removeLegacyBanner);setTimeout(releaseBoot,800)},{passive:true});
   window.addEventListener('online',()=>verify().then(removeLegacyBanner),{passive:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
