@@ -6,7 +6,7 @@ import { handleRealtimeSession } from './v38-realtime-session.js';
 const SUITE={
   productName:'Kosif',
   version:'v38.1.0-root',
-  buildId:'2026.08.19-v38.1-realtime-session-key',
+  buildId:'2026.08.19-v38.1-user-polish',
   architecture:'suite-edge → security-edge → native-worker + v38 trusted core',
   modules:{audit:'/audit/',libraries:'/libraries/',wealth:'/wealth/reader.html',sales:'/sales/'},
   designAuthority:'Aghnam Al-Wadi Sales Dashboard 7',
