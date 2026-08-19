@@ -3,15 +3,20 @@ name: Export Full Kosif JSON
 on:
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/export-full-code-json.yml'
+    paths-ignore:
+      - 'Kosif-Full-Application-Source.json'
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: kosif-full-source-json-main
+  cancel-in-progress: true
+
 jobs:
   export:
+    if: github.actor != 'github-actions[bot]' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -92,7 +97,7 @@ jobs:
           p='Kosif-Full-Application-Source.json'
           with open(p,encoding='utf-8') as f: d=json.load(f)
           assert d['file_count'] == len(d['files'])
-          for required in ['src/worker.js','src/legacy-worker.js','src/library-module.js','src/kosif-workspace.js','public/index.html','public/v36.css','public/v36-ai-gate.js','public/standards/index.html','wrangler.toml']:
+          for required in ['src/legacy-worker.js','src/library-module.js','src/kosif-workspace.js','src/suite-edge.js','src/v38-api.js','public/index.html','public/v36.css','public/v36-ai-gate.js','public/standards/index.html','wrangler.toml']:
               assert required in d['files'], required
           print('JSON_VALID', d['commit'], d['file_count'])
           PY
@@ -111,5 +116,9 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Kosif-Full-Application-Source.json
+          if git diff --cached --quiet; then
+            echo 'Full source JSON already current.'
+            exit 0
+          fi
           git commit -m 'chore: publish current full source JSON [skip ci]'
           git push origin HEAD:main
