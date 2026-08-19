@@ -1,10 +1,10 @@
 /*
  * KOSIF v38 — OpenAI Realtime server relay
  *
- * Security invariant: the browser never receives or submits a standard OpenAI
- * API key. Cloudflare stores the key as OPENAI_API_KEY (or
- * KOSIF_OPENAI_API_KEY) and this module exchanges the browser's SDP offer with
- * OpenAI's server-side WebRTC call endpoint.
+ * Preferred mode: Cloudflare stores OPENAI_API_KEY / KOSIF_OPENAI_API_KEY.
+ * Fallback mode: after owner authentication, the browser may submit the OpenAI
+ * key already entered in the Reviewer Council for this one request. The key is
+ * never persisted, logged, returned to the browser, or written to KV/D1.
  */
 
 export const DEFAULT_REALTIME_MODEL = 'gpt-realtime-2.1';
@@ -14,7 +14,6 @@ const REALTIME_MODELS = new Set([
   'gpt-realtime-2.1-mini',
   'gpt-realtime-2',
   'gpt-realtime-1.5',
-  // Backward-compatible aliases retained for existing saved UI state.
   'gpt-realtime',
   'gpt-realtime-mini'
 ]);
@@ -33,12 +32,29 @@ function text(value, max = 1000) {
   return String(value ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, max);
 }
 
-function apiKey(env) {
+function serverApiKey(env) {
   return text(env?.KOSIF_OPENAI_API_KEY || env?.OPENAI_API_KEY || '', 512);
 }
 
+function transientApiKey(value) {
+  const key = text(value, 512);
+  if (!key || key.length < 20 || /\s/.test(key)) return '';
+  return key;
+}
+
+function resolvedApiKey(env, input = {}) {
+  const server = serverApiKey(env);
+  if (server) return { key: server, source: 'server-secret' };
+  const transient = transientApiKey(input.key);
+  return transient ? { key: transient, source: 'owner-session-transient' } : { key: '', source: 'none' };
+}
+
 export function realtimeConfigured(env) {
-  return apiKey(env).length >= 20;
+  return serverApiKey(env).length >= 20;
+}
+
+export function realtimeSessionKeySupported() {
+  return true;
 }
 
 function normalizeModel(value) {
@@ -114,12 +130,12 @@ function callIdFromLocation(location) {
 }
 
 export async function createRealtimeCall(env, input = {}) {
-  const key = apiKey(env);
-  if (!key) {
+  const auth = resolvedApiKey(env, input);
+  if (!auth.key) {
     return {
       ok: false,
       error: 'REALTIME_NOT_CONFIGURED',
-      message: 'OpenAI Realtime is not configured on the server.'
+      message: 'OpenAI Realtime needs either a server secret or the transient OpenAI key from the unlocked Reviewer Council session.'
     };
   }
 
@@ -155,10 +171,7 @@ export async function createRealtimeCall(env, input = {}) {
           interrupt_response: true
         }
       },
-      output: {
-        voice,
-        speed: 1.0
-      }
+      output: { voice, speed: 1.0 }
     }
   };
 
@@ -170,7 +183,7 @@ export async function createRealtimeCall(env, input = {}) {
   try {
     response = await timedFetch(OPENAI_REALTIME_CALLS, {
       method: 'POST',
-      headers: { authorization: `Bearer ${key}` },
+      headers: { authorization: `Bearer ${auth.key}` },
       body: form
     });
   } catch (error) {
@@ -192,11 +205,7 @@ export async function createRealtimeCall(env, input = {}) {
   }
 
   if (!/^v=0(?:\r?\n)/.test(answerSdp)) {
-    return {
-      ok: false,
-      error: 'REALTIME_ANSWER_INVALID',
-      message: 'OpenAI Realtime returned an invalid SDP answer.'
-    };
+    return { ok: false, error: 'REALTIME_ANSWER_INVALID', message: 'OpenAI Realtime returned an invalid SDP answer.' };
   }
 
   return {
@@ -206,13 +215,14 @@ export async function createRealtimeCall(env, input = {}) {
     model,
     voice,
     transport: 'webrtc-server-relay',
-    keyExposure: 'none'
+    keyExposure: 'none',
+    credentialSource: auth.source
   };
 }
 
-export async function hangupRealtimeCall(env, callId) {
-  const key = apiKey(env);
-  if (!key) return { ok: false, error: 'REALTIME_NOT_CONFIGURED', message: 'OpenAI Realtime is not configured on the server.' };
+export async function hangupRealtimeCall(env, callId, input = {}) {
+  const auth = resolvedApiKey(env, input);
+  if (!auth.key) return { ok: false, error: 'REALTIME_NOT_CONFIGURED', message: 'OpenAI Realtime credential is unavailable for hangup.' };
   const id = text(callId, 160);
   if (!/^[A-Za-z0-9_-]{3,160}$/.test(id)) return { ok: false, error: 'REALTIME_CALL_ID_INVALID', message: 'Realtime call id is invalid.' };
 
@@ -220,9 +230,9 @@ export async function hangupRealtimeCall(env, callId) {
   try {
     response = await timedFetch(`${OPENAI_REALTIME_CALLS}/${encodeURIComponent(id)}/hangup`, {
       method: 'POST',
-      headers: { authorization: `Bearer ${key}` }
+      headers: { authorization: `Bearer ${auth.key}` }
     }, 12000);
-  } catch (error) {
+  } catch {
     return { ok: false, error: 'REALTIME_HANGUP_UNAVAILABLE', message: 'Realtime hangup request could not be completed.' };
   }
 

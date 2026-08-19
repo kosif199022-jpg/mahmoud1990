@@ -10,30 +10,35 @@ const ok = (c, m) => { if (!c) throw new Error('V38_CONTRACT_FAIL: ' + m); conso
 const edge = read('src/suite-edge.js');
 const proxy = read('src/suite-proxy.js');
 const api = read('src/v38-api.js');
+const realtime = read('src/v38-realtime.js');
+const realtimeSession = read('src/v38-realtime-session.js');
+const live = read('public/v38-live.js');
 const wrangler = read('wrangler.toml');
 const pkg = JSON.parse(read('package.json'));
 
 ok(fs.existsSync('src/engine/v38-core.mjs'), 'deterministic v38 core engine is present');
 ok(fs.existsSync('tests/v38-core.test.mjs'), 'v38 core tests are present');
 ok(fs.existsSync('src/engine/v38-evidence-graph.mjs'), 'evidence graph engine is present');
-ok(fs.existsSync('tests/v38-evidence-graph.test.mjs'), 'evidence graph tests are present');
+ok(fs.existsSync('tests/v38-evidence-graph.test.mjs'), 'v38 graph tests are present');
 ok(fs.existsSync('tests/v38-api.test.mjs'), 'v38 API integration tests are present');
 ok(fs.existsSync('src/public-ai-provider.js'), 'public/local AI provider module is present');
 ok(fs.existsSync('src/v38-realtime.js'), 'OpenAI realtime relay is present');
+ok(fs.existsSync('src/v38-realtime-session.js'), 'owner-session realtime router is present');
 ok(fs.existsSync('src/v38-source-intelligence.js'), 'source intelligence fabric is present');
 ok(fs.existsSync('src/v38-books.js'), 'books bridge (Open Library gateway) is present');
 ok(fs.existsSync('scripts/generate-v38-demo.mjs'), 'synthetic audit lab generator is present');
-ok(fs.existsSync('public/demo/v38/manifest.json'), 'synthetic lab dataset manifest is generated');
+ok(fs.existsSync('public/demo/v38/manifest.json'), 'synthetic audit lab dataset manifest is generated');
 
 for (const f of ['v38-ultimate.css', 'v38-ultimate.js', 'v38-io.js', 'v38-reports.js', 'v38-accounting.js', 'v38-evidence-graph.js', 'v38-council-v3.js', 'v38-source-fabric.js', 'v38-books.js', 'v38-live.js', 'v38-lab.js', 'v38-user-polish.css', 'v38-user-polish.js']) {
   ok(fs.existsSync('public/' + f) && read('public/' + f).length > 500, 'client module ' + f + ' exists and is substantial');
 }
 
 ok(edge.includes("version:'v38.1.0-root'"), 'suite version is v38.1.0-root');
-ok(edge.includes('2026.08.19-v38.1-user-polish'), 'v38.1 build id is set');
-ok(edge.includes('handleV38') && edge.includes('/api/kosif/v38/'), 'v38 API router is wired into the suite edge');
+ok(edge.includes('2026.08.19-v38.1-user-polish'), 'v38.1 production build identity is preserved');
+ok(edge.includes('handleRealtimeSession') && edge.indexOf('handleRealtimeSession') < edge.lastIndexOf('handleV38(req'), 'owner-session realtime router runs before legacy v38 handler');
+ok(edge.includes('/v38-live.js?v=38.1.1'), 'audit shell cache-busts the new realtime client');
 ok(edge.includes('/v38-ultimate.js?v=38') && edge.includes('/v38-ultimate.css?v=38'), 'audit shell injects the v38 visual layer');
-ok(edge.includes('/v38-user-polish.js?v=38.1.0') && edge.includes('/v38-user-polish.css?v=38.1.0'), 'audit shell injects final user polish after v38 core');
+ok(edge.includes('/v38-user-polish.js?v=38.1.0') && edge.includes('/v38-user-polish.css?v=38.1.0'), 'audit shell keeps final user polish after v38 core');
 ok(edge.includes('v38-io.js') && edge.includes('v38-reports.js') && edge.includes('v38-books.js'), 'audit shell injects v38 workspaces (io/reports/books)');
 ok(edge.includes("'cache-control','no-cache, no-store, must-revalidate'"), 'audit HTML is not allowed to reuse a stale release shell');
 
@@ -44,11 +49,18 @@ ok(polish.includes('DIGIT_MAP') && polish.includes('westernize'), 'Western digit
 ok(polish.includes('showStandardFallback') && polish.includes('مثال بسيط بالمصري'), 'standards fallback includes practical Egyptian-Arabic explanation');
 ok(polish.includes('reconcileReleaseWarning') && polish.includes('/__version'), 'stale release warning is removed only after live-version verification');
 
+ok(realtime.includes("source: 'owner-session-transient'") && realtime.includes('transientApiKey'), 'Realtime can resolve a transient owner-session key only when no server secret exists');
+ok(realtime.includes('never persisted') || realtime.includes('never persisted, logged'), 'Realtime module documents no persistence/logging for transient credentials');
+ok(realtimeSession.includes('if(!owner)') && realtimeSession.includes('OWNER_AUTH_REQUIRED'), 'transient Realtime routes fail closed without owner session');
+ok(realtimeSession.includes('key:b?.key') && realtimeSession.includes('keyExposure:r.keyExposure'), 'transient key is consumed server-side and never returned');
+ok(live.includes('window.KosifSecureAIKeys?.openai') && live.includes('key: realtimeCredential()'), 'live client reuses only the in-memory Council OpenAI key');
+ok(live.includes('LocalStorage') && live.includes('IndexedDB'), 'live UI discloses that the transient key is not persisted');
+
 ok(proxy.includes('#mixLaunch') && proxy.includes('#smartPebble'), 'Mafateeh reader hides Mix and Smart AI launchers by default');
 ok(proxy.includes('kosif-reader-home') && proxy.includes('kosif-reader-library-home'), 'Mafateeh reader has explicit home/library navigation');
 ok(proxy.includes('std2018') && proxy.includes('std2025') && proxy.includes('dipifr'), 'all prepared books continue to use the Mafateeh reader proxy');
 
-ok(api.includes('OWNER_AUTH_REQUIRED'), 'v38 operational routes are owner-gated');
+ok(api.includes('OWNER_AUTH_REQUIRED'), 'legacy v38 operational routes remain owner-gated');
 ok(api.includes('forbiddenAIFields') && api.includes('canApprove: false'), 'council governance strips authority and never auto-approves');
 ok(api.includes('stripAuthority'), 'AI outputs are stripped of authority fields server-side');
 ok(api.includes('openlibrary') || read('src/v38-books.js').includes('openlibrary.org'), 'millions-of-books gateway targets Open Library');
