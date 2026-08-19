@@ -1,4 +1,5 @@
 /* KOSIF v38 — secure OpenAI Realtime server-relay tests */
+import { readFileSync } from 'node:fs';
 import { createRealtimeCall, hangupRealtimeCall, realtimeConfigured } from '../src/v38-realtime.js';
 import { handleV38 } from '../src/v38-api.js';
 
@@ -13,6 +14,12 @@ const VALID_ANSWER = 'v=0\r\no=- 2 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\n';
 const base = 'https://kosif.test';
 
 console.log('KOSIF v38 Realtime security tests');
+
+const liveUi = readFileSync(new URL('../public/v38-live.js', import.meta.url), 'utf8');
+ok(!liveUi.includes('v38-lv-key'), 'voice UI has no browser OpenAI key field');
+ok(!liveUi.includes('api.openai.com'), 'voice UI never calls OpenAI directly');
+ok(liveUi.includes('/api/kosif/v38/realtime/call'), 'voice UI exchanges SDP through KOSIF server relay');
+ok(liveUi.includes('/api/kosif/v38/realtime/hangup'), 'voice UI terminates server-side Realtime calls');
 
 ok(realtimeConfigured({}) === false, 'server relay reports unconfigured without secret');
 ok(realtimeConfigured({ OPENAI_API_KEY: 'sk-server-secret-1234567890' }) === true, 'server relay detects server secret');
