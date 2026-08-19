@@ -1,10 +1,8 @@
 import fs from 'node:fs';
+import vm from 'node:vm';
 const read=p=>fs.readFileSync(p,'utf8');
 const ok=(c,m)=>{if(!c)throw new Error('KOSIF_LIBRARIES_SALES_FAIL: '+m);console.log('  ✅ '+m)};
 const libraries=read('public/libraries/index.html');
-const preparedHtml=read('public/libraries/reader.html');
-const preparedCss=read('public/libraries/reader.css');
-const preparedJs=read('public/libraries/reader.js');
 const proxy=read('src/suite-proxy.js');
 const edge=read('src/suite-edge.js');
 const wealthLibrary=read('public/wealth-library-v37.js');
@@ -16,41 +14,41 @@ const sw=read('public/sw.js');
 const stdLibrary=JSON.parse(read('public/standards/data/library.json'));
 
 ok(edge.includes("libraries:'/libraries/'")&&edge.includes("p==='/libraries'"),'Libraries is a first-class Kosif route');
-ok(libraries.includes('/wealth/reader.html?book=mafateeh'),'Mafateeh keeps its original reader route');
-for(const id of ['std2025','std2018','dipifr'])ok(libraries.includes(`/libraries/reader.html?book=${id}`),`prepared book ${id} opens in isolated Kosif reader`);
+for(const id of ['mafateeh','std2025','std2018','dipifr'])ok(libraries.includes(`/wealth/reader.html?book=${id}`),`book ${id} opens in the original Mafateeh reader route`);
 ok(!/<iframe[^>]+\.pdf/i.test(libraries)&&!libraries.includes('application/pdf'),'standards are not presented as ordinary embedded PDFs');
+ok(libraries.includes('قارئ مفاتيح الثروة للجميع')&&libraries.includes('لا يتم إنشاء قارئ منفصل'),'library UI documents the single-reader template contract');
 
 ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])"),'reader identities remain allowlisted');
-ok(proxy.includes("PREPARED_BOOKS = new Set(['std2018', 'std2025', 'dipifr'])"),'prepared books have an explicit isolation allowlist');
-ok(proxy.includes('function preparedReaderRedirect(url, path)')&&proxy.includes("new URL('/libraries/reader.html', url.origin)")&&proxy.includes("target.searchParams.set('book', book)"),'old Wealth deep links migrate to the isolated reader');
-ok(proxy.includes("'cache-control': 'no-store, max-age=0'")&&proxy.includes("'x-kosif-suite-module': 'prepared-reader'"),'prepared-reader redirects cannot be cached as stale Wealth documents');
-ok(proxy.includes('function replaceLegacyReaderLibrary(text)')&&proxy.includes("'/wealth-library-v37.js'"),'legacy upstream reader-library integration is replaced by the Kosif router');
-ok(proxy.includes('if (!text.includes(\'/wealth-library-v37.js\')) injections.push')&&!proxy.includes('data-kosif-book-bootstrap'),'Mafateeh injection no longer depends on localStorage book bootstraps');
-ok(!proxy.includes('exposeReaderRuntimeBindings')&&!proxy.includes("replace(dConst, 'var D = ')")&&!proxy.includes("replace(chConst, 'var CH = ')") ,'prepared-reader correctness no longer depends on mutating Mafateeh D/CH declarations');
-ok(proxy.includes('function injectHtmlFragments(text, fragments)')&&proxy.includes('return text.replace(/<\\/body>/i')&&proxy.includes('return text.replace(/<\\/html>/i')&&proxy.includes('return text + payload'),'Mafateeh integration still survives unusual upstream HTML shape');
-ok(proxy.includes('function isReaderHtmlRequest(contentType = \'\', requestUrl = null)')&&proxy.includes("p === '/wealth/reader.html'")&&proxy.includes("p === '/wealth/reader'")&&proxy.includes("p === '/wealth/'"),'canonical Wealth reader routes are recognized as HTML without trusting upstream MIME');
-ok(proxy.includes('function isRedirect(r)')&&proxy.includes('let redirectFallback = null'),'Mafateeh aliases still resolve real HTML before fallback redirects');
+ok(!proxy.includes('PREPARED_BOOKS')&&!proxy.includes('preparedReaderRedirect'),'prepared books are no longer routed to a separate reader');
+ok(proxy.includes("const book = requestedLibraryBook(url) || 'mafateeh'")&&proxy.includes("localStorage.setItem('mk_lib_book'"),'missing book identity deterministically resets to Mafateeh');
+ok(proxy.includes('function exposeReaderRuntimeBindings(text)')&&proxy.includes("replace(dConst, 'var D = ')")&&proxy.includes("replace(chConst, 'var CH = ')")&&proxy.includes('text = exposeReaderRuntimeBindings(text)'),'proxied reader exposes the original D/CH bindings for prepared-book replacement');
+ok(proxy.includes('function replaceLegacyReaderLibrary(text)')&&proxy.includes('/wealth-library-v37.js'),'any upstream four-book layer is normalized to the Kosif compatibility layer');
+ok(proxy.includes('#mixerDock,#smartHubDock,#libBtn{display:none!important}') ,'Mixer, Smart Library and internal library dock stay hidden on the default reader screen');
+ok(!proxy.includes('/wealth-theme-v37.css')&&!proxy.includes("injections.push('<script src=\"/suite-shell.js\""),'reader keeps the original Mafateeh navy/gold screen without suite/theme overrides');
+ok(proxy.includes('function injectHtmlFragments(text, fragments)')&&proxy.includes('return text.replace(/<\\/body>/i')&&proxy.includes('return text.replace(/<\\/html>/i')&&proxy.includes('return text + payload'),'reader integration survives unusual upstream HTML shape');
+ok(proxy.includes('function isReaderHtmlRequest(contentType = \'\', requestUrl = null)')&&proxy.includes("p === '/wealth/reader.html'")&&proxy.includes("p === '/wealth/reader'")&&proxy.includes("p === '/wealth/'"),'canonical Wealth routes are recognized as HTML without trusting upstream MIME');
+ok(proxy.includes('function isRedirect(r)')&&proxy.includes('let redirectFallback = null'),'reader aliases still resolve real HTML before fallback redirects');
 
-ok(preparedHtml.includes('/libraries/reader.js')&&preparedHtml.includes('/libraries/reader.css'),'isolated reader owns its HTML/CSS/JS shell');
-ok(preparedHtml.includes('viewport-fit=cover')&&preparedCss.includes('env(safe-area-inset-top)')&&preparedCss.includes('env(safe-area-inset-bottom)'),'isolated reader is iPhone safe-area aware');
-ok(preparedCss.includes('@media(prefers-reduced-motion:reduce)')&&preparedCss.includes('width:44px')&&preparedCss.includes('height:44px'),'isolated reader preserves reduced motion and touch targets');
-ok(preparedJs.includes("const ALLOWED=new Set(['std2025','std2018','dipifr'])")&&preparedJs.includes("const BOOK=String(qs.get('book')||'').toLowerCase()"),'URL book identity is authoritative and allowlisted');
-ok(preparedJs.includes('kosif_prepared_reader:${BOOK}:${s}')&&preparedJs.includes("localStorage.removeItem('mk_lib_book')")&&!preparedJs.includes("localStorage.setItem('mk_lib_book'"),'reading position is namespaced per prepared book and the obsolete shared Wealth selector is only removed');
-ok(preparedJs.includes("navigator.serviceWorker.getRegistrations")&&preparedJs.includes("scope.pathname.startsWith('/wealth/')")&&preparedJs.includes('reg.unregister()'),'prepared reader retires stale iOS/Safari Wealth service-worker registrations');
-ok(preparedJs.includes("stalePaths=new Set(['/wealth/','/wealth/reader','/wealth/reader.html','/wealth/reader-library.js'])")&&preparedJs.includes('cache.delete(req)'),'prepared reader removes only obsolete cached Wealth reader shells, not book/audio caches');
-ok(preparedJs.includes("cache:'no-store'")&&preparedJs.includes("'cache-control':'no-cache'"),'prepared book index/chapter fetches bypass stale browser HTTP cache');
-ok(preparedJs.includes('AbortController')&&preparedJs.includes('requestSeq'),'chapter switching aborts stale in-flight fetches and ignores races');
-ok(preparedJs.includes("window.__KOSIF_PREPARED_READER__={isolated:true")&&preparedJs.includes("route:location.pathname"),'browser tests can prove the isolated runtime is active');
-ok(!/navigator\.serviceWorker\.register|window\.D\s*=|window\.CH\s*=|\bconst\s+D\s*=|\bconst\s+CH\s*=/.test(preparedJs),'isolated reader does not register Wealth SW or share Mafateeh D/CH globals');
-ok(wealthLibrary.includes("location.assign('/libraries/reader.html?book='+encodeURIComponent(id))"),'Mafateeh library sheet routes prepared books out of its runtime');
-ok(!/window\.D\s*=|window\.CH\s*=|normalizeIndex\(|hydrate\(/.test(wealthLibrary),'Mafateeh library router cannot mutate or hydrate prepared content in-process');
-ok(wealthLibrary.includes("cache:'no-store'")&&wealthLibrary.includes('__KOSIF_WEALTH_LIBRARY_ROUTER__'),'Mafateeh router is deterministic and refresh-safe');
-ok(!/Math\.random|crypto\.getRandomValues|\/api\/ai|openai|anthropic|gemini/i.test(preparedJs+wealthLibrary),'reader layers have no random or AI inference path');
+ok(wealthLibrary.includes('__KOSIF_WEALTH_LIBRARY__')&&!wealthLibrary.includes('__KOSIF_WEALTH_LIBRARY_ROUTER__'),'shared four-book runtime layer is active instead of the isolation router');
+ok(wealthLibrary.includes('window.D=D;window.CH=CH;curId=id'),'book switch writes the selected model into the same D/CH bindings read by Mafateeh');
+ok(wealthLibrary.includes("const initialId=ALLOWED.includes(requested)?requested:'mafateeh'")&&wealthLibrary.includes("LS.set('book',initialId)"),'Mafateeh is the deterministic default even after an earlier book selection');
+ok(wealthLibrary.includes('function normalizeIndex(raw,info,id)')&&wealthLibrary.includes('function nativeParts(raw,id)'),'reader normalizes native Kosif book indexes and derives reader parts');
+ok(wealthLibrary.includes('async function hydrate(i)')&&wealthLibrary.includes('__lazy:id'),'prepared chapters hydrate lazily inside the original reader');
+ok(wealthLibrary.includes('#libBtn{display:none!important'),'internal library button is present only as latent capability and is not visible by default');
+ok(wealthLibrary.includes("cache:'no-store'")&&wealthLibrary.includes("const BOOK_BASE='/wealth/books'"),'book identity/content fetches bypass stale browser cache');
+ok(wealthLibrary.includes("info.embedded")&&wealthLibrary.includes('D0=window.D,CH0=window.CH'),'returning to Mafateeh restores the embedded original book model');
+ok(wealthLibrary.includes('prefers-reduced-motion:reduce')&&wealthLibrary.includes('min-width:44px'),'latent library sheet keeps reduced-motion and touch safeguards');
+ok(!/Math\.random|crypto\.getRandomValues|\/api\/ai|openai|anthropic|gemini/i.test(wealthLibrary),'four-book compatibility layer has no random or AI inference path');
+
+const runtime=vm.createContext({});
+vm.runInContext("var D={meta:{title:'Mafateeh'}};var CH=[{title:'M'}];function readerTitle(){return D.meta.title};function readerChapter(){return CH[0].title}",runtime);
+runtime.D={meta:{title:'Standards 2025'}};runtime.CH=[{title:'IFRS 1'}];
+ok(vm.runInContext('readerTitle()',runtime)==='Standards 2025'&&vm.runInContext('readerChapter()',runtime)==='IFRS 1','classic-script var bindings make untouched reader functions follow the selected book');
 
 ok(edge.includes("std2018:{source:'b1'")&&edge.includes("std2025:{source:'b3'")&&edge.includes("dipifr:{source:'b2'"),'reader aliases map to the current Kosif standards datasets');
 ok(edge.includes("p==='/wealth/books/library.json'")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\.json$/")&&edge.includes("/^\\/wealth\\/books\\/(std2018|std2025|dipifr)\\/(\\d+)\\.json$/"),'library, index and chapter compatibility routes exist before the Wealth proxy');
 ok(edge.includes("return redirect(req,`/standards/data/${cfg.source}.json`,307)")&&edge.includes("return redirect(req,`/standards/data/${cfg.source}/${n}.json`,307)"),'reader indexes and chapters redirect to native Kosif assets instead of being rebuilt at the edge');
-ok(edge.indexOf("p.startsWith('/wealth/books/')")<edge.indexOf("p.startsWith('/wealth/')"),'local book compatibility routes win before the legacy Mafateeh upstream proxy');
+ok(edge.indexOf("p.startsWith('/wealth/books/')")<edge.indexOf("p.startsWith('/wealth/')"),'local book compatibility routes win before the Mafateeh upstream proxy');
 for(const id of ['b1','b2','b3','b4'])ok(stdLibrary.some(x=>x.id===id),`current standards data contains ${id}`);
 
 ok(sales.includes('<title>تحليل المبيعات | Kosif</title>')&&!sales.includes('أغنام الوادي'),'Sales workspace is general in its visible shell');
@@ -61,5 +59,5 @@ ok(motion.includes("Number(r.revenue)||0")&&motion.includes('groupChannels()'),'
 ok(motion.includes("prefers-reduced-motion")&&motion.includes("pointer: coarse")&&motionCss.includes('@media(prefers-reduced-motion:reduce)'),'motion has reduced-motion and touch-device fallbacks');
 ok(motion.includes("data-mode=\"2d\"")||motion.includes("data-mode=\"3d\"")||motion.includes("panel.dataset.mode"),'3D view includes a table fallback mode');
 ok(!/fetch\(|XMLHttpRequest|\/api\//.test(motion),'motion layer has no AI or network request path');
-ok(sw.includes('/libraries/reader.html')&&sw.includes('/libraries/reader.css')&&sw.includes('/libraries/reader.js')&&sw.includes('/wealth-library-v37.js'),'isolated reader shell and Mafateeh router are PWA cached');
+ok(sw.includes('/libraries/index.html')&&sw.includes('/sales/sales-motion-v1.js')&&sw.includes('/wealth-library-v37.js'),'Libraries, Sales and Wealth compatibility assets are PWA cached');
 console.log('KOSIF_LIBRARIES_SALES_OK');
