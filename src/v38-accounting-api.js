@@ -1,0 +1,37 @@
+import {parseMinor,formatMinor,validateJournal,trialBalance,computeMateriality,aggregateMisstatements,riskFlags,reproducibleSample,frameworkReadiness,checkInvariants,stableJson} from './engine/v38-core.mjs';
+import {EvidenceGraph} from './engine/v38-evidence-graph.mjs';
+const JOURNAL='kosif:v38:journal:';const GRAPH='kosif:v38:evidence-graph';
+function json(body,status=200){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-kosif-v38':'accounting'}})}
+async function body(req){try{return await req.clone().json()}catch{return null}}
+async function hash(s){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s)));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function ownerOnly(owner){return owner?null:json({error:'OWNER_AUTH_REQUIRED',locked:true,message:'هذا الإجراء المحاسبي يغيّر سجلًا مهنيًا ويتطلب جلسة المالك.'},401)}
+async function loadEntries(env){if(!env?.DATA)return[];const list=await env.DATA.list({prefix:JOURNAL,limit:1000});const out=[];for(const k of list.keys||[]){const x=await env.DATA.get(k.name,'json');if(x)out.push(x);}return out.sort((a,b)=>String(a.postedAt||'').localeCompare(String(b.postedAt||'')));}
+async function loadGraph(env){if(!env?.DATA)return new EvidenceGraph();return new EvidenceGraph(await env.DATA.get(GRAPH,'json')||{});}
+async function saveGraph(env,g){if(env?.DATA)await env.DATA.put(GRAPH,JSON.stringify(g.snapshot()));}
+export async function handleV38Accounting(req,env,{owner=false}={}){
+ const u=new URL(req.url),p=u.pathname;
+ if(p==='/api/kosif/v38/accounting/normalize'&&req.method==='POST'){const b=await body(req);if(!b)return json({error:'bad_json'},400);try{const minor=parseMinor(b.amount,b.scale??2);return json({ok:true,minor:minor.toString(),formatted:formatMinor(minor,b.scale??2)});}catch(e){return json({error:String(e.message||e)},400)}}
+ if(p==='/api/kosif/v38/accounting/journal/validate'&&req.method==='POST'){const b=await body(req);if(!b)return json({error:'bad_json'},400);return json(validateJournal(b));}
+ if(p==='/api/kosif/v38/accounting/journal/post'&&req.method==='POST'){
+   const locked=ownerOnly(owner);if(locked)return locked;if(!env?.DATA)return json({error:'DATA_BINDING_REQUIRED'},503);const b=await body(req);if(!b)return json({error:'bad_json'},400);const v=validateJournal(b);if(!v.ok)return json(v,422);
+   const canonical={date:String(b.date||new Date().toISOString().slice(0,10)),memo:String(b.memo||''),lines:v.lines};const fingerprint=await hash(stableJson(canonical));const id=String(b.id||`J-${fingerprint.slice(0,16)}`);const key=JOURNAL+id;if(await env.DATA.get(key))return json({error:'IMMUTABLE_JOURNAL_EXISTS',id},409);
+   const rec={...canonical,id,status:'posted',postedAt:new Date().toISOString(),fingerprint,source:'deterministic-v38'};await env.DATA.put(key,JSON.stringify(rec));const g=await loadGraph(env);g.upsertNode({id:`journal:${id}`,type:'journal',label:b.memo||id,fingerprint});for(const l of rec.lines)g.upsertNode({id:`account:${l.account||l.accountNo}`,type:'account',label:l.accountName||l.account||l.accountNo}),g.link({from:`journal:${id}`,to:`account:${l.account||l.accountNo}`,type:'posts_to'});await saveGraph(env,g);return json({ok:true,journal:rec},201);
+ }
+ if(p==='/api/kosif/v38/accounting/journal/reverse'&&req.method==='POST'){
+   const locked=ownerOnly(owner);if(locked)return locked;if(!env?.DATA)return json({error:'DATA_BINDING_REQUIRED'},503);const b=await body(req);const id=String(b?.id||'');if(!id)return json({error:'id_required'},400);const original=await env.DATA.get(JOURNAL+id,'json');if(!original)return json({error:'journal_not_found'},404);if(original.status!=='posted')return json({error:'only_posted_journal_can_reverse'},409);
+   const rid=String(b.reversalId||`R-${id}-${Date.now()}`),key=JOURNAL+rid;if(await env.DATA.get(key))return json({error:'IMMUTABLE_JOURNAL_EXISTS',id:rid},409);const lines=original.lines.map(l=>({...l,debitMinor:String(l.creditMinor||'0'),creditMinor:String(l.debitMinor||'0')}));const rec={id:rid,status:'reversal',reverses:id,date:String(b.date||new Date().toISOString().slice(0,10)),memo:String(b.memo||`Reversal of ${id}`),lines,postedAt:new Date().toISOString(),source:'deterministic-v38'};rec.fingerprint=await hash(stableJson(rec));await env.DATA.put(key,JSON.stringify(rec));return json({ok:true,journal:rec},201);
+ }
+ if(p==='/api/kosif/v38/accounting/journals'&&req.method==='GET'){const locked=ownerOnly(owner);if(locked)return locked;return json({ok:true,entries:await loadEntries(env)});}
+ if(p==='/api/kosif/v38/accounting/trial-balance'&&req.method==='GET'){const locked=ownerOnly(owner);if(locked)return locked;return json({ok:true,...trialBalance(await loadEntries(env))});}
+ if(p==='/api/kosif/v38/accounting/materiality'&&req.method==='POST'){const b=await body(req);if(!b)return json({error:'bad_json'},400);try{return json({ok:true,...computeMateriality(b)});}catch(e){return json({error:String(e.message||e)},400)}}
+ if(p==='/api/kosif/v38/accounting/isa450'&&req.method==='POST'){const b=await body(req);if(!b)return json({error:'bad_json'},400);return json({ok:true,...aggregateMisstatements(b.items||[],b.materiality||{})});}
+ if(p==='/api/kosif/v38/accounting/risk'&&req.method==='POST'){const b=await body(req);if(!b)return json({error:'bad_json'},400);return json({ok:true,...riskFlags(b)});}
+ if(p==='/api/kosif/v38/accounting/sample'&&req.method==='POST'){const b=await body(req);if(!b)return json({error:'bad_json'},400);return json({ok:true,...reproducibleSample(b.population||[],b.size||1,b.seed||'kosif-v38')});}
+ if(p==='/api/kosif/v38/accounting/invariants'&&req.method==='GET'){const locked=ownerOnly(owner);if(locked)return locked;return json({ok:true,...checkInvariants({entries:await loadEntries(env)})});}
+ if(p==='/api/kosif/v38/framework/status'&&req.method==='GET')return json({ok:true,...frameworkReadiness({reportingDate:u.searchParams.get('reportingDate')||'2026-12-31',jurisdiction:u.searchParams.get('jurisdiction')||'saudi'})});
+ if(p==='/api/kosif/v38/evidence'&&req.method==='GET'){const locked=ownerOnly(owner);if(locked)return locked;const g=await loadGraph(env);return json({ok:true,...g.snapshot(),validation:g.validate()});}
+ if(p==='/api/kosif/v38/evidence/node'&&req.method==='POST'){const locked=ownerOnly(owner);if(locked)return locked;const b=await body(req);if(!b)return json({error:'bad_json'},400);try{const g=await loadGraph(env),node=g.upsertNode(b);await saveGraph(env,g);return json({ok:true,node,validation:g.validate()},201);}catch(e){return json({error:String(e.message||e)},400)}}
+ if(p==='/api/kosif/v38/evidence/edge'&&req.method==='POST'){const locked=ownerOnly(owner);if(locked)return locked;const b=await body(req);if(!b)return json({error:'bad_json'},400);try{const g=await loadGraph(env),result=g.link(b);await saveGraph(env,g);return json({ok:true,...result,validation:g.validate()},201);}catch(e){return json({error:String(e.message||e)},400)}}
+ if(p==='/api/kosif/v38/evidence/trace'&&req.method==='GET'){const locked=ownerOnly(owner);if(locked)return locked;const g=await loadGraph(env),id=u.searchParams.get('id');if(!id)return json({error:'id_required'},400);return json({ok:true,...g.trace(id,Math.min(10,Math.max(1,Number(u.searchParams.get('depth'))||6)))});}
+ return null;
+}
