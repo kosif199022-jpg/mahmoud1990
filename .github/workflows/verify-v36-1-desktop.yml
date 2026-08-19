@@ -9,6 +9,7 @@ on:
       - 'public/v36-continuity.css'
       - 'public/v36-ai-gate.js'
       - 'public/v36-zai.js'
+      - 'public/v38-live.js'
       - 'public/sw.js'
       - 'src/worker.js'
       - 'src/security-edge.js'
@@ -24,6 +25,7 @@ on:
       - 'public/v36-continuity.css'
       - 'public/v36-ai-gate.js'
       - 'public/v36-zai.js'
+      - 'public/v38-live.js'
       - 'public/sw.js'
       - 'src/worker.js'
       - 'src/security-edge.js'
@@ -70,8 +72,12 @@ jobs:
           const fs=require('fs');
           const ok=(v,m)=>{if(!v)throw Error(m)};
           const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
-          const expectedGateVersion=String(pkg.version||'');
-          const expectedRelease='v'+expectedGateVersion.split('.').slice(0,2).join('.');
+          const productVersion=String(pkg.version||'');
+          const expectedRelease='v'+productVersion.split('.').slice(0,2).join('.');
+          const gateSource=fs.readFileSync('public/v36-ai-gate.js','utf8');
+          const gateMatch=gateSource.match(/window\.KosifAIGate\s*=\s*\{version:['"]([^'"]+)['"]/);
+          const expectedGateVersion=gateMatch?.[1]||null;
+          ok(expectedGateVersion, 'could not derive AI gate component version from public/v36-ai-gate.js');
           const widths=[1024,1366,1920];
           (async()=>{
             const browser=await chromium.launch({headless:true});
@@ -112,7 +118,7 @@ jobs:
               ok(metrics.minTabWidth>=70,`choice buttons too narrow at ${width}`);
               ok(metrics.navDisplay!=='none'&&metrics.navDisplay!=='missing',`desktop tab list hidden at ${width}`);
               ok(metrics.bottomDisplay==='none'||metrics.bottomDisplay==='missing',`mobile bottom nav visible at ${width}`);
-              ok(metrics.gateVersion===expectedGateVersion,`AI gate version mismatch: expected ${expectedGateVersion}, got ${metrics.gateVersion}`);
+              ok(metrics.gateVersion===expectedGateVersion,`AI gate component version mismatch: expected ${expectedGateVersion}, got ${metrics.gateVersion}`);
               ok(metrics.zaiReady,'Z.ai bridge not loaded');
               ok(metrics.rows>=1&&metrics.rows<=4,`unexpected choice-list row count at ${width}: ${metrics.rows}`);
               const labels=await page.locator('#tabbar .tab').allTextContents();
