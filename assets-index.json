@@ -1,0 +1,79 @@
+{
+  "schema": "kosif-assets-index-v1",
+  "updated_at": "2026-08-19T19:19:00+03:00",
+  "review_id": "KOSIF-REV-B-0002",
+  "assets": [
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "agent/v38-trusted-audit-intelligence-os",
+      "path": "src/v38-trusted-intelligence.js",
+      "type": "orchestration-layer",
+      "language": "JavaScript",
+      "hash": "branch-head:5ea6bdf1fb02b348a38882c9fe03bc418a130428",
+      "reuse_value": "high",
+      "notes_ar": "PR #86 ما زال Draft ومبنياً على lineage أقدم؛ يراجع feature-by-feature فقط ولا يدمج أعمى.",
+      "duplicate_of": null,
+      "integration_status": "candidate"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "agent/v38-openai-realtime-upgrade",
+      "path": "v38 realtime/platform expansion changes",
+      "type": "integration",
+      "language": "JavaScript",
+      "hash": "branch-head:012342f229d187f614dfabc06fc2dde6a3150406",
+      "reuse_value": "medium",
+      "notes_ar": "PR #85 Draft وتوجد Realtime 2.1 وطبقات أحدث مدمجة بالفعل في main؛ أي reuse يحتاج مقارنة دقيقة لمنع الرجوع أو التكرار.",
+      "duplicate_of": "main realtime/platform lineage after PR #82/#84",
+      "integration_status": "blocked"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "agent/review-a-0001",
+      "path": "governance/* + assets-index.json",
+      "type": "review-governance-baseline",
+      "language": "JSON/Markdown",
+      "hash": "branch-head:fe4349db5e0b090e204d8d118fb873b2b7e8dd49",
+      "reuse_value": "high",
+      "notes_ar": "PR #93 يحتوي Review State وRollback Registry وAssets Index وHandoff. تم اعتماد فكرة Assets Index على main انتقائياً، بينما بقية ملفات الحوكمة تحتاج إعادة أساس على HEAD الحالي قبل الإدماج.",
+      "duplicate_of": null,
+      "integration_status": "candidate"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "main",
+      "path": "src/v38-trusted-sales-audit-bridge.mjs",
+      "type": "sales-audit-bridge",
+      "language": "JavaScript",
+      "hash": "commit:ffe2fbac074093d959a49aa3aa94817529e7c795",
+      "reuse_value": "high",
+      "notes_ar": "مُدمج ويستخدم BigInt minor units، لكن Issue #92 ما زال مفتوحاً لأن عقد المخرجات لا يطابق الاختبار والاختبار غير داخل v38-suite. يتطلب قرار حوكمة مالي قبل تغيير التفسير.",
+      "duplicate_of": null,
+      "integration_status": "blocked"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "main",
+      "path": "public/data/kosif-official-sources-2026.json",
+      "type": "standards-source-catalog",
+      "language": "JSON",
+      "hash": "commit:aca719d065efaa0996b585b54330f366e075e86e",
+      "reuse_value": "high",
+      "notes_ar": "تم تحديث metadata في Review B بمصادر رسمية حديثة: IFRS Taxonomy 2025 لتقارير 2026، تعاميم SOCPA، وIAASB LCE Exposure Draft، مع last_verified/status/requires_verification.",
+      "duplicate_of": null,
+      "integration_status": "integrated"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "main",
+      "path": "public/sw.js",
+      "type": "service-worker",
+      "language": "JavaScript",
+      "hash": "commit:c8398207e9dd49294b17bb1c57a7d3fb926e0619",
+      "reuse_value": "high",
+      "notes_ar": "تمت استعادة عقد توافق v36.4/v37 cache generation ثم تحقق Production بنجاح للإصدار v38. يبقى addAll(CORE) نقطة متابعة availability لأن ملف legacy مفقود واحد قد يفشل install بالكامل.",
+      "duplicate_of": null,
+      "integration_status": "integrated"
+    }
+  ]
+}
