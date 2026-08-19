@@ -8,6 +8,7 @@
 const MAX_SAMPLE = 256 * 1024;
 const MAX_REFRESH = 20;
 const MAX_CONCURRENCY = 4;
+const MAX_REDIRECTS = 5;
 const HISTORY_LIMIT = 50;
 const REGISTRY_CAPACITY = 5000;
 const BULK_BATCH = 500;
@@ -36,23 +37,32 @@ export function listCoreSources() { return CORE_SOURCES; }
 
 export async function loadRegistry(env) {
   const custom = env?.DATA ? ((await env.DATA.get(REGISTRY_KEY, 'json')) || { sources: [] }) : { sources: [] };
-  return { core: CORE_SOURCES, custom: (custom.sources || []).slice(0, REGISTRY_CAPACITY), capacity: REGISTRY_CAPACITY, used: (custom.sources || []).length };
+  return { core: CORE_SOURCES, custom: (custom.sources || []).slice(0, REGISTRY_CAPACITY), capacity: REGISTRY_CAPACITY, used: Math.min((custom.sources || []).length, REGISTRY_CAPACITY) };
 }
 
-function safeUrl(raw) {
+export function validateSourceUrl(raw) {
   let url;
   try { url = new URL(String(raw || '')); } catch { return null; }
   if (url.protocol !== 'https:') return null;
-  if (/@/.test(url.href) || /:\d+/.test(url.host) && !url.port) return null;
   const host = url.hostname.toLowerCase();
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(host) || host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) return null;
-  if (url.port && !['443', ''].includes(url.port)) return null;
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host) || /^\[[0-9a-f:]+\]$/i.test(host) || host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) return null;
+  if (url.port && url.port !== '443') return null;
   if (url.username || url.password) return null;
   return url;
 }
 
-async function fetchSample(target) {
-  const url = safeUrl(target.url);
+export function resolveSafeRedirect(baseRaw, locationRaw) {
+  const base = validateSourceUrl(baseRaw);
+  if (!base || !locationRaw) return null;
+  let candidate;
+  try { candidate = new URL(String(locationRaw), base.href); } catch { return null; }
+  const safe = validateSourceUrl(candidate.href);
+  if (!safe || safe.origin !== base.origin) return null;
+  return safe;
+}
+
+async function fetchSample(target, redirectDepth = 0) {
+  const url = validateSourceUrl(target.url);
   if (!url) return { ok: false, error: 'UNSAFE_OR_INVALID_URL' };
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12000);
@@ -60,10 +70,10 @@ async function fetchSample(target) {
     const res = await fetch(url.href, { redirect: 'manual', signal: ctrl.signal, headers: { 'user-agent': 'KOSIF-v38-SourceFabric/1.0 (change-detection; metadata-only)' } });
     clearTimeout(timer);
     if (res.status >= 300 && res.status < 400) {
-      const loc = res.headers.get('location');
-      const safe = safeUrl(loc);
-      if (!safe || safe.origin !== url.origin) return { ok: false, error: 'BLOCKED_REDIRECT' };
-      return fetchSample({ ...target, url: safe.href });
+      if (redirectDepth >= MAX_REDIRECTS) return { ok: false, error: 'TOO_MANY_REDIRECTS' };
+      const safe = resolveSafeRedirect(url.href, res.headers.get('location'));
+      if (!safe) return { ok: false, error: 'BLOCKED_REDIRECT' };
+      return fetchSample({ ...target, url: safe.href }, redirectDepth + 1);
     }
     if (!res.ok) return { ok: false, error: `HTTP_${res.status}` };
     const reader = res.body?.getReader();
@@ -140,12 +150,13 @@ export async function bulkOnboard(env, sources) {
   const accepted = [], rejected = [];
   for (const s of list) {
     const id = String(s?.id || '').trim();
-    const url = safeUrl(s?.url);
+    const url = validateSourceUrl(s?.url);
     if (!id || RESERVED_IDS.has(id)) { rejected.push({ id: id || '(empty)', reason: 'RESERVED_OR_EMPTY_ID' }); continue; }
     if (!url) { rejected.push({ id, reason: 'UNSAFE_OR_INVALID_URL' }); continue; }
     if (existing.has(id)) { rejected.push({ id, reason: 'DUPLICATE_ID' }); continue; }
     if (registry.custom.length + accepted.length >= REGISTRY_CAPACITY) { rejected.push({ id, reason: 'REGISTRY_CAPACITY' }); continue; }
     accepted.push({ id, title: String(s.title || id).slice(0, 200), url: url.href, tier: 'D', kind: String(s.kind || 'custom').slice(0, 40), metadataOnly: true, onboardedAt: new Date().toISOString() });
+    existing.add(id);
   }
   if (accepted.length && env?.DATA) await env.DATA.put(REGISTRY_KEY, JSON.stringify({ sources: [...registry.custom, ...accepted].slice(0, REGISTRY_CAPACITY) }));
   return { ok: rejected.length === 0, accepted: accepted.length, rejected, note: 'المصادر المخصصة تُخزن طبقة D ولقراءة البيانات الوصفية فقط ولا تستبدل المصادر الرسمية.' };
