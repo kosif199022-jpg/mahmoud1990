@@ -16,26 +16,28 @@ function bind(){repairLog();const run=q('#v36-je-run');if(run&&!run.dataset.v37S
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();
 
-/* v38 release-integrity reconciliation.
- * The legacy continuity layer still identifies itself as v36.4, but /audit/
- * is served by the v38 suite. Only after the authoritative no-store root
- * version endpoint confirms a live v38 Kosif build do we suppress that legacy
- * false-positive banner. A real unknown/mismatched release is never hidden.
- */
+/* v38 release-integrity reconciliation. */
 (()=>{'use strict';
 const LEGACY='يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.';
 let ok=false,info=null,observer=null,interval=0;
+const setText=(el,value)=>{if(el&&el.textContent!==String(value))el.textContent=String(value)};
 function scrub(){
   if(!ok)return;
   const b=document.getElementById('kosif-release-banner');
   if(b&&String(b.textContent||'').trim()===LEGACY)b.remove();
   const card=document.getElementById('kosif-build-card');
   if(card&&info){
-    const v=card.querySelector('#kosif-build-version'),id=card.querySelector('[data-k-build]'),s=card.querySelector('[data-k-release-state]');
-    if(v)v.textContent=info.version||'Kosif';
-    if(id)id.textContent=info.buildId||'—';
-    if(s)s.textContent='متطابق ✓';
+    setText(card.querySelector('#kosif-build-version'),info.version||'Kosif');
+    setText(card.querySelector('[data-k-build]'),info.buildId||'—');
+    setText(card.querySelector('[data-k-release-state]'),'متطابق ✓');
   }
+}
+function releaseBoot(){
+  const boot=document.getElementById('kosif-boot');
+  if(!boot||boot.classList.contains('error')||boot.classList.contains('done'))return;
+  document.body?.classList.add('kosif-ready');
+  boot.classList.add('done');
+  setTimeout(()=>boot.remove(),650);
 }
 async function verify(){
   try{
@@ -45,15 +47,23 @@ async function verify(){
     const v38=x?.productName==='Kosif'&&/^v38\./.test(String(x?.version||''));
     const same=!loaded||loaded===String(x?.buildId||'');
     ok=!!(v38&&same);info=x;
-    if(ok){window.KosifBuildInfo=x;document.documentElement.dataset.kosifReleaseIntegrity='ok';scrub()}
+    if(ok){
+      window.KosifBuildInfo=x;
+      if(document.documentElement.dataset.kosifReleaseIntegrity!=='ok')document.documentElement.dataset.kosifReleaseIntegrity='ok';
+      scrub();
+    }
     return ok;
   }catch(_){return false}
 }
 function start(){
   if(observer)return;
-  observer=new MutationObserver(scrub);observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
-  verify();interval=setInterval(()=>verify().then(scrub),1200);setTimeout(()=>{if(interval){clearInterval(interval);interval=0}},12000);
-  window.addEventListener('pageshow',()=>verify().then(scrub),{passive:true});
+  observer=new MutationObserver(scrub);
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  verify();
+  interval=setInterval(()=>verify().then(scrub),1200);
+  setTimeout(()=>{if(interval){clearInterval(interval);interval=0}},10000);
+  setTimeout(releaseBoot,2200);
+  window.addEventListener('pageshow',()=>{verify().then(scrub);setTimeout(releaseBoot,700)},{passive:true});
   window.addEventListener('online',()=>verify().then(scrub),{passive:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
