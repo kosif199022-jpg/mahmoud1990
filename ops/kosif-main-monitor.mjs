@@ -1,6 +1,7 @@
 const KEY = 'kosif:monitor:3m';
 const EVENT = 'kosif:monitor:event:';
 const GH = 'https://api.github.com/repos/kosif199022-jpg/mahmoud1990/commits/main';
+const PROD = 'https://mahmoud-eldesouky.kosif199022.workers.dev';
 
 async function readJsonFetch(fetcher, pathOrUrl, headers = {}) {
   try {
@@ -25,8 +26,8 @@ async function check(env, controller) {
       'user-agent': 'KOSIF-v38-monitor',
       accept: 'application/vnd.github+json',
     }),
-    readJsonFetch(env.PROD, 'https://prod/__health'),
-    readJsonFetch(env.PROD, 'https://prod/api/kosif/v38/capabilities'),
+    readJsonFetch(env.PROD, PROD + '/__health'),
+    readJsonFetch(env.PROD, PROD + '/api/kosif/v38/capabilities'),
   ]);
 
   const mainCommit = github.ok ? String(github.data?.sha || '') : '';
