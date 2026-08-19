@@ -58,6 +58,17 @@ r = await call('/api/kosif/v38/accounting/validate-journal', { method: 'POST', b
 ok(r.status === 200 && r.body.ok === false, 'unbalanced journal rejected via API');
 r = await call('/api/kosif/v38/accounting/vat', { method: 'POST', body: JSON.stringify({ taxableSupplies: 1150000, inputVat: 69000 }) });
 ok(r.body.outputVat === '17250000' && r.body.netPayable === '10350000', 'ZATCA VAT via API (minor units)');
+ok(r.body.inputPrecision === 'minor-unit-bigint', 'VAT endpoint reports deterministic minor-unit precision');
+r = await call('/api/kosif/v38/accounting/vat', { method: 'POST', body: JSON.stringify({ taxableSupplies: '9007199254740991.99', inputVat: '0.01' }) });
+ok(r.status === 200 && r.body.taxableBase === '900719925474099199' && r.body.outputVat === '135107988821114879' && r.body.netPayable === '135107988821114878', 'VAT preserves amounts beyond JS safe integer');
+r = await call('/api/kosif/v38/accounting/vat', { method: 'POST', body: JSON.stringify({ taxableSupplies: '١٠٠٠٫٠١', inputVat: '٠٫٠١' }) });
+ok(r.status === 200 && r.body.taxableBase === '100001' && r.body.outputVat === '15000' && r.body.netPayable === '14999', 'VAT accepts Arabic digits without float conversion');
+r = await call('/api/kosif/v38/accounting/vat', { method: 'POST', body: JSON.stringify({ taxableSupplies: '1.234' }) });
+ok(r.status === 400 && r.body.error === 'VAT_AMOUNT_INVALID', 'VAT rejects precision overflow instead of rounding silently');
+r = await call('/api/kosif/v38/accounting/zakat', { method: 'POST', body: JSON.stringify({ basis: '9007199254740991.99' }) });
+ok(r.status === 200 && r.body.basis === '900719925474099199' && r.body.estimatedZakat === '22517998136852479' && r.body.inputPrecision === 'minor-unit-bigint', 'Zakat preserves exact large basis');
+r = await call('/api/kosif/v38/accounting/zakat', { method: 'POST', body: JSON.stringify({ basis: 'bad-number' }) });
+ok(r.status === 400 && r.body.error === 'ZAKAT_BASIS_INVALID', 'Zakat rejects invalid monetary input');
 
 /* إطار المعايير */
 r = await call('/api/kosif/v38/framework?start=2027-01-01&end=2027-12-31');
