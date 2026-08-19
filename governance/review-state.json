@@ -1,0 +1,47 @@
+{
+  "schema": "kosif-review-state-v1",
+  "last_review_id": "KOSIF-REV-FINAL-2026-08-19",
+  "last_reviewed_at": "2026-08-19T20:12:00+03:00",
+  "review_agent": "ChatGPT coordinated final review",
+  "derived_from": [
+    "agent/review-a-0001",
+    "assets-index.json",
+    "docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md",
+    "docs/KOSIF_V38_CONTINUOUS_AUDIT_REPORT_2026-08-19.md"
+  ],
+  "dimensions": [
+    "RD-01 Numeric Integrity",
+    "RD-02 Spec Conformance",
+    "RD-03 Logical Comparisons",
+    "RD-04 Deterministic Decision Trees",
+    "RD-05 Security",
+    "RD-06 Authentication/Authorization",
+    "RD-07 Arabic Processing and Western-digit presentation",
+    "RD-08 Error Handling",
+    "RD-09 Performance",
+    "RD-10 Consistency",
+    "RD-11 Audit Trail",
+    "RD-12 Tests",
+    "RD-13 Release Provenance",
+    "RD-14 Standards Status Semantics",
+    "RD-15 iPhone/Safari Safe Area and Dialog Reachability",
+    "RD-16 Reader/Library Experience Parity"
+  ],
+  "connections": {
+    "github": "verified_and_writable",
+    "cloudflare": "connector_available; production verification required after merge",
+    "gmail": "not_required_for_runtime_review",
+    "canva": "design reference only in this release"
+  },
+  "foundational_files": {
+    "review_state": "present",
+    "rollback_registry": "present",
+    "assets_index": "present",
+    "master_requirements": "present",
+    "user_requirements_status": "present_on_release_branch"
+  },
+  "resolved_blockers": [92],
+  "current_release_branch": "agent/final-user-requirements-2026-08-19",
+  "release_target": "v38.1.0-root",
+  "notes": "Issue #92 is closed as completed with minor-unit BigInt regression coverage. This review adds only user-requested UI/reader/council wiring and does not replace deterministic accounting authority. Email password resend remains unavailable until a real server-side mail/reset transport is configured; the UI must not falsely report that an email was sent."
+}
