@@ -7,6 +7,11 @@ workers_dev = true
 binding = "DATA"
 id = "ea12d307eba1439c960c8832337a40f4"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "kosif_db"
+database_id = "7ead16c4-a825-4aef-9d5b-beb3c5712c3b"
+
 [[services]]
 binding = "MAFATEEH"
 service = "mafateeh-al-tharwa3"
