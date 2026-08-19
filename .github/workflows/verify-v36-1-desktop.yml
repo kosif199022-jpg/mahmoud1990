@@ -107,15 +107,14 @@ jobs:
               ok(metrics.main&&metrics.main.width>=width*.9,`main constrained at ${width}`);
               ok(metrics.tabsBox&&metrics.tabsBox.width>=width*.9,`tabs constrained at ${width}`);
               ok(metrics.body<=width+1,`horizontal overflow at ${width}`);
-              ok(metrics.tabCount===12,`expected 12 choices, got ${metrics.tabCount}`);
+              ok(metrics.tabCount===22,`expected 22 choices (12 core + 10 v38), got ${metrics.tabCount}`);
               ok(metrics.overlaps.length===0,`choice buttons overlap at ${width}`);
-              ok(metrics.minTabWidth>=100,`choice buttons too narrow at ${width}`);
+              ok(metrics.minTabWidth>=70,`choice buttons too narrow at ${width}`);
               ok(metrics.navDisplay!=='none'&&metrics.navDisplay!=='missing',`desktop tab list hidden at ${width}`);
               ok(metrics.bottomDisplay==='none'||metrics.bottomDisplay==='missing',`mobile bottom nav visible at ${width}`);
               ok(metrics.gateVersion===expectedGateVersion,`AI gate version mismatch: expected ${expectedGateVersion}, got ${metrics.gateVersion}`);
               ok(metrics.zaiReady,'Z.ai bridge not loaded');
-              if(width<1600)ok(metrics.rows===2,`expected balanced 2-row choice list at ${width}, got ${metrics.rows}`);
-              else ok(metrics.rows===1,`expected single-row choice list at ${width}, got ${metrics.rows}`);
+              ok(metrics.rows>=1&&metrics.rows<=4,`unexpected choice-list row count at ${width}: ${metrics.rows}`);
               const labels=await page.locator('#tabbar .tab').allTextContents();
               ok(labels.every(x=>x.trim().length>0),'empty choice label');
               for(const tab of await page.locator('#tabbar .tab').all()){

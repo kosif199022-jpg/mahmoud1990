@@ -15,11 +15,11 @@ const expectedLegacyBuild=String(releaseManifest.buildId||'');
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
   page.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
   let r=await page.request.get(BASE+'/__health');const h=await r.json();console.log('HEALTH',h);
-  const suiteMode=/^v37\./.test(String(h.version||''));
+  const suiteMode=/^v\d+\.\d+\.\d+-root$/.test(String(h.version||''));
   const auditPath=suiteMode?'/audit/':'/';
   if(suiteMode){
     ok(h.modules?.audit==='/audit/'&&h.modules?.wealth==='/wealth/reader.html'&&h.modules?.sales==='/sales/','suite routes missing');
-    ok(/v37-root-rebuild/.test(String(h.buildId||'')),'wrong suite build id');
+    ok(/v(37-root-rebuild|38-trusted-audit-os)/.test(String(h.buildId||'')),'wrong suite build id');
   }else{
     ok(h.version===expectedLegacyVersion,'wrong health version: expected '+expectedLegacyVersion);
     ok(h.buildId===expectedLegacyBuild,'wrong build id: expected '+expectedLegacyBuild);

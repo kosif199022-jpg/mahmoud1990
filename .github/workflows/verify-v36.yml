@@ -121,11 +121,11 @@ jobs:
             p.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
             p.on('response',r=>{const u=new URL(r.url());if(r.status()>=400&&!u.pathname.startsWith('/api/'))bad.push(r.status()+' '+u.pathname)});
             const health=await (await p.request.get(`${BASE}/__health`)).json();
-            const suiteMode=/^v37\./.test(String(health.version||''));
+            const suiteMode=/^v\d+\.\d+\.\d+-root$/.test(String(health.version||''));
             const auditPath=suiteMode?'/audit/':'/';
             if(suiteMode){
               ok(health.modules?.audit==='/audit/'&&health.modules?.wealth==='/wealth/reader.html'&&health.modules?.sales==='/sales/','suite route contract');
-              ok(/v37-root-rebuild/.test(String(health.buildId||'')),'wrong suite build id');
+              ok(/v(37-root-rebuild|38-trusted-audit-os)/.test(String(health.buildId||'')),'wrong suite build id');
             }else{
               ok(health.version===expectedLegacyVersion,`wrong health version: expected ${expectedLegacyVersion}, got ${health.version}`);
               ok(health.buildId===expectedLegacyBuild,`wrong health build: expected ${expectedLegacyBuild}, got ${health.buildId}`);
