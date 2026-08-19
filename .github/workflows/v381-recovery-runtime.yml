@@ -1,0 +1,71 @@
+name: KOSIF v38.1 isolated recovery
+
+on:
+  push:
+    branches:
+      - agent/v381-recovery-runtime
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kosif-v381-recovery-runtime
+  cancel-in-progress: true
+
+jobs:
+  recover-and-verify:
+    if: ${{ !contains(github.event.head_commit.message || '', '[v381-recovered]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout recovery branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/v381-recovery-runtime
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply authoritative v38.1 patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://kosif-v381-compat-wrapper.kosif199022.workers.dev/apply-v381.sh -o /tmp/apply-v381.sh
+          chmod 700 /tmp/apply-v381.sh
+          /tmp/apply-v381.sh
+
+      - name: Verify v38.1 release contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '"version": "38.1.0"' package.json
+          grep -q "v38.1.0-root" src/suite-edge.js
+          grep -q "2026.08.19-v38.1-attachments-hardening" src/suite-edge.js
+          grep -q 'database_name = "kosif_db"' wrangler.toml
+          grep -q 'binding = "DB"' wrangler.toml
+          test -f src/v38-ledger-d1.js
+          test -f src/v38-standards-registry.js
+          test -f tests/v38-attachments-hardening.test.mjs
+          test -f migrations/0001_v38_1_ledger.sql
+
+      - name: Run full gates again
+        run: |
+          npm run build
+          npm run check
+
+      - name: Commit verified recovery result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/engine/v38-core.mjs src/v38-api.js src/suite-edge.js src/v38-ledger-d1.js src/v38-standards-registry.js wrangler.toml package.json scripts/check-v38.mjs scripts/check-v36-4-contract.mjs tests/v38-core.test.mjs tests/v38-api.test.mjs tests/v38-attachments-hardening.test.mjs migrations/0001_v38_1_ledger.sql
+          if git diff --cached --quiet; then
+            echo "No recovery changes to commit"
+            exit 0
+          fi
+          git commit -m "fix(v38.1): restore hardened release contract [v381-recovered]"
+          git push origin HEAD:agent/v381-recovery-runtime
