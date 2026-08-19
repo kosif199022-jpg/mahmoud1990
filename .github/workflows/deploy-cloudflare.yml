@@ -48,14 +48,8 @@ jobs:
               if node - <<'NODE'
           const fs=require('fs');
           const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
-          const ok=h?.productName==='Kosif' &&
-            h?.version==='v38.0.0-root' &&
-            h?.modules?.audit==='/audit/' &&
-            h?.modules?.libraries==='/libraries/' &&
-            h?.modules?.wealth==='/wealth/reader.html' &&
-            h?.modules?.sales==='/sales/' &&
-            h?.designAuthority==='Aghnam Al-Wadi Sales Dashboard 7';
-          if(!ok || !String(h?.buildId||'').includes('v38-trusted-audit-os')){ console.error('Unexpected live health',h); process.exit(2); }
+          const ok=h?.productName==='Kosif' && h?.version==='v38.0.0-root' && h?.modules?.audit==='/audit/' && h?.modules?.libraries==='/libraries/' && h?.modules?.wealth==='/wealth/reader.html' && h?.modules?.sales==='/sales/' && h?.designAuthority==='Aghnam Al-Wadi Sales Dashboard 7';
+          if(!ok || !String(h?.buildId||'').includes('v38-trusted-audit-os')){console.error('Unexpected live health',h);process.exit(2)}
           console.log('LIVE_KOSIF_OK',h.version,h.buildId);
           NODE
               then ok=1; break; fi
@@ -64,41 +58,32 @@ jobs:
           done
           [ "$ok" = 1 ] || { echo 'Live Kosif verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
 
-          for path in / /audit/ /libraries/ /libraries/reader.html /libraries/reader.js /sales/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
+          for path in / /audit/ /libraries/ /sales/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
             code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
             case "$code" in 200|204|301|302|307|308) ;; *) echo "Bad live route $path -> $code"; exit 1;; esac
           done
 
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/demo/v38/manifest.json?deploy=$GITHUB_SHA" -o /tmp/kosif-v38-demo.json
           node - <<'NODE'
-          const fs=require('fs');
-          const d=JSON.parse(fs.readFileSync('/tmp/kosif-v38-demo.json','utf8'));
-          if(d?.seed!==380019 || !d?.counts || d.counts.accounts!==1000 || d.synthetic_only!==true){
-            console.error('Unexpected v38 demo manifest',d);process.exit(2);
-          }
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync('/tmp/kosif-v38-demo.json','utf8'));
+          if(d?.seed!==380019||!d?.counts||d.counts.accounts!==1000||d.synthetic_only!==true){console.error('Unexpected v38 demo manifest',d);process.exit(2)}
           console.log('LIVE_KOSIF_V38_DEMO_OK',d.seed,d.counts.accounts);
           NODE
 
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/library.json?deploy=$GITHUB_SHA" -o /tmp/kosif-library.json
           node - <<'NODE'
-          const fs=require('fs');
-          const lib=JSON.parse(fs.readFileSync('/tmp/kosif-library.json','utf8'));
-          const ids=new Set((Array.isArray(lib)?lib:[]).map(x=>x.id));
+          const fs=require('fs');const lib=JSON.parse(fs.readFileSync('/tmp/kosif-library.json','utf8'));const ids=new Set((Array.isArray(lib)?lib:[]).map(x=>x.id));
           for(const id of ['mafateeh','std2025','std2018','dipifr'])if(!ids.has(id))throw new Error('Missing prepared library book '+id);
-          const wealth=lib.find(x=>x.id==='mafateeh');
-          if(!wealth?.embedded||!wealth?.audio)throw new Error('Mafateeh must remain embedded with audio');
-          console.log('LIVE_KOSIF_LIBRARY_OK', [...ids].join(','));
+          const wealth=lib.find(x=>x.id==='mafateeh');if(!wealth?.embedded||!wealth?.audio)throw new Error('Mafateeh must remain embedded with audio');
+          console.log('LIVE_KOSIF_LIBRARY_OK',[...ids].join(','));
           NODE
 
           for book in std2025 std2018 dipifr; do
             curl -fsSL --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/$book.json?deploy=$GITHUB_SHA" -o "/tmp/kosif-index-$book.json"
             curl -fsSL --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/$book/1.json?deploy=$GITHUB_SHA" -o "/tmp/kosif-chapter-$book.json"
             BOOK="$book" node - <<'NODE'
-          const fs=require('fs');
-          const b=process.env.BOOK;
-          const expected={std2018:'b1',std2025:'b3',dipifr:'b2'};
-          const idx=JSON.parse(fs.readFileSync(`/tmp/kosif-index-${b}.json`,'utf8'));
-          const chapter=JSON.parse(fs.readFileSync(`/tmp/kosif-chapter-${b}.json`,'utf8'));
+          const fs=require('fs');const b=process.env.BOOK;const expected={std2018:'b1',std2025:'b3',dipifr:'b2'};
+          const idx=JSON.parse(fs.readFileSync(`/tmp/kosif-index-${b}.json`,'utf8'));const chapter=JSON.parse(fs.readFileSync(`/tmp/kosif-chapter-${b}.json`,'utf8'));
           if(idx?.id!==expected[b]||!Array.isArray(idx.chapters)||!idx.chapters.length)throw new Error('Bad native reader index '+b);
           if(!Array.isArray(chapter.body)||!chapter.body.length)throw new Error('Bad chapter body '+b);
           console.log('LIVE_KOSIF_BOOK_OK',b,idx.id,idx.chapters.length,chapter.no);
@@ -106,35 +91,26 @@ jobs:
           done
 
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth-library-v37.js?deploy=$GITHUB_SHA" -o /tmp/kosif-wealth-library.js
-          grep -q "__KOSIF_WEALTH_LIBRARY_ROUTER__" /tmp/kosif-wealth-library.js || { echo 'Missing Mafateeh library router'; exit 1; }
-          grep -Fq "location.assign('/libraries/reader.html?book='+encodeURIComponent(id))" /tmp/kosif-wealth-library.js || { echo 'Prepared books are not routed out of Mafateeh'; exit 1; }
-          if grep -Eq "window\.D\s*=|window\.CH\s*=|normalizeIndex\(|hydrate\(" /tmp/kosif-wealth-library.js; then echo 'Mafateeh router still mutates prepared book content in-process'; exit 1; fi
+          grep -q "__KOSIF_WEALTH_LIBRARY__" /tmp/kosif-wealth-library.js || { echo 'Missing shared Mafateeh library layer'; exit 1; }
+          grep -q "window.D=D;window.CH=CH" /tmp/kosif-wealth-library.js || { echo 'Shared reader no longer updates D/CH'; exit 1; }
+          grep -q "function normalizeIndex(raw,info,id)" /tmp/kosif-wealth-library.js || { echo 'Missing prepared book index normalization'; exit 1; }
+          grep -q "#libBtn{display:none!important" /tmp/kosif-wealth-library.js || { echo 'Internal library button is visible by default'; exit 1; }
 
-          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/libraries/reader.js?deploy=$GITHUB_SHA" -o /tmp/kosif-prepared-reader.js
-          grep -q "__KOSIF_PREPARED_READER__" /tmp/kosif-prepared-reader.js || { echo 'Missing isolated prepared-reader runtime'; exit 1; }
-          grep -q "navigator.serviceWorker.getRegistrations" /tmp/kosif-prepared-reader.js || { echo 'Missing stale Safari Wealth SW cleanup'; exit 1; }
-          grep -q "localStorage.removeItem('mk_lib_book')" /tmp/kosif-prepared-reader.js || { echo 'Missing legacy shared-book cleanup'; exit 1; }
-          grep -q "cache.delete(req)" /tmp/kosif-prepared-reader.js || { echo 'Missing obsolete reader-shell cache cleanup'; exit 1; }
-          if grep -Eq "window\.D\s*=|window\.CH\s*=" /tmp/kosif-prepared-reader.js; then echo 'Prepared reader still shares Mafateeh model globals'; exit 1; fi
-
-          # Mafateeh stays in the original document with the lightweight library
-          # router. It no longer needs D/CH declaration rewriting.
-          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?book=mafateeh&deploy=$GITHUB_SHA" -o /tmp/kosif-reader-mafateeh.html
-          grep -q "مفاتيح الثروة" /tmp/kosif-reader-mafateeh.html || { echo 'Original Mafateeh document missing'; exit 1; }
-          grep -q "wealth-library-v37.js" /tmp/kosif-reader-mafateeh.html || { echo 'Mafateeh library router missing'; exit 1; }
-
-          # Old prepared-book Wealth URLs must migrate at the edge before the
-          # upstream Mafateeh document can run. The redirect is explicitly
-          # no-store so browser/CDN HTTP caches cannot pin the obsolete route.
-          for book in std2025 std2018 dipifr; do
-            headers="/tmp/kosif-redirect-$book.headers"
-            code=$(curl -sS -D "$headers" -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?book=$book&deploy=$GITHUB_SHA")
-            [ "$code" = 302 ] || { echo "Legacy prepared URL did not redirect for $book -> $code"; cat "$headers"; exit 1; }
-            tr -d '\r' < "$headers" | grep -Fqi "location: /libraries/reader.html?book=$book" || { echo "Wrong prepared-reader redirect for $book"; cat "$headers"; exit 1; }
-            tr -d '\r' < "$headers" | grep -Fqi "cache-control: no-store" || { echo "Prepared redirect is cacheable for $book"; cat "$headers"; exit 1; }
-            curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/libraries/reader.html?book=$book&deploy=$GITHUB_SHA" -o "/tmp/kosif-isolated-$book.html"
-            grep -q "/libraries/reader.js" "/tmp/kosif-isolated-$book.html" || { echo "Isolated reader shell missing for $book"; exit 1; }
+          for book in mafateeh std2025 std2018 dipifr; do
+            code=$(curl -sS -o "/tmp/kosif-reader-$book.html" -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?book=$book&deploy=$GITHUB_SHA")
+            [ "$code" = 200 ] || { echo "Shared reader did not return 200 for $book -> $code"; exit 1; }
+            grep -q "var D = " "/tmp/kosif-reader-$book.html" || { echo "Reader D binding is not mutable for $book"; exit 1; }
+            grep -q "var CH = " "/tmp/kosif-reader-$book.html" || { echo "Reader CH binding is not mutable for $book"; exit 1; }
+            grep -q "wealth-library-v37.js" "/tmp/kosif-reader-$book.html" || { echo "Shared library layer missing for $book"; exit 1; }
+            grep -q "data-kosif-book-bootstrap=\"$book\"" "/tmp/kosif-reader-$book.html" || { echo "Exact book bootstrap missing for $book"; exit 1; }
+            grep -q "#mixerDock,#smartHubDock,#libBtn{display:none!important}" "/tmp/kosif-reader-$book.html" || { echo "Default optional docks are not hidden for $book"; exit 1; }
           done
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?deploy=$GITHUB_SHA" -o /tmp/kosif-reader-default.html
+          grep -q "data-kosif-book-bootstrap=\"mafateeh\"" /tmp/kosif-reader-default.html || { echo 'Default reader does not force Mafateeh'; exit 1; }
+          grep -q "مفاتيح الثروة" /tmp/kosif-reader-default.html || { echo 'Original Mafateeh document missing'; exit 1; }
+          if grep -q "wealth-theme-v37.css" /tmp/kosif-reader-default.html; then echo 'Default reader is still visually overridden by Wealth theme'; exit 1; fi
+          if grep -q "suite-shell.js" /tmp/kosif-reader-default.html; then echo 'Default reader still injects Kosif suite switcher'; exit 1; fi
 
       - name: Publish successful production verification
         if: success()
@@ -145,10 +121,8 @@ jobs:
         run: |
           set -euo pipefail
           node - <<'NODE' >/tmp/kosif-deploy-status.md
-          const fs=require('fs');
-          const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
-          const run=`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Prepared reader books verified: \`std2025, std2018, dipifr\`\n- Native reader indexes + first chapter hydration: **verified live**\n- Prepared-reader boundary: **isolated under /libraries/reader.html**\n- Legacy /wealth prepared-book links: **302 no-store migration verified live**\n- Safari stale-state cleanup: **Wealth SW unregister + obsolete reader-shell cache cleanup shipped**\n- Mafateeh: **original reader retained with audio and a route-only library switcher**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe production verifier no longer treats mutable Mafateeh D/CH globals as the correctness boundary. Prepared standards/training books execute in a separate Kosif-owned reader, outside the /wealth/ service-worker scope and without the shared mk_lib_book selector. Old prepared-book Wealth URLs are migrated at the edge with a non-cacheable redirect, while Mafateeh remains in its original reader.`);
+          const fs=require('fs');const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));const run=`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Shared Mafateeh reader books: \`mafateeh, std2025, std2018, dipifr\`\n- Reader model: **one original Mafateeh runtime; book content only is switched**\n- Default: **Mafateeh**\n- Initial screen: **original navy/gold; Mixer / Smart Library / internal library docks hidden**\n- Native indexes + first chapter bodies: **verified live**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe deployment gate proves all four prepared books return through /wealth/reader.html, expose the original mutable D/CH runtime, hydrate their own content, and no longer redirect to the isolated /libraries/reader.html implementation.`);
           NODE
           gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md
 
