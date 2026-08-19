@@ -42,7 +42,7 @@ async function check(env, controller) {
     health.ok &&
     capabilities.ok &&
     runtimeVersion === 'v38.1.0-root' &&
-    buildId === '2026.08.19-v38.1-attachments-hardening' &&
+    buildId.startsWith('2026.08.19-v38.1-') &&
     d1
   );
 
@@ -56,6 +56,7 @@ async function check(env, controller) {
     previous.mainCommit !== mainCommit ||
     previous.runtimeVersion !== runtimeVersion ||
     previous.buildId !== buildId ||
+    previous.d1 !== d1 ||
     previous.healthy !== healthy;
 
   const record = {
