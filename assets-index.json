@@ -1,0 +1,55 @@
+{
+  "schema": "kosif-assets-index-v1",
+  "updated_at": "2026-08-19T18:30:00+03:00",
+  "review_id": "KOSIF-REV-A-0001",
+  "assets": [
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "agent/v38-trusted-audit-intelligence-os",
+      "path": "src/v38-trusted-intelligence.js",
+      "type": "orchestration-layer",
+      "language": "JavaScript",
+      "hash": "branch-head:5ea6bdf1fb02b348a38882c9fe03bc418a130428",
+      "reuse_value": "high",
+      "notes_ar": "PR #86 متأخر عن main بعشرة commits؛ يمنع الدمج الأعمى ويحتاج مقارنة واختبار انتقائي.",
+      "duplicate_of": null,
+      "integration_status": "candidate"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "agent/v38-openai-realtime-upgrade",
+      "path": "v38 realtime/platform expansion changes",
+      "type": "integration",
+      "language": "JavaScript",
+      "hash": "branch-head:012342f229d187f614dfabc06fc2dde6a3150406",
+      "reuse_value": "medium",
+      "notes_ar": "PR #85 غير قابل للدمج مباشرة مع lineage الحالي؛ يراجع feature-by-feature فقط.",
+      "duplicate_of": null,
+      "integration_status": "blocked"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "main",
+      "path": "src/v38-trusted-sales-audit-bridge.mjs",
+      "type": "sales-audit-bridge",
+      "language": "JavaScript",
+      "hash": "commit:ffe2fbac074093d959a49aa3aa94817529e7c795",
+      "reuse_value": "high",
+      "notes_ar": "يستخدم BigInt minor units لكن عقد المخرجات لا يطابق الاختبار الحالي والاختبار غير داخل v38-suite؛ Issue #92.",
+      "duplicate_of": null,
+      "integration_status": "integrated-with-open-blocker"
+    },
+    {
+      "repo": "kosif199022-jpg/mahmoud1990",
+      "branch": "main",
+      "path": "public/data/kosif-official-sources-2026.json",
+      "type": "standards-source-catalog",
+      "language": "JSON",
+      "hash": "main-blob:6bcd6356774a47e089d6c090460a1194bd7a0d6a",
+      "reuse_value": "high",
+      "notes_ar": "تم إثراؤه على فرع Review A بمصادر IFRS 20 ومشروعات IAASB وحقل حالة/تاريخ تحقق موحد.",
+      "duplicate_of": null,
+      "integration_status": "review-branch-update"
+    }
+  ]
+}
