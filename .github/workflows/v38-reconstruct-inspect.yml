@@ -7,6 +7,9 @@ on:
     paths:
       - '.v38-import/**'
       - '.github/workflows/v38-reconstruct-inspect.yml'
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
