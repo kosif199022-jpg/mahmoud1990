@@ -31,7 +31,8 @@
     "v38-graph": "node tests/v38-evidence-graph.test.mjs",
     "v38-sources": "node tests/v38-source-intelligence.test.mjs",
     "v38-api": "node tests/v38-api.test.mjs",
-    "v38-suite": "npm run v38-core && npm run v38-graph && npm run v38-sources && npm run v38-api && node scripts/check-v38.mjs",
+    "v38-realtime": "node tests/v38-realtime.test.mjs",
+    "v38-suite": "npm run v38-core && npm run v38-graph && npm run v38-sources && npm run v38-api && npm run v38-realtime && node scripts/check-v38.mjs",
     "v38-demo": "node scripts/generate-v38-demo.mjs"
   }
 }
