@@ -5,7 +5,7 @@
  */
 (()=>{'use strict';
 const q=s=>document.querySelector(s),num=v=>Number(String(v??0).replace(/[،,\s]/g,''))||0;
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=v=>new Intl.NumberFormat('ar-SA',{maximumFractionDigits:0}).format(num(v));
 function materiality(){try{const m=computeMateriality(state?.tb?.accounts||[],state?.mat?.basis,state?.mat?.pct);return{overall:num(m?.value??m),performance:num(m?.performance??m?.value??m)}}catch{return{overall:0,performance:0}}}
 function repairLog(){try{const log=state?.v36?.materialityLog;if(!Array.isArray(log))return;let changed=false;for(const x of log){if(x&&x.value&&typeof x.value==='object'){x.value=num(x.value.value??x.value.performance);changed=true}}if(changed&&typeof save==='function')save()}catch(_){}}
