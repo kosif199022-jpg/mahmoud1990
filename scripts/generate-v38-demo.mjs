@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const SEED = 380019;
-const OUT_DIR = path.join(process.cwd(), 'public', 'v38-demo');
+const OUT_DIR = path.join(process.cwd(), 'public', 'demo', 'v38');
 
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -136,8 +136,10 @@ const files = {
   'manifest.json': {
     format: 'kosif-v38-demo',
     version: 1, seed: SEED, generatedAt: new Date().toISOString(),
+    synthetic_only: true,
     disclaimer: 'بيانات اصطناعية بالكامل لأغراض الاختبار والتدريب والعرض؛ لا تحتوي بيانات شخصية حقيقية ولا نصوص معايير مرخصة.',
     period: '2026-01-01..2026-12-31', currency: 'SAR', exp: 2,
+    counts: { accounts: accounts.length, journals: journals.length, lines: journals.reduce((a, j) => a + j.lines.length, 0) },
     totals: { journals: journals.length, lines: journals.reduce((a, j) => a + j.lines.length, 0), accounts: accounts.length, trialBalanceMinor: totalDr.toString(), balanced: totalDr === totalCr },
     datasets: {
       accounts: { file: 'accounts.json', count: accounts.length },

@@ -22,7 +22,7 @@ ok(fs.existsSync('src/v38-realtime.js'), 'OpenAI realtime relay is present');
 ok(fs.existsSync('src/v38-source-intelligence.js'), 'source intelligence fabric is present');
 ok(fs.existsSync('src/v38-books.js'), 'books bridge (Open Library gateway) is present');
 ok(fs.existsSync('scripts/generate-v38-demo.mjs'), 'synthetic audit lab generator is present');
-ok(fs.existsSync('public/v38-demo/manifest.json'), 'synthetic lab dataset manifest is generated');
+ok(fs.existsSync('public/demo/v38/manifest.json'), 'synthetic lab dataset manifest is generated');
 
 for (const f of ['v38-ultimate.css', 'v38-ultimate.js', 'v38-io.js', 'v38-reports.js', 'v38-accounting.js', 'v38-evidence-graph.js', 'v38-council-v3.js', 'v38-source-fabric.js', 'v38-books.js', 'v38-live.js', 'v38-lab.js']) {
   ok(fs.existsSync('public/' + f) && read('public/' + f).length > 500, 'client module ' + f + ' exists and is substantial');
@@ -44,8 +44,8 @@ ok(/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler), 'suite edge remains the de
 ok(pkg.scripts['v38-core'] && pkg.scripts['v38-graph'] && pkg.scripts['v38-api'], 'v38 test scripts are registered in package.json');
 ok(String(pkg.scripts.check).includes('v38-suite'), 'v38 suite is part of the master check chain');
 
-const manifest = JSON.parse(read('public/v38-demo/manifest.json'));
-ok(manifest.seed === 380019 && manifest.totals.balanced === true, 'synthetic lab is seeded 380019 and balanced');
+const manifest = JSON.parse(read('public/demo/v38/manifest.json'));
+ok(manifest.seed === 380019 && manifest.totals.balanced === true && manifest.counts?.accounts === 1000 && manifest.synthetic_only === true, 'synthetic lab matches the deploy-gate contract (seed/counts/synthetic_only)');
 ok(Object.keys(manifest.datasets).length >= 20, 'synthetic lab has 20+ datasets');
 
 console.log('V38_CONTRACT_OK');
