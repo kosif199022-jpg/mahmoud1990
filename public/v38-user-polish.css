@@ -1,0 +1,122 @@
+/* KOSIF v38 — user-requested final readability/mobile polish (2026-08-19)
+   Design authority: Aghnam sales dashboard spacing + Kosif purple identity.
+   Additive layer only; accounting/audit logic is not changed here. */
+:root{
+  --kup-accent:#635bff;
+  --kup-purple:#8b5cf6;
+  --kup-pink:#d946ef;
+  --kup-ink:#172033;
+  --kup-muted:#667085;
+  --kup-line:#e8e7f3;
+  --kup-surface:#ffffff;
+  --kup-soft:#f8f7ff;
+  --kup-nav-h:82px;
+}
+html,body{min-height:100%;min-height:100dvh;overflow-x:hidden}
+body{padding-bottom:calc(var(--kup-nav-h) + env(safe-area-inset-bottom,0px) + 18px)!important}
+main{padding-bottom:calc(var(--kup-nav-h) + env(safe-area-inset-bottom,0px) + 42px)!important}
+
+/* Eye-comfort / lower information density */
+.card:not(.hero),.v38-card,.kpi,.step,.std-card,.finding,.docreq,.src-card{
+  border-color:var(--kup-line)!important;
+  box-shadow:0 12px 34px -24px rgba(55,48,120,.30)!important;
+}
+.card:not(.hero),.v38-card{border-radius:22px!important}
+.card-h,.v38-cardh{gap:10px!important}
+.card-h h2,.v38-cardh h2{font-size:clamp(19px,4.8vw,23px)!important;line-height:1.35!important}
+.card-h h3,.v38-cardh h3{font-size:clamp(16px,4.1vw,19px)!important;line-height:1.4!important}
+.hint,.v38-cardh .hint,.kpi .l,.v38-kpi small{color:var(--kup-muted)!important;line-height:1.55!important}
+.kpi,.v38-kpi{min-height:110px!important;padding:16px!important;border-radius:18px!important}
+.kpi .v,.v38-kpi strong{font-variant-numeric:tabular-nums lining-nums!important;letter-spacing:-.02em}
+
+/* Reduce text wall on opening screen while keeping details available in their dedicated views. */
+#view-overview .card:not(.hero) p:not(.note p),#view-overview .card:not(.hero) .hint{
+  max-width:72ch;
+}
+#view-overview .grid,#view-overview .v38-grid{gap:12px!important}
+#view-overview .kpi,#view-overview .v38-kpi{min-height:96px!important}
+#view-overview .note{font-size:12.5px!important;line-height:1.55!important}
+
+/* Trial-balance/data-loading readability */
+#view-tb .card-h h2,#view-tb .v38-cardh h2{font-size:22px!important}
+#view-tb .hint,#view-tb .note,#view-tb .btn{font-size:14px!important}
+#demo-grid .card,#demo-grid .kpi,#demo-grid button{font-size:14px!important;line-height:1.55!important}
+
+/* Dialogs always belong to the visible viewport, never below the current scroll position. */
+.modal-bg,.modal-backdrop,.dialog-backdrop,[data-dialog-backdrop]{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  height:100dvh!important;
+  padding:max(14px,env(safe-area-inset-top,0px)) 14px calc(var(--kup-nav-h) + env(safe-area-inset-bottom,0px) + 18px)!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important;
+}
+.modal-bg.show{display:flex!important;z-index:2147483300!important}
+.modal-bg.show>.modal,.modal-backdrop.show>.modal,[role="dialog"],.kosif-centered-dialog{
+  position:relative!important;
+  inset:auto!important;
+  margin:auto!important;
+  width:min(560px,calc(100vw - 28px))!important;
+  max-height:calc(100dvh - var(--kup-nav-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 44px)!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  border-radius:24px!important;
+}
+#m-title{font-size:22px!important;line-height:1.35!important}
+#m-text{font-size:15px!important;line-height:1.75!important}
+#m-no,#m-yes{min-height:48px!important;font-size:15px!important}
+
+/* Keep notifications and navigation above content but below a true dialog. */
+.toast-wrap{bottom:calc(var(--kup-nav-h) + env(safe-area-inset-bottom,0px) + 12px)!important;z-index:2147483200!important}
+#kosif-bottom-nav,.suite-shell,.suite-bottom-nav{z-index:2147483000!important}
+
+/* Explicit way home: useful in deep audit/standards screens on iPhone. */
+#kosif-user-home-chip{
+  position:fixed;z-index:2147482900;top:calc(env(safe-area-inset-top,0px) + 10px);left:10px;
+  display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:7px 11px;
+  border:1px solid rgba(99,91,255,.18);border-radius:999px;background:rgba(255,255,255,.92);
+  color:#4f46e5;text-decoration:none;font:750 12px/1.2 -apple-system,BlinkMacSystemFont,"SF Arabic",system-ui,sans-serif;
+  box-shadow:0 10px 26px -18px rgba(67,56,202,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)
+}
+#kosif-user-home-chip:active{transform:scale(.98)}
+
+/* Secure reviewers council settings */
+#kosif-council-settings-card{background:linear-gradient(180deg,#fff,#faf9ff)!important}
+.kosif-provider-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kosif-provider-field{border:1px solid var(--kup-line);background:#fff;border-radius:16px;padding:12px}
+.kosif-provider-field label{display:flex;justify-content:space-between;gap:8px;font-weight:800;font-size:13px;margin-bottom:7px;color:#312e81}
+.kosif-provider-field input,.kosif-provider-field select{width:100%;min-height:44px;border:1px solid #dedbea;border-radius:12px;background:#fff;padding:9px 11px;font-size:16px!important;direction:ltr;text-align:left}
+.kosif-provider-state{font-size:11px;color:var(--kup-muted)}
+.kosif-provider-state.ok{color:#047857}.kosif-provider-state.bad{color:#b42318}
+.kosif-secure-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.kosif-secure-note{font-size:12px;color:var(--kup-muted);line-height:1.65;margin-top:10px}
+
+/* Standards click target and fallback explainer */
+.std[data-ref],.std-card[data-ref],[data-standard],[data-standard-ref]{min-height:44px;touch-action:manipulation}
+#kosif-standard-fallback{position:fixed;inset:0;z-index:2147483400;background:rgba(15,23,42,.44);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;place-items:center;padding:max(14px,env(safe-area-inset-top,0px)) 14px calc(var(--kup-nav-h) + env(safe-area-inset-bottom,0px) + 18px)}
+#kosif-standard-fallback.show{display:grid}
+#kosif-standard-fallback .ksf-card{width:min(620px,100%);max-height:calc(100dvh - var(--kup-nav-h) - 42px);overflow:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:0 30px 70px -24px rgba(15,23,42,.55)}
+#kosif-standard-fallback h3{font-size:22px;color:#312e81;margin:0 0 7px}
+#kosif-standard-fallback .ksf-ref{display:inline-flex;border-radius:999px;background:#f1efff;color:#4f46e5;padding:5px 9px;font-weight:850;font-size:12px;margin-bottom:12px}
+#kosif-standard-fallback .ksf-box{border:1px solid #eceaf7;background:#fcfbff;border-radius:15px;padding:12px;margin-top:9px;line-height:1.75;font-size:14px}
+#kosif-standard-fallback .ksf-box strong{display:block;color:#4f46e5;margin-bottom:3px}
+#kosif-standard-fallback .ksf-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+/* Western digits use tabular metrics; actual digit conversion is handled in JS. */
+.kosif-western-digits,.num,.amt,time,[data-number]{font-variant-numeric:tabular-nums lining-nums!important}
+
+@media(max-width:720px){
+  :root{--kup-nav-h:88px}
+  .card:not(.hero),.v38-card{padding:16px!important;border-radius:20px!important}
+  .grid.g2,.v38-grid.g2,.v38-grid.cols-2,.kosif-provider-grid{grid-template-columns:1fr!important}
+  .card.hero{min-height:auto!important;padding:18px!important}
+  .card.hero .kpi{min-height:88px!important}
+  .card.hero p,.card.hero .hint{font-size:12.5px!important;line-height:1.6!important}
+  #kosif-user-home-chip{top:calc(env(safe-area-inset-top,0px) + 8px);left:8px;padding:6px 9px}
+}
+
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}

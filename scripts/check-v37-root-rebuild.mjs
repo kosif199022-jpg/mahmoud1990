@@ -10,7 +10,7 @@ ok(proxy.includes("READER_ROOT_ALIASES = ['/reader.html', '/reader', '/']")&&pro
 ok(proxy.includes("h.set('location', '/wealth'")&&proxy.includes("'https://mafateeh.internal'"),'Mafateeh upstream redirects stay scoped under /wealth');
 ok(proxy.includes("LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr'])")&&!proxy.includes('PREPARED_BOOKS')&&!proxy.includes('preparedReaderRedirect'),'all four books remain inside the one Mafateeh reader architecture');
 ok(proxy.includes('exposeReaderRuntimeBindings')&&proxy.includes("replace(dConst, 'var D = ')")&&proxy.includes("replace(chConst, 'var CH = ')") ,'prepared books drive the original reader D/CH model bindings');
-ok(proxy.includes("requestedLibraryBook(url) || 'mafateeh'")&&proxy.includes('#mixerDock,#smartHubDock,#libBtn{display:none!important}'),'Mafateeh is the default and optional docks are hidden on initial reader UI');
+ok(proxy.includes("requestedLibraryBook(url) || 'mafateeh'")&&proxy.includes('#mixerDock,#smartHubDock,#libBtn,#mixLaunch')&&proxy.includes('#smartPebble,.smart-pebble'),'Mafateeh is the default and optional Mix/Smart docks are hidden on initial and dynamic reader UI');
 ok(!proxy.includes('/wealth-theme-v37.css')&&!proxy.includes('/suite-shell.js'),'original Mafateeh visual shell is not overridden inside the reader');
 ok(edge.includes('OWNER_AUTH_REQUIRED')&&edge.includes('CUSTOM_SOURCE_BLOCKED'),'client data and custom source refresh are owner-gated');
 ok(edge.includes("x-kosif-intent")&&read('public/v37-privacy-guard.js').includes('navigator.userActivation'),'silent company publication is blocked at client and edge');
