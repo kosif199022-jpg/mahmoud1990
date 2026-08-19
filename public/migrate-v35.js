@@ -19,15 +19,9 @@ try{
   }
 }catch(_){/* Storage may be unavailable in private/restricted mode. */}
 
-/*
- * v38 release-integrity bridge.
- * v36-continuity remains a compatibility/runtime layer and still carries its
- * historical v36.4 identity. The root suite identity is authoritative once it
- * matches the v38 browser bootstrap actually loaded in this page.
- */
 const FALLBACK={version:'v38.0.0-root',buildId:'2026.08.19-v38-trusted-audit-os'};
-let identity=null,checking=null;
-
+let identity=null,checking=null,observer=null;
+const setText=(el,value)=>{if(el&&el.textContent!==String(value))el.textContent=String(value)};
 function installMobileSafeArea(){
   if(document.getElementById('kosif-v38-ios-bottom-safe'))return;
   const s=document.createElement('style');
@@ -49,20 +43,23 @@ function current(info){
 }
 function scrub(){
   if(!current(identity))return;
-  /* Any legacy release banner is stale once the authoritative root identity
-     matches the v38 bootstrap loaded in this very page. */
   document.getElementById('kosif-release-banner')?.remove();
   const card=document.getElementById('kosif-build-card');
   if(card){
-    const v=card.querySelector('#kosif-build-version');
-    const id=card.querySelector('[data-k-build]');
-    const state=card.querySelector('[data-k-release-state]');
-    if(v)v.textContent=identity.version||'Kosif';
-    if(id)id.textContent=identity.buildId||'—';
-    if(state)state.textContent='متطابق ✓';
+    setText(card.querySelector('#kosif-build-version'),identity.version||'Kosif');
+    setText(card.querySelector('[data-k-build]'),identity.buildId||'—');
+    setText(card.querySelector('[data-k-release-state]'),'متطابق ✓');
   }
-  document.documentElement.dataset.kosifBuild=identity.version||'current';
-  document.documentElement.dataset.kosifReleaseIntegrity='ok';
+  const root=document.documentElement;
+  if(root.dataset.kosifBuild!==(identity.version||'current'))root.dataset.kosifBuild=identity.version||'current';
+  if(root.dataset.kosifReleaseIntegrity!=='ok')root.dataset.kosifReleaseIntegrity='ok';
+}
+function releaseBoot(){
+  const boot=document.getElementById('kosif-boot');
+  if(!boot||boot.classList.contains('error')||boot.classList.contains('done'))return;
+  document.body?.classList.add('kosif-ready');
+  boot.classList.add('done');
+  setTimeout(()=>boot.remove(),650);
 }
 async function verify(){
   if(checking)return checking;
@@ -73,9 +70,6 @@ async function verify(){
       identity=await r.json();
       window.KosifBuildInfo=identity;
       scrub();
-      /* v38 modules are deferred and may finish just after this bridge. Recheck
-         once the browser build id is definitely available. */
-      if(!browserBuild())setTimeout(scrub,350);
       return identity;
     }catch(_){return null}
     finally{checking=null}
@@ -84,11 +78,14 @@ async function verify(){
 }
 function watch(){
   installMobileSafeArea();
-  const root=document.documentElement;
-  new MutationObserver(()=>scrub()).observe(root,{childList:true,subtree:true,characterData:true});
+  if(!observer){
+    observer=new MutationObserver(()=>scrub());
+    observer.observe(document.documentElement,{childList:true,subtree:true});
+  }
   verify();
-  setTimeout(()=>{verify().then(scrub)},700);
-  window.addEventListener('pageshow',()=>verify().then(scrub),{passive:true});
+  setTimeout(()=>verify().then(scrub),700);
+  setTimeout(releaseBoot,2500);
+  window.addEventListener('pageshow',()=>{verify().then(scrub);setTimeout(releaseBoot,800)},{passive:true});
   window.addEventListener('online',()=>verify().then(scrub),{passive:true});
 }
 window.KosifReleaseIntegrityV38={expected:{...FALLBACK},verify,current:()=>current(identity),info:()=>identity};
