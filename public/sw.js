@@ -1,8 +1,23 @@
-const C='kosif-native-v37-root-app';
+const C='kosif-native-v38-root-app';
 const CORE=['/','/hub.html','/suite.css','/suite.js','/suite-shell.css','/suite-shell.js','/wealth-library-v37.js','/libraries/index.html','/libraries/libraries.css','/sales/index.html','/sales/sales.css','/sales/sales.js','/sales/sales-general-bootstrap.js','/sales/sales-motion-v1.css','/sales/sales-motion-v1.js','/v37-privacy-guard.js','/v37-audit-safety.js','/index.html','/manifest.webmanifest','/icon.svg','/migrate-v35.js','/v36.css','/v36-motion.css','/v36-continuity.js','/v36-engagement.js','/v36-continuity.css','/v36-mobile-phase-b.css','/v36-polish-phase-d.css','/v36-analytics-3d.js','/v36-analytics-3d.css','/legacy/core-v36.js','/v36-features.js','/v36-operations.js','/v36-outputs.js','/v36-governance.js','/v36-standards-readiness.js','/v36-ai-gate.js','/v36-zai.js','/v36-council-v2.js','/v36-executor.js','/v36-reviewer-media.js','/v36-voice-guide.js','/v36-history-restore.js','/standards/bridge.js'];
+const REQUIRED_CORE=new Set(['/','/hub.html','/suite.css','/suite.js','/index.html','/manifest.webmanifest']);
 const INTEGRITY=new Set(['/migrate-v35.js','/v36-continuity.js','/v36-continuity.css','/v36-mobile-phase-b.css']);
 function integrity(u){return u.origin===location.origin&&INTEGRITY.has(u.pathname)}
-self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(C);await c.addAll(CORE);await self.skipWaiting()})()));
+async function primeCore(c){
+  const failed=[];
+  await Promise.all(CORE.map(async path=>{
+    try{
+      const req=new Request(path,{cache:'reload'});
+      const res=await fetch(req);
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      await c.put(req,res);
+    }catch(_){failed.push(path)}
+  }));
+  const critical=failed.filter(path=>REQUIRED_CORE.has(path));
+  if(critical.length)throw new Error(`KOSIF_SW_REQUIRED_CORE_FAILED:${critical.join(',')}`);
+  if(failed.length)console.warn('KOSIF_SW_OPTIONAL_CORE_SKIPPED',failed);
+}
+self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(C);await primeCore(c);await self.skipWaiting()})()));
 self.addEventListener('activate',e=>e.waitUntil((async()=>{
   for(const k of await caches.keys()){
     if(k===C)continue;
