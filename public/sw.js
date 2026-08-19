@@ -1,39 +1,6 @@
-const C='kosif-native-v38-root-app-20260819';
-const CORE=[
-  '/manifest.webmanifest','/icon.svg','/migrate-v35.js',
-  '/suite-shell.css','/suite-shell.js',
-  '/v37-privacy-guard.js','/v37-audit-safety.js',
-  '/v38-ultimate.css?v=38','/v38-ultimate.js?v=38',
-  '/v38-io.js?v=38','/v38-reports.js?v=38','/v38-accounting.js?v=38',
-  '/v38-evidence-graph.js?v=38','/v38-council-v3.js?v=38',
-  '/v38-source-fabric.js?v=38','/v38-books.js?v=38','/v38-live.js?v=38','/v38-lab.js?v=38'
-];
-self.addEventListener('install',event=>event.waitUntil((async()=>{
-  const cache=await caches.open(C);
-  await Promise.allSettled(CORE.map(url=>cache.add(new Request(url,{cache:'reload'}))));
-  await self.skipWaiting();
-})()));
-self.addEventListener('activate',event=>event.waitUntil((async()=>{
-  for(const key of await caches.keys()){
-    if(key===C)continue;
-    if(/^kosif(?:-native|-app|-)/i.test(key)||/^tamhees/i.test(key))await caches.delete(key);
-  }
-  await self.clients.claim();
-})()));
-function bypass(url){return url.origin!==location.origin||url.pathname.startsWith('/api/')||url.pathname.startsWith('/library/')||url.pathname.startsWith('/wealth/')||url.pathname.startsWith('/standards/audio/')||url.pathname==='/__version'||url.pathname==='/__health'||url.pathname==='/__suite'}
-self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET')return;
-  const url=new URL(event.request.url);
-  if(bypass(url))return;
-  if(event.request.mode==='navigate'||event.request.destination==='document'){
-    event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kosif</title><body dir="rtl" style="font-family:system-ui;padding:32px">تعذر تحميل Kosif بدون اتصال. أعد المحاولة عند عودة الشبكة.</body>',{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}})));
-    return;
-  }
-  event.respondWith((async()=>{
-    try{
-      const response=await fetch(event.request,{cache:'no-store'});
-      if(response.ok){const cache=await caches.open(C);cache.put(event.request,response.clone()).catch(()=>{})}
-      return response;
-    }catch(_){return (await caches.match(event.request,{cacheName:C}))||Response.error()}
-  })());
-});
+const C='kosif-native-v37-root-app';
+const CORE=['/','/hub.html','/suite.css','/suite.js','/suite-shell.css','/suite-shell.js','/wealth-library-v37.js','/libraries/index.html','/libraries/libraries.css','/libraries/reader.html','/libraries/reader.css','/libraries/reader.js','/sales/index.html','/sales/sales.css','/sales/sales.js','/sales/sales-general-bootstrap.js','/sales/sales-motion-v1.css','/sales/sales-motion-v1.js','/v37-privacy-guard.js','/v37-audit-safety.js','/index.html','/manifest.webmanifest','/icon.svg','/migrate-v35.js','/v36.css','/v36-motion.css','/v36-continuity.js','/v36-engagement.js','/v36-continuity.css','/v36-mobile-phase-b.css','/v36-polish-phase-d.css','/v36-analytics-3d.js','/v36-analytics-3d.css','/legacy/core-v36.js','/v36-features.js','/v36-operations.js','/v36-outputs.js','/v36-governance.js','/v36-standards-readiness.js','/v36-ai-gate.js','/v36-zai.js','/v36-council-v2.js','/v36-executor.js','/v36-reviewer-media.js','/v36-voice-guide.js','/v36-history-restore.js','/standards/bridge.js'];
+self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(C);await c.addAll(CORE);await self.skipWaiting()})()));
+self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys()){if(k===C)continue;if(/^kosif-native-v[\d-]+(?:-[a-z-]+)?-app$/i.test(k)||/^tamhees/i.test(k)||/^kosif-app-/i.test(k))await caches.delete(k)}await self.clients.claim()})()));
+function bypass(u){return u.origin!==location.origin||u.pathname.startsWith('/api/')||u.pathname.startsWith('/library/')||u.pathname.startsWith('/wealth/')||u.pathname.startsWith('/standards/audio/')||u.pathname==='/__version'||u.pathname==='/__health'||u.pathname==='/__suite'}
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(bypass(u))return;e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});if(r.ok){const c=await caches.open(C);c.put(e.request,r.clone()).catch(()=>{});return r}}catch(_){}const hit=await caches.match(e.request);return hit||Response.error()})())});
