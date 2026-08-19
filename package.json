@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-assets.mjs",
-    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite",
+    "check": "npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
+    "source-export-integrity": "node scripts/check-source-export-integrity.mjs",
     "legacy-regressions": "node scripts/check-legacy-regressions.mjs",
     "audit": "node scripts/deep-audit-v36.mjs",
     "contract": "node scripts/check-v36-4-contract.mjs",
