@@ -12,6 +12,8 @@ const MAX_REDIRECTS = 5;
 const HISTORY_LIMIT = 50;
 const REGISTRY_CAPACITY = 5000;
 const BULK_BATCH = 500;
+const OFFICIAL_CATALOG_PATH = '/data/kosif-official-sources-2026.json';
+const TIER_ORDER = Object.freeze({ A: 0, B: 1, C: 2, D: 3 });
 
 const CORE_SOURCES = [
   { id: 'ifrs-foundation', title: 'مؤسسة المعايير الدولية للتقارير المالية IFRS', url: 'https://www.ifrs.org/', tier: 'A', kind: 'accounting-standards' },
@@ -35,11 +37,6 @@ const HISTORY_KEY = id => `kosif:v38:sources:history:${id}`;
 
 export function listCoreSources() { return CORE_SOURCES; }
 
-export async function loadRegistry(env) {
-  const custom = env?.DATA ? ((await env.DATA.get(REGISTRY_KEY, 'json')) || { sources: [] }) : { sources: [] };
-  return { core: CORE_SOURCES, custom: (custom.sources || []).slice(0, REGISTRY_CAPACITY), capacity: REGISTRY_CAPACITY, used: Math.min((custom.sources || []).length, REGISTRY_CAPACITY) };
-}
-
 export function validateSourceUrl(raw) {
   let url;
   try { url = new URL(String(raw || '')); } catch { return null; }
@@ -49,6 +46,64 @@ export function validateSourceUrl(raw) {
   if (url.port && url.port !== '443') return null;
   if (url.username || url.password) return null;
   return url;
+}
+
+function normalizeCatalogSource(s) {
+  const id = String(s?.id || '').trim();
+  const url = validateSourceUrl(s?.url);
+  if (!id || !url) return null;
+  return {
+    id,
+    title: String(s?.title_ar || s?.title || id).slice(0, 240),
+    url: url.href,
+    tier: 'A',
+    kind: String(s?.kind || 'official-metadata').slice(0, 80),
+    issuer: String(s?.issuer || '').slice(0, 160),
+    status: String(s?.status || '').slice(0, 40),
+    effectiveContext: String(s?.effective_context || '').slice(0, 180),
+    commentsDue: String(s?.comments_due || '').slice(0, 20),
+    lastVerifiedAt: String(s?.last_verified || '').slice(0, 30),
+    requiresVerification: !!s?.requires_verification,
+    catalog: true,
+    metadataOnly: true
+  };
+}
+
+async function loadOfficialCatalog(env) {
+  if (!env?.ASSETS?.fetch) return [];
+  try {
+    const r = await env.ASSETS.fetch(new Request(new URL(OFFICIAL_CATALOG_PATH, 'https://assets.local')));
+    if (!r?.ok) return [];
+    const data = await r.json();
+    return (Array.isArray(data?.sources) ? data.sources : []).map(normalizeCatalogSource).filter(Boolean);
+  } catch (_) {
+    return [];
+  }
+}
+
+function mergeCoreSources(catalog) {
+  const map = new Map(CORE_SOURCES.map(s => [s.id, { ...s, catalog: false, metadataOnly: true }]));
+  for (const s of catalog || []) if (!map.has(s.id)) map.set(s.id, s);
+  return [...map.values()].sort((a, b) =>
+    (TIER_ORDER[a.tier] ?? 9) - (TIER_ORDER[b.tier] ?? 9) ||
+    Number(!!b.catalog) - Number(!!a.catalog) ||
+    String(a.title || '').localeCompare(String(b.title || ''), 'ar')
+  );
+}
+
+export async function loadRegistry(env) {
+  const [catalog, custom] = await Promise.all([
+    loadOfficialCatalog(env),
+    env?.DATA ? env.DATA.get(REGISTRY_KEY, 'json').then(v => v || { sources: [] }).catch(() => ({ sources: [] })) : Promise.resolve({ sources: [] })
+  ]);
+  const core = mergeCoreSources(catalog);
+  return {
+    core,
+    custom: (custom.sources || []).slice(0, REGISTRY_CAPACITY),
+    capacity: REGISTRY_CAPACITY,
+    used: Math.min((custom.sources || []).length, REGISTRY_CAPACITY),
+    officialCatalog: { path: OFFICIAL_CATALOG_PATH, loaded: catalog.length, authorityTier: 'A' }
+  };
 }
 
 export function resolveSafeRedirect(baseRaw, locationRaw) {
@@ -110,20 +165,29 @@ export async function refreshSources(env, ids = []) {
   const targets = (ids.length ? all.filter(s => ids.includes(s.id)) : all).slice(0, MAX_REFRESH);
   const results = [];
   const queue = [...targets];
+  const order = new Map(targets.map((x, i) => [x.id, i]));
   const workers = Array.from({ length: Math.min(MAX_CONCURRENCY, queue.length) }, async () => {
     while (queue.length) {
       const t = queue.shift();
       const sample = await fetchSample(t);
       const prev = env?.DATA ? await env.DATA.get(HISTORY_KEY(t.id), 'json') : null;
       const prevVersions = Array.isArray(prev?.versions) ? prev.versions : [];
-      const changed = sample.ok && (!prevVersions.length || prevVersions[prevVersions.length - 1].contentHash !== sample.contentHash);
+      const baseline = sample.ok && prevVersions.length === 0;
+      const changed = sample.ok && prevVersions.length > 0 && prevVersions[prevVersions.length - 1].contentHash !== sample.contentHash;
       const versions = sample.ok ? [...prevVersions, { checkedAt: sample.checkedAt, contentHash: sample.contentHash, etag: sample.etag, lastModified: sample.lastModified, finalUrl: sample.finalUrl, injectionSuspected: sample.injectionSuspected }].slice(-HISTORY_LIMIT) : prevVersions;
       if (sample.ok && env?.DATA) await env.DATA.put(HISTORY_KEY(t.id), JSON.stringify({ id: t.id, versions }));
-      results.push({ id: t.id, title: t.title, tier: t.tier, ok: sample.ok, error: sample.ok ? null : sample.error, changed, versionsStored: versions.length, injectionSuspected: sample.ok ? sample.injectionSuspected : null });
+      results.push({
+        id: t.id, title: t.title, tier: t.tier, kind: t.kind,
+        sourceStatus: t.status || '', effectiveContext: t.effectiveContext || '', commentsDue: t.commentsDue || '',
+        lastVerifiedAt: t.lastVerifiedAt || '', catalog: !!t.catalog,
+        ok: sample.ok, error: sample.ok ? null : sample.error, baseline, changed,
+        versionsStored: versions.length, injectionSuspected: sample.ok ? sample.injectionSuspected : null
+      });
     }
   });
   await Promise.all(workers);
-  return { refreshed: results.length, skipped: Math.max(0, (ids.length || all.length) - targets.length), results };
+  results.sort((a, b) => (order.get(a.id) ?? 9999) - (order.get(b.id) ?? 9999));
+  return { refreshed: results.length, skipped: Math.max(0, (ids.length || all.length) - targets.length), officialCatalog: registry.officialCatalog, results };
 }
 
 export async function sourceStatus(env, id) {
