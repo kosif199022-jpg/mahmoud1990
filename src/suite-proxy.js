@@ -11,7 +11,6 @@ const PATH_PREFIXES = [
 ];
 const READER_ROOT_ALIASES = ['/reader.html', '/reader', '/'];
 const LIBRARY_BOOKS = new Set(['mafateeh', 'std2018', 'std2025', 'dipifr']);
-const PREPARED_BOOKS = new Set(['std2018', 'std2025', 'dipifr']);
 
 function isPrefixPath(path) {
   const p = String(path || '').replace(/^\//, '');
@@ -34,15 +33,11 @@ function requestedLibraryBook(url) {
   return LIBRARY_BOOKS.has(book) ? book : '';
 }
 
-function preparedReaderRedirect(url, path) {
-  if (!READER_ROOT_ALIASES.includes(path)) return null;
-  const book = requestedLibraryBook(url);
-  if (!PREPARED_BOOKS.has(book)) return null;
-  const target = new URL('/libraries/reader.html', url.origin);
-  target.searchParams.set('book', book);
-  const chapter = Number(url.searchParams.get('ch'));
-  if (Number.isInteger(chapter) && chapter > 0 && chapter < 10000) target.searchParams.set('ch', String(chapter));
-  return target.pathname + target.search;
+function readerBookBootstrap(url) {
+  // Opening the reader without an explicit book must always start at Mafateeh,
+  // regardless of any old localStorage selection left by a previous session.
+  const book = requestedLibraryBook(url) || 'mafateeh';
+  return `<script data-kosif-book-bootstrap="${book}">(function(){try{localStorage.setItem('mk_lib_book',JSON.stringify(${JSON.stringify(book)}));window.__KOSIF_REQUESTED_BOOK__=${JSON.stringify(book)};}catch(e){}})();</script>`;
 }
 
 function injectHtmlFragments(text, fragments) {
@@ -61,6 +56,21 @@ function replaceLegacyReaderLibrary(text) {
   );
 }
 
+function exposeReaderRuntimeBindings(text) {
+  // Keep the original Mafateeh reader implementation, but make only its two
+  // top-level book-model bindings mutable in the proxied Kosif copy. All native
+  // render/TOC/search/audio/studio logic then follows whichever prepared book
+  // the compatibility layer selects, without rebuilding the reader.
+  const dConst = /\bconst\s+D\s*=\s*(?=\{)/;
+  const chConst = /\bconst\s+CH\s*=\s*(?=D\.parts\.flatMap)/;
+  if (dConst.test(text) && chConst.test(text)) {
+    return text.replace(dConst, 'var D = ').replace(chConst, 'var CH = ');
+  }
+  return text;
+}
+
+const READER_DEFAULT_UI = '<style id="kosif-reader-default-ui">#mixerDock,#smartHubDock,#libBtn{display:none!important}</style>';
+
 function rewriteWealthText(input, contentType = '', requestUrl = null) {
   let text = String(input || '');
   const htmlLike = isReaderHtmlRequest(contentType, requestUrl);
@@ -74,21 +84,24 @@ function rewriteWealthText(input, contentType = '', requestUrl = null) {
     text = text.replace(/"scope"\s*:\s*"\/"/g, '"scope":"/wealth/"');
   }
   if (htmlLike) {
+    text = exposeReaderRuntimeBindings(text);
     text = text.replace(
       /navigator\.serviceWorker\.register\("\/wealth\/sw\.js"\)/g,
       'navigator.serviceWorker.register("/wealth/sw.js",{scope:"/wealth/"})'
     );
-
-    // Mafateeh remains the original runtime. Prepared books never mutate its D/CH
-    // model anymore; they are routed to the Kosif-owned /libraries/reader.html.
-    // If an upstream compatibility layer is present, replace it with the Kosif
-    // library router so the in-reader library button follows the same boundary.
+    // Prefer the Kosif compatibility layer over an upstream reader-library file
+    // so all four book identities use one deterministic source of truth.
     text = replaceLegacyReaderLibrary(text);
     const injections = [];
-    if (!text.includes('/wealth-theme-v37.css')) injections.push('<link rel="stylesheet" href="/wealth-theme-v37.css">');
-    if (!text.includes('/suite-shell.css')) injections.push('<link rel="stylesheet" href="/suite-shell.css">');
+    const bookBoot = readerBookBootstrap(requestUrl);
+    const requested = requestedLibraryBook(requestUrl) || 'mafateeh';
+    const bookMarker = `data-kosif-book-bootstrap="${requested}"`;
+    if (!text.includes(bookMarker)) injections.push(bookBoot);
+    // Preserve the original navy/gold Mafateeh design. Mixer, Smart Library and
+    // the internal library switcher remain loaded/capable but do not appear on
+    // the default reading screen.
+    if (!text.includes('id="kosif-reader-default-ui"')) injections.push(READER_DEFAULT_UI);
     if (!text.includes('/wealth-library-v37.js')) injections.push('<script src="/wealth-library-v37.js" defer></script>');
-    if (!text.includes('/suite-shell.js')) injections.push('<script src="/suite-shell.js" defer></script>');
     text = injectHtmlFragments(text, injections);
   }
   if (/javascript/i.test(contentType) || htmlLike) {
@@ -106,8 +119,8 @@ function copyResponseHeaders(upstream, requestUrl = null) {
     try {
       const u = new URL(loc, 'https://mafateeh.internal');
       if (u.origin === 'https://mafateeh.internal' || WEALTH_ORIGINS.includes(u.origin)) {
-        const requestedBook = requestedLibraryBook(requestUrl);
-        if (requestedBook && !u.searchParams.has('book')) u.searchParams.set('book', requestedBook);
+        const requestedBook = requestedLibraryBook(requestUrl) || 'mafateeh';
+        if (!u.searchParams.has('book')) u.searchParams.set('book', requestedBook);
         h.set('location', '/wealth' + (u.pathname === '/' ? '/' : u.pathname) + u.search + u.hash);
       }
     } catch (_) {}
@@ -175,22 +188,6 @@ export async function proxyWealth(req, env) {
   if (!['GET', 'HEAD'].includes(req.method)) return null;
   let path = u.pathname.slice('/wealth'.length) || '/';
   if (path === '/' || path === '') path = '/reader.html';
-
-  // Architectural boundary: prepared standards/training books are first-party
-  // Kosif reader clients under /libraries/. They never execute inside the
-  // Mafateeh document, never share its global model bindings, and are outside
-  // the /wealth/ service-worker scope. This also makes old deep links migrate
-  // automatically without trusting localStorage or reader bootstrap timing.
-  const redirect = preparedReaderRedirect(u, path);
-  if (redirect) {
-    const h = new Headers({
-      location: redirect,
-      'cache-control': 'no-store, max-age=0',
-      'x-kosif-suite-module': 'prepared-reader',
-      'x-content-type-options': 'nosniff',
-    });
-    return new Response(null, { status: 302, headers: h });
-  }
 
   const upstream = await fetchUpstream(req, env, path);
   if (!upstream) return new Response('Wealth Keys source unavailable', { status: 502 });
