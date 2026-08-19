@@ -1,0 +1,39 @@
+{
+  "schema": "kosif-review-state-v1",
+  "last_review_id": "KOSIF-REV-A-0001",
+  "last_reviewed_at": "2026-08-19T18:30:00+03:00",
+  "review_agent": "A",
+  "dimensions": [
+    "RD-01 Numeric Integrity",
+    "RD-02 Spec Conformance",
+    "RD-03 Logical Comparisons",
+    "RD-04 Deterministic Decision Trees",
+    "RD-05 Security",
+    "RD-06 Authentication/Authorization",
+    "RD-07 Arabic Processing",
+    "RD-08 Error Handling",
+    "RD-09 Performance",
+    "RD-10 Consistency",
+    "RD-11 Audit Trail",
+    "RD-12 Tests",
+    "RD-13 Release Provenance",
+    "RD-14 Standards Status Semantics"
+  ],
+  "initial_connections": {
+    "github": "verified",
+    "gmail": "verified",
+    "canva": "verified",
+    "telegram": "official_integration_unavailable",
+    "cloudflare": "repository_deployment_evidence_verified; direct_connector_not_available_in_this_run"
+  },
+  "foundational_files": {
+    "kosif.spec.json": "missing",
+    "kosif.agents.json": "missing",
+    "decision_log": "missing",
+    "review_state": "created_in_review_branch",
+    "rollback_registry": "created_in_review_branch",
+    "assets_index": "created_in_review_branch"
+  },
+  "open_blockers": [92],
+  "notes": "Accounting-output contract changes remain blocked pending explicit governance approval."
+}
