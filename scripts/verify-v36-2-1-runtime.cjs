@@ -49,7 +49,12 @@ const expectedLegacyBuild=String(releaseManifest.buildId||'');
     const ck=page.locator('#cv2-key-'+id);ok(await ck.count()===1,'Council V2 provider missing '+id);ok(await ck.getAttribute('readonly')!==null,'Council V2 key must be locked '+id);ok((await ck.inputValue())==='','Council V2 locked key must be empty '+id);
   }
   ok(await page.locator('#cv2-run').isDisabled(),'Council V2 run must be disabled while owner gate is locked');
-  await page.evaluate(()=>{document.querySelector('#kosif-ai-sheet')?.classList.remove('show');document.querySelector('#kosif-ai-gate')?.classList.remove('show');go('analytics')});await page.waitForTimeout(220);ok(await page.locator('#ops-lab').count()===1,'Operational lab missing');await page.locator('#ops-sample').click({force:true});await page.waitForTimeout(150);ok(await page.locator('#ops-out .kpi').count()>=4,'Operational KPIs missing');
+  await page.evaluate(()=>{document.querySelector('#kosif-ai-sheet')?.classList.remove('show');document.querySelector('#kosif-ai-gate')?.classList.remove('show');go('analytics')});
+  await page.waitForTimeout(220);
+  ok(await page.locator('#ops-lab').count()===1,'Operational lab missing');
+  await page.locator('#ops-sample').click({force:true});
+  await page.waitForFunction(()=>document.querySelectorAll('#ops-out .kpi').length>=4,{timeout:5000});
+  ok(await page.locator('#ops-out .kpi').count()>=4,'Operational KPIs missing');
 
   await page.goto(BASE+'/standards/?v='+encodeURIComponent(expectedLegacyVersion),{waitUntil:'domcontentloaded'});await page.waitForTimeout(900);
   ok(await page.evaluate(()=>typeof window.KosifStandardsReaderPro==='object'),'Reader Pro missing');
