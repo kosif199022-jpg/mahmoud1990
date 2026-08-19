@@ -30,7 +30,7 @@
         '<div class="v38-card v38-no-print">' +
         '<div class="v38-cardh"><h3>الاتصال الآمن</h3><span class="hint" id="v38-lv-sec">جاري التحقق من إعداد الخادم…</span></div>' +
         '<div class="v38-form-grid">' +
-        '<div class="v38-field"><label>النموذج الصوتي</label><select id="v38-lv-model"><option value="gpt-realtime">gpt-realtime</option><option value="gpt-realtime-mini">gpt-realtime-mini</option></select></div>' +
+        '<div class="v38-field"><label>النموذج الصوتي</label><select id="v38-lv-model"><option value="gpt-realtime-2.1">gpt-realtime-2.1 — الأقوى</option><option value="gpt-realtime-2.1-mini">gpt-realtime-2.1-mini — أسرع وأوفر</option><option value="gpt-realtime-2">gpt-realtime-2</option><option value="gpt-realtime-1.5">gpt-realtime-1.5</option></select></div>' +
         '<div class="v38-field"><label>الصوت</label><select id="v38-lv-voice"><option value="marin">marin — موصى به</option><option value="cedar">cedar — موصى به</option><option value="alloy">alloy</option><option value="coral">coral</option><option value="sage">sage</option><option value="verse">verse</option></select></div>' +
         '<div class="v38-field"><label>لغة المحادثة</label><select id="v38-lv-lang"><option value="ar">العربية</option><option value="en">English</option></select></div>' +
         '</div>' +
@@ -100,7 +100,7 @@
         const el = V.$('#v38-lv-sec');
         if (!el) return;
         el.textContent = r.configured
-          ? 'الخادم جاهز — المفتاح مخفي عن المتصفح'
+          ? 'الخادم جاهز — المفتاح مخفي عن المتصفح — ' + (r.model || 'Realtime')
           : 'OpenAI Realtime غير مُعد على الخادم بعد';
       }).catch(e => {
         const el = V.$('#v38-lv-sec');
