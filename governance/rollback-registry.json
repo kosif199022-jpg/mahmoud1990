@@ -1,0 +1,29 @@
+{
+  "schema": "kosif-rollback-registry-v1",
+  "entries": [
+    {
+      "review_id": "KOSIF-REV-A-0001",
+      "before_git_sha": "43da9d3f1a5dfd3dbd39f495aa0eb9bb87259843",
+      "timestamp": "2026-08-19T18:30:00+03:00",
+      "review_branch": "agent/review-a-0001",
+      "production_baseline": {
+        "build_id": "2026.08.19-v38-trusted-audit-os",
+        "url": "https://mahmoud-eldesouky.kosif199022.workers.dev",
+        "evidence": "Review A registry / production verification history"
+      }
+    },
+    {
+      "review_id": "KOSIF-REV-FINAL-2026-08-19",
+      "before_git_sha": "4ca0a88e99872e0b8d066bd7df6231881694d924",
+      "before_worker_version": "v38.0.0-root",
+      "before_schema_version": "no D1 schema change in this release",
+      "timestamp": "2026-08-19T20:12:00+03:00",
+      "review_branch": "agent/final-user-requirements-2026-08-19",
+      "target_worker_version": "v38.1.0-root",
+      "target_build_id": "2026.08.19-v38.1-user-polish",
+      "production_url": "https://mahmoud-eldesouky.kosif199022.workers.dev",
+      "data_change": "none",
+      "rollback_policy": "Rollback code only to the verified pre-release SHA if post-deploy smoke fails. Do not roll back D1/KV/user data. Re-verify /__version, /__health, /audit/, /libraries/, /wealth/reader.html and /sales/ after any rollback."
+    }
+  ]
+}
