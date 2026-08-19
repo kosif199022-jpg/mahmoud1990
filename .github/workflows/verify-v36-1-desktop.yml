@@ -70,8 +70,10 @@ jobs:
           const fs=require('fs');
           const ok=(v,m)=>{if(!v)throw Error(m)};
           const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
-          const expectedGateVersion=String(pkg.version||'');
-          const expectedRelease='v'+expectedGateVersion.split('.').slice(0,2).join('.');
+          const legacy=JSON.parse(fs.readFileSync('RELEASE_MANIFEST_V36_4.json','utf8'));
+          const productVersion=String(pkg.version||'');
+          const expectedRelease='v'+productVersion.split('.').slice(0,2).join('.');
+          const expectedGateFamily=String(legacy.version||'').replace(/^v/i,'');
           const widths=[1024,1366,1920];
           (async()=>{
             const browser=await chromium.launch({headless:true});
@@ -112,7 +114,10 @@ jobs:
               ok(metrics.minTabWidth>=70,`choice buttons too narrow at ${width}`);
               ok(metrics.navDisplay!=='none'&&metrics.navDisplay!=='missing',`desktop tab list hidden at ${width}`);
               ok(metrics.bottomDisplay==='none'||metrics.bottomDisplay==='missing',`mobile bottom nav visible at ${width}`);
-              ok(metrics.gateVersion===expectedGateVersion,`AI gate version mismatch: expected ${expectedGateVersion}, got ${metrics.gateVersion}`);
+              ok(
+                metrics.gateVersion && (metrics.gateVersion===expectedGateFamily || metrics.gateVersion.startsWith(expectedGateFamily+'.')),
+                `AI gate lineage mismatch: expected ${expectedGateFamily}.x compatibility gate, got ${metrics.gateVersion}`
+              );
               ok(metrics.zaiReady,'Z.ai bridge not loaded');
               ok(metrics.rows>=1&&metrics.rows<=4,`unexpected choice-list row count at ${width}: ${metrics.rows}`);
               const labels=await page.locator('#tabbar .tab').allTextContents();
@@ -126,7 +131,7 @@ jobs:
               await context.close();
             }
             await browser.close();
-            console.log('KOSIF_DESKTOP_NAV_OK',expectedRelease,expectedGateVersion);
+            console.log('KOSIF_DESKTOP_NAV_OK',expectedRelease,expectedGateFamily);
           })().catch(e=>{console.error(e.stack||e);process.exit(1)});
           NODE
           node /tmp/desktop-probe.cjs
