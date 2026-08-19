@@ -1,0 +1,566 @@
+{
+  "generated_at_utc": "2026-08-19T07:37:43.645529+00:00",
+  "scope": "Metadata index of user-provided RAR attachments",
+  "content_reviewed": false,
+  "extraction_note": "Archive directory metadata was indexed, but PDF/book contents inside RAR archives were not extracted because the build environment has no compatible RAR decompression backend. No content claims are made from these archive entries.",
+  "archives": [
+    {
+      "name": "1(2).rar",
+      "available": true,
+      "size_bytes": 369889401,
+      "sha256": "ebae20db5895bedcbd951e7941251d53de0bad22abd1f49b21bf69337ab029b9",
+      "entry_count": 53,
+      "entries": [
+        {
+          "name": "Malia.pdf",
+          "size_bytes": 3739653,
+          "compressed_bytes": 2604180,
+          "crc": "2852307923"
+        },
+        {
+          "name": "3lmia.pdf",
+          "size_bytes": 2659298,
+          "compressed_bytes": 2553759,
+          "crc": "403368974"
+        },
+        {
+          "name": "2013.pdf",
+          "size_bytes": 10167640,
+          "compressed_bytes": 9176582,
+          "crc": "1846518764"
+        },
+        {
+          "name": "2015Itaar.pdf",
+          "size_bytes": 14442522,
+          "compressed_bytes": 13787082,
+          "crc": "1264454929"
+        },
+        {
+          "name": "Arrows.pdf",
+          "size_bytes": 1260425,
+          "compressed_bytes": 1072800,
+          "crc": "4211566999"
+        },
+        {
+          "name": "Arrows2.pdf",
+          "size_bytes": 1027709,
+          "compressed_bytes": 404013,
+          "crc": "1527211190"
+        },
+        {
+          "name": "Aswl.pdf",
+          "size_bytes": 27652955,
+          "compressed_bytes": 20338971,
+          "crc": "2483435394"
+        },
+        {
+          "name": "Audit.pdf",
+          "size_bytes": 7329605,
+          "compressed_bytes": 6272263,
+          "crc": "1158366180"
+        },
+        {
+          "name": "Audit3.pdf",
+          "size_bytes": 2102743,
+          "compressed_bytes": 1716198,
+          "crc": "3489397495"
+        },
+        {
+          "name": "Bacics.pdf",
+          "size_bytes": 5858635,
+          "compressed_bytes": 5675674,
+          "crc": "2858075215"
+        },
+        {
+          "name": "Bank.pdf",
+          "size_bytes": 27434537,
+          "compressed_bytes": 23619779,
+          "crc": "3695129797"
+        },
+        {
+          "name": "Cash.pdf",
+          "size_bytes": 11022609,
+          "compressed_bytes": 7573527,
+          "crc": "214091064"
+        },
+        {
+          "name": "cma.part2.pdf",
+          "size_bytes": 168359,
+          "compressed_bytes": 143470,
+          "crc": "3572056525"
+        },
+        {
+          "name": "Coast.pdf",
+          "size_bytes": 41383746,
+          "compressed_bytes": 36522956,
+          "crc": "835809372"
+        },
+        {
+          "name": "Coast2.pdf",
+          "size_bytes": 20227691,
+          "compressed_bytes": 20121736,
+          "crc": "3255663155"
+        },
+        {
+          "name": "Coast4.pdf",
+          "size_bytes": 9971616,
+          "compressed_bytes": 8553657,
+          "crc": "2058974837"
+        },
+        {
+          "name": "Coast5.pdf",
+          "size_bytes": 4723132,
+          "compressed_bytes": 3534631,
+          "crc": "304620575"
+        },
+        {
+          "name": "Coast6.pdf",
+          "size_bytes": 3280404,
+          "compressed_bytes": 2978693,
+          "crc": "1362060544"
+        },
+        {
+          "name": "Coast8.pdf",
+          "size_bytes": 1658993,
+          "compressed_bytes": 1608138,
+          "crc": "2030523723"
+        },
+        {
+          "name": "Comp.pdf",
+          "size_bytes": 16912963,
+          "compressed_bytes": 12998672,
+          "crc": "430312060"
+        },
+        {
+          "name": "Daw.pdf",
+          "size_bytes": 867464,
+          "compressed_bytes": 670946,
+          "crc": "2148842071"
+        },
+        {
+          "name": "Deci.pdf",
+          "size_bytes": 11401919,
+          "compressed_bytes": 9449095,
+          "crc": "1762592624"
+        },
+        {
+          "name": "Dic.pdf",
+          "size_bytes": 27324779,
+          "compressed_bytes": 27208824,
+          "crc": "2162768061"
+        },
+        {
+          "name": "Dict2.pdf",
+          "size_bytes": 206352,
+          "compressed_bytes": 195695,
+          "crc": "1654911404"
+        },
+        {
+          "name": "E3tmadat.pdf",
+          "size_bytes": 2483019,
+          "compressed_bytes": 2280471,
+          "crc": "780331217"
+        },
+        {
+          "name": "Econ.pdf",
+          "size_bytes": 3867298,
+          "compressed_bytes": 2947880,
+          "crc": "2644255806"
+        },
+        {
+          "name": "Edarya.pdf",
+          "size_bytes": 15576189,
+          "compressed_bytes": 11055097,
+          "crc": "1776010392"
+        },
+        {
+          "name": "Ehsaa.pdf",
+          "size_bytes": 2639764,
+          "compressed_bytes": 2081223,
+          "crc": "2218171054"
+        },
+        {
+          "name": "El.pdf",
+          "size_bytes": 1316362,
+          "compressed_bytes": 1117202,
+          "crc": "3371587219"
+        },
+        {
+          "name": "Exam.pdf",
+          "size_bytes": 200903,
+          "compressed_bytes": 171139,
+          "crc": "2676970101"
+        },
+        {
+          "name": "excel_2013.pdf",
+          "size_bytes": 10145747,
+          "compressed_bytes": 7743585,
+          "crc": "2298575519"
+        },
+        {
+          "name": "Exel.pdf",
+          "size_bytes": 8257123,
+          "compressed_bytes": 7343721,
+          "crc": "3153560241"
+        },
+        {
+          "name": "Fina.pdf",
+          "size_bytes": 24130847,
+          "compressed_bytes": 23950009,
+          "crc": "974914641"
+        },
+        {
+          "name": "Final.pdf",
+          "size_bytes": 1190365,
+          "compressed_bytes": 1016210,
+          "crc": "1605268170"
+        },
+        {
+          "name": "Flow.pdf",
+          "size_bytes": 11947792,
+          "compressed_bytes": 10598843,
+          "crc": "2537636952"
+        },
+        {
+          "name": "Fondoq.pdf",
+          "size_bytes": 1823870,
+          "compressed_bytes": 1604850,
+          "crc": "17972754"
+        },
+        {
+          "name": "Foods.pdf",
+          "size_bytes": 949992,
+          "compressed_bytes": 855111,
+          "crc": "3743218475"
+        },
+        {
+          "name": "Hawk.pdf",
+          "size_bytes": 5886216,
+          "compressed_bytes": 4058902,
+          "crc": "411952294"
+        },
+        {
+          "name": "Hkowma.pdf",
+          "size_bytes": 2319525,
+          "compressed_bytes": 1987246,
+          "crc": "60317098"
+        },
+        {
+          "name": "Hr.pdf",
+          "size_bytes": 5299555,
+          "compressed_bytes": 5132217,
+          "crc": "2811013388"
+        },
+        {
+          "name": "Hr2.pdf",
+          "size_bytes": 4774776,
+          "compressed_bytes": 4322213,
+          "crc": "1767726327"
+        },
+        {
+          "name": "Idaraa.pdf",
+          "size_bytes": 4505900,
+          "compressed_bytes": 4295089,
+          "crc": "2883329577"
+        },
+        {
+          "name": "Income.pdf",
+          "size_bytes": 2037057,
+          "compressed_bytes": 1732246,
+          "crc": "3838191417"
+        },
+        {
+          "name": "Internal.pdf",
+          "size_bytes": 15552854,
+          "compressed_bytes": 14398222,
+          "crc": "3356341308"
+        },
+        {
+          "name": "Inv.pdf",
+          "size_bytes": 5114846,
+          "compressed_bytes": 4448299,
+          "crc": "4978914"
+        },
+        {
+          "name": "Inventory.pdf",
+          "size_bytes": 2412858,
+          "compressed_bytes": 2039607,
+          "crc": "4277665513"
+        },
+        {
+          "name": "Istra.pdf",
+          "size_bytes": 5008178,
+          "compressed_bytes": 4513382,
+          "crc": "2068235689"
+        },
+        {
+          "name": "Law.pdf",
+          "size_bytes": 3330132,
+          "compressed_bytes": 2855598,
+          "crc": "399233228"
+        },
+        {
+          "name": "LifeInsurance.pdf",
+          "size_bytes": 5758069,
+          "compressed_bytes": 4874825,
+          "crc": "4032492895"
+        },
+        {
+          "name": "Mab.pdf",
+          "size_bytes": 22466806,
+          "compressed_bytes": 21915853,
+          "crc": "3497343235"
+        },
+        {
+          "name": "Madkh.pdf",
+          "size_bytes": 765951,
+          "compressed_bytes": 691435,
+          "crc": "2554271437"
+        },
+        {
+          "name": "Maharat.pdf",
+          "size_bytes": 242737,
+          "compressed_bytes": 223063,
+          "crc": "1626172969"
+        },
+        {
+          "name": "Mali.pdf",
+          "size_bytes": 937285,
+          "compressed_bytes": 848648,
+          "crc": "3992080545"
+        }
+      ]
+    },
+    {
+      "name": "2(3).rar",
+      "available": true,
+      "size_bytes": 189756539,
+      "sha256": "f463120f064815f1c668d2372fa023d6cdbca95570537c5b11f75477105cd62b",
+      "entry_count": 37,
+      "entries": [
+        {
+          "name": "تعديلات معايير المحاسبة  2023.pdf",
+          "size_bytes": 22331252,
+          "compressed_bytes": 18242185,
+          "crc": "1619594724"
+        },
+        {
+          "name": "كفاءة المحاسبين في إعداد الحسابات الختامية والميزانية.pdf",
+          "size_bytes": 204105,
+          "compressed_bytes": 186070,
+          "crc": "2185090403"
+        },
+        {
+          "name": "Mashro3at.pdf",
+          "size_bytes": 4997478,
+          "compressed_bytes": 4405114,
+          "crc": "2024860809"
+        },
+        {
+          "name": "Mohaasbon.pdf",
+          "size_bytes": 975895,
+          "compressed_bytes": 653168,
+          "crc": "3652857346"
+        },
+        {
+          "name": "Monshaat.pdf",
+          "size_bytes": 2133616,
+          "compressed_bytes": 1913016,
+          "crc": "2882146963"
+        },
+        {
+          "name": "Morag3a.pdf",
+          "size_bytes": 20938153,
+          "compressed_bytes": 17146667,
+          "crc": "2802564081"
+        },
+        {
+          "name": "Morshd.pdf",
+          "size_bytes": 11962423,
+          "compressed_bytes": 11493113,
+          "crc": "2362241974"
+        },
+        {
+          "name": "Motaqdma.pdf",
+          "size_bytes": 2241788,
+          "compressed_bytes": 2092087,
+          "crc": "709367338"
+        },
+        {
+          "name": "Mowahd.pdf",
+          "size_bytes": 13722207,
+          "compressed_bytes": 12118087,
+          "crc": "1644576605"
+        },
+        {
+          "name": "Mowaznat.pdf",
+          "size_bytes": 4091903,
+          "compressed_bytes": 3823210,
+          "crc": "3543209290"
+        },
+        {
+          "name": "Mowrag3a.pdf",
+          "size_bytes": 2319152,
+          "compressed_bytes": 2063331,
+          "crc": "3254505400"
+        },
+        {
+          "name": "Mwqawlat.pdf",
+          "size_bytes": 1855432,
+          "compressed_bytes": 1645567,
+          "crc": "2635091423"
+        },
+        {
+          "name": "Nazria.pdf",
+          "size_bytes": 2772473,
+          "compressed_bytes": 2089894,
+          "crc": "2445369565"
+        },
+        {
+          "name": "Nesab.pdf",
+          "size_bytes": 796501,
+          "compressed_bytes": 720146,
+          "crc": "3879159070"
+        },
+        {
+          "name": "Nozom.pdf",
+          "size_bytes": 15100674,
+          "compressed_bytes": 12332370,
+          "crc": "4255945161"
+        },
+        {
+          "name": "Project.pdf",
+          "size_bytes": 1579353,
+          "compressed_bytes": 1448909,
+          "crc": "748393854"
+        },
+        {
+          "name": "Public.pdf",
+          "size_bytes": 3329073,
+          "compressed_bytes": 2917214,
+          "crc": "767304140"
+        },
+        {
+          "name": "Reqaba.pdf",
+          "size_bytes": 1878437,
+          "compressed_bytes": 1606850,
+          "crc": "890487201"
+        },
+        {
+          "name": "Riadh.pdf",
+          "size_bytes": 13235824,
+          "compressed_bytes": 7979108,
+          "crc": "3060706250"
+        },
+        {
+          "name": "SalesManagement.pdf",
+          "size_bytes": 4239029,
+          "compressed_bytes": 3845610,
+          "crc": "2432485757"
+        },
+        {
+          "name": "Search.pdf",
+          "size_bytes": 6159258,
+          "compressed_bytes": 5968600,
+          "crc": "508936845"
+        },
+        {
+          "name": "Stat.pdf",
+          "size_bytes": 204105,
+          "compressed_bytes": 186070,
+          "crc": "2185090403"
+        },
+        {
+          "name": "Taageer.pdf",
+          "size_bytes": 16744485,
+          "compressed_bytes": 15552518,
+          "crc": "1823158515"
+        },
+        {
+          "name": "Tadamon.pdf",
+          "size_bytes": 629965,
+          "compressed_bytes": 602058,
+          "crc": "2272057962"
+        },
+        {
+          "name": "Tahlil.pdf",
+          "size_bytes": 4801998,
+          "compressed_bytes": 4436714,
+          "crc": "1380552136"
+        },
+        {
+          "name": "Tamenat.pdf",
+          "size_bytes": 4072626,
+          "compressed_bytes": 3201892,
+          "crc": "1871803440"
+        },
+        {
+          "name": "Tamwil.pdf",
+          "size_bytes": 18512865,
+          "compressed_bytes": 18386483,
+          "crc": "1480843937"
+        },
+        {
+          "name": "Tamwil2.pdf",
+          "size_bytes": 16926127,
+          "compressed_bytes": 11363600,
+          "crc": "1476141197"
+        },
+        {
+          "name": "Tasw.pdf",
+          "size_bytes": 2256868,
+          "compressed_bytes": 2002401,
+          "crc": "4080248159"
+        },
+        {
+          "name": "Taswiat.pdf",
+          "size_bytes": 1290916,
+          "compressed_bytes": 1075980,
+          "crc": "94353001"
+        },
+        {
+          "name": "Tax.pdf",
+          "size_bytes": 6016101,
+          "compressed_bytes": 4915808,
+          "crc": "2136890037"
+        },
+        {
+          "name": "Tax2.pdf",
+          "size_bytes": 2743135,
+          "compressed_bytes": 2446513,
+          "crc": "4260464285"
+        },
+        {
+          "name": "Tax3.pdf",
+          "size_bytes": 2743135,
+          "compressed_bytes": 2446513,
+          "crc": "4260464285"
+        },
+        {
+          "name": "Tax6.pdf",
+          "size_bytes": 1412935,
+          "compressed_bytes": 1210914,
+          "crc": "3817673693"
+        },
+        {
+          "name": "Toga.pdf",
+          "size_bytes": 2665665,
+          "compressed_bytes": 2347543,
+          "crc": "2676752100"
+        },
+        {
+          "name": "Twroq.pdf",
+          "size_bytes": 2144508,
+          "compressed_bytes": 1698372,
+          "crc": "1548251928"
+        },
+        {
+          "name": "Wekalat.pdf",
+          "size_bytes": 3583625,
+          "compressed_bytes": 3188380,
+          "crc": "1079356412"
+        }
+      ]
+    }
+  ]
+}

@@ -32,7 +32,7 @@ ok('standards SW cache generation is v36.4',/const C='kosif-native-v36-4-standar
 ok('reviewer media voice guide and history restoration are available offline',/\/v36-reviewer-media\.js/.test(sw)&&/\/v36-voice-guide\.js/.test(sw)&&/\/v36-history-restore\.js/.test(sw));
 ok('app SW excludes APIs and release diagnostics',/pathname\.startsWith\('\/api\/'\)/.test(sw)&&/u\.pathname==='\/__version'/.test(sw)&&/u\.pathname==='\/__health'/.test(sw));
 ok('old Kosif and Tamhees caches remain purgeable',/tamhees/i.test(sw)&&/kosif-native-v/.test(sw)&&/tamhees/i.test(stdSw));
-ok('package declares v36.4 compatibility and this contract',/"version"\s*:\s*"36\.4\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
+ok('package declares its lineage and this contract (v38 carries v36.4 compatibility)',/"version"\s*:\s*"38\.0\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
 ok('all restored regression gates remain in full CI',/npm run reviewer-media/.test(pkg)&&/npm run history-restoration/.test(pkg)&&/npm run feature-reachability/.test(pkg)&&/npm run accounting/.test(pkg));
 ok('master anti-regressions still require iPhone modal and autoscroll safety',/iPhone/.test(req)&&/auto-scroll continuing while a modal\/body lock is active/.test(req)&&/body-scroll\/modal-scroll conflicts/.test(req));
 console.log(`KOSIF_V36_4_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}

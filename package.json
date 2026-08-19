@@ -1,11 +1,11 @@
 {
-  "name": "kosif-native-v36-4",
-  "version": "36.4.0",
+  "name": "kosif-native-v38",
+  "version": "38.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build-assets.mjs",
-    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales",
+    "check": "npm run syntax && npm run payloads && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
     "legacy-regressions": "node scripts/check-legacy-regressions.mjs",
@@ -26,6 +26,12 @@
     "accounting": "node scripts/check-accounting-v36.mjs",
     "v37-engine": "node tests/kosif.engine.test.mjs",
     "v37-root": "node scripts/check-v37-root-rebuild.mjs",
-    "libraries-sales": "node scripts/check-kosif-libraries-sales-v1.mjs"
+    "libraries-sales": "node scripts/check-kosif-libraries-sales-v1.mjs",
+    "v38-core": "node tests/v38-core.test.mjs",
+    "v38-graph": "node tests/v38-evidence-graph.test.mjs",
+    "v38-api": "node tests/v38-api.test.mjs",
+    "v38-suite": "npm run v38-core && npm run v38-graph && npm run v38-api && node scripts/check-v38.mjs",
+    "v38-demo": "node scripts/generate-v38-demo.mjs"
   }
 }
+
