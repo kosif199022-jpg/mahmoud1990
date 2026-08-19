@@ -215,7 +215,7 @@ export async function createRealtimeCall(env, input = {}) {
     model,
     voice,
     transport: 'webrtc-server-relay',
-    keyExposure: 'none-returned',
+    keyExposure: 'none',
     credentialSource: auth.source
   };
 }
