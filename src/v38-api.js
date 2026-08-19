@@ -10,7 +10,7 @@ import { serializeGraph, deserializeGraph, addNode, addEdge, neighbors, lineage,
 import { listCoreSources, loadRegistry, refreshSources, sourceStatus, bulkOnboard } from './v38-source-intelligence.js';
 import { searchOpenLibrary, curatedCatalog } from './v38-books.js';
 import { callPublicAI, publicAIConfigured } from './public-ai-provider.js';
-import { openRealtimeSession } from './v38-realtime.js';
+import { createRealtimeCall, hangupRealtimeCall, realtimeConfigured, DEFAULT_REALTIME_MODEL } from './v38-realtime.js';
 
 export const V38_CAPABILITIES = {
   product: 'KOSIF',
@@ -269,11 +269,49 @@ export async function handleV38(req, env, u, owner) {
     return json({ ok: true, matrix: councilMatrix(b) });
   }
 
-  /* جلسة OpenAI Realtime (مفتاح يمر عبر الخادم ولا يُخزَّن) */
-  if (p === '/api/kosif/v38/realtime/session' && req.method === 'POST') {
+  /* OpenAI Realtime — مفتاح الخادم لا يدخل المتصفح مطلقًا */
+  if (p === '/api/kosif/v38/realtime/status' && req.method === 'GET') {
+    return json({
+      ok: true,
+      configured: realtimeConfigured(env),
+      model: DEFAULT_REALTIME_MODEL,
+      transport: 'webrtc-server-relay',
+      keyExposure: 'none',
+      advisory: 'الصوت المباشر استشاري ولا يعتمد قيودًا ولا آراءً.'
+    });
+  }
+  if (p === '/api/kosif/v38/realtime/call' && req.method === 'POST') {
     const b = await body(req);
-    const r = await openRealtimeSession(String(b?.key || ''), String(b?.model || 'gpt-4o-realtime-preview'));
-    return r.ok ? json({ ok: true, session: r.session, advisory: 'الصوت المباشر استشاري ولا يعتمد قيودًا ولا آراءً.' }) : err(r.error, r.message, 502);
+    const r = await createRealtimeCall(env, {
+      sdp: b?.sdp,
+      model: b?.model,
+      voice: b?.voice,
+      language: b?.language,
+      company: b?.company,
+      context: b?.context
+    });
+    if (!r.ok) {
+      const status = r.error === 'REALTIME_NOT_CONFIGURED' ? 503 : r.error === 'REALTIME_UPSTREAM_REJECTED' || r.error === 'REALTIME_UPSTREAM_TIMEOUT' || r.error === 'REALTIME_UPSTREAM_UNAVAILABLE' ? 502 : 400;
+      return err(r.error, r.message, status);
+    }
+    return json({
+      ok: true,
+      answerSdp: r.answerSdp,
+      callId: r.callId,
+      model: r.model,
+      voice: r.voice,
+      transport: r.transport,
+      keyExposure: r.keyExposure,
+      advisory: 'الصوت المباشر استشاري فقط؛ أي استنتاج يحتاج دليلًا ومراجعة بشرية قبل الاستخدام.'
+    }, 201);
+  }
+  if (p === '/api/kosif/v38/realtime/hangup' && req.method === 'POST') {
+    const b = await body(req);
+    const r = await hangupRealtimeCall(env, b?.callId);
+    return r.ok ? json({ ok: true, alreadyEnded: !!r.alreadyEnded }) : err(r.error, r.message, r.error === 'REALTIME_NOT_CONFIGURED' ? 503 : 502);
+  }
+  if (p === '/api/kosif/v38/realtime/session') {
+    return err('REALTIME_LEGACY_ROUTE_RETIRED', 'تم إيقاف مسار السر المؤقت القديم. استخدم /realtime/call؛ مفتاح OpenAI يبقى في أسرار الخادم فقط.', 410);
   }
 
   /* مزود AI عام/محلي */
