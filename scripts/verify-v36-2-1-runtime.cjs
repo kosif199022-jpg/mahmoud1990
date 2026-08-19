@@ -19,7 +19,7 @@ const expectedLegacyBuild=String(releaseManifest.buildId||'');
   const auditPath=suiteMode?'/audit/':'/';
   if(suiteMode){
     ok(h.modules?.audit==='/audit/'&&h.modules?.wealth==='/wealth/reader.html'&&h.modules?.sales==='/sales/','suite routes missing');
-    ok(/v(37-root-rebuild|38-trusted-audit-os)/.test(String(h.buildId||'')),'wrong suite build id');
+    ok(/v(?:37-root-rebuild|38-trusted-audit-os|38\.1-user-polish)/.test(String(h.buildId||'')),'wrong suite build id');
   }else{
     ok(h.version===expectedLegacyVersion,'wrong health version: expected '+expectedLegacyVersion);
     ok(h.buildId===expectedLegacyBuild,'wrong build id: expected '+expectedLegacyBuild);
