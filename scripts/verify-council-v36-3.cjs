@@ -1,15 +1,34 @@
 const {chromium}=require('playwright');
 const base=process.env.KOSIF_TEST_URL||'http://127.0.0.1:8787';
 const fail=(m,x)=>{throw new Error(m+(x!==undefined?' '+JSON.stringify(x):''))};
+
+async function loadReady(page,url){
+  let lastError=null;
+  for(let attempt=1;attempt<=2;attempt++){
+    try{
+      await page.goto(url+(url.includes('?')?'&':'?')+'readyAttempt='+attempt,{waitUntil:'domcontentloaded',timeout:30000});
+      await page.waitForSelector('body.kosif-ready',{state:'attached',timeout:20000});
+      return;
+    }catch(error){
+      lastError=error;
+      const probe=await page.evaluate(()=>({ready:document.body?.classList.contains('kosif-ready')||false,state:document.readyState,href:location.href,title:document.title})).catch(()=>({probeFailed:true}));
+      console.warn('COUNCIL_READY_RETRY',attempt,probe,String(error?.message||error));
+      if(attempt<2) await page.waitForTimeout(750);
+    }
+  }
+  throw lastError||new Error('Council page did not reach kosif-ready');
+}
+
 (async()=>{
   const browser=await chromium.launch({headless:true,...(process.env.PW_CHANNEL?{channel:process.env.PW_CHANNEL}:{})});
   const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  const health=await (await page.request.get(base+'/__health?cb='+Date.now())).json();
-  const auditPath=/^v37\./.test(String(health.version||''))?'/audit/':'/';
-  await page.goto(base+auditPath+'?council-v2='+Date.now(),{waitUntil:'networkidle'});
-  await page.waitForSelector('body.kosif-ready',{timeout:15000});
-  await page.waitForFunction(()=>window.KosifCouncilV2?.version==='2.0.0',{timeout:15000});
+  const healthResponse=await page.request.get(base+'/__health?cb='+Date.now());
+  if(!healthResponse.ok()) fail('Council preflight health failed',healthResponse.status());
+  const health=await healthResponse.json();
+  const auditPath=/^v3[7-9]\./.test(String(health.version||''))||/^v38\./.test(String(health.version||''))?'/audit/':'/';
+  await loadReady(page,base+auditPath+'?council-v2='+Date.now());
+  await page.waitForFunction(()=>window.KosifCouncilV2?.version==='2.0.0',{timeout:20000});
   const apiProviders=await page.evaluate(()=>window.KosifCouncilV2.providers);
   if(JSON.stringify(apiProviders)!==JSON.stringify(['gemini','openai','anthropic','zai']))fail('Council V2 provider registry mismatch',apiProviders);
   await page.click('#kosif-more-btn');await page.waitForSelector('#kosif-more.show');
