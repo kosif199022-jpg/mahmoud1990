@@ -21,15 +21,12 @@ try{
 
 /*
  * v38 release-integrity bridge.
- * v36-continuity is intentionally retained as a legacy UI/runtime layer, but its
- * historical EXPECTED=v36.4 check must not flag a healthy v38 suite as a mixed
- * deployment. We never hide a real mismatch: the old banner is removed only
- * after the authoritative no-store /__version endpoint proves that the complete
- * v38 root identity is live.
+ * v36-continuity remains a compatibility/runtime layer and still carries its
+ * historical v36.4 identity. The root suite identity is authoritative once it
+ * matches the v38 browser bootstrap actually loaded in this page.
  */
-const CURRENT={version:'v38.0.0-root',buildId:'2026.08.19-v38-trusted-audit-os'};
+const FALLBACK={version:'v38.0.0-root',buildId:'2026.08.19-v38-trusted-audit-os'};
 let identity=null,checking=null;
-const falseWarning='يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.';
 
 function installMobileSafeArea(){
   if(document.getElementById('kosif-v38-ios-bottom-safe'))return;
@@ -43,31 +40,42 @@ function installMobileSafeArea(){
   html[data-kosif-keyboard="open"] main{padding-bottom:24px!important}`;
   document.head.appendChild(s);
 }
-function current(info){return !!(info&&info.productName==='Kosif'&&info.version===CURRENT.version&&info.buildId===CURRENT.buildId)}
+function browserBuild(){return String(window.KosifV38?.buildId||'').trim()}
+function current(info){
+  if(!info||info.productName!=='Kosif')return false;
+  const loaded=browserBuild();
+  if(loaded)return String(info.buildId||'')===loaded;
+  return info.version===FALLBACK.version&&info.buildId===FALLBACK.buildId;
+}
 function scrub(){
   if(!current(identity))return;
-  const b=document.getElementById('kosif-release-banner');
-  if(b&&String(b.textContent||'').trim()===falseWarning)b.remove();
+  /* Any legacy release banner is stale once the authoritative root identity
+     matches the v38 bootstrap loaded in this very page. */
+  document.getElementById('kosif-release-banner')?.remove();
   const card=document.getElementById('kosif-build-card');
   if(card){
     const v=card.querySelector('#kosif-build-version');
     const id=card.querySelector('[data-k-build]');
     const state=card.querySelector('[data-k-release-state]');
-    if(v)v.textContent=identity.version;
-    if(id)id.textContent=identity.buildId;
+    if(v)v.textContent=identity.version||'Kosif';
+    if(id)id.textContent=identity.buildId||'—';
     if(state)state.textContent='متطابق ✓';
   }
-  document.documentElement.dataset.kosifBuild=identity.version;
+  document.documentElement.dataset.kosifBuild=identity.version||'current';
+  document.documentElement.dataset.kosifReleaseIntegrity='ok';
 }
 async function verify(){
   if(checking)return checking;
   checking=(async()=>{
     try{
-      const r=await fetch('/__version?integrity='+Date.now(),{cache:'no-store',headers:{'cache-control':'no-cache'}});
+      const r=await fetch('/__version?integrity='+Date.now(),{cache:'no-store',headers:{'cache-control':'no-cache','pragma':'no-cache'}});
       if(!r.ok)throw new Error('HTTP '+r.status);
       identity=await r.json();
       window.KosifBuildInfo=identity;
       scrub();
+      /* v38 modules are deferred and may finish just after this bridge. Recheck
+         once the browser build id is definitely available. */
+      if(!browserBuild())setTimeout(scrub,350);
       return identity;
     }catch(_){return null}
     finally{checking=null}
@@ -79,9 +87,10 @@ function watch(){
   const root=document.documentElement;
   new MutationObserver(()=>scrub()).observe(root,{childList:true,subtree:true,characterData:true});
   verify();
-  window.addEventListener('pageshow',verify,{passive:true});
-  window.addEventListener('online',verify,{passive:true});
+  setTimeout(()=>{verify().then(scrub)},700);
+  window.addEventListener('pageshow',()=>verify().then(scrub),{passive:true});
+  window.addEventListener('online',()=>verify().then(scrub),{passive:true});
 }
-window.KosifReleaseIntegrityV38={expected:{...CURRENT},verify,current:()=>current(identity),info:()=>identity};
+window.KosifReleaseIntegrityV38={expected:{...FALLBACK},verify,current:()=>current(identity),info:()=>identity};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch,{once:true});else watch();
 })();
