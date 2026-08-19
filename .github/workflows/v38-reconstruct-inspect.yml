@@ -4,12 +4,22 @@ on:
   push:
     branches:
       - codex/kosif-v38-trusted-audit-os
+      - main
     paths:
       - '.v38-import/**'
+      - 'src/engine/v38-core.mjs'
+      - 'src/engine/v38-evidence-graph.mjs'
+      - 'src/v38-api.js'
+      - 'src/v38-source-intelligence.js'
+      - 'src/v38-realtime.js'
+      - 'tests/v38-*.test.mjs'
+      - 'scripts/check-v38.mjs'
+      - 'package.json'
       - '.github/workflows/v38-reconstruct-inspect.yml'
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,14 +27,41 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Reconstruct and inspect payload
+      - name: Verify integrated v38 or inspect historical payload
         shell: bash
         run: |
           set -euo pipefail
-          cat .v38-import/chunk-*.b64 | tr -d '\n\r ' > /tmp/v38.b64
+
+          if node - <<'NODE'
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const major = Number(String(pkg.version || '0').split('.')[0]);
+          const integrated = major >= 38 &&
+            fs.existsSync('src/engine/v38-core.mjs') &&
+            fs.existsSync('src/engine/v38-evidence-graph.mjs') &&
+            fs.existsSync('src/v38-api.js') &&
+            fs.existsSync('scripts/check-v38.mjs');
+          process.exit(integrated ? 0 : 1);
+          NODE
+          then
+            echo 'KOSIF v38 is already integrated; validating the live source contract instead of obsolete staging chunks.'
+            npm run v38-suite
+            exit 0
+          fi
+
+          shopt -s nullglob
+          chunks=(.v38-import/chunk-*.b64)
+          if [ ${#chunks[@]} -eq 0 ]; then
+            echo 'No integrated v38 source contract and no historical reconstruction chunks were found.' >&2
+            exit 1
+          fi
+
+          cat "${chunks[@]}" | tr -d '\n\r ' > /tmp/v38.b64
           base64 -d /tmp/v38.b64 > /tmp/v38.gz
+          gzip -t /tmp/v38.gz
           gzip -dc /tmp/v38.gz > /tmp/v38.payload
           echo "B64_BYTES=$(wc -c < /tmp/v38.b64)"
           echo "GZIP_BYTES=$(wc -c < /tmp/v38.gz)"
