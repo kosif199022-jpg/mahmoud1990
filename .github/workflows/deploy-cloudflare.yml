@@ -48,8 +48,8 @@ jobs:
               if node - <<'NODE'
           const fs=require('fs');
           const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
-          const ok=h?.productName==='Kosif' && h?.version==='v38.1.0-root' && h?.modules?.audit==='/audit/' && h?.modules?.libraries==='/libraries/' && h?.modules?.wealth==='/wealth/reader.html' && h?.modules?.sales==='/sales/' && h?.designAuthority==='Aghnam Al-Wadi Sales Dashboard 7';
-          if(!ok || !String(h?.buildId||'').includes('v38.1-user-polish')){console.error('Unexpected live health',h);process.exit(2)}
+          const ok=h?.productName==='Kosif' && h?.version==='v38.1.1-root' && h?.modules?.audit==='/audit/' && h?.modules?.libraries==='/libraries/' && h?.modules?.wealth==='/wealth/reader.html' && h?.modules?.sales==='/sales/' && h?.designAuthority==='KOSIF v38 Canva navy/gold visual system';
+          if(!ok || !String(h?.buildId||'').includes('v38.1.1-canva-visual-system')){console.error('Unexpected live health',h);process.exit(2)}
           console.log('LIVE_KOSIF_OK',h.version,h.buildId);
           NODE
               then ok=1; break; fi
