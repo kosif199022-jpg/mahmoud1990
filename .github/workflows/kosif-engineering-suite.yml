@@ -25,7 +25,10 @@ jobs:
           set -euo pipefail
           test -s frontend/index.html
           test -s config/engineering-suite.json
+          test -s config/source-registry.json
           test -s scripts/engineering-suite/browser-smoke.mjs
+          test -s scripts/engineering-suite/accounting-golden.mjs
+          test -s scripts/engineering-suite/provenance-gate.mjs
       - name: Reject obvious secret files
         shell: bash
         run: |
@@ -49,8 +52,8 @@ jobs:
           print('HTML integrity passed:', len(s), 'chars')
           PY
 
-  browser-gate:
-    name: Browser / Visual / A11y smoke
+  accounting-golden:
+    name: Deterministic accounting golden tests
     needs: repository-gate
     runs-on: ubuntu-latest
     steps:
@@ -58,10 +61,42 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install Playwright
+      - name: Run accounting golden gate
+        run: node scripts/engineering-suite/accounting-golden.mjs
+
+  provenance-gate:
+    name: Standards / source provenance
+    needs: repository-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate governed sources
+        run: node scripts/engineering-suite/provenance-gate.mjs
+      - name: Upload provenance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-source-provenance-${{ github.run_id }}
+          path: artifacts/source-provenance.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  browser-gate:
+    name: Browser / Visual / A11y
+    needs: repository-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test stack
         run: |
           npm init -y >/dev/null 2>&1
-          npm install --no-save playwright@1.55.0
+          npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2 pixelmatch@7.1.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
       - name: Start static server
         run: |
@@ -76,19 +111,120 @@ jobs:
           KOSIF_BASE_URL: http://127.0.0.1:4173
           KOSIF_ROUTES: /
         run: node scripts/engineering-suite/browser-smoke.mjs
-      - name: Upload screenshots
+      - name: Run axe accessibility scan
+        env:
+          KOSIF_BASE_URL: http://127.0.0.1:4173
+          KOSIF_ROUTES: /
+        run: node scripts/engineering-suite/axe-smoke.mjs
+      - name: Run visual regression gate
+        env:
+          KOSIF_VISUAL_CURRENT_DIR: artifacts
+          KOSIF_VISUAL_BASELINE_DIR: tests/visual-baselines
+          KOSIF_MAX_VISUAL_DIFF_RATIO: '0.02'
+        run: node scripts/engineering-suite/visual-regression.mjs
+      - name: Upload browser, visual and accessibility artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kosif-visual-smoke-${{ github.run_id }}
+          name: kosif-browser-quality-${{ github.run_id }}
           path: artifacts/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30
+
+  performance-gate:
+    name: Lighthouse / Core Web Vitals budget
+    needs: repository-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Lighthouse
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save lighthouse@12.8.2
+      - name: Start static server
+        run: |
+          mkdir -p artifacts
+          python3 -m http.server 4173 --directory frontend > /tmp/kosif-lighthouse-server.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/kosif-lighthouse-server.log
+          exit 1
+      - name: Run Lighthouse
+        run: |
+          npx lighthouse http://127.0.0.1:4173/ \
+            --chrome-flags='--headless --no-sandbox --disable-gpu' \
+            --only-categories=performance,accessibility,best-practices \
+            --output=json --output-path=artifacts/lighthouse.json --quiet
+      - name: Enforce budgets
+        run: node scripts/engineering-suite/lighthouse-budget.mjs
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-lighthouse-${{ github.run_id }}
+          path: artifacts/lighthouse*.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  security-sbom:
+    name: Security / SBOM
+    needs: repository-gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: artifacts/kosif-sbom.cdx.json
+      - name: Trivy HIGH/CRITICAL filesystem scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-sbom-${{ github.run_id }}
+          path: artifacts/kosif-sbom.cdx.json
+          if-no-files-found: warn
+          retention-days: 30
 
   release-sentinel:
     name: Release sentinel
-    needs: [repository-gate, browser-gate]
+    needs: [repository-gate, accounting-golden, provenance-gate, browser-gate, performance-gate, security-sbom]
     runs-on: ubuntu-latest
     steps:
       - name: All mandatory gates passed
-        run: echo 'KOSIF Engineering Suite gates are green.'
+        run: echo 'KOSIF Engineering Suite mandatory gates are green.'
+
+  integration-report:
+    name: PostHog / Linear engineering report
+    if: always()
+    needs: [repository-gate, accounting-golden, provenance-gate, browser-gate, performance-gate, security-sbom, release-sentinel]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Publish engineering outcome when integrations are configured
+        env:
+          KOSIF_SUITE_STATUS: ${{ needs.release-sentinel.result == 'success' && 'success' || 'failure' }}
+          POSTHOG_PROJECT_API_KEY: ${{ secrets.POSTHOG_PROJECT_API_KEY }}
+          POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM_ID: ${{ vars.LINEAR_TEAM_ID }}
+        run: node scripts/engineering-suite/report-integrations.mjs
