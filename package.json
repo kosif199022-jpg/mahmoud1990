@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-assets.mjs",
-    "check": "npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme",
+    "check": "npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme && npm run v42-requirements",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
     "source-export-integrity": "node scripts/check-source-export-integrity.mjs",
@@ -40,6 +40,7 @@
     "v40-experience": "node scripts/check-v40-experience.mjs",
     "v41-experience": "node scripts/check-v41-experience.mjs",
     "kitab-theme": "node scripts/check-kitab-theme-authority.mjs",
+    "v42-requirements": "node scripts/check-v42-requirements.mjs && node --test tests/v42-requirements-control-plane.test.mjs",
     "v38-demo": "node scripts/generate-v38-demo.mjs"
   }
 }
