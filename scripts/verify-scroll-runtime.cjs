@@ -88,6 +88,12 @@ async function verify(engine, label) {
   }));
   fail(modalLock.locked && modalLock.position === 'fixed', `${label}: legacy confirmation modal does not share the page lock`);
   fail(modalLock.touch !== 'none', `${label}: legacy modal cancels touch gestures`);
+  const modalGeometry = await page.locator('#m-no').evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    const backdrop = document.querySelector('#modal-bg').getBoundingClientRect();
+    return { top: rect.top, bottom: rect.bottom, backdropTop: backdrop.top, backdropBottom: backdrop.bottom, viewport: innerHeight, bodyTop: document.body.style.top };
+  });
+  fail(modalGeometry.top >= 0 && modalGeometry.bottom <= modalGeometry.viewport, `${label}: legacy confirmation actions are outside the viewport ${JSON.stringify(modalGeometry)}`);
   await page.locator('#m-no').click();
   await pause(100);
   fail(await page.evaluate(() => document.body.dataset.kosifDialogOpen !== '1' && getComputedStyle(document.body).position !== 'fixed'), `${label}: legacy modal left the page locked`);
