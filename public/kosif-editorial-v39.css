@@ -1106,7 +1106,7 @@ html[data-kosif-visual="kitab-editorial-v39"] .ratio-bar>i{
   html[data-kosif-visual="kitab-editorial-v39"][data-kosif-company-state="none"] #view-overview>.card.hero{
     display:none!important;
   }
-  html[data-kosif-visual="kitab-editorial-v39"][data-kosif-company-state="none"] #view-overview>.card:has(>#steps:empty){
+  html[data-kosif-visual="kitab-editorial-v39"][data-kosif-company-state="none"] #kosif-overview-path-card{
     display:none!important;
   }
   html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome{
