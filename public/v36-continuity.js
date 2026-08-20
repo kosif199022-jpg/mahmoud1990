@@ -8,6 +8,7 @@ const CANVA_PREMIUM_CSS='/kosif-studio-v40.css?v=2026.08.20-v40';
 const EDITORIAL_CSS='/kosif-editorial-v41.css?v=2026.08.20-v41';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const DIALOG_SELECTORS=['#kosif-more','#kosif-company-sheet','#kosif-ai-sheet','#kosif-command-sheet','#kosif-font-sheet','#kosif-ai-gate','#ks40-launch-overlay','#modal-bg','#drawer'];
+const VIEWPORT_DIALOG_SELECTORS=['#modal-bg','#drawer-bg','#drawer'];
 const PROGRESS_STALE_MS=20000;
 let versionInfo=null,lastFocus=null,lockY=0,bodySnapshot=null,rootScrollBehavior='',progressTimer=0,progressObserver=null,progressFingerprint='',viewportRaf=0,analytics3DPromise=null,premiumObserver=null;
 function announce(t){const x=$('#kosif-live-region');if(x)x.textContent=String(t||'')}
@@ -64,7 +65,11 @@ function focusable(el){return [...el.querySelectorAll('button:not([disabled]),a[
 function focusFirst(el){const x=focusable(el)[0];if(!x)return;try{x.focus({preventScroll:true})}catch(_){x.focus()}setTimeout(()=>{try{x.scrollIntoView({block:'nearest',inline:'nearest'})}catch(_){}},80)}
 function trapTab(e,el){if(e.key!=='Tab'||!el)return;const xs=focusable(el);if(!xs.length){e.preventDefault();return}const first=xs[0],last=xs.at(-1),a=document.activeElement;if(e.shiftKey&&a===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&a===last){e.preventDefault();first.focus()}}
 function withinDialog(el,target){return !!(el&&target&&(el.contains(target)||(el.id==='drawer'&&target.closest?.('#drawer-bg'))))}
+function hoistViewportDialogs(){
+ VIEWPORT_DIALOG_SELECTORS.map($).filter(Boolean).forEach(el=>{if(el.parentElement!==document.body)document.body.appendChild(el)});
+}
 function shell(){
+ hoistViewportDialogs();
  if(!$('#kosif-skip'))document.body.insertAdjacentHTML('afterbegin','<a id="kosif-skip" href="#kosif-main-anchor">تخطي إلى المحتوى</a><div id="kosif-live-region" aria-live="polite" aria-atomic="true"></div>');
  const main=$('main');if(main&&!$('#kosif-main-anchor')){main.id=main.id||'kosif-main-anchor';main.tabIndex=-1}
  DIALOG_SELECTORS.forEach(sel=>{const el=$(sel);if(!el)return;const ownsDialog=[...el.children].some(child=>child.matches?.('[role="dialog"]'));if(!el.matches('[role="dialog"]')&&!ownsDialog){el.setAttribute('role','dialog');el.setAttribute('aria-modal','true')}el.setAttribute('aria-hidden',isOpenDialog(el)?'false':'true');watchDialog(el)});
@@ -144,6 +149,6 @@ function armProgressSafety(){
 function watchProgressSafety(){const el=$('#kosif-progress');if(!el||el.dataset.kosifProgressSafety==='1')return;el.dataset.kosifProgressSafety='1';progressObserver=new MutationObserver(()=>armProgressSafety());progressObserver.observe(el,{attributes:true,attributeFilter:['class','style'],childList:true,subtree:true,characterData:true});armProgressSafety()}
 function mountWatcher(){const main=$('main');if(!main)return;let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;shell();ensureFont200();buildCard();syncCompany();syncAI();premiumMount();watchProgressSafety()})}).observe(main,{childList:true,subtree:true})}
 function init(){loadPhaseBStyles();loadCanvaPremiumStyles();shell();visualViewportGuard();dialogGuards();aiGuards();companyGuard();analytics3DGuard();ensureFont200();buildCard();premiumMount();premiumNavigation();premiumWatch();watchProgressSafety();mountWatcher();serviceWorkerContinuity();checkVersion();window.addEventListener('online',()=>{announce('عاد الاتصال');checkVersion()});window.addEventListener('offline',()=>announce('لا يوجد اتصال. سيستخدم Kosif الموارد المتاحة دون تخزين API.'))}
-window.KosifContinuity={version:'36.4',patch:'v41.1-scroll-runtime',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,registerDialogs:shell,syncDialogLock,lockBody,unlockBody,watchProgressSafety,armProgressSafety,syncVisualViewport,loadAnalytics3D,premiumMount};
+window.KosifContinuity={version:'36.4',patch:'v41.1-scroll-runtime',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,registerDialogs:shell,syncDialogLock,lockBody,unlockBody,hoistViewportDialogs,watchProgressSafety,armProgressSafety,syncVisualViewport,loadAnalytics3D,premiumMount};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

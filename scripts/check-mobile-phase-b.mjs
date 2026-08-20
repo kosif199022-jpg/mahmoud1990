@@ -16,6 +16,7 @@ ok('sheet owns vertical momentum scrolling',/-webkit-overflow-scrolling:touch/.t
 ok('body lock does not cancel Safari sheet gestures',/body\[data-kosif-dialog-open="1"\]\{touch-action:auto!important/.test(css)&&!/b\.style\.touchAction='none'/.test(js));
 ok('app entrance animation releases fixed-position containing block',/body\.kosif-ready>#app\{animation-fill-mode:none!important/.test(css));
 ok('all dialog families share the continuity lock',/ks40-launch-overlay/.test(js)&&/#modal-bg/.test(js)&&/#drawer/.test(js)&&/attributeFilter:\['class','hidden'\]/.test(js));
+ok('legacy fixed dialogs are hoisted to the viewport portal',/VIEWPORT_DIALOG_SELECTORS=\['#modal-bg','#drawer-bg','#drawer'\]/.test(js)&&/document\.body\.appendChild\(el\)/.test(js));
 ok('capability launcher owns touch scrolling',/#ks40-launch-overlay[\s\S]*\.ks40-launch-body[\s\S]*touch-action:pan-y/.test(css));
 ok('safe area insets cover every edge',/safe-area-inset-top/.test(css)&&/safe-area-inset-right/.test(css)&&/safe-area-inset-bottom/.test(css)&&/safe-area-inset-left/.test(css));
 ok('iPhone inputs avoid Safari focus zoom',/@media\(max-width:720px\)[\s\S]*font-size:16px!important/.test(css));
