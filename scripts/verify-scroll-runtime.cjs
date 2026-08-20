@@ -23,18 +23,36 @@ async function verify(engine, label) {
   await page.waitForFunction(() => document.getElementById('kosif-mobile-phase-b-css'), null, { timeout: 10000 });
   await pause(900);
 
-  const root = await page.evaluate(() => ({
-    height: document.documentElement.scrollHeight,
-    viewport: document.documentElement.clientHeight,
-    overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    hiddenReveals: [...document.querySelectorAll('[data-k41-reveal]')].filter(element => {
+  const root = await page.evaluate(() => {
+    const hiddenRevealDetails = [...document.querySelectorAll('[data-k41-reveal]')].flatMap(element => {
       const style = getComputedStyle(element);
-      return style.display !== 'none' && (Number(style.opacity) < .5 || style.visibility === 'hidden');
-    }).length
-  }));
+      if (style.display === 'none' || (Number(style.opacity) >= .5 && style.visibility !== 'hidden')) return [];
+      const rect = element.getBoundingClientRect();
+      return [{
+        tag: element.tagName,
+        id: element.id || '',
+        classes: element.className || '',
+        view: element.closest('section[data-view]')?.dataset.view || '',
+        opacity: style.opacity,
+        visibility: style.visibility,
+        display: style.display,
+        inlineOpacity: element.style.opacity || '',
+        inlineVisibility: element.style.visibility || '',
+        inClass: element.classList.contains('k41-in'),
+        rect: { width: Math.round(rect.width), height: Math.round(rect.height), top: Math.round(rect.top) }
+      }];
+    });
+    return {
+      height: document.documentElement.scrollHeight,
+      viewport: document.documentElement.clientHeight,
+      overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      hiddenReveals: hiddenRevealDetails.length,
+      hiddenRevealDetails
+    };
+  });
   fail(root.height > root.viewport + 500, `${label}: audit page is not vertically scrollable`);
   fail(root.overflowX <= 1, `${label}: horizontal overflow ${root.overflowX}px`);
-  fail(root.hiddenReveals === 0, `${label}: touch-first reveal left ${root.hiddenReveals} surfaces hidden`);
+  fail(root.hiddenReveals === 0, `${label}: touch-first reveal left ${root.hiddenReveals} surfaces hidden ${JSON.stringify(root.hiddenRevealDetails)}`);
 
   await page.evaluate(() => window.scrollTo(0, Math.min(620, document.documentElement.scrollHeight - innerHeight)));
   await pause(120);

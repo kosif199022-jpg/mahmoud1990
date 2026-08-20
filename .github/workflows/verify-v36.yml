@@ -65,6 +65,10 @@ jobs:
         env:
           KOSIF_TEST_URL: http://127.0.0.1:8788
         run: node scripts/verify-scroll-runtime.cjs
+      - name: Unified visual runtime across laptop and iPhone
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8788
+        run: node scripts/verify-visual-runtime.cjs
       - name: Mobile production smoke test
         shell: bash
         run: |

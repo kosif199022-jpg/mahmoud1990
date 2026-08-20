@@ -5,7 +5,7 @@ const STUDIO_VERSION='v41.0.0-root',STUDIO_BUILD='2026.08.20-v41-editorial-cinem
 const PHASE_B_CSS='/v36-mobile-phase-b.css?v=36.4-phase-b-3-fixed-context';
 const ANALYTICS_3D_SRC='/v36-analytics-3d.js?v=36.4-phase-c-1';
 const CANVA_PREMIUM_CSS='/kosif-studio-v40.css?v=2026.08.20-v40';
-const EDITORIAL_CSS='/kosif-editorial-v41.css?v=2026.08.20-v41';
+const EDITORIAL_CSS='/kosif-editorial-v41.css?v=2026.08.20-v41-2';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const DIALOG_SELECTORS=['#kosif-more','#kosif-company-sheet','#kosif-ai-sheet','#kosif-command-sheet','#kosif-font-sheet','#kosif-ai-gate','#ks40-launch-overlay','#modal-bg','#drawer'];
 const VIEWPORT_DIALOG_SELECTORS=['#modal-bg','#drawer-bg','#drawer'];
@@ -105,7 +105,7 @@ function releaseMatches(x){const legacy=x?.version===EXPECTED&&x?.buildId===BUIL
 function renderVersion(){if(!versionInfo)return;const b=$('[data-k-build]'),s=$('[data-k-release-state]'),v=$('#kosif-build-version');if(b)b.textContent=versionInfo.buildId||versionInfo.version||'—';if(v)v.textContent=versionInfo.version||EXPECTED;if(s)s.textContent=releaseMatches(versionInfo)?'متطابق ✓':'غير متطابق'}
 function banner(msg){let x=$('#kosif-release-banner');if(!x){x=document.createElement('button');x.id='kosif-release-banner';x.type='button';x.title='اضغط لإعادة تحميل النسخة الحالية';x.onclick=()=>location.reload();document.body.appendChild(x)}x.textContent=msg}
 async function checkVersion(){try{const r=await fetch('/__version?cb='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);versionInfo=await r.json();window.KosifBuildInfo=versionInfo;document.documentElement.dataset.kosifBuild=versionInfo.version||'unknown';renderVersion();if(!releaseMatches(versionInfo))banner('يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.');else $('#kosif-release-banner')?.remove();return versionInfo}catch(e){banner('تعذر التحقق من هوية الإصدار. اضغط لإعادة المحاولة.');return null}}
-function serviceWorkerContinuity(){if(!('serviceWorker'in navigator))return;if(['localhost','127.0.0.1','::1'].includes(location.hostname))return;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(sessionStorage.getItem('kosif_sw_reload_v41_1_scroll'))return;sessionStorage.setItem('kosif_sw_reload_v41_1_scroll','1');location.reload()});navigator.serviceWorker.getRegistration().then(r=>r?.update?.()).catch(()=>{})}
+function serviceWorkerContinuity(){if(!('serviceWorker'in navigator))return;if(['localhost','127.0.0.1','::1'].includes(location.hostname))return;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(sessionStorage.getItem('kosif_sw_reload_v41_2_unified'))return;sessionStorage.setItem('kosif_sw_reload_v41_2_unified','1');location.reload()});navigator.serviceWorker.getRegistration().then(r=>r?.update?.()).catch(()=>{})}
 function premiumYear(){
  const period=String($('#s-period')?.value||'');const m=period.match(/20\d{2}/);return m?.[0]||'2025';
 }
@@ -149,6 +149,6 @@ function armProgressSafety(){
 function watchProgressSafety(){const el=$('#kosif-progress');if(!el||el.dataset.kosifProgressSafety==='1')return;el.dataset.kosifProgressSafety='1';progressObserver=new MutationObserver(()=>armProgressSafety());progressObserver.observe(el,{attributes:true,attributeFilter:['class','style'],childList:true,subtree:true,characterData:true});armProgressSafety()}
 function mountWatcher(){const main=$('main');if(!main)return;let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;shell();ensureFont200();buildCard();syncCompany();syncAI();premiumMount();watchProgressSafety()})}).observe(main,{childList:true,subtree:true})}
 function init(){loadPhaseBStyles();loadCanvaPremiumStyles();shell();visualViewportGuard();dialogGuards();aiGuards();companyGuard();analytics3DGuard();ensureFont200();buildCard();premiumMount();premiumNavigation();premiumWatch();watchProgressSafety();mountWatcher();serviceWorkerContinuity();checkVersion();window.addEventListener('online',()=>{announce('عاد الاتصال');checkVersion()});window.addEventListener('offline',()=>announce('لا يوجد اتصال. سيستخدم Kosif الموارد المتاحة دون تخزين API.'))}
-window.KosifContinuity={version:'36.4',patch:'v41.1-scroll-runtime',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,registerDialogs:shell,syncDialogLock,lockBody,unlockBody,hoistViewportDialogs,watchProgressSafety,armProgressSafety,syncVisualViewport,loadAnalytics3D,premiumMount};
+window.KosifContinuity={version:'36.4',patch:'v41.2-unified-editorial',buildId:BUILD,checkVersion,syncAI,syncCompany,companyName,registerDialogs:shell,syncDialogLock,lockBody,unlockBody,hoistViewportDialogs,watchProgressSafety,armProgressSafety,syncVisualViewport,loadAnalytics3D,premiumMount};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

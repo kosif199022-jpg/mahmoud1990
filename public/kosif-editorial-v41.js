@@ -12,16 +12,32 @@
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
   const finePointer = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches === true;
-  const touchFirst = window.matchMedia?.('(hover: none), (pointer: coarse), (max-width: 840px)').matches === true;
+  const touchFirst = window.matchMedia?.('(hover: none), (pointer: coarse), (max-width: 840px)').matches === true ||
+    Number(navigator.maxTouchPoints || 0) > 0 || (window.innerWidth > 0 && window.innerWidth <= 840);
   let revealObserver = null;
   let decorateQueued = false;
   let revealQueued = false;
+  let scrollQueued = false;
+  let spotlightQueued = false;
+  let spotlightEvent = null;
+  let coverQueued = false;
+  let coverEvent = null;
+
+  const VIEW_DOMAINS = new Map([
+    ['overview', 'work'], ['tb', 'work'], ['rounds', 'work'], ['pbc', 'work'],
+    ['v38', 'assurance'], ['v38-core', 'assurance'], ['analytics', 'assurance'], ['map', 'evidence'],
+    ['v38-accounting', 'assurance'], ['v38-lab', 'assurance'], ['v38-graph', 'evidence'],
+    ['library', 'standards'], ['sources', 'evidence'], ['v38-sources', 'evidence'], ['reviewer', 'evidence'],
+    ['outputs', 'reports'], ['v38-reports', 'reports'], ['v38-io', 'reports'],
+    ['council', 'council'], ['v38-council', 'council'], ['v38-live', 'reports'],
+    ['v38-books', 'library'], ['settings', 'system'], ['about', 'system']
+  ]);
 
   function ensureStyles() {
     if ($('link[data-kosif-editorial="v41"]') || $('#kosif-editorial-v41')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/kosif-editorial-v41.css?v=2026.08.20-v41';
+    link.href = '/kosif-editorial-v41.css?v=2026.08.20-v41-2';
     link.id = 'kosif-editorial-v41';
     link.dataset.kosifEditorial = 'v41';
     document.head.appendChild(link);
@@ -31,9 +47,9 @@
     const theme = $('meta[name="theme-color"]');
     if (theme) theme.content = '#102825';
     const release = $('.kcw-release');
-    if (release) release.textContent = 'KOSIF Editorial · v41 · CANVA DIRECTION';
+    if (release) release.textContent = 'KOSIF Editorial · v41.2 · UNIFIED EDITION';
     const suiteVersion = $('#suite-version');
-    if (suiteVersion && !/v41/.test(suiteVersion.textContent || '')) suiteVersion.textContent = 'KOSIF Editorial v41';
+    if (suiteVersion) suiteVersion.textContent = 'KOSIF Editorial v41.2';
   }
 
   function mountFolio() {
@@ -42,8 +58,44 @@
     const folio = document.createElement('div');
     folio.className = 'k41-folio';
     folio.setAttribute('aria-hidden', 'true');
-    folio.innerHTML = '<b>KOSIF REVIEW</b><span>ISSUE 41</span>';
+    folio.innerHTML = '<b>KOSIF REVIEW</b><span>ISSUE 41.2</span>';
     hero.appendChild(folio);
+  }
+
+  function currentDomain() {
+    const path = location.pathname;
+    if (path.startsWith('/sales')) return 'sales';
+    if (path.startsWith('/libraries')) return 'library';
+    if (path.startsWith('/standards')) return 'standards';
+    const view = document.body?.dataset.kosifCurrentView || $('section[data-view].show')?.dataset.view || '';
+    return VIEW_DOMAINS.get(view) || 'work';
+  }
+
+  function syncDomain() {
+    root.dataset.kosifDomain = currentDomain();
+  }
+
+  function mountScrollProgress() {
+    if ($('#k41-scroll-progress')) return;
+    const progress = document.createElement('div');
+    progress.id = 'k41-scroll-progress';
+    progress.setAttribute('aria-hidden', 'true');
+    progress.innerHTML = '<i></i>';
+    document.body.appendChild(progress);
+  }
+
+  function updateScrollProgress() {
+    scrollQueued = false;
+    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    const ratio = Math.max(0, Math.min(1, (scrollY || document.documentElement.scrollTop || 0) / max));
+    root.style.setProperty('--k41-scroll-progress', ratio.toFixed(4));
+    queueVisibleReveal();
+  }
+
+  function queueScrollProgress() {
+    if (scrollQueued) return;
+    scrollQueued = true;
+    requestAnimationFrame(updateScrollProgress);
   }
 
   function revealTargets(scope = document) {
@@ -68,29 +120,39 @@
       '#toc > .ci'
     ].join(',');
     $$(selector, scope).forEach((element, index) => {
-      if (element.dataset.k41Reveal) return;
+      if (element.dataset.k41Reveal) {
+        if (reduced || touchFirst) exposeTarget(element, true);
+        return;
+      }
       element.dataset.k41Reveal = '1';
       element.style.setProperty('--k41-delay', Math.min(index, 9) * 48 + 'ms');
-      if (reduced || touchFirst || !revealObserver) element.classList.add('k41-in');
+      if (reduced || touchFirst || !revealObserver) exposeTarget(element, reduced || touchFirst);
       else revealObserver.observe(element);
     });
+  }
+
+  function exposeTarget(element, force = false) {
+    element.classList.add('k41-in');
+    if (force) {
+      element.style.setProperty('opacity', '1', 'important');
+      element.style.setProperty('visibility', 'visible', 'important');
+      element.style.setProperty('filter', 'none', 'important');
+      element.style.setProperty('transform', 'none', 'important');
+    }
+    revealObserver?.unobserve(element);
   }
 
   function revealVisibleTargets() {
     $$('section[data-view].show [data-k41-reveal], #view.show [data-k41-reveal]').forEach(element => {
       const rect = element.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0 && rect.top < innerHeight * .98 && rect.bottom > 0) {
-        element.classList.add('k41-in');
-        revealObserver?.unobserve(element);
+        exposeTarget(element, reduced || touchFirst);
       }
     });
   }
 
   function revealAllTargets() {
-    $$('[data-k41-reveal]').forEach(element => {
-      element.classList.add('k41-in');
-      revealObserver?.unobserve(element);
-    });
+    $$('[data-k41-reveal]').forEach(element => exposeTarget(element, reduced || touchFirst));
   }
 
   function queueVisibleReveal() {
@@ -107,38 +169,51 @@
       revealObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add('k41-in');
-          revealObserver.unobserve(entry.target);
+          exposeTarget(entry.target);
         });
       }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
     }
     revealTargets();
     requestAnimationFrame(() => root.classList.add('k41-ready'));
-    setTimeout(revealAllTargets, 1600);
+    setTimeout(revealAllTargets, 1000);
   }
 
   function setupSpotlight() {
     if (!finePointer || reduced) return;
     const selector = '.card,.v38-card,.v38-tile,.panel,.mini-card,.issue,.module,.book,.principle,.source-policy,.ks40-standard-item';
     document.addEventListener('pointermove', event => {
-      const card = event.target.closest?.(selector);
-      if (!card) return;
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty('--k41-x', event.clientX - rect.left + 'px');
-      card.style.setProperty('--k41-y', event.clientY - rect.top + 'px');
+      spotlightEvent = event;
+      if (spotlightQueued) return;
+      spotlightQueued = true;
+      requestAnimationFrame(() => {
+        spotlightQueued = false;
+        const current = spotlightEvent;
+        const card = current?.target.closest?.(selector);
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--k41-x', current.clientX - rect.left + 'px');
+        card.style.setProperty('--k41-y', current.clientY - rect.top + 'px');
+      });
     }, { passive: true });
   }
 
   function setupCoverParallax() {
     if (!finePointer || reduced) return;
     document.addEventListener('pointermove', event => {
-      const hero = event.target.closest?.('#kosif-premium-welcome');
-      if (!hero) return;
-      const rect = hero.getBoundingClientRect();
-      const x = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - .5) * 2));
-      const y = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - .5) * 2));
-      hero.style.setProperty('--k41-tilt-x', (x * 1.15).toFixed(2) + 'deg');
-      hero.style.setProperty('--k41-tilt-y', (y * -0.85).toFixed(2) + 'deg');
+      coverEvent = event;
+      if (coverQueued) return;
+      coverQueued = true;
+      requestAnimationFrame(() => {
+        coverQueued = false;
+        const current = coverEvent;
+        const hero = current?.target.closest?.('#kosif-premium-welcome');
+        if (!hero) return;
+        const rect = hero.getBoundingClientRect();
+        const x = Math.max(-1, Math.min(1, ((current.clientX - rect.left) / rect.width - .5) * 2));
+        const y = Math.max(-1, Math.min(1, ((current.clientY - rect.top) / rect.height - .5) * 2));
+        hero.style.setProperty('--k41-tilt-x', (x * .8).toFixed(2) + 'deg');
+        hero.style.setProperty('--k41-tilt-y', (y * -.6).toFixed(2) + 'deg');
+      });
     }, { passive: true });
     document.addEventListener('pointerout', event => {
       const hero = event.target.closest?.('#kosif-premium-welcome');
@@ -152,10 +227,13 @@
     decorateQueued = false;
     root.dataset.kosifEdition = 'v41';
     root.dataset.kosifExperience = 'v41';
+    root.dataset.kosifRevision = 'v41.2';
     root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
+    syncDomain();
     updateChrome();
     mountFolio();
     revealTargets();
+    if (reduced || touchFirst) revealAllTargets();
     requestAnimationFrame(() => requestAnimationFrame(revealVisibleTargets));
   }
 
@@ -169,14 +247,19 @@
     ensureStyles();
     root.dataset.kosifEdition = 'v41';
     root.dataset.kosifExperience = 'v41';
+    root.dataset.kosifRevision = 'v41.2';
     root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
+    syncDomain();
     updateChrome();
     mountFolio();
+    mountScrollProgress();
+    updateScrollProgress();
     setupReveal();
     setupSpotlight();
     setupCoverParallax();
     window.addEventListener('kosif-view-change', queueDecorate);
-    window.addEventListener('scroll', queueVisibleReveal, { passive: true });
+    window.addEventListener('scroll', queueScrollProgress, { passive: true });
+    window.addEventListener('resize', queueScrollProgress, { passive: true });
     window.addEventListener('pageshow', () => setTimeout(revealAllTargets, 80), { passive: true });
     window.addEventListener('orientationchange', () => setTimeout(revealAllTargets, 180), { passive: true });
     document.addEventListener('touchstart', revealAllTargets, { passive: true, once: true });
@@ -184,7 +267,7 @@
     document.addEventListener('click', event => {
       if (event.target.closest?.('[data-go],[data-kgo],[data-view-target],.sales-tabs button')) setTimeout(queueDecorate, 80);
     });
-    new MutationObserver(queueDecorate).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(queueDecorate).observe(document.body, { childList: true, subtree: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
