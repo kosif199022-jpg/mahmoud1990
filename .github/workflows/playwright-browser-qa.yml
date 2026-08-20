@@ -1,0 +1,118 @@
+name: Playwright Browser QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - 'src/**'
+      - 'scripts/build-assets.mjs'
+      - 'tests/browser/**'
+      - 'playwright.config.mjs'
+      - 'package.json'
+      - 'wrangler.toml'
+      - '.github/workflows/playwright-browser-qa.yml'
+  workflow_run:
+    workflows: ['Deploy Kosif to Cloudflare']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Optional URL to test instead of production
+        required: false
+        default: 'https://mahmoud-eldesouky.kosif199022.workers.dev'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwright-browser-qa-${{ github.event.pull_request.number || github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  browser-qa:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout tested revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright test runtime
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.0
+
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Build candidate production assets
+        if: github.event_name == 'pull_request'
+        run: npm run build
+
+      - name: Start candidate static origin
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory public >/tmp/kosif-browser-server.log 2>&1 &
+          echo $! >/tmp/kosif-browser-server.pid
+          for i in $(seq 1 30); do
+            if curl -fsS --connect-timeout 2 --max-time 5 http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/kosif-browser-server.log || true
+          exit 1
+
+      - name: Resolve browser QA target
+        shell: bash
+        env:
+          MANUAL_BASE_URL: ${{ inputs.base_url }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            target='http://127.0.0.1:4173'
+          elif [ -n "${MANUAL_BASE_URL:-}" ]; then
+            target="$MANUAL_BASE_URL"
+          else
+            target='https://mahmoud-eldesouky.kosif199022.workers.dev'
+          fi
+          echo "KOSIF_BASE_URL=$target" >> "$GITHUB_ENV"
+          echo "### Playwright target" >> "$GITHUB_STEP_SUMMARY"
+          echo "- $target" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run browser automation gate
+        run: npx playwright test --config=playwright.config.mjs
+
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-browser-qa-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Publish browser QA summary
+        if: always()
+        shell: bash
+        run: |
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo '### Coverage' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Desktop Chromium' >> "$GITHUB_STEP_SUMMARY"
+          echo '- iPhone 14 / WebKit (Mobile Safari engine)' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Core KOSIF routes' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Mobile document scrolling and horizontal-overflow regression' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Shared Mafateeh reader routing for mafateeh/std2025/std2018/dipifr' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Reader runtime D/CH bindings and hidden default smart/mixer controls' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Screenshots, traces, video-on-failure and runtime diagnostics as artifacts' >> "$GITHUB_STEP_SUMMARY"
