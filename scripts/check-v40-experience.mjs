@@ -75,18 +75,18 @@ for (const marker of ['v38-council-steps', 'v38-council-presets', 'data-state="i
 need(council.includes('recordButton.disabled = false') && council.includes('قرار بشري'), 'human Council gate cannot be verified');
 
 const edge = read('src/suite-edge.js');
-need(edge.includes("version:'v40.0.0-root'") && edge.includes('2026.08.20-v40-vibrant-professional-pwa'), 'suite release identity is not v40');
+need(edge.includes("version:'v41.0.0-root'") && edge.includes('2026.08.20-v41-editorial-cinematic-canva'), 'suite release identity does not preserve the v40 base under v41');
 need(edge.includes("installable:true") && edge.includes('/kosif-studio-v40.css?v=2026.08.20-v40'), 'suite shell does not declare/wire installable v40');
 
 const continuity = read('public/v36-continuity.js');
 const safety = read('public/v37-audit-safety.js');
 const polish = read('public/v38-user-polish.js');
-need(continuity.includes("STUDIO_VERSION='v40.0.0-root'") && continuity.includes('releaseMatches(versionInfo)'), 'legacy continuity does not recognize the exact v40 Studio shell');
-for (const [name, source] of [['audit safety', safety], ['user polish', polish]]) need(source.includes('v40.0.0-root') && source.includes('2026.08.20-v40-vibrant-professional-pwa') && source.includes('experienceVersion'), `${name} can leave the legacy release warning over v40`);
+need(continuity.includes("STUDIO_VERSION='v41.0.0-root'") && continuity.includes('releaseMatches(versionInfo)'), 'legacy continuity does not recognize the v41 shell over the v40 base');
+for (const [name, source] of [['audit safety', safety], ['user polish', polish]]) need(source.includes('v41.0.0-root') && source.includes('2026.08.20-v41-editorial-cinematic-canva') && source.includes('experienceVersion'), `${name} can leave the legacy release warning over v41`);
 
 const sw = read('public/sw.js');
 for (const asset of ['/kosif-studio-v40.css?v=2026.08.20-v40', '/kosif-studio-v40.js?v=40', '/kosif-suite-v40.css?v=40', '/assets/kosif-studio-hero-v40.webp', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/maskable-512.png']) need(sw.includes(asset), `service worker missing v40 asset: ${asset}`);
-need(sw.includes("const C='kosif-native-v40-studio-app'") && sw.includes("u.pathname.startsWith('/library/')") && sw.includes("u.pathname.startsWith('/api/')"), 'service worker cache/privacy contract is incomplete');
+need(sw.includes("const C='kosif-native-v41-editorial-app'") && sw.includes("u.pathname.startsWith('/library/')") && sw.includes("u.pathname.startsWith('/api/')"), 'service worker cache/privacy contract is incomplete');
 need(sw.includes("await c.match(e.request)||Response.error()") && sw.includes("await c.put(e.request,r.clone())"), 'integrity assets do not retain an offline fallback');
 
 if (failures.length) {

@@ -45,7 +45,7 @@ async function verify(){
     if(!r.ok)return false;
     const x=await r.json(),loaded=String(window.KosifV38?.buildId||'').trim();
     const v38=x?.productName==='Kosif'&&/^v38\./.test(String(x?.version||''));
-    const studio=x?.productName==='Kosif'&&x?.version==='v40.0.0-root'&&x?.buildId==='2026.08.20-v40-vibrant-professional-pwa'&&x?.experienceVersion==='v40.0.0'&&x?.installable===true;
+    const studio=x?.productName==='Kosif'&&x?.version==='v41.0.0-root'&&x?.buildId==='2026.08.20-v41-editorial-cinematic-canva'&&x?.experienceVersion==='v41.0.0'&&x?.installable===true;
     const same=!loaded||loaded===String(x?.buildId||'');
     const embeddedCore=!loaded||loaded==='2026.08.19-v38-trusted-audit-os';
     ok=!!((v38&&same)||(studio&&embeddedCore));info=x;
