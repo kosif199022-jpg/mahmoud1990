@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "target": "frontend/index.html",
+  "requiredDesignTokens": [
+    "--ink",
+    "--muted",
+    "--paper",
+    "--surface",
+    "--line",
+    "--pine",
+    "--viridian",
+    "--seal",
+    "--danger",
+    "--warn",
+    "--ok",
+    "--r",
+    "--shadow",
+    "--f-body",
+    "--f-head"
+  ],
+  "requiredMeta": [
+    "name=\"viewport\"",
+    "name=\"description\"",
+    "name=\"theme-color\""
+  ],
+  "quality": {
+    "requireRTL": true,
+    "requireArabicLanguage": true,
+    "requireReducedMotion": true,
+    "requireFocusVisible": true,
+    "requireViewportFitCover": true,
+    "maxPhysicalDirectionCssUses": 120,
+    "maxUnsafeDomWrites": 80,
+    "maxInlineImportantUses": 180
+  },
+  "observabilityMarkers": [
+    "posthog",
+    "sentry",
+    "$exception",
+    "window.onerror",
+    "unhandledrejection"
+  ]
+}
