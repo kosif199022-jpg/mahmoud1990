@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10233f">
+<title>KOSIF — مركز تنفيذ 50,000 ملاحظة</title>
+<style>
+:root{--bg:#071425;--panel:#0d2038;--ink:#eef4fb;--muted:#a7b7ca;--gold:#d5ae68;--line:#243b56;--ok:#69c69c;--warn:#f2c66d}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"SF Arabic","Segoe UI",sans-serif;background:radial-gradient(circle at 90% 0,#18385c 0,transparent 34rem),var(--bg);color:var(--ink);line-height:1.7}
+main{width:min(1180px,calc(100% - 28px));margin:auto;padding:36px 0 72px}.hero{padding:36px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(145deg,rgba(20,50,82,.96),rgba(7,20,37,.96));box-shadow:0 28px 70px rgba(0,0,0,.28)}
+.eyebrow{color:var(--gold);font-weight:800}.hero h1{font-size:clamp(2rem,5vw,4rem);margin:.25rem 0 1rem;line-height:1.15}.hero p{max-width:75ch;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:26px}.stat,.card{border:1px solid var(--line);background:rgba(13,32,56,.72);border-radius:20px;padding:20px}.stat b{display:block;font-size:2rem;color:var(--gold)}.stat span{color:var(--muted)}
+section{margin-top:28px}h2{font-size:1.45rem}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card h3{margin:0 0 .5rem;color:var(--gold)}.card p{margin:0;color:var(--muted)}
+.status{display:inline-flex;gap:8px;align-items:center;margin-top:12px;border:1px solid rgba(105,198,156,.35);color:var(--ok);padding:6px 10px;border-radius:999px;font-weight:700}.dot{width:8px;height:8px;border-radius:50%;background:currentColor}.note{color:var(--muted);border-inline-start:3px solid var(--gold);padding-inline-start:14px}.advanced{counter-reset:x}.advanced li{margin:.55rem 0;color:var(--muted)}code{direction:ltr;display:inline-block;color:#d7e9ff}.footer{color:var(--muted);text-align:center;margin-top:42px}
+@media(max-width:760px){main{width:min(100% - 18px,1180px);padding-top:14px}.hero{padding:22px;border-radius:20px}.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body><main>
+<header class="hero">
+<div class="eyebrow">KOSIF v42 · Requirements Control Plane</div>
+<h1>مركز تنفيذ 50,000 ملاحظة</h1>
+<p>لوحة شفافة تربط سجل الملاحظات الرئيسي بالتنفيذ البرمجي، الاختبارات، الحوكمة، سجل التدقيق، ومصادر الإثبات. التكرار في سجل الملاحظات يحتفظ بمعرّف كل بند، بينما يُنفّذ الكود على مستوى نمط الضبط والمجال لمنع ازدواج المنطق.</p>
+<div class="stats"><div class="stat"><b>50,000</b><span>بند محفوظ</span></div><div class="stat"><b>10,010</b><span>نصوص متطلبات فريدة</span></div><div class="stat"><b>53</b><span>مجال تنفيذ</span></div><div class="stat"><b>v42</b><span>بوابة حوكمة موحدة</span></div></div>
+</header>
+<section><h2>ما تم تثبيته في النواة</h2><div class="grid">
+<div class="card"><h3>سلامة الأرقام</h3><p>فصل الحساب الحتمي عن AI، ومنع النموذج اللغوي من أن يصبح مصدرًا نهائيًا للأرقام المالية.</p><span class="status"><i class="dot"></i>منفذ ومختبر</span></div>
+<div class="card"><h3>المصدر والأدلة</h3><p>غلاف Provenance للمصدر الرسمي + روابط evidence/source + حالات نقص المصدر + تتبع تاريخ النسخة والسريان.</p><span class="status"><i class="dot"></i>منفذ ومختبر</span></div>
+<div class="card"><h3>الحوكمة والاعتماد البشري</h3><p>Least privilege، بوابة اعتماد بشري، Feature Flags، Rollback registry، ومنع تجاوز أحكام المراجع.</p><span class="status"><i class="dot"></i>منفذ ومختبر</span></div>
+<div class="card"><h3>سجل تدقيق غير صامت</h3><p>سلسلة SHA-256، Build ID وGit SHA، Before/After، Correlation ID، مع كشف العبث والتعارض.</p><span class="status"><i class="dot"></i>منفذ ومختبر</span></div>
+<div class="card"><h3>الموثوقية</h3><p>Validation، Error Codes، Idempotency، Optimistic concurrency، Offline policy، Pagination وMetrics.</p><span class="status"><i class="dot"></i>منفذ ومختبر</span></div>
+<div class="card"><h3>الإطلاق والإنتاج</h3><p>بوابة <code>npm run check</code> أصبحت تحمل تحقق v42 قبل نشر Cloudflare؛ مسار الإنتاج يحتفظ بفحص Live smoke القائم.</p><span class="status"><i class="dot"></i>مربوط ببوابة CI</span></div>
+</div></section>
+<section><h2>التوسعة المتقدمة 10,001–50,000</h2><p class="note">هذه الأربعون ألف ملاحظة تحتوي عشرة أنماط فريدة، كل نمط مكرر 4,000 مرة. تم حفظ جميع IDs في بيان التتبع، وتنفيذ النمط مرة واحدة في النواة بدل نسخ نفس المنطق 4,000 مرة.</p>
+<ol class="advanced"><li>هندسة النواة الحتمية.</li><li>حوكمة البيانات والأدلة.</li><li>ذكاء اصطناعي آمن وقابل للتفسير.</li><li>تجربة المستخدم الاحترافية.</li><li>أمان المؤسسات والامتثال.</li><li>أداء الأنظمة الضخمة.</li><li>اختبارات الجودة المتقدمة.</li><li>التكامل مع المصادر الخارجية.</li><li>إدارة الإصدارات والتغييرات.</li><li>تحليلات المراجعة الذكية وصحة النظام.</li></ol></section>
+<section><h2>حدود البيان</h2><p class="note">"منفذ" هنا يعني أن الضبط موجود في الكود ومربوط ببوابة الاختبار أو بدليل بنيوي. التحقق من النشر الحي يظل مسؤولية Workflow الإنتاج ويجب عدم اعتباره ناجحًا قبل ظهور نتيجة GitHub Actions/Cloudflare الخاصة بالـcommit.</p></section>
+<div class="footer">KOSIF · Trusted Audit Intelligence OS · Baseline 2026-08-20</div>
+</main></body></html>
