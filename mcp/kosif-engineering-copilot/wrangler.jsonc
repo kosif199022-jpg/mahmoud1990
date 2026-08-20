@@ -8,6 +8,9 @@
   "observability": {
     "enabled": true
   },
+  "browser": {
+    "binding": "BROWSER"
+  },
   "vars": {
     "KOSIF_REPO_OWNER": "kosif199022-jpg",
     "KOSIF_REPO_NAME": "mahmoud1990",
