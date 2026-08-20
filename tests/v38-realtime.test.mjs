@@ -22,6 +22,9 @@ ok(liveUi.includes('/api/kosif/v38/realtime/call'), 'voice UI exchanges SDP thro
 ok(liveUi.includes('/api/kosif/v38/realtime/hangup'), 'voice UI terminates server-side Realtime calls');
 ok(liveUi.includes('gpt-realtime-2.1') && liveUi.includes('gpt-realtime-2.1-mini'), 'voice UI exposes current Realtime 2.1 family');
 ok(!liveUi.includes('value="gpt-realtime"') && !liveUi.includes('value="gpt-realtime-mini"'), 'deprecated Realtime aliases are hidden from new UI choices');
+ok(liveUi.includes('/api/kosif/v38/public-ai') && liveUi.includes('/api/kosif/v38/public-ai/status'), 'text chat uses KOSIF public/local AI relay and safe status route');
+ok(liveUi.includes('v38-chat-consent') && liveUi.includes('chatMessages') && !liveUi.includes('localStorage.setItem(\'v38-chat'), 'text chat requires consent and has no automatic browser persistence');
+ok(liveUi.includes('manual-export-only') && liveUi.includes('advisory-only'), 'text chat export and authority contracts are explicit');
 
 ok(DEFAULT_REALTIME_MODEL === 'gpt-realtime-2.1', 'current Realtime 2.1 is the default model');
 ok(realtimeConfigured({}) === false, 'server relay reports unconfigured without secret');

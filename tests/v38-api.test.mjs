@@ -52,6 +52,16 @@ ok(Array.isArray(r.body.forbiddenAIFields) && r.body.forbiddenAIFields.includes(
 /* نواة محاسبية عبر API */
 r = await call('/api/kosif/v38/accounting/parse-money', { method: 'POST', body: JSON.stringify({ value: '١٢٣٤٫٥٠' }) });
 ok(r.status === 200 && r.body.minor === '123450', 'arabic money via API');
+r = await call('/api/kosif/v38/accounting/trial-balance-summary', { method: 'POST', body: JSON.stringify({ accounts: [
+  { code: '1100', name: 'نقدية', debit: '9007199254740991.99', credit: '0' },
+  { code: '4100', name: 'إيراد', dr: '0', cr: '9007199254740991.99' }
+] }) });
+ok(r.status === 200 && r.body.balanced === true && r.body.dr === '900719925474099199' && r.body.cr === '900719925474099199', 'trial balance summary preserves values beyond JS safe integer');
+ok(r.body.precision === 'minor-unit-bigint' && r.body.method === 'exact-sum' && r.body.topDr[0].code === '1100', 'trial balance summary declares exact method and ranks with BigInt');
+r = await call('/api/kosif/v38/accounting/trial-balance-summary', { method: 'POST', body: JSON.stringify({ accounts: [{ code: '1', debit: '1.001', credit: '0' }] }) });
+ok(r.status === 400 && r.body.error === 'TRIAL_BALANCE_AMOUNT_INVALID', 'trial balance summary rejects precision overflow');
+r = await call('/api/kosif/v38/accounting/trial-balance-summary', { method: 'POST', body: JSON.stringify({ exp: 99, accounts: [] }) });
+ok(r.status === 400 && r.body.error === 'TRIAL_BALANCE_EXP_INVALID', 'trial balance summary rejects an unsupported exponent instead of changing scale silently');
 r = await call('/api/kosif/v38/accounting/materiality', { method: 'POST', body: JSON.stringify({ basis: 'profit', amount: '4000000', riskProfile: 'medium' }) });
 ok(r.body.ok && r.body.overall === '20000000' && r.body.performance === '13000000', 'materiality via API');
 r = await call('/api/kosif/v38/accounting/validate-journal', { method: 'POST', body: JSON.stringify({ entry: { id: 'X', date: '2026-01-01', lines: [{ account: '1', dr: '10' }, { account: '2', cr: '9' }] } }) });
@@ -77,8 +87,14 @@ ok(r.body.frameworks.find(f => f.id === 'IFRS_18')?.state === 'in-effect', 'fram
 /* حماية المالك */
 r = await call('/api/kosif/v38/evidence-graph', { method: 'POST', body: JSON.stringify({ company: 'co1', op: 'node', node: { id: 'n1', type: 'risk', label: 'خطر' } }) });
 ok(r.status === 401, 'graph mutation requires owner');
+r = await call('/api/kosif/v38/public-ai/status');
+ok(r.status === 401, 'public/local AI status is owner-gated');
 
 const token = await loginOwner();
+r = await call('/api/kosif/v38/public-ai/status', {}, token);
+ok(r.status === 200 && r.body.configured === false && r.body.keyExposure === 'none' && r.body.authority === 'advisory-only', 'public/local AI status exposes no key and no authority');
+r = await call('/api/kosif/v38/public-ai', { method: 'POST', body: JSON.stringify({ prompt: 'اختبار' }) }, token);
+ok(r.status === 503 && r.body.error === 'PUBLIC_AI_NOT_CONFIGURED', 'public/local AI fails closed without server configuration');
 r = await call('/api/kosif/v38/evidence-graph', { method: 'POST', body: JSON.stringify({ company: 'co1', op: 'node', node: { id: 'n1', type: 'risk', label: 'خطر تسعير' } }) }, token);
 ok(r.status === 200 && r.body.ok, 'owner can add graph node');
 r = await call('/api/kosif/v38/evidence-graph', { method: 'POST', body: JSON.stringify({ company: 'co1', op: 'edge', edge: { from: 'ev9', to: 'n1', kind: 'supports' } }) }, token);

@@ -17,7 +17,7 @@ export const V38_CAPABILITIES = {
   version: 'v38.0.0-root',
   buildId: '2026.08.19-v38-trusted-audit-os',
   title: 'Trusted Audit Intelligence OS',
-  deterministic: ['parse-money', 'journal-validation', 'posting-hash-chain', 'reversals', 'trial-balance', 'adjusted-tb', 'materiality-isa320', 'misstatements-isa450', 'journal-risk-flags', 'sampling', 'invariants', 'vat-zatca', 'zakat'],
+  deterministic: ['parse-money', 'journal-validation', 'posting-hash-chain', 'reversals', 'trial-balance', 'trial-balance-summary', 'adjusted-tb', 'materiality-isa320', 'misstatements-isa450', 'journal-risk-flags', 'sampling', 'invariants', 'vat-zatca', 'zakat'],
   governed: ['evidence-graph', 'council-v3', 'reviewer-notes', 'source-intelligence', 'openai-live', 'public-ai-provider'],
   aiAuthority: 'advisory-only',
   forbiddenAIFields: ['calculated_materiality', 'final_opinion', 'approved_adjustment', 'posted_entry'],
@@ -148,6 +148,61 @@ export async function handleV38(req, env, u, owner) {
       case 'parse-money': {
         const r = core.parseMoney(b?.value, { exp: b?.exp, currency: b?.currency });
         return r.ok ? json({ ok: true, minor: r.minor.toString(), exp: r.exp }) : err(r.error);
+      }
+      case 'trial-balance-summary': {
+        const rows = Array.isArray(b?.accounts) ? b.accounts : null;
+        const hasExp = b?.exp !== undefined;
+        const requestedExp = Number(b?.exp);
+        if (hasExp && ((typeof b.exp !== 'number' && typeof b.exp !== 'string') || (typeof b.exp === 'string' && !b.exp.trim()) || !Number.isInteger(requestedExp) || requestedExp < 0 || requestedExp > 6)) {
+          return err('TRIAL_BALANCE_EXP_INVALID', 'exp must be an integer between 0 and 6.');
+        }
+        const exp = hasExp ? requestedExp : 2;
+        if (!rows) return err('TRIAL_BALANCE_ACCOUNTS_REQUIRED', 'accounts must be an array.');
+        if (rows.length > 50000) return err('TRIAL_BALANCE_TOO_LARGE', 'The trial balance is limited to 50,000 rows.', 413);
+        let drTotal = 0n;
+        let crTotal = 0n;
+        const normalized = [];
+        for (let index = 0; index < rows.length; index++) {
+          const source = rows[index] || {};
+          const dr = apiMoney(source.dr ?? source.debit, exp);
+          const cr = apiMoney(source.cr ?? source.credit, exp);
+          if (!dr.ok || !cr.ok) {
+            const field = !dr.ok ? 'dr' : 'cr';
+            const parsed = !dr.ok ? dr : cr;
+            return err('TRIAL_BALANCE_AMOUNT_INVALID', `row ${index + 1} ${field}: ${parsed.error}`);
+          }
+          drTotal += dr.minor;
+          crTotal += cr.minor;
+          normalized.push({
+            index,
+            code: String(source.code ?? source.no ?? '').slice(0, 80),
+            name: String(source.name ?? '').slice(0, 240),
+            dr: dr.minor,
+            cr: cr.minor
+          });
+        }
+        const desc = key => (a, c) => a[key] === c[key] ? a.index - c.index : a[key] > c[key] ? -1 : 1;
+        const top = key => [...normalized].sort(desc(key)).slice(0, 8).map(row => ({
+          code: row.code,
+          name: row.name,
+          dr: row.dr.toString(),
+          cr: row.cr.toString()
+        }));
+        const difference = drTotal - crTotal;
+        return json({
+          ok: true,
+          count: normalized.length,
+          dr: drTotal.toString(),
+          cr: crTotal.toString(),
+          difference: difference.toString(),
+          absoluteDifference: (difference < 0n ? -difference : difference).toString(),
+          balanced: normalized.length ? difference === 0n : null,
+          topDr: top('dr'),
+          topCr: top('cr'),
+          exp,
+          precision: 'minor-unit-bigint',
+          method: 'exact-sum'
+        });
       }
       case 'validate-journal': {
         const accounts = new Map((b?.accounts || []).map(a => [String(a.code), a]));
@@ -336,11 +391,22 @@ export async function handleV38(req, env, u, owner) {
   }
 
   /* مزود AI عام/محلي */
+  if (p === '/api/kosif/v38/public-ai/status' && req.method === 'GET') {
+    return json({
+      ok: true,
+      configured: publicAIConfigured(env),
+      model: publicAIConfigured(env) ? String(env.KOSIF_PUBLIC_AI_MODEL || '') : '',
+      mode: String(env.KOSIF_PUBLIC_AI_MODE || 'chat_completions') === 'responses' ? 'responses' : 'chat_completions',
+      keyExposure: 'none',
+      persistence: 'none',
+      authority: 'advisory-only'
+    });
+  }
   if (p === '/api/kosif/v38/public-ai' && req.method === 'POST') {
     if (!publicAIConfigured(env)) return err('PUBLIC_AI_NOT_CONFIGURED', 'المزود العام/المحلي يُضبط بمتغيرات بيئة الخادم فقط.', 503);
     const b = await body(req);
     const r = await callPublicAI(env, String(b?.prompt || '').slice(0, 24000));
-    return r.ok ? json({ ok: true, text: r.text, provider: 'public-local' }) : err(r.error, r.message, 502);
+    return r.ok ? json({ ok: true, text: r.text, provider: 'public-local', model: r.model, mode: r.mode, authority: 'advisory-only' }) : err(r.error, r.message, 502);
   }
 
   /* نسيج ذكاء المصادر */

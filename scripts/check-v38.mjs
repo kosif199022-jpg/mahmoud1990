@@ -13,6 +13,8 @@ const api = read('src/v38-api.js');
 const realtime = read('src/v38-realtime.js');
 const realtimeSession = read('src/v38-realtime-session.js');
 const live = read('public/v38-live.js');
+const reports = read('public/v38-reports.js');
+const publicAI = read('src/public-ai-provider.js');
 const wrangler = read('wrangler.toml');
 const pkg = JSON.parse(read('package.json'));
 
@@ -21,6 +23,7 @@ ok(fs.existsSync('tests/v38-core.test.mjs'), 'v38 core tests are present');
 ok(fs.existsSync('src/engine/v38-evidence-graph.mjs'), 'evidence graph engine is present');
 ok(fs.existsSync('tests/v38-evidence-graph.test.mjs'), 'v38 graph tests are present');
 ok(fs.existsSync('tests/v38-api.test.mjs'), 'v38 API integration tests are present');
+ok(fs.existsSync('tests/v38-public-ai.test.mjs'), 'public/local AI governance tests are present');
 ok(fs.existsSync('src/public-ai-provider.js'), 'public/local AI provider module is present');
 ok(fs.existsSync('src/v38-realtime.js'), 'OpenAI realtime relay is present');
 ok(fs.existsSync('src/v38-realtime-session.js'), 'owner-session realtime router is present');
@@ -34,18 +37,19 @@ for (const f of ['v38-ultimate.css', 'v38-ultimate.js', 'v38-io.js', 'v38-report
 }
 
 ok(edge.includes("version:'v38.1.1-root'"), 'suite version is v38.1.1-root');
-ok(edge.includes('2026.08.19-v38.1.1-canva-visual-system'), 'Canva visual-system production build identity is preserved');
-ok(edge.includes("designAuthority:'KOSIF v38 Canva navy/gold visual system'"), 'Canva navy/gold design authority is explicit');
+ok(edge.includes('2026.08.20-v38.1.2-kitab-caffe-visual-system'), 'Kitab Caffe production build identity is explicit');
+ok(edge.includes("designAuthority:'KOSIF Kitab Caffe cream/coffee/gold visual system'"), 'Kitab Caffe design authority is explicit');
+ok(edge.includes('/kosif-kitab-theme.js') && edge.includes('/kosif-kitab-theme.css?v=1.0.0-kitab'), 'audit shell wires the Kitab Caffe final theme authority');
 ok(edge.includes('handleRealtimeSession') && edge.indexOf('handleRealtimeSession') < edge.lastIndexOf('handleV38(req'), 'owner-session realtime router runs before legacy v38 handler');
-ok(edge.includes('/v38-live.js?v=38.1.1'), 'audit shell cache-busts the new realtime client');
+ok(edge.includes('/v38-live.js?v=38.1.2'), 'audit shell cache-busts the text+voice live client');
 ok(edge.includes('/v38-ultimate.js?v=38') && edge.includes('/v38-ultimate.css?v=38'), 'audit shell injects the v38 visual layer');
-ok(edge.includes('/v38-user-polish.js?v=38.1.0') && edge.includes('/v38-user-polish.css?v=38.1.1-canva'), 'audit shell loads Canva final polish after v38 core');
+ok(edge.includes('/v38-user-polish.js?v=38.1.0') && edge.includes('/v38-user-polish.css?v=38.1.1-canva'), 'audit shell preserves the v38 polish capability layer beneath the final theme');
 ok(edge.includes('v38-io.js') && edge.includes('v38-reports.js') && edge.includes('v38-books.js'), 'audit shell injects v38 workspaces (io/reports/books)');
 ok(edge.includes("'cache-control','no-cache, no-store, must-revalidate'"), 'audit HTML is not allowed to reuse a stale release shell');
 
 const polishCss = read('public/v38-user-polish.css');
-ok(polishCss.includes('Canva-approved visual system') && polishCss.includes('--kup-navy:#0A1F44') && polishCss.includes('--kup-gold:#C9A227'), 'Canva navy/gold visual tokens are present in final polish');
-ok(polishCss.includes('--kup-font-ui:"Tajawal"') && polishCss.includes('--kup-font-display:"Cairo"'), 'Canva-approved Arabic typography hierarchy is present');
+ok(polishCss.includes('Canva-approved visual system') && polishCss.includes('--kup-navy:#0A1F44') && polishCss.includes('--kup-gold:#C9A227'), 'underlying v38 Canva polish tokens remain present for compatibility');
+ok(polishCss.includes('--kup-font-ui:"Tajawal"') && polishCss.includes('--kup-font-display:"Cairo"'), 'underlying v38 Arabic typography hierarchy remains present');
 
 const polish = read('public/v38-user-polish.js');
 ok(polish.includes('KosifSecureAIKeys') && polish.includes("zai:'"), 'council provider keys are session-memory only and include Z.ai');
@@ -60,6 +64,13 @@ ok(realtimeSession.includes('if(!owner)') && realtimeSession.includes('OWNER_AUT
 ok(realtimeSession.includes('key:b?.key') && realtimeSession.includes('keyExposure:r.keyExposure'), 'transient key is consumed server-side and never returned');
 ok(live.includes('window.KosifSecureAIKeys?.openai') && live.includes('key: realtimeCredential()'), 'live client reuses only the in-memory Council OpenAI key');
 ok(live.includes('LocalStorage') && live.includes('IndexedDB'), 'live UI discloses that the transient key is not persisted');
+ok(live.includes('/api/kosif/v38/public-ai/status') && live.includes('manual-export-only'), 'text chat is server-relayed and memory-only with manual export');
+ok(live.includes('v38-chat-consent') && live.includes('untrusted-context-advisory-only'), 'text chat requires consent and labels optional engagement context untrusted');
+ok(publicAI.includes("role: 'system'") && publicAI.includes('Never approve') && publicAI.includes('SOURCE_NOT_VERIFIED'), 'public/local provider enforces immutable advisory governance');
+ok(reports.includes('/accounting/trial-balance-summary') && reports.includes('minor-unit-bigint'), 'reports consume the exact trial-balance summary instead of floating-point totals');
+ok(reports.includes('v38-report-gate') && reports.includes("gate('اعتماد المراجع والشريك', 'human'"), 'reports expose completion and non-automatable human gates');
+ok(reports.includes("gate('مسودة تقرير موجودة'") && reports.includes('model.hasReportDraft && model.findings.length === 0'), 'reports require a real draft before completion readiness');
+ok(reports.includes("const materialityAmount = st?.mat?.val ?? ''") && !reports.includes('st?.mat?.value'), 'reports never promote a legacy computed materiality display back into a source');
 
 ok(proxy.includes('#mixLaunch') && proxy.includes('#smartPebble'), 'Mafateeh reader hides Mix and Smart AI launchers by default');
 ok(proxy.includes('kosif-reader-home') && proxy.includes('kosif-reader-library-home'), 'Mafateeh reader has explicit home/library navigation');
@@ -72,7 +83,7 @@ ok(api.includes('openlibrary') || read('src/v38-books.js').includes('openlibrary
 ok(read('src/v38-source-intelligence.js').includes('UNSAFE_OR_INVALID_URL') && read('src/v38-source-intelligence.js').includes('256'), 'source fabric enforces safe URLs and bounded samples');
 
 ok(/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler), 'suite edge remains the deploy entrypoint');
-ok(pkg.scripts['v38-core'] && pkg.scripts['v38-graph'] && pkg.scripts['v38-api'], 'v38 test scripts are registered in package.json');
+ok(pkg.scripts['v38-core'] && pkg.scripts['v38-graph'] && pkg.scripts['v38-api'] && pkg.scripts['v38-public-ai'], 'v38 test scripts are registered in package.json');
 ok(String(pkg.scripts.check).includes('v38-suite'), 'v38 suite is part of the master check chain');
 
 const manifest = JSON.parse(read('public/demo/v38/manifest.json'));

@@ -5,6 +5,13 @@ You are a senior software engineer working on the Kosif accounting, audit, stand
 ## Primary objective
 Improve the repository without silently removing existing capabilities. Fix defects at their root cause, preserve backward compatibility where practical, and keep the application reliable on mobile devices.
 
+## Binding product baseline
+Read and follow `docs/KOSIF_UNIFIED_REQUIREMENTS_2026-08-20.md` before non-trivial implementation work. It is the consolidated product baseline.
+
+The user-selected visual authority is the **Kitab Caffe** system in `public/kosif-kitab-theme.css`, with runtime pinning in `public/kosif-kitab-theme.js`. Treat that as a presentation authority only: deterministic accounting, audit logic, source authority, privacy/security, evidence, and governed human approval remain functional authorities and must never be weakened by visual work.
+
+Do not create a new competing global theme or silently remove capabilities to make a screen simpler. Extend the established theme variables and current architecture instead.
+
 ## Mandatory development workflow
 1. Inspect the repository and the relevant implementation before proposing changes.
 2. For non-trivial work, post a concise implementation plan before writing code.
@@ -29,6 +36,8 @@ Improve the repository without silently removing existing capabilities. Fix defe
 - Avoid introducing duplicate modal, scrolling, state-management, or persistence mechanisms when an existing mechanism can be extended safely.
 - Preserve accessibility and keyboard/touch interaction.
 - Do not weaken security checks or tests simply to make CI pass.
+- Do not cherry-pick or merge stale agent branches wholesale. Compare them against current `main` and port only still-valid improvements that preserve later security, accounting, source, mobile, and v38 work.
+- Never introduce floating-point equality as an accounting control where the deterministic minor-unit core applies.
 
 ## Repository validation
 The repository's `npm run check` command is the required regression gate and includes syntax, payload, legacy regression, contract, UI safety, history parity, security edge, library privacy, executor contract, reviewer media, history restoration, feature reachability, accounting, and deep audit checks. Treat failures as meaningful until proven otherwise.
