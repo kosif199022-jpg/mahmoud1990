@@ -121,7 +121,10 @@ async function verify(engine, label) {
 
   const reportsTab = page.locator('.tab[data-go="v38-reports"]');
   if (await reportsTab.count()) {
-    await reportsTab.click();
+    await page.evaluate(() => {
+      if (typeof window.go === 'function') window.go('v38-reports');
+      else document.querySelector('.tab[data-go="v38-reports"]')?.click();
+    });
     await pause(350);
     const reportState = await page.evaluate(() => {
       const section = document.querySelector('section[data-view="v38-reports"]');
