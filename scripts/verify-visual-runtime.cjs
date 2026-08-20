@@ -91,16 +91,39 @@ async function verifyRoutes(engine, label, options) {
 async function verifyOriginalReader() {
   const browser = await webkit.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: 'ar-SA' });
-  await page.goto(`${BASE}/wealth/reader.html?book=mafateeh&visual-runtime=reader`, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => window.__KOSIF_WEALTH_LIBRARY__ === true && document.querySelector('#prose')?.textContent?.trim().length > 80, null, { timeout: 15000 });
+  const response = await page.goto(`${BASE}/wealth/reader.html?book=mafateeh&visual-runtime=reader`, { waitUntil: 'domcontentloaded' });
+  fail(response && response.status() < 400, `Mafateeh original reader route returned ${response?.status?.() || 'no response'}`);
+  try {
+    await page.waitForFunction(() => (
+      window.__KOSIF_WEALTH_LIBRARY__ === true &&
+      Array.isArray(window.D?.parts) && window.D.parts.length > 0 &&
+      Array.isArray(window.CH) && window.CH.length > 10
+    ), null, { timeout: 15000 });
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => ({
+      href: location.href,
+      title: document.title,
+      ready: document.readyState,
+      marker: window.__KOSIF_WEALTH_LIBRARY__ === true,
+      script: Boolean(document.querySelector('script[src*="wealth-library-v37.js"]')),
+      parts: Array.isArray(window.D?.parts) ? window.D.parts.length : -1,
+      chapters: Array.isArray(window.CH) ? window.CH.length : -1,
+      hero: Boolean(document.querySelector('#hero')),
+      prose: document.querySelector('#prose')?.textContent?.trim().length || 0,
+      bodyText: document.body?.innerText?.trim().length || 0
+    }));
+    throw new Error(`Mafateeh original reader did not initialize ${JSON.stringify(diagnostics)}; ${error.message}`);
+  }
   const state = await page.evaluate(() => ({
     edition: document.documentElement.dataset.kosifEdition || '',
     progress: Boolean(document.getElementById('k41-scroll-progress')),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    prose: document.querySelector('#prose')?.textContent?.trim().length || 0
+    modelParts: Array.isArray(window.D?.parts) ? window.D.parts.length : 0,
+    modelChapters: Array.isArray(window.CH) ? window.CH.length : 0,
+    originalHero: Boolean(document.querySelector('#hero'))
   }));
   fail(state.edition !== 'v41' && !state.progress, 'Mafateeh original reader was overridden by the suite magazine shell');
-  fail(state.overflow <= 1 && state.prose > 80, 'Mafateeh original reader is clipped or empty');
+  fail(state.overflow <= 1 && state.modelParts > 0 && state.modelChapters > 10 && state.originalHero, `Mafateeh original reader is clipped or its native book model is unavailable ${JSON.stringify(state)}`);
   await browser.close();
   console.log('KOSIF_ORIGINAL_READER_VISUAL_CONTRACT_OK');
 }
