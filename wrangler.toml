@@ -1,5 +1,5 @@
 name = "mahmoud-eldesouky"
-main = "src/suite-edge.js"
+main = "src/suite-edge-v43.js"
 compatibility_date = "2026-08-17"
 workers_dev = true
 

@@ -22,11 +22,20 @@ if(!full.primitives.ok) fail('high-risk primitives missing',full.primitives);
 const requiredFiles=[
   'src/requirements/v43-full-registry.mjs',
   'src/requirements/v43-control-implementation.mjs',
+  'src/suite-edge-v43.js',
+  'wrangler.toml',
   'tests/v43-full-coverage.test.mjs',
   'public/data/kosif-requirements-summary-v43.json',
   'public/requirements/index.html'
 ];
 for(const file of requiredFiles) if(!fs.existsSync(new URL(`../${file}`,import.meta.url))) fail('required evidence file missing',{file});
+
+const wrangler=fs.readFileSync(new URL('../wrangler.toml',import.meta.url),'utf8');
+if(!/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler)) fail('production Worker does not use v43 requirements wrapper');
+const edge=fs.readFileSync(new URL('../src/suite-edge-v43.js',import.meta.url),'utf8');
+for(const marker of ['createFullyImplementedRequirementsRuntime',"p==='/__requirements'",'REQUIREMENTS_BASELINE_INCOMPLETE','x-kosif-requirements-implemented']){
+  if(!edge.includes(marker)) fail('production requirements integration marker missing',{marker});
+}
 
 console.log('KOSIF_V43_50000_OK',JSON.stringify({
   version:summary.version,

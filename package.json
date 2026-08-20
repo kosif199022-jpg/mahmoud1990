@@ -41,7 +41,7 @@
     "v41-experience": "node scripts/check-v41-experience.mjs",
     "kitab-theme": "node scripts/check-kitab-theme-authority.mjs",
     "v42-requirements": "node scripts/check-v42-requirements.mjs && node --test tests/v42-requirements-control-plane.test.mjs",
-    "v43-requirements": "node scripts/check-v43-requirements.mjs && node --test tests/v43-full-coverage.test.mjs",
+    "v43-requirements": "node scripts/check-v43-requirements.mjs && node --test tests/v43-full-coverage.test.mjs tests/v43-edge-wrapper.test.mjs",
     "v38-demo": "node scripts/generate-v38-demo.mjs"
   }
 }
