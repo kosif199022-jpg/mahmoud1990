@@ -1,21 +1,12 @@
 name: Deploy KOSIF Engineering Copilot MCP
 
 on:
-  push:
-    branches: [feat/kosif-mcp-v0-2]
-    paths:
-      - 'mcp/kosif-engineering-copilot/**'
-      - '.github/workflows/deploy-kosif-mcp.yml'
   pull_request:
     branches: [main]
     paths:
       - 'mcp/kosif-engineering-copilot/**'
       - '.github/workflows/deploy-kosif-mcp.yml'
   workflow_dispatch:
-
-concurrency:
-  group: deploy-kosif-engineering-copilot-mcp
-  cancel-in-progress: true
 
 jobs:
   deploy:
