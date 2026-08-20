@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { createMcpHandler } from "agents/mcp/server";
 import { z } from "zod";
+import { registerVisualCaptureTools, setVisualRuntimeEnv } from "./visual";
 
 const OWNER = "kosif199022-jpg";
 const REPO = "mahmoud1990";
@@ -26,7 +27,7 @@ async function getJson(url: string) {
   const response = await fetch(url, {
     headers: {
       accept: "application/vnd.github+json",
-      "user-agent": "kosif-engineering-copilot-mcp/0.2.0",
+      "user-agent": "kosif-engineering-copilot-mcp/0.2.2",
     },
   });
   if (!response.ok) {
@@ -42,7 +43,7 @@ async function github(path: string) {
 
 async function liveHealth() {
   const response = await fetch(`${LIVE_URL}/__health?source=kosif-mcp-v0.2`, {
-    headers: { "user-agent": "kosif-engineering-copilot-mcp/0.2.0" },
+    headers: { "user-agent": "kosif-engineering-copilot-mcp/0.2.2" },
   });
   if (!response.ok) throw new Error(`Production health returned ${response.status}`);
   return response.json() as Promise<any>;
@@ -65,7 +66,7 @@ async function repositoryText(path: string, ref: string) {
 }
 
 function createServer() {
-  const server = new McpServer({ name: "KOSIF Engineering Copilot", version: "0.2.0" });
+  const server = new McpServer({ name: "KOSIF Engineering Copilot", version: "0.2.2" });
 
   server.registerTool(
     "project_health",
@@ -293,6 +294,7 @@ function createServer() {
     },
   );
 
+  registerVisualCaptureTools(server);
   return server;
 }
 
@@ -304,19 +306,21 @@ const mcpHandler = createMcpHandler(createServer, {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown): Promise<Response> {
+    setVisualRuntimeEnv(env);
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/") {
       return Response.json({
         name: "KOSIF Engineering Copilot MCP",
-        version: "0.2.0",
+        version: "0.2.2",
         mode: "read-only-public-data",
         mcpEndpoint: "/mcp",
         healthEndpoint: "/healthz",
+        visualTools: ["capture_app_screen", "capture_responsive_set"],
         repository: REPO_FULL,
       });
     }
     if (request.method === "GET" && url.pathname === "/healthz") {
-      return Response.json({ ok: true, service: "kosif-engineering-copilot-mcp", version: "0.2.0" });
+      return Response.json({ ok: true, service: "kosif-engineering-copilot-mcp", version: "0.2.2", visualCapture: true });
     }
     return mcpHandler(request, env, ctx);
   },
