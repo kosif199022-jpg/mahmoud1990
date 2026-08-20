@@ -1,8 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kosif-engineering-copilot-mcp",
-  "main": "src/worker.ts",
+  "main": "src/oauth.ts",
   "compatibility_date": "2026-08-20",
+  "compatibility_flags": ["global_fetch_strictly_public"],
   "workers_dev": true,
   "observability": {
     "enabled": true
