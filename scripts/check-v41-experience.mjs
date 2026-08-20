@@ -82,7 +82,7 @@ need(css.includes('scroll-behavior:auto') && css.includes('background-attachment
 need(css.includes('@media (hover:none),(pointer:coarse)') && css.includes('@keyframes k41-page-in-touch'), 'touch-first motion fallback is missing');
 need(mobile.includes('body[data-kosif-dialog-open="1"]{touch-action:auto!important') && mobile.includes('#ks40-launch-overlay .ks40-launch-body'), 'Safari dialog gestures are still blocked by the page lock');
 need(!continuity.includes("b.style.touchAction='none'") && continuity.includes("'#ks40-launch-overlay','#modal-bg','#drawer'") && continuity.includes("attributeFilter:['class','hidden']"), 'dialog continuity does not cover every active window safely');
-need(studioRuntime.includes('lockLauncherPage') && studioRuntime.includes('unlockLauncherPage') && studioRuntime.includes('continuity.registerDialogs?.()'), 'capability launcher does not use a reversible page lock');
+need(studioRuntime.includes('lockLauncherPage') && studioRuntime.includes('unlockLauncherPage') && studioRuntime.includes('window.KosifContinuity?.registerDialogs?.()') && studioRuntime.includes('continuity.syncDialogLock(preferredY)'), 'capability launcher does not use a reversible page lock');
 
 need(manifest.theme_color === '#102825' && manifest.background_color === '#F7F0E2', 'PWA colors do not match the v41 magazine masthead');
 need(deploy.includes('/kosif-editorial-v41.css') && deploy.includes('/kosif-editorial-v41.js'), 'production route verification does not include v41 assets');
