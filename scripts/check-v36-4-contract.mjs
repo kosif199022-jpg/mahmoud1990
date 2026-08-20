@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 const read=p=>fs.existsSync(p)?fs.readFileSync(p,'utf8'):'';
-const edge=read('src/security-edge.js'),suite=read('src/suite-edge.js'),wrangler=read('wrangler.toml'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),reader=read('public/standards/reader-pro-v36.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),gate=read('public/v36-ai-gate.js'),zai=read('public/v36-zai.js'),reviewer=read('public/v36-reviewer-media.js'),voice=read('public/v36-voice-guide.js'),pkg=read('package.json'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
+const edge=read('src/security-edge.js'),suite=read('src/suite-edge.js'),wrapper=read('src/suite-edge-v43.js'),wrangler=read('wrangler.toml'),cont=read('public/v36-continuity.js'),css=read('public/v36-continuity.css'),reader=read('public/standards/reader-pro-v36.js'),sw=read('public/sw.js'),stdSw=read('public/standards/sw.js'),gate=read('public/v36-ai-gate.js'),zai=read('public/v36-zai.js'),reviewer=read('public/v36-reviewer-media.js'),voice=read('public/v36-voice-guide.js'),pkg=read('package.json'),req=read('docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md');
 const failures=[];const ok=(name,v)=>{console.log((v?'✅':'❌')+' '+name);if(!v)failures.push(name)};
-ok('production enters v37 suite edge then fail-closed security edge',/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler)&&/import securityEdge from '.\/security-edge\.js'/.test(suite)&&/securityEdge\.fetch/.test(suite));
+const directEntry=/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler);
+const governedEntry=/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler)&&/import suite from '.\/suite-edge\.js'/.test(wrapper)&&/await suite\.fetch\(req,env,ctx\)/.test(wrapper);
+ok('production enters governed suite edge then fail-closed security edge',(directEntry||governedEntry)&&/import securityEdge from '.\/security-edge\.js'/.test(suite)&&/securityEdge\.fetch/.test(suite));
 ok('v36.4 version endpoint is owned by security edge',/version:'v36\.4'/.test(edge)&&/2026\.08\.18-v36\.4-mobile-release-integrity/.test(edge)&&/u\.pathname==='\/__version'/.test(edge));
 ok('v36.4 health endpoint shares release identity',/u\.pathname==='\/__health'/.test(edge)&&/BUILD_INFO\.version/.test(edge)&&/BUILD_INFO\.buildId/.test(edge));
 ok('security edge exposes release headers on JSON diagnostics',/x-kosif-release/.test(edge)&&/native-v36-4-mobile-release-integrity/.test(edge)&&/x-kosif-build-id/.test(edge));
