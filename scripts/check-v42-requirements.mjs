@@ -26,10 +26,21 @@ for (const marker of [
   'withIdempotency', 'sourceEnvelope', 'metricSummary', 'governedOperation'
 ]) ok(plane.includes(marker), `Control-plane invariant missing: ${marker}`);
 
+// The reader and /wealth/books/* endpoints are virtual runtime routes. Verify the
+// implementation that owns them instead of requiring non-existent public files.
+const suite = fs.readFileSync(path.join(root, 'src/suite-edge.js'), 'utf8');
+const proxy = fs.readFileSync(path.join(root, 'src/suite-proxy.js'), 'utf8');
+const wealthLibrary = fs.readFileSync(path.join(root, 'public/wealth-library-v37.js'), 'utf8');
+ok(suite.includes("p.startsWith('/wealth/books/')") && suite.includes('wealthBookData'), 'Suite edge must own native Wealth book compatibility routes');
+ok(proxy.includes("READER_ROOT_ALIASES = ['/reader.html', '/reader', '/']") && proxy.includes('/wealth/'), 'Mafateeh reader must remain supplied through the governed Wealth proxy');
+ok(wealthLibrary.includes('__KOSIF_WEALTH_LIBRARY__'), 'Shared four-book Wealth runtime evidence is missing');
+
 const deploy = fs.readFileSync(path.join(root, '.github/workflows/deploy-cloudflare.yml'), 'utf8');
 ok(deploy.includes('npm run check'), 'Cloudflare production deploy must execute the full check gate');
 ok(/push:\s*\n\s*branches:\s*\[main\]/.test(deploy), 'Production workflow must remain attached to main');
-ok(/Live verification|verify-live-site/.test(deploy), 'Production workflow must retain live verification');
+const hasLiveStep = /name:\s*Verify live Kosif suite/i.test(deploy);
+const hasLiveProbe = /LIVE_KOSIF_OK/.test(deploy) && /curl\s+-fsS[\s\S]*\$LIVE_URL\/__health/.test(deploy);
+ok(hasLiveStep && hasLiveProbe, 'Production workflow must retain real live verification');
 
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 ok(String(packageJson.scripts?.check || '').includes('v42-requirements'), 'npm run check must include v42-requirements gate');
@@ -44,5 +55,7 @@ console.log('KOSIF_V42_REQUIREMENTS_GATE_OK', JSON.stringify({
   totalItems: REQUIREMENTS_BASELINE.totalItems,
   uniqueRequirementTexts: REQUIREMENTS_BASELINE.uniqueRequirementTexts,
   domains: Object.keys(DOMAIN_EVIDENCE).length,
-  evidencePaths: REQUIRED_EVIDENCE_PATHS.length
+  evidencePaths: REQUIRED_EVIDENCE_PATHS.length,
+  liveVerification: true,
+  virtualReaderEvidence: true
 }));
