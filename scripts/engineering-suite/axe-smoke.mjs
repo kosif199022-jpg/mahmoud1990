@@ -19,7 +19,13 @@ for (const viewport of viewports) {
   const page = await context.newPage();
   for (const route of routes) {
     const url = new URL(route, baseURL).toString();
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    if (!response || response.status() >= 400) {
+      blocking++;
+      report.push({ viewport: viewport.name, route, url, httpStatus: response?.status() ?? null, blocking: [{ id: 'http-load-failure', impact: 'critical', nodes: 1 }], violations: [] });
+      continue;
+    }
+    await page.waitForTimeout(750);
     const scan = await new AxeBuilder({ page }).analyze();
     const critical = scan.violations.filter(v => ['critical', 'serious'].includes(v.impact));
     blocking += critical.length;
@@ -27,6 +33,7 @@ for (const viewport of viewports) {
       viewport: viewport.name,
       route,
       url,
+      httpStatus: response.status(),
       violations: scan.violations.map(v => ({
         id: v.id,
         impact: v.impact,
