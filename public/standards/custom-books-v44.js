@@ -1,0 +1,16 @@
+/* KOSIF v44 — direct book routing + System Brain local books in the standards reader. */
+(()=>{'use strict';
+const V=()=>window.KosifBookVault;
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const base={jget:window.jget,showLibrary:window.showLibrary,openBook:window.openBook,openChapter:window.openChapter};
+if(!base.jget||!base.showLibrary||!base.openBook||!base.openChapter){console.error('KOSIF_V44_READER_BASE_MISSING');return}
+function setUrl(id,ch){try{const u=new URL(location.href);if(id)u.searchParams.set('book',id);else u.searchParams.delete('book');if(ch)u.searchParams.set('chapter',String(ch));else u.searchParams.delete('chapter');history.replaceState({book:id,chapter:ch||null},'',u)}catch(_){}}
+window.jget=async function(u){try{const local=await V()?.readerJsonForPath(u);if(local)return local}catch(e){console.error('KOSIF_LOCAL_BOOK_READ_FAILED',e)}return base.jget(u)};
+async function localCards(){const root=$('#library');if(!root||!V())return;root.querySelector('#kosif-local-books-v44')?.remove();const books=await V().listBooks();if(!books.length)return;const box=document.createElement('div');box.id='kosif-local-books-v44';box.innerHTML=`<div style="margin:30px 0 12px;border-top:1px solid var(--rule);padding-top:20px"><div style="font-family:var(--font);font-size:21px;font-weight:700">كتب عقل النظام المضافة</div><p style="color:var(--ink2);font-size:12.5px;margin:4px 0 14px">محفوظة على هذا الجهاز ومتاحة مباشرة في نفس القارئ.</p></div>`+books.map(b=>`<button class="card custom" data-local-book="${esc(b.id)}"><span class="yr">${esc(b.reader?.year||'—')}</span><span class="devbadge" style="border-color:var(--seal);color:var(--seal)">عقل النظام</span><h3>${esc(b.title)}</h3><p>${esc(b.reader?.sub||'كتاب مضاف')}</p><div class="st"><span><b>${esc(b.reader?.chapters?.length||0)}</b> فصلًا</span><span><b>${esc(Number(b.cleaning?.words||0).toLocaleString('en'))}</b> كلمة</span></div></button>`).join('');root.appendChild(box);box.querySelectorAll('[data-local-book]').forEach(x=>x.onclick=()=>window.openBook(x.dataset.localBook))}
+window.showLibrary=async function(){setUrl(null,null);const r=await base.showLibrary();await localCards();return r};
+window.openBook=async function(id,jump){setUrl(id,jump||null);return base.openBook(id,jump)};
+window.openChapter=async function(id,no){setUrl(id,no);return base.openChapter(id,no)};
+async function route(){const q=new URLSearchParams(location.search),id=q.get('book');if(!id)return;const ch=Math.max(0,Number(q.get('chapter')||0)||0),lib=$('#library');if(lib)lib.style.visibility='hidden';try{if(id.startsWith('local-')){const b=await V()?.getBook(id);if(!b)throw new Error('LOCAL_BOOK_NOT_FOUND')}else if(!/^b[1-4]$/.test(id))throw new Error('BOOK_ROUTE_INVALID');await window.openBook(id,ch||undefined)}catch(e){console.error(e);try{toast('تعذر فتح الكتاب المطلوب مباشرة')}catch(_){}await window.showLibrary()}finally{if(lib)lib.style.visibility=''}}
+addEventListener('popstate',route);window.KosifDirectBooksV44={version:'44.0.0',route,refreshLocalBooks:localCards};
+queueMicrotask(route);
+})();
