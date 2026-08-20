@@ -1,0 +1,46 @@
+{
+  "name": "KOSIF Engineering Suite",
+  "version": "1.0.0",
+  "mode": "fail-closed",
+  "priority": [
+    "numeric-integrity",
+    "security",
+    "compliance",
+    "source-integrity",
+    "quality",
+    "performance"
+  ],
+  "agents": {
+    "orchestrator": {"enabled": true, "role": "Coordinate all engineering gates and stop unsafe releases."},
+    "designDirector": {"enabled": true, "role": "Enforce design tokens, RTL, typography, spacing, responsive layout and visual consistency."},
+    "uiEngineer": {"enabled": true, "role": "Turn approved UI decisions into maintainable implementation."},
+    "visualQA": {"enabled": true, "role": "Detect overflow, clipping, broken modals, layout drift and mobile regressions."},
+    "browserTester": {"enabled": true, "role": "Exercise navigation and critical interactions in a real browser."},
+    "codeAuditor": {"enabled": true, "role": "Review code quality, duplicated logic, dead code, unsafe patterns and regressions."},
+    "performanceEngineer": {"enabled": true, "role": "Track load speed, resource weight, caching and runtime regressions."},
+    "accessibilityInspector": {"enabled": true, "role": "Check keyboard access, labels, contrast, semantic structure and RTL usability."},
+    "releaseSentinel": {"enabled": true, "role": "Permit release only when required gates pass."}
+  },
+  "gates": {
+    "repository": true,
+    "security": true,
+    "htmlIntegrity": true,
+    "browserSmoke": true,
+    "visualSmoke": true,
+    "accessibilitySmoke": true,
+    "performanceSmoke": true
+  },
+  "criticalRoutes": ["/", "/reader"],
+  "viewportMatrix": [
+    {"name": "iphone", "width": 390, "height": 844},
+    {"name": "tablet", "width": 820, "height": 1180},
+    {"name": "desktop", "width": 1440, "height": 1000}
+  ],
+  "releasePolicy": {
+    "blockOnCritical": true,
+    "blockOnHigh": true,
+    "requireBrowserSmoke": true,
+    "requireNoHorizontalOverflow": true,
+    "requireMainDocument": "frontend/index.html"
+  }
+}
