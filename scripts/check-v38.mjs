@@ -8,6 +8,7 @@ const read = p => fs.readFileSync(p, 'utf8');
 const ok = (c, m) => { if (!c) throw new Error('V38_CONTRACT_FAIL: ' + m); console.log('  ✅ ' + m); };
 
 const edge = read('src/suite-edge.js');
+const edgeV43 = fs.existsSync('src/suite-edge-v43.js') ? read('src/suite-edge-v43.js') : '';
 const proxy = read('src/suite-proxy.js');
 const api = read('src/v38-api.js');
 const realtime = read('src/v38-realtime.js');
@@ -90,7 +91,9 @@ ok(api.includes('stripAuthority'), 'AI outputs are stripped of authority fields 
 ok(api.includes('openlibrary') || read('src/v38-books.js').includes('openlibrary.org'), 'millions-of-books gateway targets Open Library');
 ok(read('src/v38-source-intelligence.js').includes('UNSAFE_OR_INVALID_URL') && read('src/v38-source-intelligence.js').includes('256'), 'source fabric enforces safe URLs and bounded samples');
 
-ok(/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler), 'suite edge remains the deploy entrypoint');
+const directSuiteEntry=/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler);
+const governedV43Entry=/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler)&&edgeV43.includes("import suite from './suite-edge.js'")&&edgeV43.includes('await suite.fetch(req,env,ctx)');
+ok(directSuiteEntry||governedV43Entry, 'governed suite edge remains the deploy entrypoint');
 ok(pkg.scripts['v38-core'] && pkg.scripts['v38-graph'] && pkg.scripts['v38-api'] && pkg.scripts['v38-public-ai'], 'v38 test scripts are registered in package.json');
 ok(String(pkg.scripts.check).includes('v38-suite'), 'v38 suite is part of the master check chain');
 
