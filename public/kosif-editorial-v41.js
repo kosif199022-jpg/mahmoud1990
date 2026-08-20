@@ -12,8 +12,10 @@
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
   const finePointer = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches === true;
+  const touchFirst = window.matchMedia?.('(hover: none), (pointer: coarse), (max-width: 840px)').matches === true;
   let revealObserver = null;
   let decorateQueued = false;
+  let revealQueued = false;
 
   function ensureStyles() {
     if ($('link[data-kosif-editorial="v41"]') || $('#kosif-editorial-v41')) return;
@@ -69,7 +71,7 @@
       if (element.dataset.k41Reveal) return;
       element.dataset.k41Reveal = '1';
       element.style.setProperty('--k41-delay', Math.min(index, 9) * 48 + 'ms');
-      if (reduced || !revealObserver) element.classList.add('k41-in');
+      if (reduced || touchFirst || !revealObserver) element.classList.add('k41-in');
       else revealObserver.observe(element);
     });
   }
@@ -84,8 +86,24 @@
     });
   }
 
+  function revealAllTargets() {
+    $$('[data-k41-reveal]').forEach(element => {
+      element.classList.add('k41-in');
+      revealObserver?.unobserve(element);
+    });
+  }
+
+  function queueVisibleReveal() {
+    if (revealQueued) return;
+    revealQueued = true;
+    requestAnimationFrame(() => {
+      revealQueued = false;
+      revealVisibleTargets();
+    });
+  }
+
   function setupReveal() {
-    if (!reduced && 'IntersectionObserver' in window) {
+    if (!reduced && !touchFirst && 'IntersectionObserver' in window) {
       revealObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (!entry.isIntersecting) return;
@@ -96,6 +114,7 @@
     }
     revealTargets();
     requestAnimationFrame(() => root.classList.add('k41-ready'));
+    setTimeout(revealAllTargets, 1600);
   }
 
   function setupSpotlight() {
@@ -157,6 +176,11 @@
     setupSpotlight();
     setupCoverParallax();
     window.addEventListener('kosif-view-change', queueDecorate);
+    window.addEventListener('scroll', queueVisibleReveal, { passive: true });
+    window.addEventListener('pageshow', () => setTimeout(revealAllTargets, 80), { passive: true });
+    window.addEventListener('orientationchange', () => setTimeout(revealAllTargets, 180), { passive: true });
+    document.addEventListener('touchstart', revealAllTargets, { passive: true, once: true });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) revealAllTargets(); }, { passive: true });
     document.addEventListener('click', event => {
       if (event.target.closest?.('[data-go],[data-kgo],[data-view-target],.sales-tabs button')) setTimeout(queueDecorate, 80);
     });

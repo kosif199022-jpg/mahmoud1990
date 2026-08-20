@@ -13,6 +13,7 @@
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const cssEscape = value => window.CSS?.escape ? window.CSS.escape(String(value)) : String(value).replace(/["\\]/g, '\\$&');
   const state = { installPrompt: null, installed: false, launcherOpen: false };
+  let launcherPageLock = null;
 
   root.dataset.kosifVisual = 'kosif-studio-v40';
   root.dataset.kosifExperience = 'v40';
@@ -183,6 +184,59 @@
     return $$('button:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])', overlay).filter(el => !el.hidden && el.offsetParent !== null);
   }
 
+  function lockLauncherPage() {
+    const continuity = window.KosifContinuity;
+    if (continuity?.syncDialogLock) {
+      continuity.registerDialogs?.();
+      continuity.syncDialogLock();
+      return;
+    }
+    if (launcherPageLock) return;
+    const body = document.body, html = document.documentElement;
+    const y = Math.max(0, window.scrollY || html.scrollTop || 0);
+    launcherPageLock = {
+      y,
+      rootScrollBehavior: html.style.scrollBehavior,
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow
+    };
+    html.style.scrollBehavior = 'auto';
+    body.dataset.kosifDialogOpen = '1';
+    body.style.position = 'fixed';
+    body.style.top = `-${y}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+  }
+
+  function unlockLauncherPage() {
+    const continuity = window.KosifContinuity;
+    if (continuity?.syncDialogLock) {
+      continuity.syncDialogLock();
+      return;
+    }
+    if (!launcherPageLock) {
+      delete document.body.dataset.kosifDialogOpen;
+      return;
+    }
+    const body = document.body, html = document.documentElement, saved = launcherPageLock;
+    launcherPageLock = null;
+    body.style.position = saved.position;
+    body.style.top = saved.top;
+    body.style.left = saved.left;
+    body.style.right = saved.right;
+    body.style.width = saved.width;
+    body.style.overflow = saved.overflow;
+    delete body.dataset.kosifDialogOpen;
+    window.scrollTo(0, saved.y);
+    requestAnimationFrame(() => { html.style.scrollBehavior = saved.rootScrollBehavior; });
+  }
+
   let previouslyFocused = null;
   function openLauncher({ installHelp = false } = {}) {
     const overlay = $('#ks40-launch-overlay');
@@ -190,7 +244,7 @@
     previouslyFocused = document.activeElement;
     overlay.hidden = false;
     state.launcherOpen = true;
-    document.body.dataset.kosifDialogOpen = '1';
+    lockLauncherPage();
     updateInstallUI();
     if (installHelp) showInstallHelp();
     requestAnimationFrame(() => $('#ks40-launch-query')?.focus());
@@ -201,7 +255,7 @@
     if (!overlay) return;
     overlay.hidden = true;
     state.launcherOpen = false;
-    delete document.body.dataset.kosifDialogOpen;
+    unlockLauncherPage();
     previouslyFocused?.focus?.();
   }
 
@@ -386,6 +440,7 @@
   function mountLauncher() {
     if ($('#ks40-launch-overlay')) return;
     document.body.insertAdjacentHTML('beforeend', launcherMarkup());
+    window.KosifContinuity?.registerDialogs?.();
     bindLauncher();
   }
 

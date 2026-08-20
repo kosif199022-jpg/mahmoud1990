@@ -47,7 +47,7 @@
 
 html[data-kosif-edition="v41"]{
   color-scheme:light;
-  scroll-behavior:smooth;
+  scroll-behavior:auto;
   text-rendering:optimizeLegibility;
   font-synthesis:none;
   --ke-cream:var(--k41-paper-2);
@@ -101,7 +101,7 @@ html[data-kosif-edition="v41"] body{
     radial-gradient(820px 520px at -8% 48%,rgba(11,139,124,.09),transparent 70%),
     radial-gradient(680px 380px at 64% 108%,rgba(216,101,77,.07),transparent 72%),
     linear-gradient(180deg,#F8F1E5 0%,#FFFCF5 48%,#F5EDDE 100%)!important;
-  background-attachment:fixed!important;
+  background-attachment:scroll!important;
   letter-spacing:0!important;
 }
 
@@ -802,8 +802,8 @@ html[data-kosif-edition="v41"] :is(#dock,.sheet){
 /* Motion is an editorial cue, never a blocker. Elements are hidden only after JS marks the page ready. */
 html[data-kosif-edition="v41"].k41-ready [data-k41-reveal]{
   opacity:0;
-  filter:blur(5px);
-  transform:translate3d(0,24px,0) scale(.988);
+  filter:blur(2px);
+  transform:translate3d(0,18px,0) scale(.992);
   transition:
     opacity .72s var(--k41-ease-cinema) var(--k41-delay,0ms),
     transform .82s var(--k41-ease-cinema) var(--k41-delay,0ms),
@@ -902,6 +902,14 @@ html[data-kosif-edition="v41"][data-theme="night"] :is(p,.hint,.sub,.meta,small,
 }
 
 @media (max-width:840px){
+  html[data-kosif-edition="v41"].k41-ready [data-k41-reveal]{
+    opacity:1!important;
+    filter:none!important;
+    transform:none!important;
+  }
+  html[data-kosif-edition="v41"] section[data-view].show{
+    animation:k41-page-in-touch .28s ease-out both!important;
+  }
   html[data-kosif-edition="v41"] .hero:has(.hero-metrics),
   html[data-kosif-edition="v41"] .library-hero{
     min-height:auto!important;
@@ -910,6 +918,22 @@ html[data-kosif-edition="v41"][data-theme="night"] :is(p,.hint,.sub,.meta,small,
   html[data-kosif-edition="v41"] :is(.hero:has(.hero-metrics),.library-hero) h1{
     max-width:15ch;
   }
+}
+
+@media (hover:none),(pointer:coarse){
+  html[data-kosif-edition="v41"].k41-ready [data-k41-reveal]{
+    opacity:1!important;
+    filter:none!important;
+    transform:none!important;
+  }
+  html[data-kosif-edition="v41"] :is(.card,.v38-card,.v38-tile,.module,.book,#kosif-premium-welcome){
+    transform:none!important;
+  }
+}
+
+@keyframes k41-page-in-touch{
+  from{opacity:.88;transform:translateY(6px)}
+  to{opacity:1;transform:none}
 }
 
 @media (max-width:720px){
