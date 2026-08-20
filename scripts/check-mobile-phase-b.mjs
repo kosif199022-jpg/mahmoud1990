@@ -9,7 +9,7 @@ const ok=(name,value)=>{console.log(`${value?'✓':'✗'} ${name}`);if(!value)fa
 ok('Phase B stylesheet is dynamically loaded',/v36-mobile-phase-b\.css\?v=36\.4-phase-b-2-scroll/.test(js)&&/loadPhaseBStyles/.test(js));
 ok('VisualViewport drives usable mobile height',/window\.visualViewport/.test(js)&&/--k-vv-height/.test(js)&&/--k-vv-top/.test(js));
 ok('keyboard state is explicit',/dataset\.kosifKeyboard=keyboard\?'open':'closed'/.test(js)&&/data-kosif-keyboard="open"/.test(css));
-ok('iOS body lock remains exact',/lockY=Math\.max\(0,window\.scrollY\|\|document\.documentElement\.scrollTop\|\|0\)/.test(js)&&/b\.style\.top=`-\$\{lockY\}px`/.test(js)&&/window\.scrollTo\(0,y\)/.test(js));
+ok('iOS body lock remains exact',/lockY=Math\.max\(0,Number\.isFinite\(preferredY\)\?preferredY:\(window\.scrollY\|\|document\.documentElement\.scrollTop\|\|0\)\)/.test(js)&&/b\.style\.top=`-\$\{lockY\}px`/.test(js)&&/window\.scrollTo\(0,y\)/.test(js));
 ok('focus stays trapped inside the active dialog',/function trapTab\(e,el\)/.test(js)&&/focusable\(el\)/.test(js));
 ok('background touch movement is blocked',/touchmove/.test(js)&&/passive:false/.test(js)&&/e\.stopPropagation\(\)/.test(js));
 ok('sheet owns vertical momentum scrolling',/-webkit-overflow-scrolling:touch/.test(css)&&/touch-action:pan-y/.test(css)&&/overscroll-behavior:contain/.test(css));

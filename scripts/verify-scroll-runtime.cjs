@@ -62,7 +62,7 @@ async function verify(engine, label) {
   fail(launcher.bodyTouch !== 'none', `${label}: body touch-action cancels Safari sheet gestures`);
   fail(launcher.listTouch === 'pan-y', `${label}: launcher does not own vertical touch gestures`);
   fail(['auto', 'scroll'].includes(launcher.listOverflow) && launcher.listScrollHeight > launcher.listHeight, `${label}: launcher is not internally scrollable`);
-  fail(Math.abs(launcher.bodyTop + pageY) <= 2, `${label}: launcher lock did not preserve the page position`);
+  fail(Math.abs(launcher.bodyTop + pageY) <= 2, `${label}: launcher lock did not preserve the page position (pageY=${pageY}, bodyTop=${launcher.bodyTop})`);
 
   await page.locator('.ks40-launch-body').evaluate(element => element.scrollTo(0, 360));
   await pause(80);

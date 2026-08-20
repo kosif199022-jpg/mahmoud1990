@@ -184,16 +184,16 @@
     return $$('button:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])', overlay).filter(el => !el.hidden && el.offsetParent !== null);
   }
 
-  function lockLauncherPage() {
+  function lockLauncherPage(preferredY) {
     const continuity = window.KosifContinuity;
     if (continuity?.syncDialogLock) {
       continuity.registerDialogs?.();
-      continuity.syncDialogLock();
+      continuity.syncDialogLock(preferredY);
       return;
     }
     if (launcherPageLock) return;
     const body = document.body, html = document.documentElement;
-    const y = Math.max(0, window.scrollY || html.scrollTop || 0);
+    const y = Math.max(0, Number.isFinite(preferredY) ? preferredY : (window.scrollY || html.scrollTop || 0));
     launcherPageLock = {
       y,
       rootScrollBehavior: html.style.scrollBehavior,
@@ -242,9 +242,10 @@
     const overlay = $('#ks40-launch-overlay');
     if (!overlay) return;
     previouslyFocused = document.activeElement;
+    const pageY = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
     overlay.hidden = false;
     state.launcherOpen = true;
-    lockLauncherPage();
+    lockLauncherPage(pageY);
     updateInstallUI();
     if (installHelp) showInstallHelp();
     requestAnimationFrame(() => $('#ks40-launch-query')?.focus());

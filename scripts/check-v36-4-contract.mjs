@@ -9,8 +9,8 @@ ok('security edge exposes release headers on JSON diagnostics',/x-kosif-release/
 ok('security edge remains canonical application gateway',/import appWorker from '.\/worker\.js'/.test(edge)&&/OWNER_AUTH_REQUIRED/.test(edge)&&/return appWorker\.fetch/.test(edge));
 ok('release identity declares both cache generations',/kosif-native-v36-4-app/.test(edge)&&/kosif-native-v36-4-standards/.test(edge));
 ok('continuity expects exact v36.4 build',/EXPECTED='v36\.4'/.test(cont)&&/BUILD='2026\.08\.18-v36\.4-mobile-release-integrity'/.test(cont));
-ok('continuity performs real iOS-safe body lock',/function lockBody\(\)/.test(cont)&&/style\.position='fixed'/.test(cont)&&/style\.top=`-\$\{lockY\}px`/.test(cont)&&/function unlockBody\(\)/.test(cont)&&/window\.scrollTo\(0,y\)/.test(cont));
-ok('dialog lock is state-driven and restores only after last dialog closes',/function syncDialogLock\(\)/.test(cont)&&/openDialogs\(\)/.test(cont)&&/if\(open\.length\)lockBody\(\);else unlockBody\(\)/.test(cont));
+ok('continuity performs real iOS-safe body lock',/function lockBody\(preferredY\)/.test(cont)&&/Number\.isFinite\(preferredY\)\?preferredY/.test(cont)&&/style\.position='fixed'/.test(cont)&&/style\.top=`-\$\{lockY\}px`/.test(cont)&&/function unlockBody\(\)/.test(cont)&&/window\.scrollTo\(0,y\)/.test(cont));
+ok('dialog lock is state-driven and restores only after last dialog closes',/function syncDialogLock\(preferredY\)/.test(cont)&&/openDialogs\(\)/.test(cont)&&/if\(open\.length\)lockBody\(preferredY\);else unlockBody\(\)/.test(cont));
 ok('dialog observers are scoped per dialog element',/attributeFilter:\['class','hidden'\]/.test(cont)&&!/observe\(document\.documentElement,\{childList:true,subtree:true\}\)/.test(cont));
 ok('background pointer interaction is blocked while modal is open',/pointerdown/.test(cont)&&/openDialogs\(\)\.at\(-1\)/.test(cont)&&/e\.stopPropagation\(\)/.test(cont));
 ok('dialog sheets retain independent momentum scrolling',/-webkit-overflow-scrolling:touch/.test(css)&&/touch-action:pan-y/.test(css)&&/overscroll-behavior:contain/.test(css));
