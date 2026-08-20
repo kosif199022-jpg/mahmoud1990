@@ -187,7 +187,6 @@
   function lockLauncherPage(preferredY) {
     const continuity = window.KosifContinuity;
     if (continuity?.syncDialogLock) {
-      continuity.registerDialogs?.();
       continuity.syncDialogLock(preferredY);
       return;
     }
@@ -243,6 +242,7 @@
     if (!overlay) return;
     previouslyFocused = document.activeElement;
     const pageY = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
+    window.KosifContinuity?.registerDialogs?.();
     overlay.hidden = false;
     state.launcherOpen = true;
     lockLauncherPage(pageY);
