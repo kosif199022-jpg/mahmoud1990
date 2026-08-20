@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kosif-engineering-copilot-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-20",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "KOSIF_REPO_OWNER": "kosif199022-jpg",
+    "KOSIF_REPO_NAME": "mahmoud1990",
+    "KOSIF_LIVE_URL": "https://mahmoud-eldesouky.kosif199022.workers.dev"
+  }
+}
