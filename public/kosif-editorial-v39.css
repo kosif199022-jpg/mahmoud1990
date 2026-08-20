@@ -1,0 +1,1272 @@
+/*
+ * KOSIF Editorial Visual Experience v39
+ * Final runtime authority for the audit workspace.
+ * Warm paper + espresso + amber gold, with original generated imagery.
+ * Visual-only: no accounting, audit, security, or persistence behavior lives here.
+ */
+
+:root{
+  --ke-cream:#FBF4E1;
+  --ke-cream-deep:#F4E8C9;
+  --ke-paper:#FFFDF7;
+  --ke-paper-soft:#FDF7E8;
+  --ke-espresso:#2B1D0E;
+  --ke-roast:#3B2A14;
+  --ke-muted:#766247;
+  --ke-muted-2:#9A8767;
+  --ke-line:#E7D9B8;
+  --ke-line-strong:#D8C397;
+  --ke-gold:#F5A623;
+  --ke-gold-deep:#B96D0B;
+  --ke-gold-soft:#FFF0CA;
+  --ke-olive:#65734A;
+  --ke-olive-soft:#EFF1E5;
+  --ke-danger:#A8542E;
+  --ke-danger-soft:#F7E7DC;
+  --ke-info:#45646A;
+  --ke-info-soft:#E9F0ED;
+  --ke-radius:24px;
+  --ke-radius-sm:15px;
+  --ke-shadow:0 2px 5px rgba(43,29,14,.04),0 22px 58px -38px rgba(67,43,15,.48);
+  --ke-shadow-lift:0 8px 20px rgba(43,29,14,.06),0 34px 82px -42px rgba(67,43,15,.50);
+  --ke-font:Alexandria,"SF Arabic","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+
+  /* Win over every legacy palette namespace without changing component logic. */
+  --k8-bg:var(--ke-cream);
+  --k8-bg-soft:var(--ke-cream-deep);
+  --k8-surface:var(--ke-paper);
+  --k8-surface-2:var(--ke-paper-soft);
+  --k8-ink:var(--ke-espresso);
+  --k8-ink-strong:#1D1207;
+  --k8-muted:var(--ke-muted);
+  --k8-muted-2:var(--ke-muted-2);
+  --k8-rose:var(--ke-gold);
+  --k8-rose-deep:var(--ke-gold-deep);
+  --k8-rose-soft:var(--ke-gold-soft);
+  --k8-mauve:var(--ke-gold-deep);
+  --k8-mauve-soft:var(--ke-gold-soft);
+  --k8-sage:var(--ke-olive);
+  --k8-sage-soft:var(--ke-olive-soft);
+  --k8-blue:var(--ke-info);
+  --k8-blue-soft:var(--ke-info-soft);
+  --k8-gold:var(--ke-gold);
+  --k8-gold-soft:var(--ke-gold-soft);
+  --k8-border:var(--ke-line);
+  --k8-border-strong:var(--ke-line-strong);
+  --k8-shadow:var(--ke-shadow);
+  --k8-shadow-soft:var(--ke-shadow);
+  --k8-font:var(--ke-font);
+  --k8-head:var(--ke-font);
+  --k8-brand:var(--ke-font);
+
+  --v38-navy:var(--ke-espresso);
+  --v38-navy-2:var(--ke-roast);
+  --v38-navy-3:#503719;
+  --v38-ink:var(--ke-espresso);
+  --v38-muted:var(--ke-muted);
+  --v38-paper:var(--ke-cream);
+  --v38-surface:var(--ke-paper);
+  --v38-line:var(--ke-line);
+  --v38-line2:var(--ke-line-strong);
+  --v38-gold:var(--ke-gold);
+  --v38-gold-2:var(--ke-gold-deep);
+  --v38-goldsoft:var(--ke-gold-soft);
+  --v38-goldline:#E4BE65;
+  --v38-info:var(--ke-info);
+  --v38-infosoft:var(--ke-info-soft);
+  --v38-ok:var(--ke-olive);
+  --v38-oksoft:var(--ke-olive-soft);
+  --v38-danger:var(--ke-danger);
+  --v38-dangersoft:var(--ke-danger-soft);
+}
+
+html[data-kosif-visual="kitab-editorial-v39"],
+html[data-kosif-visual="kitab-editorial-v39"] body{
+  background:var(--ke-cream)!important;
+  color:var(--ke-espresso)!important;
+  font-family:var(--ke-font)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] body{
+  min-height:100dvh!important;
+  background-image:
+    radial-gradient(760px 390px at 100% -8%,rgba(245,166,35,.13),transparent 68%),
+    radial-gradient(720px 420px at -6% 100%,rgba(101,115,74,.08),transparent 72%),
+    linear-gradient(180deg,#FBF4E1 0%,#FFF9EA 56%,#F8EFD9 100%)!important;
+  background-attachment:fixed!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] body::before{
+  opacity:.35!important;
+  background:
+    repeating-linear-gradient(0deg,transparent 0 31px,rgba(75,48,17,.035) 31px 32px),
+    repeating-linear-gradient(90deg,transparent 0 47px,rgba(75,48,17,.018) 47px 48px)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-motion-bg{
+  opacity:.18!important;
+  filter:sepia(.7) saturate(.65)!important;
+}
+
+/* Header: compact, readable, and unmistakably espresso/gold. */
+html[data-kosif-visual="kitab-editorial-v39"] .topbar{
+  position:relative!important;
+  top:auto!important;
+  overflow:visible!important;
+  padding:14px 24px!important;
+  color:var(--ke-espresso)!important;
+  background:rgba(251,244,225,.94)!important;
+  border-bottom:1px solid var(--ke-line)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(18px) saturate(125%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(125%)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .topbar::before,
+html[data-kosif-visual="kitab-editorial-v39"] .topbar::after{
+  display:none!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .topbar-inner{
+  width:calc(100% - 32px)!important;
+  max-width:1840px!important;
+  min-height:62px!important;
+  margin:auto!important;
+  display:grid!important;
+  grid-template-columns:minmax(280px,1fr) auto!important;
+  align-items:center!important;
+  gap:18px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .brand{
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .brand-seal{
+  width:46px!important;
+  height:46px!important;
+  color:var(--ke-gold-deep)!important;
+  filter:sepia(1) saturate(1.4) drop-shadow(0 8px 12px rgba(92,55,8,.13))!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .brand-name{
+  position:relative!important;
+  margin:0!important;
+  color:var(--ke-espresso)!important;
+  background:none!important;
+  -webkit-background-clip:initial!important;
+  background-clip:initial!important;
+  -webkit-text-fill-color:var(--ke-espresso)!important;
+  text-shadow:none!important;
+  font-family:var(--ke-font)!important;
+  font-size:clamp(26px,3vw,37px)!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:.13em!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .brand-name::after{
+  content:""!important;
+  position:absolute!important;
+  inset-inline-end:-10px!important;
+  top:2px!important;
+  width:8px!important;
+  height:8px!important;
+  border-radius:50%!important;
+  background:var(--ke-gold)!important;
+  box-shadow:0 0 0 4px rgba(245,166,35,.16)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .brand-sub{
+  margin-top:5px!important;
+  color:var(--ke-muted)!important;
+  font-size:11.5px!important;
+  line-height:1.55!important;
+  letter-spacing:0!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .top-status{
+  width:auto!important;
+  max-width:790px!important;
+  margin-inline-start:auto!important;
+  display:flex!important;
+  flex-flow:row wrap!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:7px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .top-status .pill,
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-ai-pill,
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-ai-pill.off,
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-ai-pill.pending{
+  min-height:38px!important;
+  padding:7px 12px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  color:var(--ke-muted)!important;
+  background:rgba(255,253,247,.78)!important;
+  border:1px solid var(--ke-line)!important;
+  border-radius:999px!important;
+  box-shadow:0 10px 24px -22px rgba(73,45,12,.4)!important;
+  font-size:11.5px!important;
+  font-weight:700!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .top-status #pill-entity{
+  grid-column:auto!important;
+  max-width:270px!important;
+  min-height:40px!important;
+  padding:7px 12px!important;
+  justify-content:flex-start!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .top-status #pill-entity::before{
+  content:""!important;
+  width:9px!important;
+  height:9px!important;
+  border-radius:50%!important;
+  background:var(--ke-gold)!important;
+  box-shadow:0 0 0 4px rgba(245,166,35,.13)!important;
+  flex:0 0 auto!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-ai-pill .dot{
+  background:var(--ke-gold-deep)!important;
+  box-shadow:0 0 0 4px rgba(185,109,11,.12)!important;
+}
+
+/* Navigation: a single calm rail instead of a wall of four rows. */
+html[data-kosif-visual="kitab-editorial-v39"] .tabs{
+  position:sticky!important;
+  top:0!important;
+  z-index:70!important;
+  min-height:58px!important;
+  height:auto!important;
+  background:rgba(255,253,247,.94)!important;
+  border-bottom:1px solid var(--ke-line)!important;
+  box-shadow:0 13px 34px -30px rgba(72,45,13,.48)!important;
+  backdrop-filter:blur(20px) saturate(120%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(120%)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .tabs-inner{
+  width:calc(100% - 32px)!important;
+  max-width:1840px!important;
+  height:auto!important;
+  margin:auto!important;
+  padding:8px 14px!important;
+  display:flex!important;
+  flex-flow:row nowrap!important;
+  align-items:center!important;
+  gap:6px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  overscroll-behavior-inline:contain!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:var(--ke-line-strong) transparent!important;
+  scroll-snap-type:x proximity!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .tab{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:132px!important;
+  min-height:42px!important;
+  padding:9px 13px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  color:var(--ke-muted)!important;
+  background:transparent!important;
+  border:1px solid transparent!important;
+  border-radius:13px!important;
+  box-shadow:none!important;
+  font-size:12.5px!important;
+  font-weight:700!important;
+  scroll-snap-align:start!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .tab:hover{
+  color:var(--ke-espresso)!important;
+  background:var(--ke-paper-soft)!important;
+  border-color:var(--ke-line)!important;
+  transform:none!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .tab.active{
+  color:var(--ke-espresso)!important;
+  background:var(--ke-gold-soft)!important;
+  border-color:#EBC66F!important;
+  box-shadow:inset 0 -3px 0 var(--ke-gold)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .tab .n{
+  background:rgba(43,29,14,.08)!important;
+  color:var(--ke-espresso)!important;
+}
+
+/* Main workspace and common paper components. */
+html[data-kosif-visual="kitab-editorial-v39"] main{
+  width:calc(100% - 32px)!important;
+  max-width:1840px!important;
+  box-sizing:border-box!important;
+  margin:0 auto!important;
+  padding:28px 22px 110px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .card,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-card,
+html[data-kosif-visual="kitab-editorial-v39"] .kpi,
+html[data-kosif-visual="kitab-editorial-v39"] .step,
+html[data-kosif-visual="kitab-editorial-v39"] .finding,
+html[data-kosif-visual="kitab-editorial-v39"] .docreq,
+html[data-kosif-visual="kitab-editorial-v39"] .pbc-item,
+html[data-kosif-visual="kitab-editorial-v39"] .round,
+html[data-kosif-visual="kitab-editorial-v39"] .std-card,
+html[data-kosif-visual="kitab-editorial-v39"] .src-card,
+html[data-kosif-visual="kitab-editorial-v39"] .file-row,
+html[data-kosif-visual="kitab-editorial-v39"] .upd,
+html[data-kosif-visual="kitab-editorial-v39"] .hr-item,
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-action{
+  color:var(--ke-espresso)!important;
+  background:rgba(255,253,247,.97)!important;
+  border-color:var(--ke-line)!important;
+  box-shadow:var(--ke-shadow)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .card,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-card{
+  border:1px solid var(--ke-line)!important;
+  border-radius:var(--ke-radius)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .card:hover,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-card:hover,
+html[data-kosif-visual="kitab-editorial-v39"] .kpi:hover,
+html[data-kosif-visual="kitab-editorial-v39"] .step:hover,
+html[data-kosif-visual="kitab-editorial-v39"] .std-card:hover{
+  border-color:var(--ke-line-strong)!important;
+  box-shadow:var(--ke-shadow-lift)!important;
+  transform:translateY(-2px)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .card-h h2,
+html[data-kosif-visual="kitab-editorial-v39"] .card-h h3,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-cardh h2,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-cardh h3{
+  color:var(--ke-espresso)!important;
+  font-family:var(--ke-font)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .hint,
+html[data-kosif-visual="kitab-editorial-v39"] .round-meta,
+html[data-kosif-visual="kitab-editorial-v39"] .kpi .l,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-kpi .l,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-kpi .s,
+html[data-kosif-visual="kitab-editorial-v39"] .card p{
+  color:var(--ke-muted)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .btn,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-btn,
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-action{
+  min-height:44px!important;
+  border-radius:14px!important;
+  font-family:var(--ke-font)!important;
+  font-weight:750!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .btn.primary,
+html[data-kosif-visual="kitab-editorial-v39"] .btn.gold,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-btn.primary,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-btn.gold,
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-action.primary{
+  color:#FFFDF7!important;
+  background:linear-gradient(135deg,#F8B945,#F5A623 52%,#C87510)!important;
+  border:1px solid #C87510!important;
+  box-shadow:0 13px 28px -17px rgba(139,76,6,.72)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .btn.ghost,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-btn.ghost{
+  color:var(--ke-espresso)!important;
+  background:var(--ke-paper)!important;
+  border-color:var(--ke-line-strong)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .btn.danger,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-btn.danger{
+  color:var(--ke-danger)!important;
+  background:var(--ke-danger-soft)!important;
+  border-color:#E5BDA9!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] input,
+html[data-kosif-visual="kitab-editorial-v39"] select,
+html[data-kosif-visual="kitab-editorial-v39"] textarea,
+html[data-kosif-visual="kitab-editorial-v39"] .field input,
+html[data-kosif-visual="kitab-editorial-v39"] .field select,
+html[data-kosif-visual="kitab-editorial-v39"] .field textarea,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-field input,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-field select,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-field textarea{
+  color:var(--ke-espresso)!important;
+  background:#FFFDF8!important;
+  border:1px solid var(--ke-line-strong)!important;
+  border-radius:13px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] input:focus,
+html[data-kosif-visual="kitab-editorial-v39"] select:focus,
+html[data-kosif-visual="kitab-editorial-v39"] textarea:focus{
+  border-color:var(--ke-gold)!important;
+  outline:none!important;
+  box-shadow:0 0 0 4px rgba(245,166,35,.15)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] label,
+html[data-kosif-visual="kitab-editorial-v39"] .field label,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-field label{
+  color:#59452B!important;
+  font-weight:750!important;
+}
+
+/* Generated-image home hero: large editorial headline, RTL copy, image on left. */
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  min-height:430px!important;
+  margin:0 0 22px!important;
+  padding:52px 54px!important;
+  display:flex!important;
+  align-items:center!important;
+  border:1px solid #DCC89D!important;
+  border-radius:32px!important;
+  background-color:#F3E2BC!important;
+  background-image:
+    linear-gradient(90deg,rgba(251,244,225,.05) 0%,rgba(251,244,225,.12) 39%,rgba(251,244,225,.78) 67%,rgba(251,244,225,.98) 100%),
+    url('/assets/kosif-audit-hero-v39.webp')!important;
+  background-position:center,left center!important;
+  background-size:cover,cover!important;
+  background-repeat:no-repeat!important;
+  box-shadow:0 34px 90px -48px rgba(67,42,12,.62)!important;
+  text-align:right!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome::before{
+  content:""!important;
+  position:absolute!important;
+  inset:auto 0 0 auto!important;
+  width:54%!important;
+  height:4px!important;
+  display:block!important;
+  background:linear-gradient(90deg,transparent,var(--ke-gold))!important;
+  opacity:1!important;
+  pointer-events:none!important;
+  z-index:1!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome::after{
+  content:""!important;
+  position:absolute!important;
+  inset:24px 24px auto auto!important;
+  width:118px!important;
+  height:118px!important;
+  border:1px solid rgba(185,109,11,.22)!important;
+  border-radius:50%!important;
+  box-shadow:0 0 0 18px rgba(245,166,35,.045),0 0 0 38px rgba(245,166,35,.026)!important;
+  pointer-events:none!important;
+  z-index:0!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-mark{
+  display:none!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy{
+  position:relative!important;
+  z-index:3!important;
+  width:min(54%,650px)!important;
+  margin:0 0 0 auto!important;
+  padding:0!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-kicker{
+  margin:0 0 14px!important;
+  color:var(--ke-gold-deep)!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+  font-weight:850!important;
+  letter-spacing:.04em!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy h2{
+  margin:0 0 17px!important;
+  color:var(--ke-espresso)!important;
+  font-family:var(--ke-font)!important;
+  font-size:clamp(40px,5.4vw,66px)!important;
+  line-height:1.24!important;
+  font-weight:900!important;
+  letter-spacing:-.045em!important;
+  text-shadow:none!important;
+  text-wrap:balance!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy h2 span{
+  position:relative!important;
+  display:inline-block!important;
+  color:var(--ke-gold-deep)!important;
+  font-size:inherit!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy h2 span::after{
+  content:""!important;
+  position:absolute!important;
+  inset-inline:4% 2%!important;
+  bottom:-7px!important;
+  height:7px!important;
+  border-top:3px solid var(--ke-gold)!important;
+  border-radius:50%!important;
+  transform:rotate(-1.4deg)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy .kcw-desc{
+  max-width:560px!important;
+  margin:0!important;
+  color:#5E482D!important;
+  font-size:14px!important;
+  line-height:1.95!important;
+  font-weight:550!important;
+  text-wrap:pretty!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-proof{
+  margin-top:20px!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-proof span{
+  min-height:32px!important;
+  padding:6px 10px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  color:#4D3922!important;
+  background:rgba(255,253,247,.72)!important;
+  border:1px solid rgba(185,109,11,.28)!important;
+  border-radius:999px!important;
+  font-size:10.5px!important;
+  font-weight:750!important;
+  backdrop-filter:blur(8px)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-proof span::before{
+  content:"✓"!important;
+  color:var(--ke-olive)!important;
+  font-weight:900!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-actions{
+  margin-top:22px!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:9px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-action{
+  min-height:46px!important;
+  padding:10px 17px!important;
+  border-radius:14px!important;
+  font-family:var(--ke-font)!important;
+  font-size:12px!important;
+  font-weight:800!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-action.primary{
+  color:#FFFDF7!important;
+  background:var(--ke-espresso)!important;
+  border:1px solid var(--ke-espresso)!important;
+  box-shadow:0 14px 28px -18px rgba(43,29,14,.68)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-action.secondary{
+  color:var(--ke-espresso)!important;
+  background:rgba(255,253,247,.78)!important;
+  border:1px solid var(--ke-line-strong)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kcw-release{
+  display:block!important;
+  margin-top:14px!important;
+  color:var(--ke-muted-2)!important;
+  font-size:9.5px!important;
+  font-weight:650!important;
+}
+
+/* Overview: remove all rose residue and turn the file card into warm paper. */
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview>.card.hero{
+  position:relative!important;
+  overflow:hidden!important;
+  color:var(--ke-espresso)!important;
+  background:
+    radial-gradient(360px 190px at 100% 0,rgba(245,166,35,.12),transparent 70%),
+    linear-gradient(145deg,#FFFDF7,#FDF7E8)!important;
+  border:1px solid var(--ke-line)!important;
+  border-top:4px solid var(--ke-gold)!important;
+  border-radius:27px!important;
+  box-shadow:var(--ke-shadow)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview>.card.hero::before,
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview>.card.hero::after{
+  display:none!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview>.card.hero .card-h h2{
+  color:var(--ke-espresso)!important;
+  font-size:clamp(26px,3.5vw,42px)!important;
+  font-weight:900!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview>.card.hero .badge.gold,
+html[data-kosif-visual="kitab-editorial-v39"] #ov-basis{
+  color:#75450A!important;
+  background:var(--ke-gold-soft)!important;
+  border-color:#E6C067!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:11px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi{
+  min-width:0!important;
+  min-height:130px!important;
+  padding:18px 13px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  text-align:center!important;
+  overflow:hidden!important;
+  border:1px solid var(--ke-line)!important;
+  border-radius:20px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi:nth-child(4n+1){background:linear-gradient(155deg,#FFF3D5,#FFFDF7)!important}
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi:nth-child(4n+2){background:linear-gradient(155deg,#F4EADB,#FFFDF7)!important}
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi:nth-child(4n+3){background:linear-gradient(155deg,#EDF0E4,#FFFDF7)!important}
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi:nth-child(4n+4){background:linear-gradient(155deg,#F7EBDD,#FFFDF7)!important}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi .l{
+  margin-bottom:7px!important;
+  color:var(--ke-muted)!important;
+  font-size:11.5px!important;
+  font-weight:750!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi .v{
+  width:100%!important;
+  color:var(--ke-espresso)!important;
+  -webkit-text-fill-color:var(--ke-espresso)!important;
+  background:none!important;
+  font-family:var(--ke-font)!important;
+  font-size:clamp(20px,3vw,31px)!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-rounds-cta .btn.gold{
+  color:#FFFDF7!important;
+  background:var(--ke-espresso)!important;
+  border-color:var(--ke-espresso)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-rounds-cta>div{
+  color:var(--ke-muted)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions{
+  margin:16px 0 20px!important;
+  padding:18px!important;
+  color:var(--ke-espresso)!important;
+  background:rgba(255,253,247,.84)!important;
+  border:1px solid var(--ke-line)!important;
+  border-radius:24px!important;
+  box-shadow:var(--ke-shadow)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions .kpa-title{
+  color:var(--ke-espresso)!important;
+  font-family:var(--ke-font)!important;
+  font-size:18px!important;
+  font-weight:900!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions button{
+  min-height:106px!important;
+  color:var(--ke-espresso)!important;
+  background:linear-gradient(155deg,#FFFDF7,#F8EFD9)!important;
+  border:1px solid var(--ke-line)!important;
+  border-radius:18px!important;
+  box-shadow:none!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions button:hover{
+  border-color:var(--ke-gold)!important;
+  background:#FFF3D6!important;
+  transform:translateY(-2px)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions .kpa-ic{
+  width:40px!important;
+  height:40px!important;
+  color:var(--ke-gold)!important;
+  background:var(--ke-espresso)!important;
+  border-radius:13px!important;
+  box-shadow:0 12px 24px -18px rgba(43,29,14,.65)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions small{
+  color:var(--ke-muted)!important;
+}
+
+/* v38 heroes: default espresso; generated image variants for reports and live chat. */
+html[data-kosif-visual="kitab-editorial-v39"] .v38-hero{
+  min-height:235px!important;
+  padding:34px 38px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  color:#FFF9EC!important;
+  background:
+    radial-gradient(360px 190px at 0 0,rgba(245,166,35,.16),transparent 70%),
+    linear-gradient(140deg,var(--ke-espresso),#4A3419)!important;
+  border:1px solid rgba(245,166,35,.24)!important;
+  border-radius:28px!important;
+  box-shadow:var(--ke-shadow)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-hero::before{
+  border-color:rgba(245,166,35,.24)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-hero h2{
+  margin:0 0 8px!important;
+  color:#FFF8E7!important;
+  font-family:var(--ke-font)!important;
+  font-size:clamp(28px,4vw,44px)!important;
+  line-height:1.35!important;
+  font-weight:900!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-hero p{
+  max-width:70ch!important;
+  color:#EADABD!important;
+  font-size:13.5px!important;
+  line-height:1.85!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-reports"]>.v38-hero,
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-live"]>.v38-hero{
+  min-height:310px!important;
+  padding:42px 46px 42px 50%!important;
+  color:var(--ke-espresso)!important;
+  border-color:#DCC89D!important;
+  background-color:#F3E2BC!important;
+  background-position:center,left center!important;
+  background-size:cover,cover!important;
+  background-repeat:no-repeat!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-reports"]>.v38-hero{
+  background-image:
+    linear-gradient(90deg,rgba(251,244,225,.02),rgba(251,244,225,.14) 40%,rgba(251,244,225,.86) 68%,rgba(251,244,225,.98)),
+    url('/assets/kosif-reports-hero-v39.webp')!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-live"]>.v38-hero{
+  background-image:
+    linear-gradient(90deg,rgba(251,244,225,.02),rgba(251,244,225,.16) 40%,rgba(251,244,225,.88) 68%,rgba(251,244,225,.98)),
+    url('/assets/kosif-live-hero-v39.webp')!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-reports"]>.v38-hero h2,
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-live"]>.v38-hero h2{
+  color:var(--ke-espresso)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-reports"]>.v38-hero p,
+html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-live"]>.v38-hero p{
+  color:#604A30!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chip{
+  color:#5D420F!important;
+  background:rgba(255,250,235,.86)!important;
+  border-color:#DFC172!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chip.safe,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chip.fact{
+  color:#4B5F35!important;
+  background:rgba(239,241,229,.9)!important;
+  border-color:#C7D1B4!important;
+}
+
+/* Report document contrast and paper hierarchy. */
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover{
+  color:#FFF8E7!important;
+  background:
+    radial-gradient(360px 220px at 8% 12%,rgba(245,166,35,.14),transparent 68%),
+    linear-gradient(145deg,#25180B,#4A3016)!important;
+  border:1px solid #6E4B21!important;
+  border-radius:26px!important;
+  box-shadow:0 28px 66px -42px rgba(43,29,14,.78)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover h1,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover h2,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover h3,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover b{
+  color:#FFF8E7!important;
+  -webkit-text-fill-color:#FFF8E7!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover .sub,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover .meta{
+  color:#DCC9A7!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-cover .seal,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-kicker{
+  color:var(--ke-gold)!important;
+  -webkit-text-fill-color:var(--ke-gold)!important;
+  border-color:var(--ke-gold)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-section{
+  color:var(--ke-espresso)!important;
+  background:var(--ke-paper)!important;
+  border:1px solid var(--ke-line)!important;
+  border-radius:22px!important;
+  box-shadow:var(--ke-shadow)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-section h4{
+  color:var(--ke-espresso)!important;
+  border-inline-start-color:var(--ke-gold)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-report-gate,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-sign,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-finding{
+  background:#FFFCF4!important;
+  border-color:var(--ke-line)!important;
+}
+
+/* Chat: warm workspace, clear composer, voice orb matching the generated hero. */
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chat-card{
+  background:linear-gradient(180deg,#FFFDF7,#FBF4E1)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chat-quick button{
+  color:#60400E!important;
+  background:var(--ke-gold-soft)!important;
+  border-color:#E5C16D!important;
+  border-radius:999px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chat-log{
+  min-height:300px!important;
+  background:
+    radial-gradient(260px 170px at 100% 0,rgba(245,166,35,.08),transparent 70%),
+    #FFFDF8!important;
+  border-color:var(--ke-line)!important;
+  border-radius:18px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chat-message.user{
+  color:#FFF8E7!important;
+  background:var(--ke-espresso)!important;
+  border-color:var(--ke-espresso)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-chat-message.assistant{
+  color:var(--ke-espresso)!important;
+  background:var(--ke-gold-soft)!important;
+  border-color:#E5C16D!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-live-orb{
+  color:var(--ke-gold)!important;
+  background:radial-gradient(circle at 35% 30%,#60431E,var(--ke-espresso))!important;
+  border:1px solid rgba(245,166,35,.38)!important;
+  box-shadow:0 16px 42px -24px rgba(43,29,14,.72)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .v38-wave i{
+  background:linear-gradient(180deg,var(--ke-gold),var(--ke-gold-deep))!important;
+}
+
+/* Tables, notes, badges, and sheets retain semantic color without rose/purple. */
+html[data-kosif-visual="kitab-editorial-v39"] .twrap,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-scroll{
+  background:#FFFDF8!important;
+  border-color:var(--ke-line)!important;
+  border-radius:16px!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] table.data th,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-table th{
+  color:#5C431F!important;
+  background:#F7E9C9!important;
+  border-bottom-color:var(--ke-line-strong)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] table.data td,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-table td{
+  color:var(--ke-espresso)!important;
+  background:#FFFDF8!important;
+  border-bottom-color:#EFE4CC!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] table.data tr:nth-child(even) td,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-table tr:nth-child(even) td{
+  background:#FCF6E8!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .badge.gold,
+html[data-kosif-visual="kitab-editorial-v39"] .std{
+  color:#75450A!important;
+  background:var(--ke-gold-soft)!important;
+  border-color:#E2BE67!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .badge.ok,
+html[data-kosif-visual="kitab-editorial-v39"] .std.local,
+html[data-kosif-visual="kitab-editorial-v39"] .note.ok,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-note.ok{
+  color:#52613C!important;
+  background:var(--ke-olive-soft)!important;
+  border-color:#CBD3BB!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .badge.info,
+html[data-kosif-visual="kitab-editorial-v39"] .std.isa,
+html[data-kosif-visual="kitab-editorial-v39"] .note.info,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-note.info{
+  color:var(--ke-info)!important;
+  background:var(--ke-info-soft)!important;
+  border-color:#C8D8D4!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .badge.warn,
+html[data-kosif-visual="kitab-editorial-v39"] .note.warn,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-note.warn{
+  color:#8A5718!important;
+  background:#F9EDD9!important;
+  border-color:#E8CF9F!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .badge.danger,
+html[data-kosif-visual="kitab-editorial-v39"] .note.danger,
+html[data-kosif-visual="kitab-editorial-v39"] .v38-note.danger{
+  color:var(--ke-danger)!important;
+  background:var(--ke-danger-soft)!important;
+  border-color:#E5BDA9!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .drawer,
+html[data-kosif-visual="kitab-editorial-v39"] .modal,
+html[data-kosif-visual="kitab-editorial-v39"] .palette,
+html[data-kosif-visual="kitab-editorial-v39"] .moresheet,
+html[data-kosif-visual="kitab-editorial-v39"] .kosif-sheet{
+  color:var(--ke-espresso)!important;
+  background:var(--ke-paper)!important;
+  border-color:var(--ke-line)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .drawer-h{
+  color:#FFF8E7!important;
+  background:linear-gradient(135deg,var(--ke-espresso),#4A3419)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] #kosif-progress .kp-card{
+  color:var(--ke-espresso)!important;
+  background:var(--ke-paper)!important;
+  border-color:var(--ke-line)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kp-ring{
+  background:conic-gradient(var(--ke-gold) var(--p),#F0E4CA 0)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kp-bar{
+  background:#F0E4CA!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"] .kp-bar i,
+html[data-kosif-visual="kitab-editorial-v39"] .mini-progress>i,
+html[data-kosif-visual="kitab-editorial-v39"] .ratio-bar>i{
+  background:linear-gradient(90deg,var(--ke-gold),var(--ke-gold-deep))!important;
+}
+
+/* Desktop uses the horizontal rail; mobile uses the five-action bottom dock. */
+@media (min-width:1024px){
+  html body[data-kosif-dialog-open="1"]{overflow:hidden!important}
+  html[data-kosif-visual="kitab-editorial-v39"] body #kosif-bottom-nav{display:none!important}
+  html[data-kosif-visual="kitab-editorial-v39"] body .tabs{display:block!important}
+}
+
+@media (max-width:1023px){
+  html[data-kosif-visual="kitab-editorial-v39"] .topbar-inner{
+    grid-template-columns:1fr!important;
+    gap:12px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .top-status{
+    width:100%!important;
+    max-width:none!important;
+    justify-content:flex-start!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome{
+    min-height:390px!important;
+    padding:40px 34px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy{
+    width:62%!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-reports"]>.v38-hero,
+  html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-live"]>.v38-hero{
+    padding-left:46%!important;
+  }
+}
+
+@media (max-width:720px){
+  html[data-kosif-visual="kitab-editorial-v39"] body{
+    padding-bottom:calc(94px + env(safe-area-inset-bottom,0px))!important;
+    background-attachment:scroll!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .topbar{
+    padding:12px 14px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .topbar-inner{
+    min-height:0!important;
+    gap:10px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .brand-seal{
+    width:40px!important;
+    height:40px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .brand-name{
+    font-size:29px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .brand-sub{
+    font-size:10.5px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .top-status{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:6px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .top-status #pill-entity{
+    grid-column:1/-1!important;
+    width:100%!important;
+    max-width:none!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .top-status .pill,
+  html[data-kosif-visual="kitab-editorial-v39"] .kosif-ai-pill{
+    min-width:0!important;
+    font-size:10.5px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .tabs{
+    display:none!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] main{
+    padding:16px 12px calc(112px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome{
+    min-height:620px!important;
+    padding:32px 24px 248px!important;
+    align-items:flex-start!important;
+    border-radius:25px!important;
+    background-image:
+      linear-gradient(180deg,rgba(251,244,225,.99) 0%,rgba(251,244,225,.96) 48%,rgba(251,244,225,.18) 76%,rgba(251,244,225,.03) 100%),
+      url('/assets/kosif-audit-hero-v39.webp')!important;
+    background-position:center,left bottom!important;
+    background-size:cover,auto 55%!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome::after{
+    width:82px!important;
+    height:82px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy{
+    width:100%!important;
+    margin:0!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome .kcw-copy h2{
+    font-size:clamp(37px,11vw,49px)!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .kcw-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi{
+    min-height:126px!important;
+    padding:14px 8px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #view-overview #kpis .kpi .v{
+    font-size:clamp(17px,6vw,25px)!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions .kpa-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .v38-hero{
+    min-height:230px!important;
+    padding:28px 22px!important;
+    border-radius:23px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-reports"]>.v38-hero,
+  html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-live"]>.v38-hero{
+    min-height:520px!important;
+    padding:28px 22px 230px!important;
+    justify-content:flex-start!important;
+    background-position:center,left bottom!important;
+    background-size:cover,auto 48%!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-reports"]>.v38-hero{
+    background-image:
+      linear-gradient(180deg,rgba(251,244,225,.99),rgba(251,244,225,.96) 48%,rgba(251,244,225,.16) 78%,rgba(251,244,225,.03)),
+      url('/assets/kosif-reports-hero-v39.webp')!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] section[data-view="v38-live"]>.v38-hero{
+    background-image:
+      linear-gradient(180deg,rgba(251,244,225,.99),rgba(251,244,225,.96) 48%,rgba(251,244,225,.16) 78%,rgba(251,244,225,.03)),
+      url('/assets/kosif-live-hero-v39.webp')!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .v38-chat-log{
+    min-height:250px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-bottom-nav{
+    display:grid!important;
+    min-height:70px!important;
+    border-color:rgba(213,191,145,.94)!important;
+    background:rgba(255,251,239,.94)!important;
+    box-shadow:0 20px 48px -26px rgba(68,43,14,.48)!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-bottom-nav button{
+    color:var(--ke-muted)!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-bottom-nav button.active{
+    color:var(--ke-espresso)!important;
+    background:var(--ke-gold-soft)!important;
+    box-shadow:inset 0 0 0 1px #E6C169!important;
+  }
+}
+
+@media (max-width:390px){
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome{
+    min-height:650px!important;
+    padding-inline:19px!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .kcw-actions{
+    grid-template-columns:1fr!important;
+  }
+  html[data-kosif-visual="kitab-editorial-v39"] .kcw-proof span{
+    font-size:9.5px!important;
+  }
+}
+
+/* A deliberate dark variant remains available without changing the warm default. */
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"],
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] body{
+  background:#171009!important;
+  color:#F0E4CB!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] body{
+  background-image:radial-gradient(700px 380px at 100% -8%,rgba(245,166,35,.08),transparent 70%),linear-gradient(180deg,#171009,#1D140D)!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .topbar,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .tabs{
+  background:rgba(29,20,13,.94)!important;
+  border-color:#3B2D1E!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .brand-name,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .card-h h2,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .card-h h3,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .v38-cardh h2,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .v38-cardh h3{
+  color:#F0E4CB!important;
+  -webkit-text-fill-color:#F0E4CB!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .card,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .v38-card,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .kpi,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .step,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] .std-card{
+  color:#F0E4CB!important;
+  background:#211710!important;
+  border-color:#3B2D1E!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] #kosif-premium-welcome,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] section[data-view="v38-reports"]>.v38-hero,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] section[data-view="v38-live"]>.v38-hero{
+  background-color:#24180D!important;
+  background-blend-mode:multiply,normal!important;
+}
+
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] #kosif-premium-welcome .kcw-copy h2,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] #kosif-premium-welcome .kcw-copy .kcw-desc,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] section[data-view="v38-reports"]>.v38-hero h2,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] section[data-view="v38-live"]>.v38-hero h2,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] section[data-view="v38-reports"]>.v38-hero p,
+html[data-kosif-visual="kitab-editorial-v39"][data-theme="dark"] section[data-view="v38-live"]>.v38-hero p{
+  color:#FFF1D2!important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-kosif-visual="kitab-editorial-v39"] *,
+  html[data-kosif-visual="kitab-editorial-v39"] *::before,
+  html[data-kosif-visual="kitab-editorial-v39"] *::after{
+    animation:none!important;
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+  }
+}
+
+@media print{
+  html[data-kosif-visual="kitab-editorial-v39"] body{background:#fff!important}
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome,
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-actions,
+  html[data-kosif-visual="kitab-editorial-v39"] .tabs,
+  html[data-kosif-visual="kitab-editorial-v39"] #kosif-bottom-nav{display:none!important}
+  html[data-kosif-visual="kitab-editorial-v39"] .card,
+  html[data-kosif-visual="kitab-editorial-v39"] .v38-card,
+  html[data-kosif-visual="kitab-editorial-v39"] .v38-report-section{box-shadow:none!important}
+}

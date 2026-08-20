@@ -8,7 +8,7 @@ Improve the repository without silently removing existing capabilities. Fix defe
 ## Binding product baseline
 Read and follow `docs/KOSIF_UNIFIED_REQUIREMENTS_2026-08-20.md` before non-trivial implementation work. It is the consolidated product baseline.
 
-The user-selected visual authority is the **Kitab Caffe** system in `public/kosif-kitab-theme.css`, with runtime pinning in `public/kosif-kitab-theme.js`. Treat that as a presentation authority only: deterministic accounting, audit logic, source authority, privacy/security, evidence, and governed human approval remain functional authorities and must never be weakened by visual work.
+The user-selected shared visual tokens live in `public/kosif-kitab-theme.css`, while the audit workspace's final authority is `public/kosif-editorial-v39.css`, mounted after legacy/Canva/v38 layers by `public/v36-continuity.js`. The three required original hero assets live under `public/assets/*-hero-v39.webp`. Treat all of this as presentation authority only: deterministic accounting, audit logic, source authority, privacy/security, evidence, and governed human approval remain functional authorities and must never be weakened by visual work.
 
 Do not create a new competing global theme or silently remove capabilities to make a screen simpler. Extend the established theme variables and current architecture instead.
 

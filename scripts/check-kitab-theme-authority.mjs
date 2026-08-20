@@ -10,6 +10,10 @@ const need=(cond,msg)=>{if(!cond)failures.push(msg)};
 const required=[
   'public/kosif-kitab-theme.css',
   'public/kosif-kitab-theme.js',
+  'public/kosif-editorial-v39.css',
+  'public/assets/kosif-audit-hero-v39.webp',
+  'public/assets/kosif-reports-hero-v39.webp',
+  'public/assets/kosif-live-hero-v39.webp',
   'public/fonts/alexandria-arabic-500-normal.woff2',
   'public/fonts/alexandria-arabic-700-normal.woff2',
   'docs/KOSIF_UNIFIED_REQUIREMENTS_2026-08-20.md'
@@ -31,21 +35,45 @@ if(exists('public/kosif-kitab-theme.js')){
   need(js.includes('MutationObserver'),'runtime theme pinning missing');
   need(js.includes("localStorage.setItem('kosif_theme', 'light')"),'warm-paper default is not persisted against the legacy dark fallback');
 }
+if(exists('public/kosif-editorial-v39.css')){
+  const css=read('public/kosif-editorial-v39.css');
+  for(const token of ['#FBF4E1','#2B1D0E','#F5A623'])need(css.includes(token),`editorial palette token missing: ${token}`);
+  for(const asset of ['/assets/kosif-audit-hero-v39.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp'])need(css.includes(asset),`generated image is not consumed: ${asset}`);
+  need(css.includes('kitab-editorial-v39'),'editorial runtime authority selector missing');
+  need(css.includes('section[data-view="v38-reports"]')&&css.includes('section[data-view="v38-live"]'),'report/live generated-image selectors missing');
+  need(css.includes('display:flex!important')&&css.includes('overflow-x:auto!important'),'single-rail desktop navigation contract missing');
+  need((css.match(/max-width:1840px!important;/g)||[]).length>=3,'editorial desktop shell is still constrained instead of using the wide workspace');
+  need(!/#c87f8d|#b487a4|#dca8b1|#c98794|#b77483/i.test(css),'legacy Canva Rose colors leaked into the final editorial layer');
+  need(css.includes('@media (max-width:720px)'),'mobile editorial layout missing');
+}
+for(const asset of ['public/assets/kosif-audit-hero-v39.webp','public/assets/kosif-reports-hero-v39.webp','public/assets/kosif-live-hero-v39.webp']){
+  if(exists(asset))need(fs.statSync(path.join(root,asset)).size>20000,`generated image is unexpectedly small or empty: ${asset}`);
+}
+if(exists('public/v36-continuity.js')){
+  const cont=read('public/v36-continuity.js');
+  need(cont.includes('/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-1'),'continuity runtime does not load the editorial authority');
+  need(cont.includes("dataset.kosifVisual='kitab-editorial-v39'"),'continuity runtime visual marker is stale');
+  need(cont.includes('مراجعة أوضح.')&&cont.includes('قرار مهني أقوى.'),'editorial Arabic headline is missing');
+  need(!cont.includes("CANVA_PREMIUM_CSS='/kosif-canva-premium-v2.css"),'legacy Canva Rose stylesheet still owns runtime priority');
+}
 for(const f of ['public/suite.js','public/suite-shell.js','public/standards/bridge.js']){
   if(!exists(f))continue;
   const s=read(f);need(s.includes('kosif-kitab-theme'),`${f} does not wire the theme authority`);
 }
 if(exists('src/suite-edge.js')){
   const s=read('src/suite-edge.js');
-  need(s.includes('Kitab Caffe cream/coffee/gold visual system'),'suite designAuthority is not Kitab Caffe');
+  need(s.includes('KOSIF cream/espresso/gold editorial system with original generated imagery'),'suite editorial designAuthority is missing');
   need(s.includes('/kosif-kitab-theme.js'),'audit shell does not load theme runtime');
   need(s.includes('/kosif-kitab-theme.css?v=1.0.0-kitab'),'audit shell does not load final theme stylesheet');
+  need(s.includes('/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-1'),'audit shell does not load final editorial stylesheet');
+  need(s.includes('rel="preload" as="image" href="/assets/kosif-audit-hero-v39.webp"'),'audit shell does not preload the generated hero');
   for(const capability of ['/v38-accounting.js','/v38-evidence-graph.js','/v38-council-v3.js','/v38-source-fabric.js','/v38-books.js','/v38-live.js','/v38-lab.js'])need(s.includes(capability),`audit capability wiring missing after theme adoption: ${capability}`);
   need(s.includes("deterministicEngine:'kosif-blueprint-v3 + ISA opinion tree + v38 minor-unit core'"),'deterministic engine declaration changed or missing');
 }
 if(exists('public/sw.js')){
   const sw=read('public/sw.js');
-  for(const asset of ['/kosif-kitab-theme.css?v=1.0.0-kitab','/kosif-kitab-theme.js?v=1.0.0-kitab','/fonts/alexandria-arabic-500-normal.woff2','/fonts/alexandria-arabic-700-normal.woff2'])need(sw.includes(asset),`service worker missing theme asset: ${asset}`);
+  for(const asset of ['/kosif-kitab-theme.css?v=1.0.0-kitab','/kosif-kitab-theme.js?v=1.0.0-kitab','/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-1','/assets/kosif-audit-hero-v39.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp','/fonts/alexandria-arabic-500-normal.woff2','/fonts/alexandria-arabic-700-normal.woff2'])need(sw.includes(asset),`service worker missing theme asset: ${asset}`);
+  need(sw.includes("const C='kosif-native-v39-editorial-app'"),'service-worker cache was not bumped for the visual release');
   need(sw.includes('KOSIF_SW_REQUIRED_CORE_FAILED'),'service-worker required-core fail-safe missing');
 }
 if(exists('GEMINI.md'))need(read('GEMINI.md').includes('KOSIF_UNIFIED_REQUIREMENTS_2026-08-20.md'),'agent instructions do not reference unified requirements');

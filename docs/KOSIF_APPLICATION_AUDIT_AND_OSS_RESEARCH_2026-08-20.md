@@ -2,7 +2,7 @@
 
 ## Executive outcome
 
-This review converted the Kitab Caffe reference into a KOSIF-specific visual system without copying the reference site's content or assets. It also hardened the report and live-chat paths: trial-balance totals now come from an exact BigInt API, report completion gates are explicit, text chat is memory-only with opt-in context and consent, and the final theme layer owns desktop/mobile navigation state.
+This review converted the Kitab Caffe reference into a KOSIF-specific visual system without copying the reference site's content or assets. A follow-up visual release added three original generated hero images, replaced the late Canva Rose runtime authority with `kosif-editorial-v39.css`, and bumped the PWA cache so production cannot silently retain the old pink experience. It also hardened the report and live-chat paths: trial-balance totals now come from an exact BigInt API, report completion gates are explicit, text chat is memory-only with opt-in context and consent, and the final theme layer owns desktop/mobile navigation state.
 
 The accompanying machine-readable sample is [`KOSIF_OSS_500_SCAN_2026-08-20.json`](./KOSIF_OSS_500_SCAN_2026-08-20.json).
 
@@ -119,7 +119,9 @@ No source code was copied from these repositories. The review adopted architectu
 11. **Desktop navigation regression:** the final theme authority explicitly hides the mobile nav and restores desktop tabs from 1024px upward.
 12. **Theme-toggle fragility:** a fallback observes theme-control clicks and acts only when the existing app handler made no change.
 13. **Duplicate theme link risk:** the audit shell now declares the theme stylesheet before its runtime, preventing a second same-ID link during parsing.
-14. **Stale production workflow identity:** the production check now accepts the current Kitab Caffe build ID.
+14. **Stale production workflow identity:** the production check now accepts the current editorial visual build ID.
+15. **Late Canva Rose override:** the legacy pink stylesheet was loading after the warm theme and winning the cascade. The final runtime import now targets `kosif-editorial-v39.css`, the audit shell preloads the generated hero, and CI rejects the old rose palette.
+16. **Stale visual service-worker cache:** the root PWA cache generation is now `kosif-native-v39-editorial-app`, with the new CSS and three generated WebP assets required before activation.
 
 ## Deliberate boundaries and follow-up work
 
