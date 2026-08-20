@@ -51,7 +51,8 @@ async function verify(engine, label) {
       locked: body.dataset.kosifDialogOpen === '1',
       bodyPosition: getComputedStyle(body).position,
       bodyTouch: getComputedStyle(body).touchAction,
-      bodyTop: parseFloat(getComputedStyle(body).top) || 0,
+      bodyTop: parseFloat(body.style.top) || 0,
+      bodyComputedTop: parseFloat(getComputedStyle(body).top) || 0,
       listTouch: getComputedStyle(list).touchAction,
       listOverflow: getComputedStyle(list).overflowY,
       listHeight: list.clientHeight,
@@ -62,7 +63,7 @@ async function verify(engine, label) {
   fail(launcher.bodyTouch !== 'none', `${label}: body touch-action cancels Safari sheet gestures`);
   fail(launcher.listTouch === 'pan-y', `${label}: launcher does not own vertical touch gestures`);
   fail(['auto', 'scroll'].includes(launcher.listOverflow) && launcher.listScrollHeight > launcher.listHeight, `${label}: launcher is not internally scrollable`);
-  fail(Math.abs(launcher.bodyTop + pageY) <= 2, `${label}: launcher lock did not preserve the page position (pageY=${pageY}, bodyTop=${launcher.bodyTop})`);
+  fail(Math.abs(launcher.bodyTop + pageY) <= 2, `${label}: launcher lock did not preserve the page position (pageY=${pageY}, inlineTop=${launcher.bodyTop}, computedTop=${launcher.bodyComputedTop})`);
 
   await page.locator('.ks40-launch-body').evaluate(element => element.scrollTo(0, 360));
   await pause(80);
