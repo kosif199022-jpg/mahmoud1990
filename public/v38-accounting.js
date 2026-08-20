@@ -11,6 +11,7 @@
   const r2 = x => Math.round((Number(x) || 0) * 100) / 100;
   const fmt = n => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
   const pct = x => (Number.isFinite(x) ? new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(x) + '%' : '—');
+  const absMinor = value => String(value ?? '0').startsWith('-') ? String(value).slice(1) : String(value ?? '0');
 
   function liveState() {
     try { if (typeof state !== 'undefined' && state?.tb) return state; } catch {}
@@ -18,7 +19,7 @@
   }
   function classifyAccounts(st) {
     const accs = Array.isArray(st?.tb?.accounts) ? st.tb.accounts : [];
-    const sum = (pred) => accs.filter(pred).reduce((a, x) => a + Math.abs(numOf(x.dr) - numOf(x.cr)), 0);
+    const sum = (pred) => accs.filter(pred).reduce((a, x) => a + Math.abs(numOf(x.dr ?? x.debit) - numOf(x.cr ?? x.credit)), 0);
     const isCode = (a, prefixes) => prefixes.some(p => String(a.code ?? a.no ?? '').startsWith(p));
     return {
       count: accs.length,
@@ -144,9 +145,9 @@
       '</div><div style="margin-top:12px"><button class="v38-btn gold" id="v38-vt-go">احسب عبر النواة الحتمية</button></div><div id="v38-vt-out" style="margin-top:14px"></div>';
     V.$('#v38-vt-go').onclick = async () => {
       try {
-        const r = await V.api('/api/kosif/v38/accounting/vat', { method: 'POST', body: { taxableSupplies: numOf(V.$('#v38-vt-std').value), zeroRated: numOf(V.$('#v38-vt-zero').value), exempt: numOf(V.$('#v38-vt-ex').value), inputVat: numOf(V.$('#v38-vt-in').value), ratePct: numOf(V.$('#v38-vt-rate').value) } });
+        const r = await V.api('/api/kosif/v38/accounting/vat', { method: 'POST', body: { taxableSupplies: V.$('#v38-vt-std').value, zeroRated: V.$('#v38-vt-zero').value, exempt: V.$('#v38-vt-ex').value, inputVat: V.$('#v38-vt-in').value, ratePct: V.$('#v38-vt-rate').value } });
         V.$('#v38-vt-out').innerHTML =
-          '<div class="v38-kpis">' + V.kpi('ضريبة المخرجات', fmt(r.outputVat / 100), 'على التوريدات الخاضعة', true) + V.kpi('ضريبة المدخلات', fmt(r.inputVat / 100), 'القابلة للخصم') + V.kpi(r.direction === 'payable' ? 'صافي مستحق للسداد' : 'صافي قابل للاسترداد', fmt(Math.abs(r.netPayable) / 100), 'صافي الفترة') + '</div>' +
+          '<div class="v38-kpis">' + V.kpi('ضريبة المخرجات', V.fmtMinor(r.outputVat, r.exp), 'على التوريدات الخاضعة', true) + V.kpi('ضريبة المدخلات', V.fmtMinor(r.inputVat, r.exp), 'القابلة للخصم') + V.kpi(r.direction === 'payable' ? 'صافي مستحق للسداد' : 'صافي قابل للاسترداد', V.fmtMinor(absMinor(r.netPayable), r.exp), 'صافي الفترة') + '</div>' +
           '<div class="v38-note ok"><span>⚙️</span><span>حُسبت بالوحدات الصغرى في نواة v38 — ' + V.esc(r.method) + '</span></div>';
       } catch (e) { V.toast(e.message, 'error'); }
     };
@@ -161,8 +162,8 @@
       '</div><div style="margin-top:12px"><button class="v38-btn gold" id="v38-zk-go">قدّر الزكاة</button></div><div id="v38-zk-out" style="margin-top:14px"></div>';
     V.$('#v38-zk-go').onclick = async () => {
       try {
-        const r = await V.api('/api/kosif/v38/accounting/zakat', { method: 'POST', body: { basis: numOf(V.$('#v38-zk-base').value), ratePct: numOf(V.$('#v38-zk-rate').value) } });
-        V.$('#v38-zk-out').innerHTML = '<div class="v38-kpis">' + V.kpi('الزكاة التقديرية', fmt(r.estimatedZakat / 100), 'على الوعاء المعطى (' + r.ratePct + '% — ' + r.calendar + ')', true) + '</div>' +
+        const r = await V.api('/api/kosif/v38/accounting/zakat', { method: 'POST', body: { basis: V.$('#v38-zk-base').value, ratePct: V.$('#v38-zk-rate').value } });
+        V.$('#v38-zk-out').innerHTML = '<div class="v38-kpis">' + V.kpi('الزكاة التقديرية', V.fmtMinor(r.estimatedZakat, r.exp), 'على الوعاء المعطى (' + r.ratePct + '% — ' + r.calendar + ')', true) + '</div>' +
           '<div class="v38-note warn"><span>⚖️</span><span>' + V.esc(r.disclaimer) + '</span></div>';
       } catch (e) { V.toast(e.message, 'error'); }
     };
@@ -205,20 +206,20 @@
       '<div class="v38-form-grid">' +
       '<div class="v38-field"><label>رصيد الكتاب (الميزان)</label><input id="v38-br-book" value="482650"></div>' +
       '<div class="v38-field"><label>رصيد كشف البنك</label><input id="v38-br-bank" value="471300"></div>' +
-      '<div class="v38-field"><label>شيكات في الطريق (مُصدرة لم تُصرف)</label><input id="v38-br-out" value="14500"></div>' +
+      '<div class="v38-field"><label>شيكات في الطريق (مُصدرة لم تُصرف)</label><input id="v38-br-outstanding" value="14500"></div>' +
       '<div class="v38-field"><label>إيداعات في الطريق</label><input id="v38-br-in" value="26800"></div>' +
       '<div class="v38-field"><label>رسوم بنكية غير مسجلة</label><input id="v38-br-fee" value="350"></div>' +
       '<div class="v38-field"><label>إيراد فوائد غير مسجل</label><input id="v38-br-int" value="1200"></div>' +
-      '</div><div style="margin-top:12px"><button class="v38-btn gold" id="v38-br-go">اعمل التسوية</button></div><div id="v38-br-out" style="margin-top:14px"></div>';
+      '</div><div style="margin-top:12px"><button class="v38-btn gold" id="v38-br-go">اعمل التسوية</button></div><div id="v38-br-result" style="margin-top:14px"></div>';
     V.$('#v38-br-go').onclick = () => {
       const g = id => numOf(V.$(id).value);
       const adjBook = g('#v38-br-book') - g('#v38-br-fee') + g('#v38-br-int');
-      const adjBank = g('#v38-br-bank') + g('#v38-br-in') - g('#v38-br-out');
+      const adjBank = g('#v38-br-bank') + g('#v38-br-in') - g('#v38-br-outstanding');
       const diff = r2(adjBook - adjBank);
-      V.$('#v38-br-out').innerHTML =
+      V.$('#v38-br-result').innerHTML =
         '<div class="v38-scroll"><table class="v38-table"><thead><tr><th>الجانب</th><th class="num">الرصيد</th><th class="num">التسوية</th><th class="num">بعد التسوية</th></tr></thead><tbody>' +
         '<tr><td>رصيد الكتاب</td><td class="num">' + fmt(g('#v38-br-book')) + '</td><td class="num">' + fmt(-g('#v38-br-fee') + g('#v38-br-int')) + '</td><td class="num">' + fmt(adjBook) + '</td></tr>' +
-        '<tr><td>رصيد البنك</td><td class="num">' + fmt(g('#v38-br-bank')) + '</td><td class="num">' + fmt(g('#v38-br-in') - g('#v38-br-out')) + '</td><td class="num">' + fmt(adjBank) + '</td></tr>' +
+        '<tr><td>رصيد البنك</td><td class="num">' + fmt(g('#v38-br-bank')) + '</td><td class="num">' + fmt(g('#v38-br-in') - g('#v38-br-outstanding')) + '</td><td class="num">' + fmt(adjBank) + '</td></tr>' +
         '</tbody></table></div>' +
         (Math.abs(diff) < 0.005 ? '<div class="v38-note ok"><span>✅</span><span>الطرفان متطابقان — التسوية سليمة.</span></div>' : '<div class="v38-note danger"><span>⛔</span><span>فرق غير مفسر بمقدار ' + fmt(Math.abs(diff)) + ' يتطلب فحص بنود إضافية قبل الاعتماد.</span></div>');
     };

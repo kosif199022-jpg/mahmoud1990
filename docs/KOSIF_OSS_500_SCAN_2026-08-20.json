@@ -1,0 +1,4033 @@
+{
+  "generatedAt": "2026-08-20",
+  "purpose": "Stratified discovery sample for KOSIF architecture and UX research; not a code or license provenance claim.",
+  "sampleSize": 500,
+  "uniqueness": "unique repository full_name across the combined search pool",
+  "categories": {
+    "accounting": 69,
+    "audit management": 69,
+    "ERP finance": 69,
+    "financial reporting": 69,
+    "IFRS XBRL": 20,
+    "bookkeeping": 68,
+    "PDF reader PWA": 68,
+    "realtime chat support": 68
+  },
+  "methodology": {
+    "source": "GitHub repository search",
+    "queries": [
+      "accounting",
+      "audit management",
+      "ERP finance",
+      "financial reporting",
+      "IFRS XBRL",
+      "bookkeeping",
+      "PDF reader PWA",
+      "realtime chat support"
+    ],
+    "selection": "round-robin across query result sets after de-duplication",
+    "limitation": "Search ranking is a discovery sample, not an exhaustive census or quality endorsement."
+  },
+  "repositories": [
+    {
+      "category": "accounting",
+      "name": "akaunting/akaunting",
+      "url": "https://github.com/akaunting/akaunting",
+      "default_branch": "master",
+      "size": 86526,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "glpi-project/glpi",
+      "url": "https://github.com/glpi-project/glpi",
+      "default_branch": "11.0/bugfixes",
+      "size": 1115319,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "andrewdwallo/erpsaas",
+      "url": "https://github.com/andrewdwallo/erpsaas",
+      "default_branch": "3.x",
+      "size": 14069,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "OCA/account-financial-reporting",
+      "url": "https://github.com/OCA/account-financial-reporting",
+      "default_branch": "18.0",
+      "size": 56083,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "bseddon/XBRL",
+      "url": "https://github.com/bseddon/XBRL",
+      "default_branch": "develop",
+      "size": 18189,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "378056350/bookkeeping-iOS",
+      "url": "https://github.com/378056350/bookkeeping-iOS",
+      "default_branch": "master",
+      "size": 68303,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "acmpesuecc/Literate",
+      "url": "https://github.com/acmpesuecc/Literate",
+      "default_branch": "main",
+      "size": 2596,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Dooy/chatgpt-web-midjourney-proxy",
+      "url": "https://github.com/Dooy/chatgpt-web-midjourney-proxy",
+      "default_branch": "main",
+      "size": 33197,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "frappe/books",
+      "url": "https://github.com/frappe/books",
+      "default_branch": "master",
+      "size": 17269,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "unity-cn/Asset-Auditing",
+      "url": "https://github.com/unity-cn/Asset-Auditing",
+      "default_branch": "master",
+      "size": 430,
+      "archived": true
+    },
+    {
+      "category": "ERP finance",
+      "name": "osbzr/gooderp_addons",
+      "url": "https://github.com/osbzr/gooderp_addons",
+      "default_branch": "latest",
+      "size": 24419,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "bigcapitalhq/bigcapital",
+      "url": "https://github.com/bigcapitalhq/bigcapital",
+      "default_branch": "develop",
+      "size": 43548,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "Kruhlmann/xbrl-parser",
+      "url": "https://github.com/Kruhlmann/xbrl-parser",
+      "default_branch": "master",
+      "size": 16,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "mayswind/ezbookkeeping",
+      "url": "https://github.com/mayswind/ezbookkeeping",
+      "default_branch": "main",
+      "size": 24864,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "evgeniy038/yuki-reader",
+      "url": "https://github.com/evgeniy038/yuki-reader",
+      "default_branch": "main",
+      "size": 264023,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "youngmonkeys/ezyfox-server",
+      "url": "https://github.com/youngmonkeys/ezyfox-server",
+      "default_branch": "master",
+      "size": 4938,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "openexchangerates/accounting.js",
+      "url": "https://github.com/openexchangerates/accounting.js",
+      "default_branch": "master",
+      "size": 248,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "xiaojam/it-management-and-audit-source",
+      "url": "https://github.com/xiaojam/it-management-and-audit-source",
+      "default_branch": "main",
+      "size": 122502,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Boom-Vitt/boombignose-erp",
+      "url": "https://github.com/Boom-Vitt/boombignose-erp",
+      "default_branch": "main",
+      "size": 581,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Profitbase/PowerBI-visuals-FinancialReportingMatrix",
+      "url": "https://github.com/Profitbase/PowerBI-visuals-FinancialReportingMatrix",
+      "default_branch": "master",
+      "size": 15358,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "axioradev/edinet-xbrl",
+      "url": "https://github.com/axioradev/edinet-xbrl",
+      "default_branch": "main",
+      "size": 48,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "Nick-Triller/accounting",
+      "url": "https://github.com/Nick-Triller/accounting",
+      "default_branch": "master",
+      "size": 60,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "none0enon/math-reader-boox",
+      "url": "https://github.com/none0enon/math-reader-boox",
+      "default_branch": "main",
+      "size": 2124,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "cookeem/chatgpt-service",
+      "url": "https://github.com/cookeem/chatgpt-service",
+      "default_branch": "master",
+      "size": 1887,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Gnucash/gnucash",
+      "url": "https://github.com/Gnucash/gnucash",
+      "default_branch": "stable",
+      "size": 666264,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "Arudjreis/awesome-security-GRC",
+      "url": "https://github.com/Arudjreis/awesome-security-GRC",
+      "default_branch": "main",
+      "size": 123,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "seangalliher/D365-erp-cli",
+      "url": "https://github.com/seangalliher/D365-erp-cli",
+      "default_branch": "main",
+      "size": 206,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "elewa-git/kujali",
+      "url": "https://github.com/elewa-git/kujali",
+      "default_branch": "main",
+      "size": 8525,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "csrak/xbrl_parser",
+      "url": "https://github.com/csrak/xbrl_parser",
+      "default_branch": "main",
+      "size": 15,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "markliu2013/bookkeeping",
+      "url": "https://github.com/markliu2013/bookkeeping",
+      "default_branch": "main",
+      "size": 1816,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "threecatswink/Dyslexia-PDF-Reader",
+      "url": "https://github.com/threecatswink/Dyslexia-PDF-Reader",
+      "default_branch": "main",
+      "size": 10360,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "moeru-ai/airi",
+      "url": "https://github.com/moeru-ai/airi",
+      "default_branch": "main",
+      "size": 534128,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Nightonke/CoCoin",
+      "url": "https://github.com/Nightonke/CoCoin",
+      "default_branch": "master",
+      "size": 73657,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "google/sshkey-audit",
+      "url": "https://github.com/google/sshkey-audit",
+      "default_branch": "master",
+      "size": 22,
+      "archived": true
+    },
+    {
+      "category": "ERP finance",
+      "name": "shyamsitaula/samarium",
+      "url": "https://github.com/shyamsitaula/samarium",
+      "default_branch": "master",
+      "size": 35856,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "muriithi-ian/kujali",
+      "url": "https://github.com/muriithi-ian/kujali",
+      "default_branch": "main",
+      "size": 4104,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "PDLee87/XBRL_IFRS-filers",
+      "url": "https://github.com/PDLee87/XBRL_IFRS-filers",
+      "default_branch": "main",
+      "size": 1559,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "LiJiaPing09015314/Bookkeeping",
+      "url": "https://github.com/LiJiaPing09015314/Bookkeeping",
+      "default_branch": "master",
+      "size": 5426,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "MdTanweerAlam123/pdf-reader-pwa",
+      "url": "https://github.com/MdTanweerAlam123/pdf-reader-pwa",
+      "default_branch": "main",
+      "size": 4,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "cookeem/chatgpt-stream",
+      "url": "https://github.com/cookeem/chatgpt-stream",
+      "default_branch": "master",
+      "size": 2198,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "leekchan/accounting",
+      "url": "https://github.com/leekchan/accounting",
+      "default_branch": "master",
+      "size": 108,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "openedx/django-config-models",
+      "url": "https://github.com/openedx/django-config-models",
+      "default_branch": "master",
+      "size": 607,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "fafapeter/erp_accounting-finance",
+      "url": "https://github.com/fafapeter/erp_accounting-finance",
+      "default_branch": "master",
+      "size": 34972,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "terancejiang/financial-report-minesweeper",
+      "url": "https://github.com/terancejiang/financial-report-minesweeper",
+      "default_branch": "main",
+      "size": 206,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "zhang0098/edinet-xbrl",
+      "url": "https://github.com/zhang0098/edinet-xbrl",
+      "default_branch": "main",
+      "size": 54,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "378056350/react-native-bookkeeping",
+      "url": "https://github.com/378056350/react-native-bookkeeping",
+      "default_branch": "master",
+      "size": 30549,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "ibaitsys/pdf-reader-pwa2",
+      "url": "https://github.com/ibaitsys/pdf-reader-pwa2",
+      "default_branch": "master",
+      "size": 21827,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "isaacsu/twich",
+      "url": "https://github.com/isaacsu/twich",
+      "default_branch": "master",
+      "size": 590,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "idurar/idurar-erp-crm",
+      "url": "https://github.com/idurar/idurar-erp-crm",
+      "default_branch": "master",
+      "size": 23369,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "dephell/dephell",
+      "url": "https://github.com/dephell/dephell",
+      "default_branch": "master",
+      "size": 2543,
+      "archived": true
+    },
+    {
+      "category": "ERP finance",
+      "name": "Frainlar/Frainlar-ERP",
+      "url": "https://github.com/Frainlar/Frainlar-ERP",
+      "default_branch": "master",
+      "size": 9039,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "killbill/killbill-analytics-plugin",
+      "url": "https://github.com/killbill/killbill-analytics-plugin",
+      "default_branch": "master",
+      "size": 9012,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "zoharbabin/edgar_analytics",
+      "url": "https://github.com/zoharbabin/edgar_analytics",
+      "default_branch": "main",
+      "size": 574,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "forkdog/Bookkeeping",
+      "url": "https://github.com/forkdog/Bookkeeping",
+      "default_branch": "master",
+      "size": 366,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "bobolua123/ebook-reader",
+      "url": "https://github.com/bobolua123/ebook-reader",
+      "default_branch": "main",
+      "size": 41,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "basement-chat/basement-chat",
+      "url": "https://github.com/basement-chat/basement-chat",
+      "default_branch": "main",
+      "size": 5725,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Codyweisfeld/AccountingArchitecture",
+      "url": "https://github.com/Codyweisfeld/AccountingArchitecture",
+      "default_branch": "master",
+      "size": 288,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "opena2a-org/agent-identity-management",
+      "url": "https://github.com/opena2a-org/agent-identity-management",
+      "default_branch": "main",
+      "size": 109311,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "VTHoop/Oracle-EBS-SQL",
+      "url": "https://github.com/VTHoop/Oracle-EBS-SQL",
+      "default_branch": "master",
+      "size": 12,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "altova/SECDB",
+      "url": "https://github.com/altova/SECDB",
+      "default_branch": "master",
+      "size": 848,
+      "archived": true
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "criskurtin/xbrl-parser",
+      "url": "https://github.com/criskurtin/xbrl-parser",
+      "default_branch": "master",
+      "size": 273,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "nafiesl/dompet",
+      "url": "https://github.com/nafiesl/dompet",
+      "default_branch": "master",
+      "size": 2590,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "ibaitsys/pdf-reader-pwa",
+      "url": "https://github.com/ibaitsys/pdf-reader-pwa",
+      "default_branch": "master",
+      "size": 23823,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "tanvir-robin/Chat-app-serverpod",
+      "url": "https://github.com/tanvir-robin/Chat-app-serverpod",
+      "default_branch": "main",
+      "size": 380,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "beancount/beancount",
+      "url": "https://github.com/beancount/beancount",
+      "default_branch": "master",
+      "size": 109299,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "SatoshiNextTechLab/BlockSCM",
+      "url": "https://github.com/SatoshiNextTechLab/BlockSCM",
+      "default_branch": "master",
+      "size": 175,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Mayank03-dev/FinanceERPIntegration",
+      "url": "https://github.com/Mayank03-dev/FinanceERPIntegration",
+      "default_branch": "main",
+      "size": 819,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "whoiskatrin/financial-statement-pdf-extractor",
+      "url": "https://github.com/whoiskatrin/financial-statement-pdf-extractor",
+      "default_branch": "master",
+      "size": 18,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "JLBMAmine/s-plus-socle-referentiel",
+      "url": "https://github.com/JLBMAmine/s-plus-socle-referentiel",
+      "default_branch": "main",
+      "size": 20065,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "plctlab/riscv-lab-access",
+      "url": "https://github.com/plctlab/riscv-lab-access",
+      "default_branch": "main",
+      "size": 119,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "JoethonDev/pdf-reader-pwa",
+      "url": "https://github.com/JoethonDev/pdf-reader-pwa",
+      "default_branch": "main",
+      "size": 67043,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "icywind/RemoteAssistantAR",
+      "url": "https://github.com/icywind/RemoteAssistantAR",
+      "default_branch": "master",
+      "size": 243,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "scottlaurent/accounting",
+      "url": "https://github.com/scottlaurent/accounting",
+      "default_branch": "master",
+      "size": 228,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "auditumio/auditum",
+      "url": "https://github.com/auditumio/auditum",
+      "default_branch": "main",
+      "size": 1655,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "ncc-erp/ncc-erp-finance",
+      "url": "https://github.com/ncc-erp/ncc-erp-finance",
+      "default_branch": "dev",
+      "size": 7469,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "dude333/rapina",
+      "url": "https://github.com/dude333/rapina",
+      "default_branch": "master",
+      "size": 469,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "aeharvlee/xbrl-parser",
+      "url": "https://github.com/aeharvlee/xbrl-parser",
+      "default_branch": "master",
+      "size": 269,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "AliceO2Group/Bookkeeping",
+      "url": "https://github.com/AliceO2Group/Bookkeeping",
+      "default_branch": "main",
+      "size": 39355,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "ruruming-git/pdf-reader-pwa",
+      "url": "https://github.com/ruruming-git/pdf-reader-pwa",
+      "default_branch": "main",
+      "size": 30,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "http-kit/chat-websocket",
+      "url": "https://github.com/http-kit/chat-websocket",
+      "default_branch": "master",
+      "size": 180,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "glink25/Cent",
+      "url": "https://github.com/glink25/Cent",
+      "default_branch": "main",
+      "size": 2490,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "YosaiProject/yosai",
+      "url": "https://github.com/YosaiProject/yosai",
+      "default_branch": "master",
+      "size": 28200,
+      "archived": true
+    },
+    {
+      "category": "ERP finance",
+      "name": "ccampora/D365FOMiddleware",
+      "url": "https://github.com/ccampora/D365FOMiddleware",
+      "default_branch": "main",
+      "size": 178,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "eliangcs/pystock-crawler",
+      "url": "https://github.com/eliangcs/pystock-crawler",
+      "default_branch": "master",
+      "size": 4172,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "SixtpalQ/xbrl-parser",
+      "url": "https://github.com/SixtpalQ/xbrl-parser",
+      "default_branch": "master",
+      "size": 270,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "brandon-rhodes/luca",
+      "url": "https://github.com/brandon-rhodes/luca",
+      "default_branch": "master",
+      "size": 13175,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "Meow233333/pwa-pdf-reader",
+      "url": "https://github.com/Meow233333/pwa-pdf-reader",
+      "default_branch": "main",
+      "size": 3626,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "mumer92/RealtimeChat",
+      "url": "https://github.com/mumer92/RealtimeChat",
+      "default_branch": "master",
+      "size": 934,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Re-engineering-Domain-Driven-Design/Accounting",
+      "url": "https://github.com/Re-engineering-Domain-Driven-Design/Accounting",
+      "default_branch": "main",
+      "size": 1220,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "iambetaraybill/AuditManagementSystem",
+      "url": "https://github.com/iambetaraybill/AuditManagementSystem",
+      "default_branch": "master",
+      "size": 15167,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "marcor/gazie",
+      "url": "https://github.com/marcor/gazie",
+      "default_branch": "master",
+      "size": 139408,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "gshashank84/FINREP",
+      "url": "https://github.com/gshashank84/FINREP",
+      "default_branch": "master",
+      "size": 9089,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "openpharma-org/eu-filings-mcp-server",
+      "url": "https://github.com/openpharma-org/eu-filings-mcp-server",
+      "default_branch": "main",
+      "size": 90,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "deb-sig/double-entry-generator",
+      "url": "https://github.com/deb-sig/double-entry-generator",
+      "default_branch": "master",
+      "size": 4156,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "think-fact0ry/reader",
+      "url": "https://github.com/think-fact0ry/reader",
+      "default_branch": "main",
+      "size": 5673,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "DefNotArham/realtime-chatrooms",
+      "url": "https://github.com/DefNotArham/realtime-chatrooms",
+      "default_branch": "main",
+      "size": 12875,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "sherlock-project/sherlock",
+      "url": "https://github.com/sherlock-project/sherlock",
+      "default_branch": "master",
+      "size": 18974,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "kite-org/kite",
+      "url": "https://github.com/kite-org/kite",
+      "default_branch": "main",
+      "size": 31059,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "buildwithtalia/erp-finance",
+      "url": "https://github.com/buildwithtalia/erp-finance",
+      "default_branch": "main",
+      "size": 7,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "amitkedia007/Financial-Fraud-Detection-Using-LLMs",
+      "url": "https://github.com/amitkedia007/Financial-Fraud-Detection-Using-LLMs",
+      "default_branch": "main",
+      "size": 2202,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "Omnifolio-app/sec-toolkit",
+      "url": "https://github.com/Omnifolio-app/sec-toolkit",
+      "default_branch": "main",
+      "size": 101,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "artoh/kitupiikki",
+      "url": "https://github.com/artoh/kitupiikki",
+      "default_branch": "master",
+      "size": 119816,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "BriceKrispies/Pwa-pdf-reader-fast",
+      "url": "https://github.com/BriceKrispies/Pwa-pdf-reader-fast",
+      "default_branch": "master",
+      "size": 17710,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "classiebit/addchat-codeigniter",
+      "url": "https://github.com/classiebit/addchat-codeigniter",
+      "default_branch": "master",
+      "size": 2052,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "hfiref0x/UACME",
+      "url": "https://github.com/hfiref0x/UACME",
+      "default_branch": "master",
+      "size": 14086,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "HotRiceNoodles/CrossLink",
+      "url": "https://github.com/HotRiceNoodles/CrossLink",
+      "default_branch": "main",
+      "size": 6690,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "SA-FLOW/sa-erp",
+      "url": "https://github.com/SA-FLOW/sa-erp",
+      "default_branch": "main",
+      "size": 1536,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "RUC-NLPIR/FinSight",
+      "url": "https://github.com/RUC-NLPIR/FinSight",
+      "default_branch": "main",
+      "size": 108805,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "ryanrodrigues25200525-svg/openfilings",
+      "url": "https://github.com/ryanrodrigues25200525-svg/openfilings",
+      "default_branch": "main",
+      "size": 1051,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "imetaxas/double-entry-bookkeeping-api",
+      "url": "https://github.com/imetaxas/double-entry-bookkeeping-api",
+      "default_branch": "master",
+      "size": 145,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "farshaddavoudi/PWAOfflineBookReaderMVP",
+      "url": "https://github.com/farshaddavoudi/PWAOfflineBookReaderMVP",
+      "default_branch": "main",
+      "size": 4687,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "XavierCanadas/kafka-realtime-chat",
+      "url": "https://github.com/XavierCanadas/kafka-realtime-chat",
+      "default_branch": "main",
+      "size": 490,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "ledger/ledger",
+      "url": "https://github.com/ledger/ledger",
+      "default_branch": "main",
+      "size": 81322,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "intuitem/ciso-assistant-community",
+      "url": "https://github.com/intuitem/ciso-assistant-community",
+      "default_branch": "main",
+      "size": 262201,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Mayank03-dev/FinanceERP_DefectFIX",
+      "url": "https://github.com/Mayank03-dev/FinanceERP_DefectFIX",
+      "default_branch": "main",
+      "size": 574,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "fedoco/itc-reporter",
+      "url": "https://github.com/fedoco/itc-reporter",
+      "default_branch": "master",
+      "size": 59,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "ChristianLuciani/accounting-esperanto",
+      "url": "https://github.com/ChristianLuciani/accounting-esperanto",
+      "default_branch": "main",
+      "size": 56142,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "txn513/mpvue-bookKeeping",
+      "url": "https://github.com/txn513/mpvue-bookKeeping",
+      "default_branch": "master",
+      "size": 1580,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "qucumbah/repeatio-pwa",
+      "url": "https://github.com/qucumbah/repeatio-pwa",
+      "default_branch": "master",
+      "size": 3356,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "http-kit/chat-polling",
+      "url": "https://github.com/http-kit/chat-polling",
+      "default_branch": "master",
+      "size": 184,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "WuKongOpenSource/Wukong_Accounting",
+      "url": "https://github.com/WuKongOpenSource/Wukong_Accounting",
+      "default_branch": "main",
+      "size": 13001,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "tmobile/hyperdirectory",
+      "url": "https://github.com/tmobile/hyperdirectory",
+      "default_branch": "master",
+      "size": 16525,
+      "archived": true
+    },
+    {
+      "category": "ERP finance",
+      "name": "sihab-hasan/workforce-erp",
+      "url": "https://github.com/sihab-hasan/workforce-erp",
+      "default_branch": "develop",
+      "size": 1641,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "jesson-hh/financial-analyst",
+      "url": "https://github.com/jesson-hh/financial-analyst",
+      "default_branch": "main",
+      "size": 15380,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "MaxSchoon/rgs-skill",
+      "url": "https://github.com/MaxSchoon/rgs-skill",
+      "default_branch": "main",
+      "size": 65,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "ledermann/keepr",
+      "url": "https://github.com/ledermann/keepr",
+      "default_branch": "master",
+      "size": 230,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "FelipeRude/Comic-Reader",
+      "url": "https://github.com/FelipeRude/Comic-Reader",
+      "default_branch": "main",
+      "size": 3601,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "fraineralex/chatify",
+      "url": "https://github.com/fraineralex/chatify",
+      "default_branch": "main",
+      "size": 4638,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "rotki/rotki",
+      "url": "https://github.com/rotki/rotki",
+      "default_branch": "develop",
+      "size": 513723,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "ClouGence/open-cdm",
+      "url": "https://github.com/ClouGence/open-cdm",
+      "default_branch": "main",
+      "size": 67477,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "AmitXShukla/GeneralLedger.jl",
+      "url": "https://github.com/AmitXShukla/GeneralLedger.jl",
+      "default_branch": "master",
+      "size": 5093,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "priyanka200201/FinancialReportingAndAnalysis",
+      "url": "https://github.com/priyanka200201/FinancialReportingAndAnalysis",
+      "default_branch": "main",
+      "size": 1286,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "api-evangelist/accounting-standards",
+      "url": "https://github.com/api-evangelist/accounting-standards",
+      "default_branch": "main",
+      "size": 49,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "yii2tech/balance",
+      "url": "https://github.com/yii2tech/balance",
+      "default_branch": "master",
+      "size": 62,
+      "archived": true
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "StevenBuglione/speed-reader-pwa",
+      "url": "https://github.com/StevenBuglione/speed-reader-pwa",
+      "default_branch": "master",
+      "size": 73,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "JasonXuDeveloper/Realtime-Socket-Chat",
+      "url": "https://github.com/JasonXuDeveloper/Realtime-Socket-Chat",
+      "default_branch": "master",
+      "size": 21334,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "AutoAccountingOrg/AutoAccounting",
+      "url": "https://github.com/AutoAccountingOrg/AutoAccounting",
+      "default_branch": "master",
+      "size": 145844,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "JayjeetAtGithub/Audition-Management-System",
+      "url": "https://github.com/JayjeetAtGithub/Audition-Management-System",
+      "default_branch": "master",
+      "size": 2173,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "roshnnjabir/Teamora",
+      "url": "https://github.com/roshnnjabir/Teamora",
+      "default_branch": "main",
+      "size": 5174,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "ole/itunesconnect-financialreports",
+      "url": "https://github.com/ole/itunesconnect-financialreports",
+      "default_branch": "master",
+      "size": 9,
+      "archived": true
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "AlsoTheZv3n/finance-models-v1",
+      "url": "https://github.com/AlsoTheZv3n/finance-models-v1",
+      "default_branch": "main",
+      "size": 2660,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "378056350/bookkeeping-react-native",
+      "url": "https://github.com/378056350/bookkeeping-react-native",
+      "default_branch": "master",
+      "size": 18510,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "LearnFromSiran/pdf-reader-pro",
+      "url": "https://github.com/LearnFromSiran/pdf-reader-pro",
+      "default_branch": "main",
+      "size": 48,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "john-carroll-sw/coffee-chat-voice-assistant",
+      "url": "https://github.com/john-carroll-sw/coffee-chat-voice-assistant",
+      "default_branch": "main",
+      "size": 44423,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "contatomegasign/finance-account-tool",
+      "url": "https://github.com/contatomegasign/finance-account-tool",
+      "default_branch": "main",
+      "size": 61,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "paavaninfotech/audit_management",
+      "url": "https://github.com/paavaninfotech/audit_management",
+      "default_branch": "main",
+      "size": 67,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Smart-IT-Kirkham/nhs-finance",
+      "url": "https://github.com/Smart-IT-Kirkham/nhs-finance",
+      "default_branch": "13.0",
+      "size": 139,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "jeremiak/us-senate-financial-disclosure-scraper",
+      "url": "https://github.com/jeremiak/us-senate-financial-disclosure-scraper",
+      "default_branch": "master",
+      "size": 889,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "antonyvannieuwkoop/ixbrl",
+      "url": "https://github.com/antonyvannieuwkoop/ixbrl",
+      "default_branch": "main",
+      "size": 427,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "pietrzakadrian/bank-server",
+      "url": "https://github.com/pietrzakadrian/bank-server",
+      "default_branch": "master",
+      "size": 2980,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "yapweijun1996/PDF-Reader",
+      "url": "https://github.com/yapweijun1996/PDF-Reader",
+      "default_branch": "main",
+      "size": 2259,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "liverecord/liverecord",
+      "url": "https://github.com/liverecord/liverecord",
+      "default_branch": "master",
+      "size": 706,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "waynerobinson/xeroizer",
+      "url": "https://github.com/waynerobinson/xeroizer",
+      "default_branch": "master",
+      "size": 2817,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "iamtalib13/audit_management",
+      "url": "https://github.com/iamtalib13/audit_management",
+      "default_branch": "version-15",
+      "size": 1294,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "milincjoshi/RoyalTextiles_ERP",
+      "url": "https://github.com/milincjoshi/RoyalTextiles_ERP",
+      "default_branch": "master",
+      "size": 3051,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "khaz-dev/FinancialReporting_PowerBI",
+      "url": "https://github.com/khaz-dev/FinancialReporting_PowerBI",
+      "default_branch": "main",
+      "size": 4078,
+      "archived": false
+    },
+    {
+      "category": "IFRS XBRL",
+      "name": "ikarib/FinEvalKit",
+      "url": "https://github.com/ikarib/FinEvalKit",
+      "default_branch": "main",
+      "size": 260,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "illuminatech/balance",
+      "url": "https://github.com/illuminatech/balance",
+      "default_branch": "master",
+      "size": 63,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "jjsierrah/reader",
+      "url": "https://github.com/jjsierrah/reader",
+      "default_branch": "main",
+      "size": 2312,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "SarthakSKumar/Chatroom-App",
+      "url": "https://github.com/SarthakSKumar/Chatroom-App",
+      "default_branch": "main",
+      "size": 292,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "dulacp/django-accounting",
+      "url": "https://github.com/dulacp/django-accounting",
+      "default_branch": "master",
+      "size": 290,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "AgriciDaniel/claude-email",
+      "url": "https://github.com/AgriciDaniel/claude-email",
+      "default_branch": "main",
+      "size": 734,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "SnowBconeDeveloper/FinanceERPIntegration_psmutahdevint",
+      "url": "https://github.com/SnowBconeDeveloper/FinanceERPIntegration_psmutahdevint",
+      "default_branch": "main",
+      "size": 2314,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Adkid-Zephyr/Financial-research-agent-QBT",
+      "url": "https://github.com/Adkid-Zephyr/Financial-research-agent-QBT",
+      "default_branch": "main",
+      "size": 304,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "SwingTix/bookkeeper",
+      "url": "https://github.com/SwingTix/bookkeeper",
+      "default_branch": "master",
+      "size": 95,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "abhidesai2003/chapter-reader",
+      "url": "https://github.com/abhidesai2003/chapter-reader",
+      "default_branch": "main",
+      "size": 1608,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Enter-tainer/richat",
+      "url": "https://github.com/Enter-tainer/richat",
+      "default_branch": "master",
+      "size": 146,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "vas3k/TaxHacker",
+      "url": "https://github.com/vas3k/TaxHacker",
+      "default_branch": "main",
+      "size": 21649,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "VidyaSagarMallarapu/Auditorium-Management",
+      "url": "https://github.com/VidyaSagarMallarapu/Auditorium-Management",
+      "default_branch": "master",
+      "size": 2107,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "6missedcalls/awesome-agent-skills",
+      "url": "https://github.com/6missedcalls/awesome-agent-skills",
+      "default_branch": "main",
+      "size": 5,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "xbrlus/cafr",
+      "url": "https://github.com/xbrlus/cafr",
+      "default_branch": "master",
+      "size": 101931,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "abdullokhonz/Bookkeeping",
+      "url": "https://github.com/abdullokhonz/Bookkeeping",
+      "default_branch": "main",
+      "size": 10638,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "edygert/pdfreader",
+      "url": "https://github.com/edygert/pdfreader",
+      "default_branch": "main",
+      "size": 28275,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "enggen/Firebase-Chat-App",
+      "url": "https://github.com/enggen/Firebase-Chat-App",
+      "default_branch": "master",
+      "size": 26904,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "mozilla/fxa",
+      "url": "https://github.com/mozilla/fxa",
+      "default_branch": "main",
+      "size": 746636,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "YaleArchivesSpace/yams_data_auditing",
+      "url": "https://github.com/YaleArchivesSpace/yams_data_auditing",
+      "default_branch": "master",
+      "size": 66,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "yonas790/finance_erp",
+      "url": "https://github.com/yonas790/finance_erp",
+      "default_branch": "main",
+      "size": 591,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "secdatabase/SEC-XBRL-Financial-Statement-Dataset",
+      "url": "https://github.com/secdatabase/SEC-XBRL-Financial-Statement-Dataset",
+      "default_branch": "master",
+      "size": 143,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "bread-and-pepper/django-brookie",
+      "url": "https://github.com/bread-and-pepper/django-brookie",
+      "default_branch": "master",
+      "size": 265,
+      "archived": true
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "syy266313/pdf-reader",
+      "url": "https://github.com/syy266313/pdf-reader",
+      "default_branch": "main",
+      "size": 412,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "jgurdal/Online-Chess",
+      "url": "https://github.com/jgurdal/Online-Chess",
+      "default_branch": "master",
+      "size": 1275,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "hyperledger-labs/blockchain-carbon-accounting",
+      "url": "https://github.com/hyperledger-labs/blockchain-carbon-accounting",
+      "default_branch": "main",
+      "size": 270276,
+      "archived": true
+    },
+    {
+      "category": "audit management",
+      "name": "maltzsama/dagster-authkit",
+      "url": "https://github.com/maltzsama/dagster-authkit",
+      "default_branch": "main",
+      "size": 1081,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "gokulmohankumar/Finance_ERP",
+      "url": "https://github.com/gokulmohankumar/Finance_ERP",
+      "default_branch": "main",
+      "size": 4748,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "chockenberry/BeanCounter",
+      "url": "https://github.com/chockenberry/BeanCounter",
+      "default_branch": "master",
+      "size": 20451,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "dmwm/DBS",
+      "url": "https://github.com/dmwm/DBS",
+      "default_branch": "master",
+      "size": 12542,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "YTFL/PDFark-Mode-PDF-Darkmode-Converter",
+      "url": "https://github.com/YTFL/PDFark-Mode-PDF-Darkmode-Converter",
+      "default_branch": "main",
+      "size": 479,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Hemanthsp999/TheraBot",
+      "url": "https://github.com/Hemanthsp999/TheraBot",
+      "default_branch": "master",
+      "size": 5957,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "simonmichael/hledger",
+      "url": "https://github.com/simonmichael/hledger",
+      "default_branch": "main",
+      "size": 120116,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "irsdl/auraditor",
+      "url": "https://github.com/irsdl/auraditor",
+      "default_branch": "main",
+      "size": 1816,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "seangalliher/Agent-Driven-ERP-Implementation",
+      "url": "https://github.com/seangalliher/Agent-Driven-ERP-Implementation",
+      "default_branch": "main",
+      "size": 30,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "cybermaggedon/ixbrl-reporter",
+      "url": "https://github.com/cybermaggedon/ixbrl-reporter",
+      "default_branch": "master",
+      "size": 1721,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "thelineva/tilitin",
+      "url": "https://github.com/thelineva/tilitin",
+      "default_branch": "master",
+      "size": 8827,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "mojoro/murmur-tts-reader",
+      "url": "https://github.com/mojoro/murmur-tts-reader",
+      "default_branch": "main",
+      "size": 1667,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Joakim-animate90/Realtime-chat-app-golang",
+      "url": "https://github.com/Joakim-animate90/Realtime-chat-app-golang",
+      "default_branch": "main",
+      "size": 74,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "liberusoftware/accounting-erp-laravel",
+      "url": "https://github.com/liberusoftware/accounting-erp-laravel",
+      "default_branch": "main",
+      "size": 47035,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "jimmy201602/webterminal",
+      "url": "https://github.com/jimmy201602/webterminal",
+      "default_branch": "master",
+      "size": 775405,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "OpadaAlzaiede/erp-system",
+      "url": "https://github.com/OpadaAlzaiede/erp-system",
+      "default_branch": "main",
+      "size": 1394,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "makerdao-ses/transparency-reporting",
+      "url": "https://github.com/makerdao-ses/transparency-reporting",
+      "default_branch": "main",
+      "size": 252,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "MikeChongCan/cfo-stack",
+      "url": "https://github.com/MikeChongCan/cfo-stack",
+      "default_branch": "main",
+      "size": 491,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "Leo-Wang681/linguanote-reader",
+      "url": "https://github.com/Leo-Wang681/linguanote-reader",
+      "default_branch": "master",
+      "size": 2471,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "FZl47/SupChat",
+      "url": "https://github.com/FZl47/SupChat",
+      "default_branch": "main",
+      "size": 44230,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Temple-Stuart/temple-stuart-accounting",
+      "url": "https://github.com/Temple-Stuart/temple-stuart-accounting",
+      "default_branch": "main",
+      "size": 18003,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "LeenHawk/gproxy",
+      "url": "https://github.com/LeenHawk/gproxy",
+      "default_branch": "main",
+      "size": 34880,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "anandureghu/sunway-erp",
+      "url": "https://github.com/anandureghu/sunway-erp",
+      "default_branch": "main",
+      "size": 4037,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "raymond180/FINRA_TRACE",
+      "url": "https://github.com/raymond180/FINRA_TRACE",
+      "default_branch": "master",
+      "size": 26653,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "yidierh/mini-bookkeeping",
+      "url": "https://github.com/yidierh/mini-bookkeeping",
+      "default_branch": "master",
+      "size": 1851,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "beniwal1ajay/bookReader",
+      "url": "https://github.com/beniwal1ajay/bookReader",
+      "default_branch": "main",
+      "size": 564,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "HARIHARANS24/realtime-chatapp-springboot",
+      "url": "https://github.com/HARIHARANS24/realtime-chatapp-springboot",
+      "default_branch": "main",
+      "size": 4314,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "ledgersmb/LedgerSMB",
+      "url": "https://github.com/ledgersmb/LedgerSMB",
+      "default_branch": "master",
+      "size": 279996,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "MengMengCode/VoCat",
+      "url": "https://github.com/MengMengCode/VoCat",
+      "default_branch": "master",
+      "size": 4251,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Albert1318/ERP_Accounting-and-Finance-",
+      "url": "https://github.com/Albert1318/ERP_Accounting-and-Finance-",
+      "default_branch": "master",
+      "size": 7094,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "jeremiak/us-senate-financial-disclosure-data",
+      "url": "https://github.com/jeremiak/us-senate-financial-disclosure-data",
+      "default_branch": "master",
+      "size": 574198,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "vanderheijden86/moneybird-mcp-server",
+      "url": "https://github.com/vanderheijden86/moneybird-mcp-server",
+      "default_branch": "main",
+      "size": 89,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "emma77017/paper-reader",
+      "url": "https://github.com/emma77017/paper-reader",
+      "default_branch": "main",
+      "size": 1836,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "CoderSwarup/realtime_chat_app",
+      "url": "https://github.com/CoderSwarup/realtime_chat_app",
+      "default_branch": "main",
+      "size": 2641,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "mate-academy/node_accounting-app-v2",
+      "url": "https://github.com/mate-academy/node_accounting-app-v2",
+      "default_branch": "master",
+      "size": 3185,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "ForkWrenGuide/AnyUnlock",
+      "url": "https://github.com/ForkWrenGuide/AnyUnlock",
+      "default_branch": "main",
+      "size": 5,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "ScottySchmidt/full-stack-finance-erp",
+      "url": "https://github.com/ScottySchmidt/full-stack-finance-erp",
+      "default_branch": "main",
+      "size": 2384,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "deepak223098/Long-Term-Stock-Price-Growth-Prediction-using-NLP-on-10-K-Financial-Reports",
+      "url": "https://github.com/deepak223098/Long-Term-Stock-Price-Growth-Prediction-using-NLP-on-10-K-Financial-Reports",
+      "default_branch": "master",
+      "size": 10823,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "SugoiFactory/SkillKeeper",
+      "url": "https://github.com/SugoiFactory/SkillKeeper",
+      "default_branch": "master",
+      "size": 7681,
+      "archived": true
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "ogura-connection/comic-reader",
+      "url": "https://github.com/ogura-connection/comic-reader",
+      "default_branch": "main",
+      "size": 11724,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "zangassis/chat-signalR",
+      "url": "https://github.com/zangassis/chat-signalR",
+      "default_branch": "main",
+      "size": 952,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "pinax/django-user-accounts",
+      "url": "https://github.com/pinax/django-user-accounts",
+      "default_branch": "master",
+      "size": 983,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "Petyok/SSHub",
+      "url": "https://github.com/Petyok/SSHub",
+      "default_branch": "main",
+      "size": 41913,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "AliGates915/ERP-Integration",
+      "url": "https://github.com/AliGates915/ERP-Integration",
+      "default_branch": "main",
+      "size": 2902,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "zubair-trabzada/ai-trading-claude",
+      "url": "https://github.com/zubair-trabzada/ai-trading-claude",
+      "default_branch": "main",
+      "size": 126,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "hinance/hinance",
+      "url": "https://github.com/hinance/hinance",
+      "default_branch": "master",
+      "size": 415,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "julien118/read",
+      "url": "https://github.com/julien118/read",
+      "default_branch": "main",
+      "size": 293,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "DiabeticOwl/web-chat-go",
+      "url": "https://github.com/DiabeticOwl/web-chat-go",
+      "default_branch": "main",
+      "size": 49,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "terencehyz/AccountingApp",
+      "url": "https://github.com/terencehyz/AccountingApp",
+      "default_branch": "master",
+      "size": 1099,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "gebruder/wirken",
+      "url": "https://github.com/gebruder/wirken",
+      "default_branch": "main",
+      "size": 9082,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "RestbaseDev/SalesSuit",
+      "url": "https://github.com/RestbaseDev/SalesSuit",
+      "default_branch": "master",
+      "size": 10,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "NExTplusplus/TAT-QA",
+      "url": "https://github.com/NExTplusplus/TAT-QA",
+      "default_branch": "master",
+      "size": 4776,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "LumiDesk/verifin",
+      "url": "https://github.com/LumiDesk/verifin",
+      "default_branch": "main",
+      "size": 7989,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "hfzizz/RDSY",
+      "url": "https://github.com/hfzizz/RDSY",
+      "default_branch": "main",
+      "size": 240,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "daisy3607/chatroom-app",
+      "url": "https://github.com/daisy3607/chatroom-app",
+      "default_branch": "master",
+      "size": 5598,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "safe-global/safe-wallet-monorepo",
+      "url": "https://github.com/safe-global/safe-wallet-monorepo",
+      "default_branch": "dev",
+      "size": 133066,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "Silverov/yandex-direct-skill",
+      "url": "https://github.com/Silverov/yandex-direct-skill",
+      "default_branch": "master",
+      "size": 21,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "mybizna/account",
+      "url": "https://github.com/mybizna/account",
+      "default_branch": "main",
+      "size": 17008,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "NDelventhal/cot_reports",
+      "url": "https://github.com/NDelventhal/cot_reports",
+      "default_branch": "main",
+      "size": 74,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "mayswind/ezBookkeeping-Website",
+      "url": "https://github.com/mayswind/ezBookkeeping-Website",
+      "default_branch": "main",
+      "size": 5785,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "c1b3rt00lk1t/press-reader-prototype",
+      "url": "https://github.com/c1b3rt00lk1t/press-reader-prototype",
+      "default_branch": "demo",
+      "size": 1695,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "nathnaelg/RealTimeChat",
+      "url": "https://github.com/nathnaelg/RealTimeChat",
+      "default_branch": "master",
+      "size": 22,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Lax/traffic-accounting-nginx-module",
+      "url": "https://github.com/Lax/traffic-accounting-nginx-module",
+      "default_branch": "master",
+      "size": 841,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "ChristoAnsek/audited-change-gate",
+      "url": "https://github.com/ChristoAnsek/audited-change-gate",
+      "default_branch": "main",
+      "size": 782,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "NayeemHasan807/BusinessERP-ASP.NET-Project",
+      "url": "https://github.com/NayeemHasan807/BusinessERP-ASP.NET-Project",
+      "default_branch": "main",
+      "size": 16813,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "lefterisloukas/edgar-crawler",
+      "url": "https://github.com/lefterisloukas/edgar-crawler",
+      "default_branch": "main",
+      "size": 66077,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "twilco/beancount",
+      "url": "https://github.com/twilco/beancount",
+      "default_branch": "master",
+      "size": 168,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "ernestodisa/tss-reader-app",
+      "url": "https://github.com/ernestodisa/tss-reader-app",
+      "default_branch": "main",
+      "size": 681,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "iamtouha/Chat",
+      "url": "https://github.com/iamtouha/Chat",
+      "default_branch": "main",
+      "size": 527,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "aws-ia/terraform-aws-control_tower_account_factory",
+      "url": "https://github.com/aws-ia/terraform-aws-control_tower_account_factory",
+      "default_branch": "main",
+      "size": 880,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "AlexZio00/sovereign-skills",
+      "url": "https://github.com/AlexZio00/sovereign-skills",
+      "default_branch": "master",
+      "size": 793,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "SnowBconeDeveloper/FinanceERP_defrepotokint",
+      "url": "https://github.com/SnowBconeDeveloper/FinanceERP_defrepotokint",
+      "default_branch": "main",
+      "size": 1751,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Ontica/Empiria.FinancialAccounting",
+      "url": "https://github.com/Ontica/Empiria.FinancialAccounting",
+      "default_branch": "master",
+      "size": 3857,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "ash-project/ash_double_entry",
+      "url": "https://github.com/ash-project/ash_double_entry",
+      "default_branch": "main",
+      "size": 507,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "pwintri2/BookReader",
+      "url": "https://github.com/pwintri2/BookReader",
+      "default_branch": "main",
+      "size": 2439,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Kiremate/RealTimeChat",
+      "url": "https://github.com/Kiremate/RealTimeChat",
+      "default_branch": "master",
+      "size": 52,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "apache/fineract-cn-accounting",
+      "url": "https://github.com/apache/fineract-cn-accounting",
+      "default_branch": "develop",
+      "size": 660,
+      "archived": true
+    },
+    {
+      "category": "audit management",
+      "name": "CervantesSec/cervantes",
+      "url": "https://github.com/CervantesSec/cervantes",
+      "default_branch": "master",
+      "size": 94157,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "dawit-kebebe/mk-erp-next",
+      "url": "https://github.com/dawit-kebebe/mk-erp-next",
+      "default_branch": "main",
+      "size": 1751,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Agents365-ai/daisy-financial-research",
+      "url": "https://github.com/Agents365-ai/daisy-financial-research",
+      "default_branch": "main",
+      "size": 1849,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "mengXTXTXT666/bill",
+      "url": "https://github.com/mengXTXTXT666/bill",
+      "default_branch": "master",
+      "size": 16823,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "GDDaucatmoi/pdf2epub-paddle",
+      "url": "https://github.com/GDDaucatmoi/pdf2epub-paddle",
+      "default_branch": "main",
+      "size": 535,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "innovatorved/nexttalk-frontend",
+      "url": "https://github.com/innovatorved/nexttalk-frontend",
+      "default_branch": "main",
+      "size": 564,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "pennersr/django-allauth",
+      "url": "https://github.com/pennersr/django-allauth",
+      "default_branch": "main",
+      "size": 22060,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "imsweb/django-history-triggers",
+      "url": "https://github.com/imsweb/django-history-triggers",
+      "default_branch": "main",
+      "size": 150,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "benjdiasaad/ERP",
+      "url": "https://github.com/benjdiasaad/ERP",
+      "default_branch": "main",
+      "size": 569,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "noahnan-max/financial-red-flag-auditor-skill",
+      "url": "https://github.com/noahnan-max/financial-red-flag-auditor-skill",
+      "default_branch": "main",
+      "size": 55,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "pihel/cash",
+      "url": "https://github.com/pihel/cash",
+      "default_branch": "master",
+      "size": 9882,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "manynames3/gesture-reader",
+      "url": "https://github.com/manynames3/gesture-reader",
+      "default_branch": "main",
+      "size": 1562,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "ZiadGamalDev/customer-support-agent-react",
+      "url": "https://github.com/ZiadGamalDev/customer-support-agent-react",
+      "default_branch": "main",
+      "size": 374,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "cloudfoundry/uaa",
+      "url": "https://github.com/cloudfoundry/uaa",
+      "default_branch": "develop",
+      "size": 84707,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "samirketema/pg_roast",
+      "url": "https://github.com/samirketema/pg_roast",
+      "default_branch": "main",
+      "size": 32,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "michaelcoders/ERP-Financeiro",
+      "url": "https://github.com/michaelcoders/ERP-Financeiro",
+      "default_branch": "main",
+      "size": 87,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "tvp-freeports/analysis_finance_reports",
+      "url": "https://github.com/tvp-freeports/analysis_finance_reports",
+      "default_branch": "main",
+      "size": 200390,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "kunkku/django-financial-accounting",
+      "url": "https://github.com/kunkku/django-financial-accounting",
+      "default_branch": "master",
+      "size": 112,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "M3RCU3Y/Flow-Reader",
+      "url": "https://github.com/M3RCU3Y/Flow-Reader",
+      "default_branch": "main",
+      "size": 499,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "GEOSOFT-GLOBAL/geo-connects",
+      "url": "https://github.com/GEOSOFT-GLOBAL/geo-connects",
+      "default_branch": "master",
+      "size": 32,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "mate-academy/node_accounting-app-with-db",
+      "url": "https://github.com/mate-academy/node_accounting-app-with-db",
+      "default_branch": "master",
+      "size": 35,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "crescent-purchasing/filament-auditing",
+      "url": "https://github.com/crescent-purchasing/filament-auditing",
+      "default_branch": "main",
+      "size": 1217,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "LastoriaBread/Finance",
+      "url": "https://github.com/LastoriaBread/Finance",
+      "default_branch": "main",
+      "size": 0,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "fedoco/apple-slicer",
+      "url": "https://github.com/fedoco/apple-slicer",
+      "default_branch": "master",
+      "size": 101,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "Goalsum/TataruBook",
+      "url": "https://github.com/Goalsum/TataruBook",
+      "default_branch": "main",
+      "size": 2048,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "arirarif/shelfy",
+      "url": "https://github.com/arirarif/shelfy",
+      "default_branch": "main",
+      "size": 1780,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "HebaAbdElhamed/realtime-support-ticketing-system",
+      "url": "https://github.com/HebaAbdElhamed/realtime-support-ticketing-system",
+      "default_branch": "main",
+      "size": 69,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "JiuZX/Cursor-Register",
+      "url": "https://github.com/JiuZX/Cursor-Register",
+      "default_branch": "main",
+      "size": 114,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "Vinum-Security/yandex-cloud-security",
+      "url": "https://github.com/Vinum-Security/yandex-cloud-security",
+      "default_branch": "main",
+      "size": 12,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "verpseo/verp-erp-packages",
+      "url": "https://github.com/verpseo/verp-erp-packages",
+      "default_branch": "master",
+      "size": 2,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "mb4468/bartik_intro",
+      "url": "https://github.com/mb4468/bartik_intro",
+      "default_branch": "main",
+      "size": 6,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "jonaswitt/stripe-datev-exporter",
+      "url": "https://github.com/jonaswitt/stripe-datev-exporter",
+      "default_branch": "master",
+      "size": 148,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "SuperWalrus01/rsvp-reader",
+      "url": "https://github.com/SuperWalrus01/rsvp-reader",
+      "default_branch": "main",
+      "size": 104,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "asim-sde/realtime-chat",
+      "url": "https://github.com/asim-sde/realtime-chat",
+      "default_branch": "main",
+      "size": 15,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "ekmungai/python-accounting",
+      "url": "https://github.com/ekmungai/python-accounting",
+      "default_branch": "main",
+      "size": 8439,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "DevopsArtFactory/redhawk",
+      "url": "https://github.com/DevopsArtFactory/redhawk",
+      "default_branch": "main",
+      "size": 28142,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "khouloud912/ERP_Chantier",
+      "url": "https://github.com/khouloud912/ERP_Chantier",
+      "default_branch": "main",
+      "size": 28720,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Agentic-Analyst/stock-analyst",
+      "url": "https://github.com/Agentic-Analyst/stock-analyst",
+      "default_branch": "main",
+      "size": 6971,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "hoophq/sequence",
+      "url": "https://github.com/hoophq/sequence",
+      "default_branch": "master",
+      "size": 49,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "puppe1990/epub-reader",
+      "url": "https://github.com/puppe1990/epub-reader",
+      "default_branch": "main",
+      "size": 1082,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "buj99/RealtimeSupportChat",
+      "url": "https://github.com/buj99/RealtimeSupportChat",
+      "default_branch": "main",
+      "size": 28906,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "adamcharnock/django-hordak",
+      "url": "https://github.com/adamcharnock/django-hordak",
+      "default_branch": "master",
+      "size": 2642,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "krishnakanthb13/antigravity_global_skills",
+      "url": "https://github.com/krishnakanthb13/antigravity_global_skills",
+      "default_branch": "main",
+      "size": 971,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "delta-corpit-erpdev/Finance",
+      "url": "https://github.com/delta-corpit-erpdev/Finance",
+      "default_branch": "master",
+      "size": 0,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "andyevers/sec-edgar-api",
+      "url": "https://github.com/andyevers/sec-edgar-api",
+      "default_branch": "main",
+      "size": 1896,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "php-finance/double-entry",
+      "url": "https://github.com/php-finance/double-entry",
+      "default_branch": "master",
+      "size": 65,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "fuzmaster/book-comic-reader",
+      "url": "https://github.com/fuzmaster/book-comic-reader",
+      "default_branch": "main",
+      "size": 138,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Enter-tainer/richat-backend",
+      "url": "https://github.com/Enter-tainer/richat-backend",
+      "default_branch": "master",
+      "size": 6,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "yvanwangl/AccountSystem",
+      "url": "https://github.com/yvanwangl/AccountSystem",
+      "default_branch": "master",
+      "size": 1378,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "neatlogic/neatlogic-framework",
+      "url": "https://github.com/neatlogic/neatlogic-framework",
+      "default_branch": "develop3.0.0",
+      "size": 62718,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "CodeByPinar/accura-finance",
+      "url": "https://github.com/CodeByPinar/accura-finance",
+      "default_branch": "main",
+      "size": 2254,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "portfedh/fundamental_analysis_report",
+      "url": "https://github.com/portfedh/fundamental_analysis_report",
+      "default_branch": "main",
+      "size": 10110,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "tackler-ng/tackler",
+      "url": "https://github.com/tackler-ng/tackler",
+      "default_branch": "main",
+      "size": 2106,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "cyborgpulsedev/volt",
+      "url": "https://github.com/cyborgpulsedev/volt",
+      "default_branch": "main",
+      "size": 20085,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "szHeron/ChatApp",
+      "url": "https://github.com/szHeron/ChatApp",
+      "default_branch": "main",
+      "size": 734,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "SealedSaucer/Online-Forever",
+      "url": "https://github.com/SealedSaucer/Online-Forever",
+      "default_branch": "main",
+      "size": 117,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "mimiog/Inventory-and-Audit-Management-System-",
+      "url": "https://github.com/mimiog/Inventory-and-Audit-Management-System-",
+      "default_branch": "main",
+      "size": 1981,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "virleux/ERP",
+      "url": "https://github.com/virleux/ERP",
+      "default_branch": "master",
+      "size": 0,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Flakky/steamworks-extras",
+      "url": "https://github.com/Flakky/steamworks-extras",
+      "default_branch": "main",
+      "size": 5701,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "TNT-Likely/BeeCount",
+      "url": "https://github.com/TNT-Likely/BeeCount",
+      "default_branch": "main",
+      "size": 124084,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "MarianHoroiu/ci-reader",
+      "url": "https://github.com/MarianHoroiu/ci-reader",
+      "default_branch": "main",
+      "size": 10705,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "chachaa10/realtime-chat-support",
+      "url": "https://github.com/chachaa10/realtime-chat-support",
+      "default_branch": "main",
+      "size": 2492,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "postaddictme/instagram-php-scraper",
+      "url": "https://github.com/postaddictme/instagram-php-scraper",
+      "default_branch": "master",
+      "size": 648,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "AmatCire/APACGAMONDE-",
+      "url": "https://github.com/AmatCire/APACGAMONDE-",
+      "default_branch": "master",
+      "size": 8,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "rohitpawar-tech/CoreFlow-ERP",
+      "url": "https://github.com/rohitpawar-tech/CoreFlow-ERP",
+      "default_branch": "main",
+      "size": 17107,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "APACGAMONDE/APACGAMONDE-Bank-Public",
+      "url": "https://github.com/APACGAMONDE/APACGAMONDE-Bank-Public",
+      "default_branch": "master",
+      "size": 273,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "FranzLiszt-1847/Bookkeeping",
+      "url": "https://github.com/FranzLiszt-1847/Bookkeeping",
+      "default_branch": "main",
+      "size": 1067,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "leosimon/InkReader",
+      "url": "https://github.com/leosimon/InkReader",
+      "default_branch": "main",
+      "size": 92,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "CodeWith-HAMZA/Realtime-Messaging-App",
+      "url": "https://github.com/CodeWith-HAMZA/Realtime-Messaging-App",
+      "default_branch": "main",
+      "size": 775,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "OCA/account-financial-tools",
+      "url": "https://github.com/OCA/account-financial-tools",
+      "default_branch": "18.0",
+      "size": 110556,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "eclipse-tradista/tradista",
+      "url": "https://github.com/eclipse-tradista/tradista",
+      "default_branch": "main",
+      "size": 40606,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "galigeethu45-prog/ERP",
+      "url": "https://github.com/galigeethu45-prog/ERP",
+      "default_branch": "main",
+      "size": 61,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "marcioalexandre/XbrlParser",
+      "url": "https://github.com/marcioalexandre/XbrlParser",
+      "default_branch": "master",
+      "size": 53,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "flatlogic/bookkeeper",
+      "url": "https://github.com/flatlogic/bookkeeper",
+      "default_branch": "master",
+      "size": 20371,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "leisurexhx/mfe-study-cloud",
+      "url": "https://github.com/leisurexhx/mfe-study-cloud",
+      "default_branch": "main",
+      "size": 238,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "harshxraj/realtime-chat",
+      "url": "https://github.com/harshxraj/realtime-chat",
+      "default_branch": "main",
+      "size": 9058,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "ic3w0lf22/Roblox-Account-Manager",
+      "url": "https://github.com/ic3w0lf22/Roblox-Account-Manager",
+      "default_branch": "master",
+      "size": 3199,
+      "archived": true
+    },
+    {
+      "category": "audit management",
+      "name": "SafetyMP/Autonomous-EHS-Management",
+      "url": "https://github.com/SafetyMP/Autonomous-EHS-Management",
+      "default_branch": "main",
+      "size": 7451,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "phemi/finance",
+      "url": "https://github.com/phemi/finance",
+      "default_branch": "1.0.0",
+      "size": 46,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "CharlesHoffmanCPA/fac-ifrs",
+      "url": "https://github.com/CharlesHoffmanCPA/fac-ifrs",
+      "default_branch": "master",
+      "size": 107,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "eekboek/eekboek",
+      "url": "https://github.com/eekboek/eekboek",
+      "default_branch": "master",
+      "size": 5642,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "annamariacijo-lab/Literate",
+      "url": "https://github.com/annamariacijo-lab/Literate",
+      "default_branch": "main",
+      "size": 2592,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "okancem/socketio-realtime-chat",
+      "url": "https://github.com/okancem/socketio-realtime-chat",
+      "default_branch": "main",
+      "size": 20,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "tgrosinger/ledger-obsidian",
+      "url": "https://github.com/tgrosinger/ledger-obsidian",
+      "default_branch": "main",
+      "size": 3435,
+      "archived": true
+    },
+    {
+      "category": "audit management",
+      "name": "Orange-OpenSource/optisam-backend",
+      "url": "https://github.com/Orange-OpenSource/optisam-backend",
+      "default_branch": "master",
+      "size": 20379,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "ChChatz/personal-erp",
+      "url": "https://github.com/ChChatz/personal-erp",
+      "default_branch": "main",
+      "size": 1304,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "kunalrye/financialsummary",
+      "url": "https://github.com/kunalrye/financialsummary",
+      "default_branch": "master",
+      "size": 109823,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "wangpf1129/bookkeeping-vue",
+      "url": "https://github.com/wangpf1129/bookkeeping-vue",
+      "default_branch": "master",
+      "size": 819,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "krithik-vasu/Literate-AIEP",
+      "url": "https://github.com/krithik-vasu/Literate-AIEP",
+      "default_branch": "main",
+      "size": 55,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "ashajyothi9795/realtime-support-chat",
+      "url": "https://github.com/ashajyothi9795/realtime-support-chat",
+      "default_branch": "main",
+      "size": 1999,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "flash-oss/medici",
+      "url": "https://github.com/flash-oss/medici",
+      "default_branch": "master",
+      "size": 2876,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "MACE-App/MACE",
+      "url": "https://github.com/MACE-App/MACE",
+      "default_branch": "main",
+      "size": 31628,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Bhawana0218/AI-Powered-Cloud-ERP-Suite",
+      "url": "https://github.com/Bhawana0218/AI-Powered-Cloud-ERP-Suite",
+      "default_branch": "main",
+      "size": 733,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "gboudreau/easymalt",
+      "url": "https://github.com/gboudreau/easymalt",
+      "default_branch": "master",
+      "size": 168,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "lst555ProMax/bookkeeping",
+      "url": "https://github.com/lst555ProMax/bookkeeping",
+      "default_branch": "main",
+      "size": 83908,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "WhyAmIHereHarshul/Literate",
+      "url": "https://github.com/WhyAmIHereHarshul/Literate",
+      "default_branch": "main",
+      "size": 29,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Yuvraj-0707/realtime-support-chat",
+      "url": "https://github.com/Yuvraj-0707/realtime-support-chat",
+      "default_branch": "main",
+      "size": 1661,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "snowflakedb/terraform-provider-snowflake",
+      "url": "https://github.com/snowflakedb/terraform-provider-snowflake",
+      "default_branch": "main",
+      "size": 69270,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "nicholasblexrud/ga-auditor",
+      "url": "https://github.com/nicholasblexrud/ga-auditor",
+      "default_branch": "master",
+      "size": 290,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Hijab-bit/Fintrack",
+      "url": "https://github.com/Hijab-bit/Fintrack",
+      "default_branch": "main",
+      "size": 4,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "JumsAdeyemi/personal-finance-tracker",
+      "url": "https://github.com/JumsAdeyemi/personal-finance-tracker",
+      "default_branch": "main",
+      "size": 64,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "AliceO2Group/analysis-tutorials",
+      "url": "https://github.com/AliceO2Group/analysis-tutorials",
+      "default_branch": "master",
+      "size": 150972,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "Boffin-Omega/Literate",
+      "url": "https://github.com/Boffin-Omega/Literate",
+      "default_branch": "main",
+      "size": 2592,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "vchada/realtime-support-chat",
+      "url": "https://github.com/vchada/realtime-support-chat",
+      "default_branch": "main",
+      "size": 2,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "trezor/blockbook",
+      "url": "https://github.com/trezor/blockbook",
+      "default_branch": "master",
+      "size": 12148,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "urosengineer/saas-backend-starter",
+      "url": "https://github.com/urosengineer/saas-backend-starter",
+      "default_branch": "main",
+      "size": 475,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "biglitzofficial/casifly",
+      "url": "https://github.com/biglitzofficial/casifly",
+      "default_branch": "main",
+      "size": 4662,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "JayVora-SerpentCS/account_fstr",
+      "url": "https://github.com/JayVora-SerpentCS/account_fstr",
+      "default_branch": "6.1",
+      "size": 201,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "kazukinagata/shinkoku",
+      "url": "https://github.com/kazukinagata/shinkoku",
+      "default_branch": "main",
+      "size": 1204,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "AkagamiShankz007/Literate",
+      "url": "https://github.com/AkagamiShankz007/Literate",
+      "default_branch": "main",
+      "size": 32,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Bellamkondakavya/realtime-support-chat",
+      "url": "https://github.com/Bellamkondakavya/realtime-support-chat",
+      "default_branch": "main",
+      "size": 173,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "bread-and-pepper/django-userena",
+      "url": "https://github.com/bread-and-pepper/django-userena",
+      "default_branch": "master",
+      "size": 2986,
+      "archived": true
+    },
+    {
+      "category": "audit management",
+      "name": "michaelmsonne/ManagedIdentityPermissionManager",
+      "url": "https://github.com/michaelmsonne/ManagedIdentityPermissionManager",
+      "default_branch": "main",
+      "size": 16290,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "raflyyadinata/FE.-ERP",
+      "url": "https://github.com/raflyyadinata/FE.-ERP",
+      "default_branch": "main",
+      "size": 4,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "samietex/Financial_Dashboard_Modeling",
+      "url": "https://github.com/samietex/Financial_Dashboard_Modeling",
+      "default_branch": "main",
+      "size": 3267,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "mne-tools/fiff-constants",
+      "url": "https://github.com/mne-tools/fiff-constants",
+      "default_branch": "master",
+      "size": 107,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "alyosha858585-cell/folio",
+      "url": "https://github.com/alyosha858585-cell/folio",
+      "default_branch": "master",
+      "size": 153,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "LavKumar82/Realtime-support-chat",
+      "url": "https://github.com/LavKumar82/Realtime-support-chat",
+      "default_branch": "main",
+      "size": 4,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "chenyme/grok2api",
+      "url": "https://github.com/chenyme/grok2api",
+      "default_branch": "main",
+      "size": 10975,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "thangphan205/tacacs-ng-ui",
+      "url": "https://github.com/thangphan205/tacacs-ng-ui",
+      "default_branch": "main",
+      "size": 14187,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "pocgithubtest/erp-finance",
+      "url": "https://github.com/pocgithubtest/erp-finance",
+      "default_branch": "main",
+      "size": 0,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "radii/noisetor-accounting",
+      "url": "https://github.com/radii/noisetor-accounting",
+      "default_branch": "master",
+      "size": 134,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "malwaredb/malwaredb-rs",
+      "url": "https://github.com/malwaredb/malwaredb-rs",
+      "default_branch": "main",
+      "size": 6009,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "DavidSnoble/folio",
+      "url": "https://github.com/DavidSnoble/folio",
+      "default_branch": "main",
+      "size": 113,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "dronsharmasharma61-alt/Realtime-Support-Chat",
+      "url": "https://github.com/dronsharmasharma61-alt/Realtime-Support-Chat",
+      "default_branch": "main",
+      "size": 16,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "IAmBlackHacker/Facebook-BruteForce",
+      "url": "https://github.com/IAmBlackHacker/Facebook-BruteForce",
+      "default_branch": "master",
+      "size": 12721,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "sandeepbazar/ocm-mcp-server",
+      "url": "https://github.com/sandeepbazar/ocm-mcp-server",
+      "default_branch": "main",
+      "size": 21673,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "rochiyat-bit/erp-finance",
+      "url": "https://github.com/rochiyat-bit/erp-finance",
+      "default_branch": "main",
+      "size": 294,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "RoboFinSystems/robosystems",
+      "url": "https://github.com/RoboFinSystems/robosystems",
+      "default_branch": "main",
+      "size": 56806,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "bex-co/beancount-io",
+      "url": "https://github.com/bex-co/beancount-io",
+      "default_branch": "main",
+      "size": 8078,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "ivan7800/Comic-Reader-404",
+      "url": "https://github.com/ivan7800/Comic-Reader-404",
+      "default_branch": "main",
+      "size": 455,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "DarabaneanuCosmin/Realtime-Support-Chat",
+      "url": "https://github.com/DarabaneanuCosmin/Realtime-Support-Chat",
+      "default_branch": "ReSC-v0.1",
+      "size": 18412,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "aussiearef/Accounting",
+      "url": "https://github.com/aussiearef/Accounting",
+      "default_branch": "master",
+      "size": 412,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "amirul1000/audit-management",
+      "url": "https://github.com/amirul1000/audit-management",
+      "default_branch": "master",
+      "size": 58275,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "onurkockann/AccountingERP-ASP.NET-MVC",
+      "url": "https://github.com/onurkockann/AccountingERP-ASP.NET-MVC",
+      "default_branch": "master",
+      "size": 972,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "minhyeoky/mcp-server-ledger",
+      "url": "https://github.com/minhyeoky/mcp-server-ledger",
+      "default_branch": "master",
+      "size": 32,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "SEIAROTg/autobean",
+      "url": "https://github.com/SEIAROTg/autobean",
+      "default_branch": "master",
+      "size": 809,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "mysticninja487/Fixed-Point-RSVP-Speed-Reader",
+      "url": "https://github.com/mysticninja487/Fixed-Point-RSVP-Speed-Reader",
+      "default_branch": "main",
+      "size": 32,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "harshjdhv/Realtime-Chat-Application",
+      "url": "https://github.com/harshjdhv/Realtime-Chat-Application",
+      "default_branch": "main",
+      "size": 987,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "FeezyHendrix/Insta-mass-account-creator",
+      "url": "https://github.com/FeezyHendrix/Insta-mass-account-creator",
+      "default_branch": "master",
+      "size": 15283,
+      "archived": true
+    },
+    {
+      "category": "audit management",
+      "name": "akshay528/Audit-Management-System",
+      "url": "https://github.com/akshay528/Audit-Management-System",
+      "default_branch": "main",
+      "size": 45824,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "ChickSA-v1/ERP",
+      "url": "https://github.com/ChickSA-v1/ERP",
+      "default_branch": "main",
+      "size": 95,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "brain-tec/account-financial-reporting",
+      "url": "https://github.com/brain-tec/account-financial-reporting",
+      "default_branch": "18.0",
+      "size": 57234,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "GVogeler/bookkeeping",
+      "url": "https://github.com/GVogeler/bookkeeping",
+      "default_branch": "master",
+      "size": 55,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "DuyTai2003/doc-sach",
+      "url": "https://github.com/DuyTai2003/doc-sach",
+      "default_branch": "master",
+      "size": 1487,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "NEVIL5249/socketio-realtime-chat",
+      "url": "https://github.com/NEVIL5249/socketio-realtime-chat",
+      "default_branch": "main",
+      "size": 226,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "timschofield/webERP",
+      "url": "https://github.com/timschofield/webERP",
+      "default_branch": "master",
+      "size": 655616,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "veilkey/veilkey-selfhosted",
+      "url": "https://github.com/veilkey/veilkey-selfhosted",
+      "default_branch": "main",
+      "size": 63982,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "SyedMSaqib/erp-system",
+      "url": "https://github.com/SyedMSaqib/erp-system",
+      "default_branch": "master",
+      "size": 13669,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "OpenTechStrategies/cafr-parsing",
+      "url": "https://github.com/OpenTechStrategies/cafr-parsing",
+      "default_branch": "master",
+      "size": 82218,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "nutalk/OpenBookkeeping",
+      "url": "https://github.com/nutalk/OpenBookkeeping",
+      "default_branch": "main",
+      "size": 1470,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "VicThor-wpp/spritz-rsvp",
+      "url": "https://github.com/VicThor-wpp/spritz-rsvp",
+      "default_branch": "main",
+      "size": 1223,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "thanhtonhuynh/realtime-chat-support",
+      "url": "https://github.com/thanhtonhuynh/realtime-chat-support",
+      "default_branch": "main",
+      "size": 287,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Lakr233/Asspp",
+      "url": "https://github.com/Lakr233/Asspp",
+      "default_branch": "main",
+      "size": 10892,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "aplater/VendorAuditAI",
+      "url": "https://github.com/aplater/VendorAuditAI",
+      "default_branch": "master",
+      "size": 4932,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "suzuki-429/Modern-multi-tenant-ERP-system-for-SMBs",
+      "url": "https://github.com/suzuki-429/Modern-multi-tenant-ERP-system-for-SMBs",
+      "default_branch": "main",
+      "size": 2194,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "DataBytes-Organisation/Neo_Dolfin",
+      "url": "https://github.com/DataBytes-Organisation/Neo_Dolfin",
+      "default_branch": "develop",
+      "size": 49325,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "counsyl/capone",
+      "url": "https://github.com/counsyl/capone",
+      "default_branch": "master",
+      "size": 480,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "shravzzv/paddy",
+      "url": "https://github.com/shravzzv/paddy",
+      "default_branch": "main",
+      "size": 20814,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Lalitforreal/realtime-support-chat",
+      "url": "https://github.com/Lalitforreal/realtime-support-chat",
+      "default_branch": "main",
+      "size": 134,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "ingadhoc/account-invoicing",
+      "url": "https://github.com/ingadhoc/account-invoicing",
+      "default_branch": "19.0",
+      "size": 12814,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "PCJ-Somil-ERP/performance_management",
+      "url": "https://github.com/PCJ-Somil-ERP/performance_management",
+      "default_branch": "main",
+      "size": 231,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "zhound420/D365FO-claude-connector",
+      "url": "https://github.com/zhound420/D365FO-claude-connector",
+      "default_branch": "main",
+      "size": 482,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "leojg/financial-inteligence-agent",
+      "url": "https://github.com/leojg/financial-inteligence-agent",
+      "default_branch": "master",
+      "size": 43668,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "SoftwareForScience/jiskefet-api",
+      "url": "https://github.com/SoftwareForScience/jiskefet-api",
+      "default_branch": "master",
+      "size": 1618,
+      "archived": true
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "CodeEnthusiast09/narrator",
+      "url": "https://github.com/CodeEnthusiast09/narrator",
+      "default_branch": "main",
+      "size": 1047,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Sumit-kumar-byte/realtime-support-chat",
+      "url": "https://github.com/Sumit-kumar-byte/realtime-support-chat",
+      "default_branch": "main",
+      "size": 102,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "OCA/account-invoicing",
+      "url": "https://github.com/OCA/account-invoicing",
+      "default_branch": "18.0",
+      "size": 23642,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "UmashankarGouda/AuditTrail",
+      "url": "https://github.com/UmashankarGouda/AuditTrail",
+      "default_branch": "main",
+      "size": 261,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "sher-holmes/FINANCE.ERP",
+      "url": "https://github.com/sher-holmes/FINANCE.ERP",
+      "default_branch": "main",
+      "size": 603,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "CFA-Institute-RPC/Reframing-Financial-Markets-as-Complex-Systems",
+      "url": "https://github.com/CFA-Institute-RPC/Reframing-Financial-Markets-as-Complex-Systems",
+      "default_branch": "main",
+      "size": 120,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "fatsheep2/beanBridge",
+      "url": "https://github.com/fatsheep2/beanBridge",
+      "default_branch": "main",
+      "size": 20601,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "rudrapratapsahoo04-netizen/CollegeLibrary",
+      "url": "https://github.com/rudrapratapsahoo04-netizen/CollegeLibrary",
+      "default_branch": "main",
+      "size": 3492,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "PavloGrydin/realtime-support-chat",
+      "url": "https://github.com/PavloGrydin/realtime-support-chat",
+      "default_branch": "main",
+      "size": 1,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Gnucash/gnucash-docs",
+      "url": "https://github.com/Gnucash/gnucash-docs",
+      "default_branch": "stable",
+      "size": 340688,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "njiddasalifu/File-Management-System",
+      "url": "https://github.com/njiddasalifu/File-Management-System",
+      "default_branch": "main",
+      "size": 6480,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "vardhmangurgaon/vardhman-finance-erp",
+      "url": "https://github.com/vardhmangurgaon/vardhman-finance-erp",
+      "default_branch": "main",
+      "size": 751,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "param20h/PDF-Assistant-RAG",
+      "url": "https://github.com/param20h/PDF-Assistant-RAG",
+      "default_branch": "dev",
+      "size": 1815,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "norman-finance/norman-mcp-server",
+      "url": "https://github.com/norman-finance/norman-mcp-server",
+      "default_branch": "main",
+      "size": 589,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "zgbrenner/circuitus",
+      "url": "https://github.com/zgbrenner/circuitus",
+      "default_branch": "main",
+      "size": 1256,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "pikselan/realtime-support-backend",
+      "url": "https://github.com/pikselan/realtime-support-backend",
+      "default_branch": "master",
+      "size": 5,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "rebuy-de/aws-nuke",
+      "url": "https://github.com/rebuy-de/aws-nuke",
+      "default_branch": "main",
+      "size": 1411,
+      "archived": true
+    },
+    {
+      "category": "audit management",
+      "name": "Sb9009639898/AuditManagement",
+      "url": "https://github.com/Sb9009639898/AuditManagement",
+      "default_branch": "master",
+      "size": 46759,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "hrtglsolutions-spec/erp-construction",
+      "url": "https://github.com/hrtglsolutions-spec/erp-construction",
+      "default_branch": "main",
+      "size": 19,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "BeetleStudios/bs_credit",
+      "url": "https://github.com/BeetleStudios/bs_credit",
+      "default_branch": "main",
+      "size": 876,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "luohuihua/uni-bookkeeping",
+      "url": "https://github.com/luohuihua/uni-bookkeeping",
+      "default_branch": "master",
+      "size": 997,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "farhandnb999/Jarvis-AI1",
+      "url": "https://github.com/farhandnb999/Jarvis-AI1",
+      "default_branch": "main",
+      "size": 1,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "buildwithmehul/realtime-chat-backend-nodejs",
+      "url": "https://github.com/buildwithmehul/realtime-chat-backend-nodejs",
+      "default_branch": "main",
+      "size": 1860,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "OCA/account-analytic",
+      "url": "https://github.com/OCA/account-analytic",
+      "default_branch": "18.0",
+      "size": 39070,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "GarrickLin/any_gateway",
+      "url": "https://github.com/GarrickLin/any_gateway",
+      "default_branch": "main",
+      "size": 19843,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "lunebadou/app-pfa",
+      "url": "https://github.com/lunebadou/app-pfa",
+      "default_branch": "main",
+      "size": 61,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Christy-Lo/Financial-Fraud-Detection-Using-Text-Mining",
+      "url": "https://github.com/Christy-Lo/Financial-Fraud-Detection-Using-Text-Mining",
+      "default_branch": "main",
+      "size": 1455,
+      "archived": true
+    },
+    {
+      "category": "bookkeeping",
+      "name": "hyperjumptech/bookkeeping",
+      "url": "https://github.com/hyperjumptech/bookkeeping",
+      "default_branch": "main",
+      "size": 8828,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "cirosantilli/china-dictatorship",
+      "url": "https://github.com/cirosantilli/china-dictatorship",
+      "default_branch": "master",
+      "size": 105457,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Qard/Chattan",
+      "url": "https://github.com/Qard/Chattan",
+      "default_branch": "master",
+      "size": 1872,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "OCA/bank-payment",
+      "url": "https://github.com/OCA/bank-payment",
+      "default_branch": "18.0",
+      "size": 31634,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "jsimpsonn/MSP_QMS",
+      "url": "https://github.com/jsimpsonn/MSP_QMS",
+      "default_branch": "main",
+      "size": 1451,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Abhishekbhavsar1925/Capkco-finserv",
+      "url": "https://github.com/Abhishekbhavsar1925/Capkco-finserv",
+      "default_branch": "main",
+      "size": 50483,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "nickenshidqia/SQL-for-Financial-Data-Analysis",
+      "url": "https://github.com/nickenshidqia/SQL-for-Financial-Data-Analysis",
+      "default_branch": "main",
+      "size": 2294,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "huerlisi/bookyt",
+      "url": "https://github.com/huerlisi/bookyt",
+      "default_branch": "master",
+      "size": 5654,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "gege-circle/.github",
+      "url": "https://github.com/gege-circle/.github",
+      "default_branch": "master",
+      "size": 1706,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "garima-23-cyber/RealTime-ChatApp",
+      "url": "https://github.com/garima-23-cyber/RealTime-ChatApp",
+      "default_branch": "main",
+      "size": 2095,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "arxhr007/Aliens_eye",
+      "url": "https://github.com/arxhr007/Aliens_eye",
+      "default_branch": "main",
+      "size": 4130,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "levantoan/DevVN-WordPress-Skills",
+      "url": "https://github.com/levantoan/DevVN-WordPress-Skills",
+      "default_branch": "main",
+      "size": 43,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "Bharadwaj204/Construction-ERP-Finance",
+      "url": "https://github.com/Bharadwaj204/Construction-ERP-Finance",
+      "default_branch": "main",
+      "size": 21,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "SoviD7/Financial-Reporting-Power-BI",
+      "url": "https://github.com/SoviD7/Financial-Reporting-Power-BI",
+      "default_branch": "main",
+      "size": 3172,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "DivDash/BookKeeping",
+      "url": "https://github.com/DivDash/BookKeeping",
+      "default_branch": "master",
+      "size": 3257,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "cirosantilli/china-dictatroship-7",
+      "url": "https://github.com/cirosantilli/china-dictatroship-7",
+      "default_branch": "master",
+      "size": 17476,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "PrathamUpreti/realtime-chat-support-widget",
+      "url": "https://github.com/PrathamUpreti/realtime-chat-support-widget",
+      "default_branch": "main",
+      "size": 40,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "alexey-goloburdin/accounting-documents-ai-agent",
+      "url": "https://github.com/alexey-goloburdin/accounting-documents-ai-agent",
+      "default_branch": "main",
+      "size": 36,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "detain/ip_vlan_manager",
+      "url": "https://github.com/detain/ip_vlan_manager",
+      "default_branch": "master",
+      "size": 557,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "egi5/haebot-finance",
+      "url": "https://github.com/egi5/haebot-finance",
+      "default_branch": "main",
+      "size": 3760,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "Jabonsote/Financial-Anomaly-Detection-with-DeepSeek-and-Isolation-Forest",
+      "url": "https://github.com/Jabonsote/Financial-Anomaly-Detection-with-DeepSeek-and-Isolation-Forest",
+      "default_branch": "main",
+      "size": 4503,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "daveh551/PATITradingAssistant",
+      "url": "https://github.com/daveh551/PATITradingAssistant",
+      "default_branch": "master",
+      "size": 569,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "mRFWq7LwNPZjaVv5v6eo/cihna-dictattorshrip-8",
+      "url": "https://github.com/mRFWq7LwNPZjaVv5v6eo/cihna-dictattorshrip-8",
+      "default_branch": "master",
+      "size": 12715,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "jrimmer/hermes-chatto-plugin",
+      "url": "https://github.com/jrimmer/hermes-chatto-plugin",
+      "default_branch": "main",
+      "size": 119,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "JarFraud/FraudDetection",
+      "url": "https://github.com/JarFraud/FraudDetection",
+      "default_branch": "master",
+      "size": 31520,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "nanxiangxi/qssh",
+      "url": "https://github.com/nanxiangxi/qssh",
+      "default_branch": "main",
+      "size": 24914,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "tarigemad8888-a11y/erp-systemm",
+      "url": "https://github.com/tarigemad8888-a11y/erp-systemm",
+      "default_branch": "main",
+      "size": 154,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "akhtarshahnawaz/research-esg-Impacts-of-non-financial-reporting",
+      "url": "https://github.com/akhtarshahnawaz/research-esg-Impacts-of-non-financial-reporting",
+      "default_branch": "master",
+      "size": 26236,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "arrobalytics/django-ledger",
+      "url": "https://github.com/arrobalytics/django-ledger",
+      "default_branch": "master",
+      "size": 23336,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "panbinibn/OpenPacketFix_",
+      "url": "https://github.com/panbinibn/OpenPacketFix_",
+      "default_branch": "main",
+      "size": 558,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "monisha-kT/support-ticket-realtime-chat",
+      "url": "https://github.com/monisha-kT/support-ticket-realtime-chat",
+      "default_branch": "main",
+      "size": 103,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "envato/double_entry",
+      "url": "https://github.com/envato/double_entry",
+      "default_branch": "main",
+      "size": 738,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "unidoc/isms",
+      "url": "https://github.com/unidoc/isms",
+      "default_branch": "master",
+      "size": 3824,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "sonnguyenngoc/finances",
+      "url": "https://github.com/sonnguyenngoc/finances",
+      "default_branch": "develop",
+      "size": 31,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "cacoderquan/Predict-financial-recession",
+      "url": "https://github.com/cacoderquan/Predict-financial-recession",
+      "default_branch": "master",
+      "size": 66132,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "byrokrat/accounting",
+      "url": "https://github.com/byrokrat/accounting",
+      "default_branch": "master",
+      "size": 1823,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "zpc1314521/PCL2",
+      "url": "https://github.com/zpc1314521/PCL2",
+      "default_branch": "main",
+      "size": 5251,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "Pranavipranavi/RealTimeSupportChat",
+      "url": "https://github.com/Pranavipranavi/RealTimeSupportChat",
+      "default_branch": "main",
+      "size": 3726,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "apmuthu/frontaccounting",
+      "url": "https://github.com/apmuthu/frontaccounting",
+      "default_branch": "master",
+      "size": 60378,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "emmanuelcalad0615/AuditManagement-BackEnd",
+      "url": "https://github.com/emmanuelcalad0615/AuditManagement-BackEnd",
+      "default_branch": "main",
+      "size": 106121,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "grinvi04/erp",
+      "url": "https://github.com/grinvi04/erp",
+      "default_branch": "main",
+      "size": 4008,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "stimulsoft/Samples-Reports.JS-for-HTML",
+      "url": "https://github.com/stimulsoft/Samples-Reports.JS-for-HTML",
+      "default_branch": "main",
+      "size": 135722,
+      "archived": false
+    },
+    {
+      "category": "bookkeeping",
+      "name": "tn47/goledger",
+      "url": "https://github.com/tn47/goledger",
+      "default_branch": "master",
+      "size": 1513,
+      "archived": false
+    },
+    {
+      "category": "PDF reader PWA",
+      "name": "X601169957911/china-dictatorship",
+      "url": "https://github.com/X601169957911/china-dictatorship",
+      "default_branch": "master",
+      "size": 28733,
+      "archived": false
+    },
+    {
+      "category": "realtime chat support",
+      "name": "semaes111/realtime-customer-chat-support",
+      "url": "https://github.com/semaes111/realtime-customer-chat-support",
+      "default_branch": "broken-package-upload",
+      "size": 6648,
+      "archived": false
+    },
+    {
+      "category": "accounting",
+      "name": "Manager-io/Manager",
+      "url": "https://github.com/Manager-io/Manager",
+      "default_branch": "main",
+      "size": 3946,
+      "archived": false
+    },
+    {
+      "category": "audit management",
+      "name": "Vishal-HaCkEr1910/Phone-Number-Tracker",
+      "url": "https://github.com/Vishal-HaCkEr1910/Phone-Number-Tracker",
+      "default_branch": "main",
+      "size": 196,
+      "archived": false
+    },
+    {
+      "category": "ERP finance",
+      "name": "AugustoMota/Gest-o-Financeira",
+      "url": "https://github.com/AugustoMota/Gest-o-Financeira",
+      "default_branch": "main",
+      "size": 171,
+      "archived": false
+    },
+    {
+      "category": "financial reporting",
+      "name": "xwww333/Machine_Learning_NLP_Sentiment_Analysis",
+      "url": "https://github.com/xwww333/Machine_Learning_NLP_Sentiment_Analysis",
+      "default_branch": "main",
+      "size": 850,
+      "archived": false
+    }
+  ]
+}

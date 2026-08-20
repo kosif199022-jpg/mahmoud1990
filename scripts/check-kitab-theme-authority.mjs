@@ -18,9 +18,11 @@ for(const f of required)need(exists(f),`missing ${f}`);
 
 if(exists('public/kosif-kitab-theme.css')){
   const css=read('public/kosif-kitab-theme.css');
-  for(const token of ['#FBF4E1','#2B1D0E','#B8862B'])need(css.includes(token),`theme palette token missing: ${token}`);
+  for(const token of ['#FBF4E1','#2B1D0E','#F5A623'])need(css.includes(token),`theme palette token missing: ${token}`);
   for(const ns of ['--v36-primary','--v38-gold','--kup-gold','--k8-gold','--kstd-primary','--r-accent','--lib-gold'])need(css.includes(ns),`legacy namespace bridge missing: ${ns}`);
   need(css.includes('prefers-reduced-motion'),'reduced-motion quality floor missing');
+  need(/@media\(min-width:1024px\)[^{]*\{[^}]*#kosif-bottom-nav\{display:none!important/.test(css),'desktop mobile-nav override missing from final authority layer');
+  need(css.includes('.v38-chat-message')&&css.includes('.v38-report-gate'),'chat/report Kitab components missing');
 }
 if(exists('public/kosif-kitab-theme.js')){
   const js=read('public/kosif-kitab-theme.js');

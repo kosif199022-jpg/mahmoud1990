@@ -6,7 +6,7 @@ This document is the binding implementation baseline for KOSIF after the user-se
 
 - `public/kosif-kitab-theme.css` is the final visual authority for KOSIF.
 - `public/kosif-kitab-theme.js` must keep that stylesheet last when legacy, Phase-D, Canva, analytics, reader, or dynamically injected CSS is added later.
-- Core identity: warm paper/cream, espresso/coffee, and restrained gold; Arabic-first typography; correct RTL; high legibility; premium but calm hierarchy.
+- Core identity: warm paper `#FBF4E1`, espresso/coffee, and a restrained `#F5A623` orange-gold accent; Arabic-first typography; correct RTL; high legibility; premium but calm hierarchy.
 - The theme is a presentation layer. It must never alter accounting calculations, audit conclusions, evidence, source authority, security, persistence, or business logic.
 - New UI work must extend the theme variables instead of creating another competing color/typography namespace.
 
