@@ -7,10 +7,17 @@ import mcpHandler from "./worker";
 
 const BASE_URL = "https://kosif-engineering-copilot-mcp.kosif199022.workers.dev";
 const MCP_URL = `${BASE_URL}/mcp`;
+const KOSIF_LIVE_URL = "https://mahmoud-eldesouky.kosif199022.workers.dev";
+
+type BrowserRunBinding = {
+  quickAction(action: "screenshot", input: Record<string, unknown>): Promise<Response>;
+};
 
 type Env = {
   OAUTH_PROVIDER: OAuthHelpers;
   OAUTH_KV: any;
+  BROWSER?: BrowserRunBinding;
+  VISUAL_SMOKE_KEY?: string;
 };
 
 function escapeHtml(value: string) {
@@ -50,6 +57,7 @@ h1{margin:0 0 12px;font-size:28px}.muted{color:#5f6f69;line-height:1.7}.badge{di
       <li>قراءة حالة مشروع KOSIF العامة.</li>
       <li>قراءة الـPull Requests وحالة CI العامة.</li>
       <li>تشغيل فحوصات Design Guardian للقراءة فقط.</li>
+      <li>التقاط صور لواجهة KOSIF العامة على مقاسات موبايل وتابلت وديسكتوب للمراجعة البصرية.</li>
       <li>لا توجد أدوات Merge أو تعديل أو نشر في هذه النسخة.</li>
     </ul>
     <div>Scopes: <code>${escapeHtml(scopeText)}</code></div>
@@ -58,7 +66,7 @@ h1{margin:0 0 12px;font-size:28px}.muted{color:#5f6f69;line-height:1.7}.badge{di
     <button class="allow" type="submit" name="decision" value="allow">السماح والاتصال</button>
     <button class="deny" type="submit" name="decision" value="deny">رفض</button>
   </form>
-  <p class="small">هذه النسخة لا تمنح وصولًا لبيانات خاصة؛ أدواتها تعتمد على بيانات عامة وقراءة فقط.</p>
+  <p class="small">هذه النسخة للقراءة والفحص البصري فقط، ولا تمنح ChatGPT صلاحية تعديل أو نشر التطبيق.</p>
 </main>
 </body>
 </html>`,
@@ -74,6 +82,40 @@ function deniedRedirect(oauthRequest: AuthRequest) {
   return Response.redirect(redirect.toString(), 302);
 }
 
+async function visualSmoke(request: Request, env: Env) {
+  const supplied = request.headers.get("x-kosif-visual-smoke") || "";
+  if (!env.VISUAL_SMOKE_KEY || supplied !== env.VISUAL_SMOKE_KEY) {
+    return new Response("Not found", { status: 404 });
+  }
+  if (!env.BROWSER) {
+    return Response.json({ ok: false, error: "browser_binding_unavailable" }, { status: 503 });
+  }
+
+  const screenshot = await env.BROWSER.quickAction("screenshot", {
+    url: KOSIF_LIVE_URL,
+    viewport: { width: 393, height: 852, deviceScaleFactor: 1 },
+    screenshotOptions: { type: "jpeg", quality: 50, fullPage: false },
+    gotoOptions: { waitUntil: "networkidle2", timeout: 30000 },
+  });
+
+  if (!screenshot.ok) {
+    const detail = (await screenshot.text()).slice(0, 300);
+    return Response.json(
+      { ok: false, error: "browser_capture_failed", status: screenshot.status, detail },
+      { status: 502 },
+    );
+  }
+
+  const bytes = (await screenshot.arrayBuffer()).byteLength;
+  return Response.json({
+    ok: bytes > 1000,
+    bytes,
+    contentType: screenshot.headers.get("content-type") || "image/jpeg",
+    target: KOSIF_LIVE_URL,
+    viewport: { width: 393, height: 852 },
+  });
+}
+
 const defaultHandler = {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -82,22 +124,28 @@ const defaultHandler = {
       return Response.json({
         ok: true,
         service: "kosif-engineering-copilot-mcp",
-        version: "0.2.1",
+        version: "0.2.2",
         oauth: true,
         dcr: true,
         cimd: true,
+        visualCapture: true,
       });
+    }
+
+    if (request.method === "GET" && url.pathname === "/internal/visual-smoke") {
+      return visualSmoke(request, env);
     }
 
     if (request.method === "GET" && url.pathname === "/") {
       return Response.json({
         name: "KOSIF Engineering Copilot MCP",
-        version: "0.2.1",
-        mode: "oauth-read-only-public-data",
+        version: "0.2.2",
+        mode: "oauth-read-only-visual-review",
         mcpEndpoint: "/mcp",
         authorizationEndpoint: "/authorize",
         tokenEndpoint: "/oauth/token",
         registrationEndpoint: "/oauth/register",
+        visualTools: ["capture_app_screen", "capture_responsive_set"],
       });
     }
 
@@ -129,11 +177,11 @@ const defaultHandler = {
       userId: "kosif-readonly-connector-user",
       metadata: {
         clientName: client.clientName || "ChatGPT",
-        authorizationMode: "read-only-public-data",
+        authorizationMode: "read-only-visual-review",
       },
       scope: grantedScopes,
       props: {
-        access: "read-only-public-data",
+        access: "read-only-visual-review",
       },
     });
 
