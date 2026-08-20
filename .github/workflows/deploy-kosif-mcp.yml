@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Install MCP dependencies
         run: npm install --no-audit --no-fund
@@ -29,13 +29,61 @@ jobs:
       - name: Typecheck MCP server
         run: npm run typecheck
 
-      - name: Deploy isolated MCP Worker
+      - name: Ensure isolated OAuth KV namespace
+        shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
           CLOUDFLARE_ACCOUNT_ID: 9ff3d8494afab356ecbf95a2a231a6b5
-        run: npx wrangler deploy
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces"
+          TITLE="kosif-engineering-copilot-mcp-oauth"
 
-      - name: Verify remote MCP health and handshake
+          curl -fsS "$API?per_page=100" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -o /tmp/kosif-kv-list.json
+
+          KV_ID=$(node - <<'NODE'
+          const fs=require('fs');
+          const j=JSON.parse(fs.readFileSync('/tmp/kosif-kv-list.json','utf8'));
+          const row=(j.result||[]).find(x=>x.title==='kosif-engineering-copilot-mcp-oauth');
+          process.stdout.write(row?.id||'');
+          NODE
+          )
+
+          if [ -z "$KV_ID" ]; then
+            curl -fsS -X POST "$API" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H 'Content-Type: application/json' \
+              --data '{"title":"kosif-engineering-copilot-mcp-oauth"}' \
+              -o /tmp/kosif-kv-create.json
+            KV_ID=$(node - <<'NODE'
+          const fs=require('fs');
+          const j=JSON.parse(fs.readFileSync('/tmp/kosif-kv-create.json','utf8'));
+          if(!j.success || !j.result?.id){console.error(j);process.exit(2)}
+          process.stdout.write(j.result.id);
+          NODE
+            )
+          fi
+
+          test -n "$KV_ID"
+          export KV_ID
+          node - <<'NODE'
+          const fs=require('fs');
+          const config=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8'));
+          config.kv_namespaces=[{binding:'OAUTH_KV',id:process.env.KV_ID}];
+          fs.writeFileSync('wrangler.deploy.json',JSON.stringify(config,null,2)+'\n');
+          NODE
+          echo "OAuth KV namespace ready: $TITLE"
+
+      - name: Deploy isolated OAuth-enabled MCP Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
+          CLOUDFLARE_ACCOUNT_ID: 9ff3d8494afab356ecbf95a2a231a6b5
+        run: npx wrangler deploy --config wrangler.deploy.json
+
+      - name: Verify OAuth discovery, DCR, and protected MCP
         shell: bash
         env:
           MCP_BASE_URL: https://kosif-engineering-copilot-mcp.kosif199022.workers.dev
@@ -45,26 +93,45 @@ jobs:
           ok=0
           for attempt in $(seq 1 30); do
             if curl -fsS --connect-timeout 10 --max-time 20 "$MCP_BASE_URL/healthz" -o /tmp/kosif-mcp-health.json; then
-              if grep -q '"ok":true' /tmp/kosif-mcp-health.json; then
+              if grep -q '"ok":true' /tmp/kosif-mcp-health.json && grep -q '"oauth":true' /tmp/kosif-mcp-health.json; then
                 ok=1
                 break
               fi
             fi
             sleep 3
           done
-          [ "$ok" = 1 ] || { echo 'MCP health endpoint failed'; cat /tmp/kosif-mcp-health.json 2>/dev/null || true; exit 1; }
+          [ "$ok" = 1 ] || { echo 'OAuth MCP health endpoint failed'; cat /tmp/kosif-mcp-health.json 2>/dev/null || true; exit 1; }
 
-          curl -fsS --connect-timeout 10 --max-time 30 \
+          curl -fsS "$MCP_BASE_URL/.well-known/oauth-protected-resource/mcp" -o /tmp/kosif-resource.json
+          grep -q 'authorization_servers' /tmp/kosif-resource.json
+          grep -q "$MCP_BASE_URL/mcp" /tmp/kosif-resource.json
+
+          curl -fsS "$MCP_BASE_URL/.well-known/oauth-authorization-server" -o /tmp/kosif-auth-server.json
+          grep -q 'authorization_endpoint' /tmp/kosif-auth-server.json
+          grep -q 'registration_endpoint' /tmp/kosif-auth-server.json
+          grep -q 'code_challenge_methods_supported' /tmp/kosif-auth-server.json
+
+          curl -fsS -X POST "$MCP_BASE_URL/oauth/register" \
+            -H 'content-type: application/json' \
+            --data '{"client_name":"KOSIF CI Smoke","redirect_uris":["https://example.com/callback"],"token_endpoint_auth_method":"none","grant_types":["authorization_code"],"response_types":["code"]}' \
+            -o /tmp/kosif-register.json
+          CLIENT_ID=$(node - <<'NODE'
+          const fs=require('fs');const j=JSON.parse(fs.readFileSync('/tmp/kosif-register.json','utf8'));
+          if(!j.client_id){console.error(j);process.exit(2)}process.stdout.write(j.client_id);
+          NODE
+          )
+
+          STATUS=$(curl -sS -o /tmp/kosif-mcp-unauth.txt -D /tmp/kosif-mcp-unauth.headers -w '%{http_code}' \
             -X POST "$MCP_BASE_URL/mcp" \
             -H 'content-type: application/json' \
             -H 'accept: application/json, text/event-stream' \
-            --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2026-07-28","capabilities":{},"clientInfo":{"name":"kosif-ci-smoke","version":"1.0.0"}}}' \
-            -o /tmp/kosif-mcp-init.txt
+            --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2026-07-28","capabilities":{},"clientInfo":{"name":"kosif-ci-smoke","version":"1.0.0"}}}')
+          [ "$STATUS" = "401" ] || { echo "Expected OAuth-protected MCP 401, got $STATUS"; cat /tmp/kosif-mcp-unauth.txt; exit 1; }
+          grep -qi 'WWW-Authenticate: Bearer' /tmp/kosif-mcp-unauth.headers
 
-          grep -Eq 'KOSIF Engineering Copilot|"result"|event: message' /tmp/kosif-mcp-init.txt || {
-            echo 'Unexpected MCP initialize response'
-            cat /tmp/kosif-mcp-init.txt
-            exit 1
-          }
+          ENCODED_CLIENT=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$CLIENT_ID")
+          AUTH_URL="$MCP_BASE_URL/authorize?response_type=code&client_id=$ENCODED_CLIENT&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=mcp%3Aread&state=ci-smoke&code_challenge=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&code_challenge_method=S256&resource=https%3A%2F%2Fkosif-engineering-copilot-mcp.kosif199022.workers.dev%2Fmcp"
+          curl -fsS "$AUTH_URL" -o /tmp/kosif-consent.html
+          grep -q 'السماح والاتصال' /tmp/kosif-consent.html
 
-          echo "KOSIF_MCP_READY=$MCP_BASE_URL/mcp"
+          echo "KOSIF_OAUTH_MCP_READY=$MCP_BASE_URL/mcp"
