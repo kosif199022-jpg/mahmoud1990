@@ -121,7 +121,7 @@ No source code was copied from these repositories. The review adopted architectu
 13. **Duplicate theme link risk:** the audit shell now declares the theme stylesheet before its runtime, preventing a second same-ID link during parsing.
 14. **Stale production workflow identity:** the production check now accepts the current editorial visual build ID.
 15. **Late Canva Rose override:** the legacy pink stylesheet was loading after the warm theme and winning the cascade. The final runtime import now targets `kosif-editorial-v39.css`, the audit shell preloads the generated hero, and CI rejects the old rose palette.
-16. **Stale visual service-worker cache:** the root PWA cache generation is now `kosif-native-v39-editorial-app`, with the new CSS and three generated WebP assets required before activation.
+16. **Stale visual service-worker cache:** the root PWA cache generation is now `kosif-native-v39-editorial-app-2`, with the new CSS and three generated WebP assets required before activation; the follow-up bump ensures existing clients receive the mobile readability refinements.
 
 ## Deliberate boundaries and follow-up work
 
