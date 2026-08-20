@@ -5,6 +5,7 @@
 import suite from './suite-edge.js';
 import { createFullyImplementedRequirementsRuntime } from './requirements/v43-control-implementation.mjs';
 import { resolveRequirement, KOSIF_REQUIREMENTS_VERSION } from './requirements/v43-full-registry.mjs';
+import { handleV44BookVault } from './v44-book-vault-api.js';
 
 const REQUIREMENTS = createFullyImplementedRequirementsRuntime({
   buildId: '2026.08.20-v43-complete-50000',
@@ -79,7 +80,7 @@ export default {
       return reqJson({ok:status.runtimeImplemented,requirement:status},status.runtimeImplemented?200:503);
     }
 
-    // No sensitive mutation is allowed to execute if the 50,000-note runtime is incomplete.
+    // No sensitive mutation is allowed to execute if the complete governed runtime is incomplete.
     if(isSensitiveMutation(req,u) && !READY){
       return reqJson({
         ok:false,
@@ -87,6 +88,10 @@ export default {
         message:'تم منع العملية لأن بوابة متطلبات KOSIF الكاملة ليست في حالة 50,000/50,000.'
       },503);
     }
+
+    // v44 System Brain custom books are shared only through an authenticated owner session.
+    const books=await handleV44BookVault(req,env);
+    if(books)return decorateRequirements(books);
 
     const response=await suite.fetch(req,env,ctx);
     return decorateRequirements(response);
