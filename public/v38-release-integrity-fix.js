@@ -22,8 +22,10 @@ async function verify(){
     const x=await r.json();
     const loaded=browserBuild();
     const isV38=String(x?.version||'').startsWith('v38.')&&x?.productName==='Kosif';
+    const studio=x?.productName==='Kosif'&&x?.version==='v40.0.0-root'&&x?.buildId==='2026.08.20-v40-vibrant-professional-pwa'&&x?.experienceVersion==='v40.0.0'&&x?.installable===true;
     const sameBuild=!loaded||String(x?.buildId||'')===loaded;
-    verified=!!(isV38&&sameBuild);
+    const embeddedCore=!loaded||loaded==='2026.08.19-v38-trusted-audit-os';
+    verified=!!((isV38&&sameBuild)||(studio&&embeddedCore));
     if(verified){
       window.KosifBuildInfo=x;
       if(document.documentElement.dataset.kosifReleaseIntegrity!=='ok')document.documentElement.dataset.kosifReleaseIntegrity='ok';

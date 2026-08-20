@@ -49,6 +49,8 @@ const css = read('public/kosif-studio-v40.css');
 for (const token of ['--ks-cobalt:', '--ks-teal:', '--ks-coral:', '--ks-violet:', '--ks-focus:']) need(css.includes(token), `vibrant design token missing: ${token}`);
 for (const marker of ['kosif-studio-v40', '.ks40-launcher', '.ks40-install-card', '.v38-report-charts', '.v38-report-readiness', '.v38-council-steps', '[data-theme="dark"]', '@media (min-width:1024px) and (max-width:1440px)', '@media (max-width:720px)', '@media (max-width:390px)', '@media print']) need(css.includes(marker), `responsive experience marker missing: ${marker}`);
 need(css.includes("/assets/kosif-studio-hero-v40.webp"), 'v40 hero artwork is not consumed by the audit visual authority');
+need(css.includes('#kosif-premium-actions .kpa-grid') && css.includes('grid-template-columns:repeat(4,minmax(0,1fr))!important'), 'desktop quick actions are not an explicit professional grid');
+need(css.includes('#app>.drawer') && css.includes('position:fixed!important') && css.includes('#app>.drawer:not(.show)'), 'closed detail drawer can leak into page flow');
 
 const suiteCss = read('public/kosif-suite-v40.css');
 for (const surface of ['.suite-head', '.library-head', '.sales-side', '#library .card', '#reader', '.ks40-overlay']) need(suiteCss.includes(surface), `shared suite surface is not themed: ${surface}`);
@@ -75,6 +77,12 @@ need(council.includes('recordButton.disabled = false') && council.includes('قر
 const edge = read('src/suite-edge.js');
 need(edge.includes("version:'v40.0.0-root'") && edge.includes('2026.08.20-v40-vibrant-professional-pwa'), 'suite release identity is not v40');
 need(edge.includes("installable:true") && edge.includes('/kosif-studio-v40.css?v=2026.08.20-v40'), 'suite shell does not declare/wire installable v40');
+
+const continuity = read('public/v36-continuity.js');
+const safety = read('public/v37-audit-safety.js');
+const polish = read('public/v38-user-polish.js');
+need(continuity.includes("STUDIO_VERSION='v40.0.0-root'") && continuity.includes('releaseMatches(versionInfo)'), 'legacy continuity does not recognize the exact v40 Studio shell');
+for (const [name, source] of [['audit safety', safety], ['user polish', polish]]) need(source.includes('v40.0.0-root') && source.includes('2026.08.20-v40-vibrant-professional-pwa') && source.includes('experienceVersion'), `${name} can leave the legacy release warning over v40`);
 
 const sw = read('public/sw.js');
 for (const asset of ['/kosif-studio-v40.css?v=2026.08.20-v40', '/kosif-studio-v40.js?v=40', '/kosif-suite-v40.css?v=40', '/assets/kosif-studio-hero-v40.webp', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/maskable-512.png']) need(sw.includes(asset), `service worker missing v40 asset: ${asset}`);

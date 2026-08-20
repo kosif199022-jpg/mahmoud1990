@@ -16,7 +16,7 @@ function bind(){repairLog();const run=q('#v36-je-run');if(run&&!run.dataset.v37S
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();
 
-/* v38 release-integrity reconciliation. */
+/* v38 core / v40 Studio release-integrity reconciliation. */
 (()=>{'use strict';
 const LEGACY='يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.';
 let ok=false,info=null,observer=null,interval=0;
@@ -45,8 +45,10 @@ async function verify(){
     if(!r.ok)return false;
     const x=await r.json(),loaded=String(window.KosifV38?.buildId||'').trim();
     const v38=x?.productName==='Kosif'&&/^v38\./.test(String(x?.version||''));
+    const studio=x?.productName==='Kosif'&&x?.version==='v40.0.0-root'&&x?.buildId==='2026.08.20-v40-vibrant-professional-pwa'&&x?.experienceVersion==='v40.0.0'&&x?.installable===true;
     const same=!loaded||loaded===String(x?.buildId||'');
-    ok=!!(v38&&same);info=x;
+    const embeddedCore=!loaded||loaded==='2026.08.19-v38-trusted-audit-os';
+    ok=!!((v38&&same)||(studio&&embeddedCore));info=x;
     if(ok){
       window.KosifBuildInfo=x;
       if(document.documentElement.dataset.kosifReleaseIntegrity!=='ok')document.documentElement.dataset.kosifReleaseIntegrity='ok';
