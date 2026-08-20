@@ -3,7 +3,7 @@
 const EXPECTED='v36.4',BUILD='2026.08.18-v36.4-mobile-release-integrity';
 const PHASE_B_CSS='/v36-mobile-phase-b.css?v=36.4-phase-b-1';
 const ANALYTICS_3D_SRC='/v36-analytics-3d.js?v=36.4-phase-c-1';
-const CANVA_PREMIUM_CSS='/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-1';
+const CANVA_PREMIUM_CSS='/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-2';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const DIALOG_SELECTORS=['#kosif-more','#kosif-company-sheet','#kosif-ai-sheet','#kosif-command-sheet','#kosif-font-sheet','#kosif-ai-gate'];
 const PROGRESS_STALE_MS=20000;
@@ -99,7 +99,7 @@ function premiumWelcome(){
  hero.insertAdjacentHTML('beforebegin','<section id="kosif-premium-welcome" aria-label="تجربة Kosif البصرية الجديدة"><div class="kcw-mark" aria-hidden="true"></div><div class="kcw-copy"><p class="kcw-kicker">KOSIF · مساحة المراجع الذكية</p><h2>مراجعة أوضح.<br><span>قرار مهني أقوى.</span></h2><p class="kcw-desc">حوّل ملف الارتباط إلى مسار هادئ وقابل للتتبع: أرقام حتمية، أدلة منظمة، وتقارير محكومة—مع إبقاء الرأي والاعتماد النهائي بيد المراجع البشري.</p><div class="kcw-proof" aria-label="ضمانات التجربة"><span>أرقام حتمية</span><span>أدلة قابلة للتتبع</span><span>اعتماد بشري</span></div><div class="kcw-actions"><button type="button" class="kcw-action primary" data-kc-go="rounds">ابدأ جولة مراجعة</button><button type="button" class="kcw-action secondary" data-kc-go="v38-reports">افتح التقارير المحكومة</button></div><small class="kcw-release">التجربة البصرية التحريرية · v39</small></div></section>');
 }
 function premiumActions(){
- const host=$('#view-overview'),hero=host?.querySelector('.card.hero');if(!host||!hero||$('#kosif-premium-actions'))return;
+ const host=$('#view-overview'),hero=host?.querySelector('.card.hero'),pathCard=host?.querySelector('#steps')?.closest('.card');if(pathCard)pathCard.id='kosif-overview-path-card';if(!host||!hero||$('#kosif-premium-actions'))return;
  hero.insertAdjacentHTML('afterend','<section id="kosif-premium-actions" aria-label="إجراءات سريعة"><div class="kpa-title">إجراءات سريعة</div><div class="kpa-grid"><button type="button" data-kc-go="rounds"><span class="kpa-ic">↻</span><b>الجولات</b><small>المتابعة والإدارة</small></button><button type="button" data-kc-go="pbc"><span class="kpa-ic">▤</span><b>المطالبات</b><small>الأدلة والمستندات</small></button><button type="button" data-kc-go="tb"><span class="kpa-ic">⚖</span><b>الميزان</b><small>التحقق والتحليل</small></button><button type="button" data-kc-go="outputs"><span class="kpa-ic">▥</span><b>التقارير</b><small>المخرجات والتحليل</small></button></div></section>');
 }
 function premiumHeroCTA(){

@@ -43,7 +43,7 @@ ok(edge.includes("version:'v38.1.1-root'"), 'suite version is v38.1.1-root');
 ok(edge.includes('2026.08.20-v38.1.3-editorial-visual-experience'), 'editorial visual production build identity is explicit');
 ok(edge.includes("designAuthority:'KOSIF cream/espresso/gold editorial system with original generated imagery'"), 'editorial generated-image design authority is explicit');
 ok(edge.includes('/kosif-kitab-theme.js') && edge.includes('/kosif-kitab-theme.css?v=1.0.0-kitab'), 'audit shell wires the Kitab Caffe final theme authority');
-ok(edge.includes('/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-1') && edge.includes('/assets/kosif-audit-hero-v39.webp'), 'audit shell wires and preloads the final editorial experience');
+ok(edge.includes('/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-2') && edge.includes('/assets/kosif-audit-hero-v39.webp'), 'audit shell wires and preloads the final editorial experience');
 ok(edge.includes('handleRealtimeSession') && edge.indexOf('handleRealtimeSession') < edge.lastIndexOf('handleV38(req'), 'owner-session realtime router runs before legacy v38 handler');
 ok(edge.includes('/v38-live.js?v=38.1.2'), 'audit shell cache-busts the text+voice live client');
 ok(edge.includes('/v38-ultimate.js?v=38') && edge.includes('/v38-ultimate.css?v=38'), 'audit shell injects the v38 visual layer');

@@ -27,7 +27,7 @@ ok('runtime wires historical voice guide instead of leaving it as dead code',/fu
 ok('runtime wires history restoration independently of view timing',/function loadHistoryRestore\(\)/.test(zai)&&/\/v36-history-restore\.js\?v=36\.3-history1/.test(zai)&&/loadHistoryRestore\(\)/.test(zai));
 ok('historical Council loader identifier remains stable',/\/v36-council-v2\.js\?v=36\.3-council2/.test(zai));
 ok('shared guarded module loader prevents duplicate injections',/function loadModule\(globalName,selector,src,datasetKey\)/.test(zai)&&/window\[globalName\]\|\|document\.querySelector\(selector\)/.test(zai));
-ok('root app SW cache generation is v39 while preserving v36.4 migration',/const C='kosif-native-v39-editorial-app'/.test(sw)&&/kosif-native-v/.test(sw));
+ok('root app SW cache generation is v39 while preserving v36.4 migration',/const C='kosif-native-v39-editorial-app-2'/.test(sw)&&/kosif-native-v/.test(sw));
 ok('standards SW cache generation is v36.4',/const C='kosif-native-v36-4-standards'/.test(stdSw));
 ok('reviewer media voice guide and history restoration are available offline',/\/v36-reviewer-media\.js/.test(sw)&&/\/v36-voice-guide\.js/.test(sw)&&/\/v36-history-restore\.js/.test(sw));
 ok('app SW excludes APIs and release diagnostics',/pathname\.startsWith\('\/api\/'\)/.test(sw)&&/u\.pathname==='\/__version'/.test(sw)&&/u\.pathname==='\/__health'/.test(sw));
