@@ -1,0 +1,21 @@
+name: KOSIF 50,000 Full Requirements Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  full-requirements-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify all 50,000 requirement IDs
+        run: npm run v43-requirements
+      - name: Verify complete application gate
+        run: npm run check

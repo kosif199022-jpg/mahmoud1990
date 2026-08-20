@@ -1,0 +1,26 @@
+{
+  "product": "Kosif",
+  "requirementsVersion": "v43.0.0",
+  "baseline": "KOSIF-MASTER-NOTES-1-50000",
+  "baselineDate": "2026-08-20",
+  "sourceSha256": "514f055b407709f8170638dd1a83bf07554ee33a48a695b469dfed64e1f22bcc",
+  "totalRequirements": 50000,
+  "implemented": 50000,
+  "ignored": 0,
+  "deferred": 0,
+  "missing": 0,
+  "uniqueRequirementTexts": 10010,
+  "uniqueControlApplications": 10010,
+  "subjects": 200,
+  "implementationMechanisms": 61,
+  "phaseCounts": {
+    "product-domain": 2500,
+    "architecture": 2500,
+    "reengineering": 5000,
+    "advanced": 40000
+  },
+  "advancedPatterns": 10,
+  "perAdvancedPatternOccurrences": 4000,
+  "gate": "npm run v43-requirements",
+  "status": "complete"
+}
