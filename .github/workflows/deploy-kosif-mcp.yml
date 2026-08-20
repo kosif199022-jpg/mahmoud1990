@@ -1,0 +1,74 @@
+name: Deploy KOSIF Engineering Copilot MCP
+
+on:
+  push:
+    branches: [feat/kosif-mcp-v0-2]
+    paths:
+      - 'mcp/kosif-engineering-copilot/**'
+      - '.github/workflows/deploy-kosif-mcp.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-kosif-engineering-copilot-mcp
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp/kosif-engineering-copilot
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install MCP dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck MCP server
+        run: npm run typecheck
+
+      - name: Deploy isolated MCP Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
+          CLOUDFLARE_ACCOUNT_ID: 9ff3d8494afab356ecbf95a2a231a6b5
+        run: npx wrangler deploy
+
+      - name: Verify remote MCP health and handshake
+        shell: bash
+        env:
+          MCP_BASE_URL: https://kosif-engineering-copilot-mcp.kosif199022.workers.dev
+        run: |
+          set -euo pipefail
+
+          ok=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS --connect-timeout 10 --max-time 20 "$MCP_BASE_URL/healthz" -o /tmp/kosif-mcp-health.json; then
+              if grep -q '"ok":true' /tmp/kosif-mcp-health.json; then
+                ok=1
+                break
+              fi
+            fi
+            sleep 3
+          done
+          [ "$ok" = 1 ] || { echo 'MCP health endpoint failed'; cat /tmp/kosif-mcp-health.json 2>/dev/null || true; exit 1; }
+
+          curl -fsS --connect-timeout 10 --max-time 30 \
+            -X POST "$MCP_BASE_URL/mcp" \
+            -H 'content-type: application/json' \
+            -H 'accept: application/json, text/event-stream' \
+            --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2026-07-28","capabilities":{},"clientInfo":{"name":"kosif-ci-smoke","version":"1.0.0"}}}' \
+            -o /tmp/kosif-mcp-init.txt
+
+          grep -Eq 'KOSIF Engineering Copilot|"result"|event: message' /tmp/kosif-mcp-init.txt || {
+            echo 'Unexpected MCP initialize response'
+            cat /tmp/kosif-mcp-init.txt
+            exit 1
+          }
+
+          echo "KOSIF_MCP_READY=$MCP_BASE_URL/mcp"
