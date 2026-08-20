@@ -35,22 +35,22 @@ function lockBody(preferredY){
  if(bodySnapshot){
   if(Number.isFinite(preferredY)){
    lockY=Math.max(0,preferredY);
-   document.body.style.top=`-${lockY}px`;
+   const p=bodySnapshot.page||$('#app')||document.body;p.style.top=`-${lockY}px`;
    window.dispatchEvent(new CustomEvent('kosif-dialog-lock',{detail:{locked:true,scrollY:lockY,retargeted:true}}));
   }
   return;
  }
  lockY=Math.max(0,Number.isFinite(preferredY)?preferredY:(window.scrollY||document.documentElement.scrollTop||0));
- const b=document.body,r=document.documentElement;
- bodySnapshot={position:b.style.position,top:b.style.top,left:b.style.left,right:b.style.right,width:b.style.width,overflow:b.style.overflow,touchAction:b.style.touchAction};
- rootScrollBehavior=r.style.scrollBehavior;r.style.scrollBehavior='auto';
- b.dataset.kosifDialogOpen='1';b.style.position='fixed';b.style.top=`-${lockY}px`;b.style.left='0';b.style.right='0';b.style.width='100%';b.style.overflow='hidden';
+ const b=document.body,r=document.documentElement,p=$('#app')||b;
+ bodySnapshot={page:p,pagePosition:p.style.position,pageTop:p.style.top,pageLeft:p.style.left,pageRight:p.style.right,pageWidth:p.style.width,pageMaxWidth:p.style.maxWidth,bodyOverflow:b.style.overflow,bodyTouchAction:b.style.touchAction,rootOverflow:r.style.overflow};
+ rootScrollBehavior=r.style.scrollBehavior;r.style.scrollBehavior='auto';r.style.overflow='hidden';
+ b.dataset.kosifDialogOpen='1';b.style.overflow='hidden';p.style.position='fixed';p.style.top=`-${lockY}px`;p.style.left='0';p.style.right='0';p.style.width='100%';p.style.maxWidth='100%';
  window.dispatchEvent(new CustomEvent('kosif-dialog-lock',{detail:{locked:true,scrollY:lockY}}));
 }
 function unlockBody(){
  if(!bodySnapshot)return;
- const b=document.body,r=document.documentElement,y=lockY,s=bodySnapshot;bodySnapshot=null;
- b.style.position=s.position;b.style.top=s.top;b.style.left=s.left;b.style.right=s.right;b.style.width=s.width;b.style.overflow=s.overflow;b.style.touchAction=s.touchAction;delete b.dataset.kosifDialogOpen;
+ const b=document.body,r=document.documentElement,y=lockY,s=bodySnapshot,p=s.page||$('#app')||b;bodySnapshot=null;
+ p.style.position=s.pagePosition;p.style.top=s.pageTop;p.style.left=s.pageLeft;p.style.right=s.pageRight;p.style.width=s.pageWidth;p.style.maxWidth=s.pageMaxWidth;b.style.overflow=s.bodyOverflow;b.style.touchAction=s.bodyTouchAction;r.style.overflow=s.rootOverflow;delete b.dataset.kosifDialogOpen;
  window.scrollTo(0,y);requestAnimationFrame(()=>{r.style.scrollBehavior=rootScrollBehavior;rootScrollBehavior=''});
  window.dispatchEvent(new CustomEvent('kosif-dialog-lock',{detail:{locked:false,scrollY:y}}));
 }

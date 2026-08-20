@@ -110,6 +110,23 @@ body[data-kosif-dialog-open="1"] :is(#kosif-more,#kosif-company-sheet,#kosif-ai-
   padding-bottom:max(12px,var(--k-safe-bottom));
 }
 
+/* Legacy dialogs are viewport portals. The page shell is locked independently,
+   so these surfaces must never inherit document-position or generic dialog rules. */
+body>.modal-bg,body>.drawer-bg{position:fixed!important;inset:0!important;margin:0!important;}
+body>.drawer{
+  position:fixed!important;
+  top:0!important;
+  bottom:0!important;
+  inset-inline-start:0!important;
+  inset-inline-end:auto!important;
+  width:min(480px,94vw)!important;
+  height:auto!important;
+  margin:0!important;
+}
+body>.drawer:not(.open){transform:translateX(-105%)!important;}
+html[dir="rtl"] body>.drawer:not(.open){transform:translateX(105%)!important;}
+body>.drawer.open{transform:none!important;}
+
 .twrap,.table-wrap,[data-horizontal-scroll]{
   max-width:100%;
   overflow-x:auto!important;
@@ -165,6 +182,17 @@ html[data-kosif-keyboard="open"] .modal{
   .modal-bg{align-items:flex-end!important;}
   .modal{border-radius:22px 22px 12px 12px!important;}
   .drawer{width:min(94vw,430px)!important;}
+  body>.drawer{
+    top:auto!important;
+    bottom:calc(82px + var(--k-safe-bottom))!important;
+    inset-inline:12px!important;
+    width:auto!important;
+    height:auto!important;
+    max-height:calc(var(--k-vv-height) - 112px - var(--k-safe-bottom))!important;
+    border-radius:24px!important;
+    transform:translateY(calc(100% + 120px))!important;
+  }
+  body>.drawer.open{transform:none!important;}
 }
 
 @media(max-width:720px) and (orientation:landscape){

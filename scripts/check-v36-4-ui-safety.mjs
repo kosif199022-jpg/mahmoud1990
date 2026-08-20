@@ -8,7 +8,7 @@ const operations = read('public/v36-operations.js');
 
 const checks = [
   ['iOS lock captures scrollY before a dialog mutates layout', /lockY=Math\.max\(0,Number\.isFinite\(preferredY\)\?preferredY:\(window\.scrollY\|\|document\.documentElement\.scrollTop\|\|0\)\)/.test(continuity)],
-  ['iOS lock offsets body by saved scrollY', /b\.style\.top=`-\$\{lockY\}px`/.test(continuity)],
+  ['iOS lock offsets the app shell by saved scrollY', /p\.style\.top=`-\$\{lockY\}px`/.test(continuity)],
   ['iOS unlock restores exact scrollY', /window\.scrollTo\(0,y\)/.test(continuity)],
   ['reader blocks auto-scroll while dialogs are open', /function autoBlocked\(\)/.test(reader) && /kosifDialogOpen/.test(reader)],
   ['AI gate observers stay scoped', /function watchScopedRoots\(\)/.test(aiGate) && !/observe\(document\.documentElement/.test(aiGate)],
