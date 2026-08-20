@@ -921,7 +921,7 @@ html[data-kosif-edition="v41"][data-theme="night"] :is(p,.hint,.sub,.meta,small,
   html[data-kosif-edition="v41"] #kosif-premium-welcome{
     min-height:600px!important;
     margin-block-end:4px!important;
-    padding:34px 24px 30px!important;
+    padding:34px 24px 132px!important;
     align-items:flex-end!important;
     border-radius:28px!important;
     background-image:

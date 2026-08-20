@@ -35,6 +35,7 @@ need(css.includes("url('/assets/kosif-studio-hero-v40.webp')") && css.includes("
 need(css.includes('(hover:hover) and (pointer:fine)') && css.includes('prefers-reduced-motion:reduce'), 'motion is not bounded by pointer and reduced-motion preferences');
 need(!/animation-duration:[^;]*(?:10ms|20ms|50ms)!important/.test(css), 'reduced-motion fallback should use a near-zero duration only');
 need(css.includes('margin-block-end:4px!important') && css.includes('margin-block-start:0!important'), 'mobile cover-to-actions rhythm is not explicitly bounded');
+need(css.includes('padding:34px 24px 132px!important'), 'mobile cover actions do not reserve space above the fixed navigation');
 
 for (const marker of [
   '__KOSIF_EDITORIAL_V41__', "root.dataset.kosifEdition = 'v41'", "root.dataset.kosifExperience = 'v41'",
