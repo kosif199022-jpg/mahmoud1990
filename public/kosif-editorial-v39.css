@@ -1103,6 +1103,9 @@ html[data-kosif-visual="kitab-editorial-v39"] .ratio-bar>i{
   html[data-kosif-visual="kitab-editorial-v39"] main{
     padding:16px 12px calc(112px + env(safe-area-inset-bottom,0px))!important;
   }
+  html[data-kosif-visual="kitab-editorial-v39"][data-kosif-company-state="none"] #view-overview>.card.hero{
+    display:none!important;
+  }
   html[data-kosif-visual="kitab-editorial-v39"] #kosif-premium-welcome{
     min-height:620px!important;
     padding:32px 24px 248px!important;
