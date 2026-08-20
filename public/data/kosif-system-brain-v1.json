@@ -1,0 +1,92 @@
+{
+  "schema": "kosif.system-brain.v1",
+  "title": "KOSIF System Brain",
+  "updated_at": "2026-08-20",
+  "principles": [
+    "صحة الأرقام قبل الذكاء الاصطناعي",
+    "المصدر الرسمي أعلى من الشرح والكتاب التدريبي",
+    "كل استنتاج مهني قابل للتتبع إلى مصدر وفترة ودولة",
+    "الذكاء الاصطناعي استشاري ولا يعتمد قيداً أو رأياً نهائياً",
+    "المحتوى الأصلي للكتب محفوظ مع خريطة الصفحة والسطر",
+    "التطبيق يقرأ من مصدر حقيقة واحد بدلاً من نسخ واجهات متباعدة"
+  ],
+  "layers": [
+    {
+      "id": "experience",
+      "name": "الواجهة وتجربة الاستخدام",
+      "responsibilities": ["هوية بصرية موحدة", "RTL أولاً", "iPhone/WebKit scroll safety", "PWA", "Themes محفوظة", "حركة تحترم prefers-reduced-motion"]
+    },
+    {
+      "id": "books",
+      "name": "محرك الكتب الموحد",
+      "responsibilities": ["فتح الكتاب مباشرة", "تنظيف OCR محافظ", "إزالة التكرار الدقيق", "بناء باب/فصل/قسم/عنوان", "الاحتفاظ بالصفحة الأصلية", "فهرسة البحث والقراءة"]
+    },
+    {
+      "id": "knowledge",
+      "name": "عقل المعرفة والمصادر",
+      "responsibilities": ["سجل مصادر رسمي-أولاً", "فصل نافذ/مشروع/شرح", "تحديثات دورية", "ربط الدولة بالمصدر", "بناء Evidence Pack للاستدلال"]
+    },
+    {
+      "id": "audit",
+      "name": "محرك المحاسبة والمراجعة",
+      "responsibilities": ["TB/GL/PBC", "المطابقات", "المخاطر", "الأهمية النسبية", "القيود المقترحة", "القوائم", "التقرير", "الاعتماد البشري"]
+    }
+  ],
+  "authority_order": [
+    { "rank": 1, "type": "jurisdiction_official", "label": "الجهة الرسمية المحلية المختصة" },
+    { "rank": 2, "type": "international_standard_setter", "label": "الجهة الدولية المصدرة للمعيار" },
+    { "rank": 3, "type": "adopted_standard_book", "label": "نسخة معيار معتمدة/مرخصة داخل KOSIF" },
+    { "rank": 4, "type": "official_guidance", "label": "إرشاد أو توضيح رسمي" },
+    { "rank": 5, "type": "training_reference", "label": "كتاب أو مادة تدريبية" },
+    { "rank": 6, "type": "ai_explanation", "label": "شرح أو استدلال AI" }
+  ],
+  "status_policy": {
+    "effective": "يمكن الاستناد إليه ضمن نطاقه وبعد تحقق الفترة والدولة",
+    "future-effective": "يعرض كتغيير قادم ولا يفرض قبل تاريخ النفاذ إلا عند تطبيق مبكر صحيح",
+    "exposure-draft": "مشروع للتعليق ولا يعامل كمتطلب نافذ",
+    "superseded": "مرجع تاريخي فقط",
+    "training": "للشرح والتعلم ولا يعلو على المصدر الرسمي"
+  },
+  "country_profiles": {
+    "saudi": {
+      "label": "المملكة العربية السعودية",
+      "primary_authorities": ["SOCPA", "ZATCA", "IFRS Foundation / IASB", "IAASB"],
+      "default_book_ids": ["b3", "b1"],
+      "tax_authority": "ZATCA"
+    },
+    "egypt": {
+      "label": "مصر",
+      "primary_authorities": ["الهيئة العامة للرقابة المالية/الجهات المصرية المختصة", "معايير المحاسبة المصرية", "IFRS Foundation / IASB"],
+      "default_book_ids": []
+    },
+    "us": {
+      "label": "الولايات المتحدة",
+      "primary_authorities": ["FASB", "SEC", "PCAOB", "AICPA"],
+      "default_book_ids": []
+    }
+  },
+  "workflow": [
+    { "step": 1, "id": "engagement", "name": "بيانات الارتباط والمنشأة", "inputs": ["الدولة", "الفترة", "نوع المنشأة"], "outputs": ["إطار التطبيق", "مصادر السلطة"] },
+    { "step": 2, "id": "tb", "name": "استيراد ميزان المراجعة", "inputs": ["TB"], "outputs": ["ميزان موحد", "فحوص أولية"] },
+    { "step": 3, "id": "gl", "name": "دفتر الأستاذ والتحليلات", "inputs": ["GL", "TB"], "outputs": ["مطابقات", "أعلام مخاطر"] },
+    { "step": 4, "id": "pbc", "name": "PBC والمستندات", "inputs": ["المخاطر", "المستندات"], "outputs": ["فجوات أدلة", "طلبات محدثة"] },
+    { "step": 5, "id": "testing", "name": "إجراءات المراجعة والاختبارات", "inputs": ["الأدلة", "العينات", "المعايير"], "outputs": ["نتائج", "تحريفات"] },
+    { "step": 6, "id": "council", "name": "مجلس المراجعين", "inputs": ["ملف الأدلة", "المصادر"], "outputs": ["توافق", "خلاف", "فجوات أدلة"] },
+    { "step": 7, "id": "adjustments", "name": "التسويات والقيود المقترحة", "inputs": ["النتائج"], "outputs": ["قيد مقترح", "قرار بشري"] },
+    { "step": 8, "id": "statements", "name": "القوائم والإفصاحات", "inputs": ["TB مصحح", "إطار التقرير"], "outputs": ["مسودات قوائم", "اختبارات اتساق"] },
+    { "step": 9, "id": "report", "name": "التقرير النهائي", "inputs": ["نتائج", "قرارات بشرية", "أدلة"], "outputs": ["مسودة تقرير", "حزمة تتبع"] }
+  ],
+  "council": {
+    "assignment_modes": ["member", "whole-council"],
+    "members": ["OpenAI", "Claude", "Gemini", "Public/Local AI", "Human Reviewer"],
+    "rules": ["جولة مستقلة عمياء", "تجريد حقول السلطة", "توافق النماذج لا يعد اعتماداً", "القرار النهائي بشري موثق"]
+  },
+  "book_engine": {
+    "schema": "kosif.book.v1",
+    "accepted_extraction_inputs": ["text-pages", "txt", "structured-json"],
+    "pdf_policy": "PDF يمر أولاً عبر طبقة استخراج موثقة؛ لا يختلق Book Engine نصاً مفقوداً من OCR.",
+    "hierarchy": ["part", "chapter", "section", "heading", "paragraph", "list_item"],
+    "cleanup": ["unicode/spacing normalization", "page-number removal", "repeating header/footer removal", "exact duplicate removal", "OCR suspicion flags"],
+    "provenance_required": true
+  }
+}
