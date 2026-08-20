@@ -90,31 +90,47 @@ jobs:
         run: |
           set -euo pipefail
 
+          probe_get() {
+            name="$1"; url="$2"; file="/tmp/$name.out"
+            code=$(curl -sS --connect-timeout 10 --max-time 30 -o "$file" -w '%{http_code}' "$url")
+            echo "$name -> HTTP $code"
+            if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+              cat "$file" || true
+              exit 1
+            fi
+          }
+
           ok=0
           for attempt in $(seq 1 30); do
-            if curl -fsS --connect-timeout 10 --max-time 20 "$MCP_BASE_URL/healthz" -o /tmp/kosif-mcp-health.json; then
-              if grep -q '"ok":true' /tmp/kosif-mcp-health.json && grep -q '"oauth":true' /tmp/kosif-mcp-health.json; then
-                ok=1
-                break
-              fi
+            code=$(curl -sS --connect-timeout 10 --max-time 20 -o /tmp/kosif-mcp-health.json -w '%{http_code}' "$MCP_BASE_URL/healthz" || true)
+            if [ "$code" = "200" ] && grep -q '"ok":true' /tmp/kosif-mcp-health.json && grep -q '"oauth":true' /tmp/kosif-mcp-health.json; then
+              ok=1
+              break
             fi
             sleep 3
           done
-          [ "$ok" = 1 ] || { echo 'OAuth MCP health endpoint failed'; cat /tmp/kosif-mcp-health.json 2>/dev/null || true; exit 1; }
+          [ "$ok" = 1 ] || { echo "OAuth MCP health failed (HTTP ${code:-none})"; cat /tmp/kosif-mcp-health.json 2>/dev/null || true; exit 1; }
+          echo "healthz -> HTTP 200"
 
-          curl -fsS "$MCP_BASE_URL/.well-known/oauth-protected-resource/mcp" -o /tmp/kosif-resource.json
-          grep -q 'authorization_servers' /tmp/kosif-resource.json
-          grep -q "$MCP_BASE_URL/mcp" /tmp/kosif-resource.json
+          probe_get resource_metadata "$MCP_BASE_URL/.well-known/oauth-protected-resource/mcp"
+          grep -q 'authorization_servers' /tmp/resource_metadata.out
+          grep -q "$MCP_BASE_URL/mcp" /tmp/resource_metadata.out
 
-          curl -fsS "$MCP_BASE_URL/.well-known/oauth-authorization-server" -o /tmp/kosif-auth-server.json
-          grep -q 'authorization_endpoint' /tmp/kosif-auth-server.json
-          grep -q 'registration_endpoint' /tmp/kosif-auth-server.json
-          grep -q 'code_challenge_methods_supported' /tmp/kosif-auth-server.json
+          probe_get auth_server_metadata "$MCP_BASE_URL/.well-known/oauth-authorization-server"
+          grep -q 'authorization_endpoint' /tmp/auth_server_metadata.out
+          grep -q 'registration_endpoint' /tmp/auth_server_metadata.out
+          grep -q 'code_challenge_methods_supported' /tmp/auth_server_metadata.out
 
-          curl -fsS -X POST "$MCP_BASE_URL/oauth/register" \
+          REG_STATUS=$(curl -sS --connect-timeout 10 --max-time 30 -o /tmp/kosif-register.json -w '%{http_code}' \
+            -X POST "$MCP_BASE_URL/oauth/register" \
             -H 'content-type: application/json' \
-            --data '{"client_name":"KOSIF CI Smoke","redirect_uris":["https://example.com/callback"],"token_endpoint_auth_method":"none","grant_types":["authorization_code"],"response_types":["code"]}' \
-            -o /tmp/kosif-register.json
+            --data '{"client_name":"KOSIF CI Smoke","redirect_uris":["https://example.com/callback"],"token_endpoint_auth_method":"none","grant_types":["authorization_code"],"response_types":["code"]}')
+          echo "dcr_register -> HTTP $REG_STATUS"
+          if [ "$REG_STATUS" -lt 200 ] || [ "$REG_STATUS" -ge 300 ]; then
+            cat /tmp/kosif-register.json || true
+            exit 1
+          fi
+
           CLIENT_ID=$(node - <<'NODE'
           const fs=require('fs');const j=JSON.parse(fs.readFileSync('/tmp/kosif-register.json','utf8'));
           if(!j.client_id){console.error(j);process.exit(2)}process.stdout.write(j.client_id);
@@ -126,12 +142,15 @@ jobs:
             -H 'content-type: application/json' \
             -H 'accept: application/json, text/event-stream' \
             --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2026-07-28","capabilities":{},"clientInfo":{"name":"kosif-ci-smoke","version":"1.0.0"}}}')
-          [ "$STATUS" = "401" ] || { echo "Expected OAuth-protected MCP 401, got $STATUS"; cat /tmp/kosif-mcp-unauth.txt; exit 1; }
+          echo "protected_mcp_without_token -> HTTP $STATUS"
+          [ "$STATUS" = "401" ] || { cat /tmp/kosif-mcp-unauth.txt; exit 1; }
           grep -qi 'WWW-Authenticate: Bearer' /tmp/kosif-mcp-unauth.headers
 
           ENCODED_CLIENT=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$CLIENT_ID")
           AUTH_URL="$MCP_BASE_URL/authorize?response_type=code&client_id=$ENCODED_CLIENT&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=mcp%3Aread&state=ci-smoke&code_challenge=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&code_challenge_method=S256&resource=https%3A%2F%2Fkosif-engineering-copilot-mcp.kosif199022.workers.dev%2Fmcp"
-          curl -fsS "$AUTH_URL" -o /tmp/kosif-consent.html
+          AUTH_STATUS=$(curl -sS --connect-timeout 10 --max-time 30 -o /tmp/kosif-consent.html -w '%{http_code}' "$AUTH_URL")
+          echo "authorize_consent -> HTTP $AUTH_STATUS"
+          if [ "$AUTH_STATUS" != "200" ]; then cat /tmp/kosif-consent.html || true; exit 1; fi
           grep -q 'السماح والاتصال' /tmp/kosif-consent.html
 
           echo "KOSIF_OAUTH_MCP_READY=$MCP_BASE_URL/mcp"
