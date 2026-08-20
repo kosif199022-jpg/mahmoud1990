@@ -77,7 +77,7 @@
       const r = await fetch('/__version', {cache:'no-store', credentials:'same-origin'});
       const d = await r.json();
       const v38 = /^v38\./i.test(String(d.version || '')) && /v38/i.test(String(d.buildId || d.build || ''));
-      const studio = d.productName === 'Kosif' && d.version === 'v40.0.0-root' && d.buildId === '2026.08.20-v40-vibrant-professional-pwa' && d.experienceVersion === 'v40.0.0' && d.installable === true;
+      const studio = d.productName === 'Kosif' && d.version === 'v41.0.0-root' && d.buildId === '2026.08.20-v41-editorial-cinematic-canva' && d.experienceVersion === 'v41.0.0' && d.installable === true;
       ok = r.ok && (v38 || studio);
     } catch (_) {}
     if (!ok) return;

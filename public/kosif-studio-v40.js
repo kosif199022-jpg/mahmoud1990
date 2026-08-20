@@ -108,13 +108,13 @@
     if (!$('link[rel="manifest"]', head)) {
       const manifest = document.createElement('link');
       manifest.rel = 'manifest';
-      manifest.href = '/manifest.webmanifest?v=40';
+      manifest.href = '/manifest.webmanifest?v=41';
       head.appendChild(manifest);
     }
     if (!$('link[rel="apple-touch-icon"]', head)) {
       const icon = document.createElement('link');
       icon.rel = 'apple-touch-icon';
-      icon.href = '/icons/apple-touch-icon.png?v=40';
+      icon.href = '/icons/apple-touch-icon.png?v=41';
       head.appendChild(icon);
     }
     if (!$('meta[name="apple-mobile-web-app-capable"]', head)) {
