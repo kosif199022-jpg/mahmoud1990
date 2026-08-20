@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="KOSIF maskable icon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2B1D0E"/>
+      <stop offset=".48" stop-color="#214694"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD36C"/>
+      <stop offset="1" stop-color="#F5A623"/>
+    </linearGradient>
+    <linearGradient id="vivid" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2563EB"/>
+      <stop offset=".52" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#EF5B4C"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="390" cy="124" r="76" fill="none" stroke="#FFD36C" stroke-opacity=".24" stroke-width="3"/>
+  <circle cx="390" cy="124" r="112" fill="none" stroke="#FFD36C" stroke-opacity=".10" stroke-width="3"/>
+  <path d="M151 116h54v108l95-108h67L269 244l109 151h-68l-84-109-21 27v82h-54z" fill="#F2F6FC"/>
+  <circle cx="380" cy="124" r="24" fill="url(#gold)"/>
+  <circle cx="380" cy="124" r="12" fill="#2B1D0E"/>
+  <path d="M112 395h288" stroke="url(#gold)" stroke-width="11" stroke-linecap="round"/>
+  <path d="M112 420h190" stroke="url(#vivid)" stroke-width="7" stroke-linecap="round"/>
+</svg>

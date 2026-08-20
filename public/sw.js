@@ -1,7 +1,7 @@
-const C='kosif-native-v39-editorial-app-2';
-const CORE=['/','/hub.html','/suite.css','/suite.js','/suite-shell.css','/suite-shell.js','/kosif-kitab-theme.css?v=1.0.0-kitab','/kosif-kitab-theme.js?v=1.0.0-kitab','/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-2','/assets/kosif-audit-hero-v39.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp','/fonts/alexandria-arabic-500-normal.woff2','/fonts/alexandria-arabic-700-normal.woff2','/wealth-library-v37.js','/libraries/index.html','/libraries/libraries.css','/sales/index.html','/sales/sales.css','/sales/sales.js','/sales/sales-general-bootstrap.js','/sales/sales-motion-v1.css','/sales/sales-motion-v1.js','/v37-privacy-guard.js','/v37-audit-safety.js','/index.html','/manifest.webmanifest','/icon.svg','/migrate-v35.js','/v36.css','/v36-motion.css','/v36-continuity.js','/v36-engagement.js','/v36-continuity.css','/kosif-canva-premium-v2.css','/kosif-vibrant-audit-hero.svg','/v36-mobile-phase-b.css','/v36-polish-phase-d.css','/v36-analytics-3d.js','/v36-analytics-3d.css','/legacy/core-v36.js','/v36-features.js','/v36-operations.js','/v36-outputs.js','/v36-governance.js','/v36-standards-readiness.js','/v36-ai-gate.js','/v36-zai.js','/v36-council-v2.js','/v36-executor.js','/v36-reviewer-media.js','/v36-voice-guide.js','/v36-history-restore.js','/standards/bridge.js'];
-const REQUIRED_CORE=new Set(['/','/hub.html','/suite.css','/suite.js','/index.html','/manifest.webmanifest','/kosif-kitab-theme.css?v=1.0.0-kitab','/kosif-kitab-theme.js?v=1.0.0-kitab','/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-2','/assets/kosif-audit-hero-v39.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp']);
-const INTEGRITY=new Set(['/migrate-v35.js','/v36-continuity.js','/v36-continuity.css','/kosif-editorial-v39.css','/assets/kosif-audit-hero-v39.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp','/kosif-canva-premium-v2.css','/kosif-vibrant-audit-hero.svg','/v36-mobile-phase-b.css','/kosif-kitab-theme.css','/kosif-kitab-theme.js']);
+const C='kosif-native-v40-studio-app';
+const CORE=['/','/hub.html','/suite.css','/suite.js','/suite-shell.css','/suite-shell.js','/kosif-kitab-theme.css?v=1.0.0-kitab','/kosif-kitab-theme.js?v=1.0.0-kitab','/kosif-studio-v40.css?v=2026.08.20-v40','/kosif-studio-v40.js?v=40','/kosif-suite-v40.css?v=40','/assets/kosif-studio-hero-v40.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp','/fonts/alexandria-arabic-500-normal.woff2','/fonts/alexandria-arabic-700-normal.woff2','/wealth-library-v37.js','/libraries/index.html','/libraries/libraries.css','/sales/index.html','/sales/sales.css','/sales/sales.js','/sales/sales-general-bootstrap.js','/sales/sales-motion-v1.css','/sales/sales-motion-v1.js','/v37-privacy-guard.js','/v37-audit-safety.js','/index.html','/manifest.webmanifest','/icon.svg','/icon-maskable.svg','/icons/icon-192.png','/icons/icon-512.png','/icons/maskable-512.png','/icons/apple-touch-icon.png','/migrate-v35.js','/v36.css','/v36-motion.css','/v36-continuity.js','/v36-engagement.js','/v36-continuity.css','/kosif-canva-premium-v2.css','/kosif-vibrant-audit-hero.svg','/v36-mobile-phase-b.css','/v36-polish-phase-d.css','/v36-analytics-3d.js','/v36-analytics-3d.css','/legacy/core-v36.js','/v36-features.js','/v36-operations.js','/v36-outputs.js','/v36-governance.js','/v36-standards-readiness.js','/v36-ai-gate.js','/v36-zai.js','/v36-council-v2.js','/v36-executor.js','/v36-reviewer-media.js','/v36-voice-guide.js','/v36-history-restore.js','/standards/bridge.js'];
+const REQUIRED_CORE=new Set(['/','/hub.html','/suite.css','/suite.js','/index.html','/manifest.webmanifest','/kosif-kitab-theme.css?v=1.0.0-kitab','/kosif-kitab-theme.js?v=1.0.0-kitab','/kosif-studio-v40.css?v=2026.08.20-v40','/kosif-studio-v40.js?v=40','/kosif-suite-v40.css?v=40','/assets/kosif-studio-hero-v40.webp','/icons/icon-192.png','/icons/icon-512.png','/icons/maskable-512.png']);
+const INTEGRITY=new Set(['/migrate-v35.js','/v36-continuity.js','/v36-continuity.css','/kosif-studio-v40.css','/kosif-studio-v40.js','/kosif-suite-v40.css','/assets/kosif-studio-hero-v40.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp','/manifest.webmanifest','/icon.svg','/icon-maskable.svg','/icons/icon-192.png','/icons/icon-512.png','/icons/maskable-512.png','/icons/apple-touch-icon.png','/kosif-canva-premium-v2.css','/kosif-vibrant-audit-hero.svg','/v36-mobile-phase-b.css','/kosif-kitab-theme.css','/kosif-kitab-theme.js']);
 function integrity(u){return u.origin===location.origin&&INTEGRITY.has(u.pathname)}
 async function primeCore(c){
   const failed=[];
@@ -21,12 +21,12 @@ self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.o
 self.addEventListener('activate',e=>e.waitUntil((async()=>{
   for(const k of await caches.keys()){
     if(k===C)continue;
-    if(/^kosif-native-v[\d-]+(?:-[a-z-]+)?-app$/i.test(k)||/^tamhees/i.test(k)||/^kosif-app-/i.test(k))await caches.delete(k)
+    if(/^kosif-native-v/i.test(k)||/^tamhees/i.test(k)||/^kosif-app-/i.test(k))await caches.delete(k)
   }
   const c=await caches.open(C);
   for(const req of await c.keys()){
     const u=new URL(req.url);
-    if(integrity(u)||['/libraries/reader.html','/libraries/reader.css','/libraries/reader.js'].includes(u.pathname))await c.delete(req);
+    if(['/libraries/reader.html','/libraries/reader.css','/libraries/reader.js'].includes(u.pathname))await c.delete(req);
   }
   await self.clients.claim();
 })()));
@@ -35,7 +35,14 @@ self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET')return;
   const u=new URL(e.request.url);
   if(integrity(u)){
-    e.respondWith(fetch(e.request,{cache:'reload'}).then(r=>r).catch(()=>Response.error()));
+    e.respondWith((async()=>{
+      const c=await caches.open(C);
+      try{
+        const r=await fetch(e.request,{cache:'reload'});
+        if(r.ok)await c.put(e.request,r.clone());
+        return r;
+      }catch(_){return await c.match(e.request)||Response.error()}
+    })());
     return;
   }
   if(bypass(u))return;

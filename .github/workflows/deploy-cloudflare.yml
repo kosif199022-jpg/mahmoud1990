@@ -48,8 +48,8 @@ jobs:
               if node - <<'NODE'
           const fs=require('fs');
           const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
-          const ok=h?.productName==='Kosif' && h?.version==='v38.1.1-root' && h?.modules?.audit==='/audit/' && h?.modules?.libraries==='/libraries/' && h?.modules?.wealth==='/wealth/reader.html' && h?.modules?.sales==='/sales/' && h?.designAuthority==='KOSIF cream/espresso/gold editorial system with original generated imagery';
-          if(!ok || !String(h?.buildId||'').includes('v38.1.3-editorial-visual-experience')){console.error('Unexpected live health',h);process.exit(2)}
+          const ok=h?.productName==='Kosif' && h?.version==='v40.0.0-root' && h?.modules?.audit==='/audit/' && h?.modules?.libraries==='/libraries/' && h?.modules?.wealth==='/wealth/reader.html' && h?.modules?.sales==='/sales/' && h?.designAuthority==='KOSIF Studio v40 warm editorial system with governed cobalt, teal, coral, violet and gold accents' && h?.installable===true;
+          if(!ok || !String(h?.buildId||'').includes('v40-vibrant-professional-pwa')){console.error('Unexpected live health',h);process.exit(2)}
           console.log('LIVE_KOSIF_OK',h.version,h.buildId);
           NODE
               then ok=1; break; fi
@@ -58,18 +58,27 @@ jobs:
           done
           [ "$ok" = 1 ] || { echo 'Live Kosif verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
 
-          for path in / /audit/ /libraries/ /sales/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-user-polish.css /v38-user-polish.js /kosif-editorial-v39.css /assets/kosif-audit-hero-v39.webp /assets/kosif-reports-hero-v39.webp /assets/kosif-live-hero-v39.webp /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
+          for path in / /audit/ /libraries/ /sales/ /standards/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-user-polish.css /v38-user-polish.js /kosif-studio-v40.css /kosif-studio-v40.js /kosif-suite-v40.css /manifest.webmanifest /icons/icon-192.png /icons/icon-512.png /icons/maskable-512.png /assets/kosif-studio-hero-v40.webp /assets/kosif-reports-hero-v39.webp /assets/kosif-live-hero-v39.webp /v38-reports.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
             code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
             case "$code" in 200|204|301|302|307|308) ;; *) echo "Bad live route $path -> $code"; exit 1;; esac
           done
 
-          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/audit/?deploy=$GITHUB_SHA" -o /tmp/kosif-editorial-audit.html
-          grep -q 'kosif-editorial-v39.css' /tmp/kosif-editorial-audit.html || { echo 'Final editorial stylesheet is not wired into the audit shell'; exit 1; }
-          grep -q 'kosif-audit-hero-v39.webp' /tmp/kosif-editorial-audit.html || { echo 'Generated audit hero is not preloaded'; exit 1; }
-          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/kosif-editorial-v39.css?deploy=$GITHUB_SHA" -o /tmp/kosif-editorial-v39.css
-          grep -q 'kitab-editorial-v39' /tmp/kosif-editorial-v39.css || { echo 'Editorial visual authority marker missing'; exit 1; }
-          grep -q '/assets/kosif-reports-hero-v39.webp' /tmp/kosif-editorial-v39.css || { echo 'Generated report hero is not consumed'; exit 1; }
-          grep -q '/assets/kosif-live-hero-v39.webp' /tmp/kosif-editorial-v39.css || { echo 'Generated live hero is not consumed'; exit 1; }
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/audit/?deploy=$GITHUB_SHA" -o /tmp/kosif-v40-audit.html
+          grep -q 'kosif-studio-v40.css' /tmp/kosif-v40-audit.html || { echo 'Final v40 stylesheet is not wired into the audit shell'; exit 1; }
+          grep -q 'kosif-studio-hero-v40.webp' /tmp/kosif-v40-audit.html || { echo 'Generated v40 hero is not preloaded'; exit 1; }
+          grep -q 'manifest.webmanifest' /tmp/kosif-v40-audit.html || { echo 'PWA manifest is not wired into the audit shell'; exit 1; }
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/kosif-studio-v40.css?deploy=$GITHUB_SHA" -o /tmp/kosif-studio-v40.css
+          grep -q 'kosif-studio-v40' /tmp/kosif-studio-v40.css || { echo 'Studio visual authority marker missing'; exit 1; }
+          grep -q '/assets/kosif-studio-hero-v40.webp' /tmp/kosif-studio-v40.css || { echo 'Generated v40 hero is not consumed'; exit 1; }
+          grep -q '/assets/kosif-reports-hero-v39.webp' /tmp/kosif-studio-v40.css || { echo 'Generated report hero is not consumed'; exit 1; }
+          grep -q '/assets/kosif-live-hero-v39.webp' /tmp/kosif-studio-v40.css || { echo 'Generated live hero is not consumed'; exit 1; }
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/manifest.webmanifest?deploy=$GITHUB_SHA" -o /tmp/kosif-v40-manifest.json
+          node - <<'NODE'
+          const fs=require('fs');const m=JSON.parse(fs.readFileSync('/tmp/kosif-v40-manifest.json','utf8'));
+          if(m?.id!=='/audit/'||m?.display!=='standalone'||!String(m?.start_url||'').startsWith('/audit/')||!m?.icons?.some(x=>x.sizes==='512x512')||!m?.icons?.some(x=>String(x.purpose).includes('maskable'))){console.error('Unexpected PWA manifest',m);process.exit(2)}
+          console.log('LIVE_KOSIF_PWA_OK',m.id,m.display,m.icons.length);
+          NODE
 
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/demo/v38/manifest.json?deploy=$GITHUB_SHA" -o /tmp/kosif-v38-demo.json
           node - <<'NODE'

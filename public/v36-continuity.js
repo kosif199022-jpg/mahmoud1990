@@ -3,7 +3,7 @@
 const EXPECTED='v36.4',BUILD='2026.08.18-v36.4-mobile-release-integrity';
 const PHASE_B_CSS='/v36-mobile-phase-b.css?v=36.4-phase-b-1';
 const ANALYTICS_3D_SRC='/v36-analytics-3d.js?v=36.4-phase-c-1';
-const CANVA_PREMIUM_CSS='/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-2';
+const CANVA_PREMIUM_CSS='/kosif-studio-v40.css?v=2026.08.20-v40';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const DIALOG_SELECTORS=['#kosif-more','#kosif-company-sheet','#kosif-ai-sheet','#kosif-command-sheet','#kosif-font-sheet','#kosif-ai-gate'];
 const PROGRESS_STALE_MS=20000;
@@ -16,7 +16,7 @@ function loadCanvaPremiumStyles(){
  if($('#kosif-canva-premium-runtime'))return;
  const st=document.createElement('style');st.id='kosif-canva-premium-runtime';st.textContent=`@import url("${CANVA_PREMIUM_CSS}");`;
  (document.body||document.documentElement).appendChild(st);
- document.documentElement.dataset.kosifVisual='kitab-editorial-v39';
+ document.documentElement.dataset.kosifVisual='kosif-studio-v40';
  const metas=[...document.querySelectorAll('meta[name="theme-color"]')];
  if(metas.length)metas.forEach(m=>m.setAttribute('content',/dark/.test(m.media||'')?'#171009':'#FBF4E1'));else{const m=document.createElement('meta');m.name='theme-color';m.content='#FBF4E1';document.head.appendChild(m)}
  try{const saved=String(localStorage.getItem('kosif_theme')||'').toLowerCase();if(saved==='dark'||saved==='light'||saved==='sepia')document.documentElement.dataset.theme=saved;else{localStorage.setItem('kosif_theme','light');document.documentElement.dataset.theme='light'}}catch(_){if(!document.documentElement.dataset.theme)document.documentElement.dataset.theme='light'}
@@ -96,7 +96,7 @@ function premiumTopbar(){
 }
 function premiumWelcome(){
  const host=$('#view-overview'),hero=host?.querySelector('.card.hero');if(!host||!hero||$('#kosif-premium-welcome'))return;
- hero.insertAdjacentHTML('beforebegin','<section id="kosif-premium-welcome" aria-label="تجربة Kosif البصرية الجديدة"><div class="kcw-mark" aria-hidden="true"></div><div class="kcw-copy"><p class="kcw-kicker">KOSIF · مساحة المراجع الذكية</p><h2>مراجعة أوضح.<br><span>قرار مهني أقوى.</span></h2><p class="kcw-desc">حوّل ملف الارتباط إلى مسار هادئ وقابل للتتبع: أرقام حتمية، أدلة منظمة، وتقارير محكومة—مع إبقاء الرأي والاعتماد النهائي بيد المراجع البشري.</p><div class="kcw-proof" aria-label="ضمانات التجربة"><span>أرقام حتمية</span><span>أدلة قابلة للتتبع</span><span>اعتماد بشري</span></div><div class="kcw-actions"><button type="button" class="kcw-action primary" data-kc-go="rounds">ابدأ جولة مراجعة</button><button type="button" class="kcw-action secondary" data-kc-go="v38-reports">افتح التقارير المحكومة</button></div><small class="kcw-release">التجربة البصرية التحريرية · v39</small></div></section>');
+ hero.insertAdjacentHTML('beforebegin','<section id="kosif-premium-welcome" aria-label="تجربة Kosif البصرية الجديدة"><div class="kcw-mark" aria-hidden="true"></div><div class="kcw-copy"><p class="kcw-kicker">KOSIF · مساحة المراجع الذكية</p><h2>مراجعة أوضح.<br><span>قرار مهني أقوى.</span></h2><p class="kcw-desc">حوّل ملف الارتباط إلى مسار هادئ وقابل للتتبع: أرقام حتمية، أدلة منظمة، وتقارير محكومة—مع إبقاء الرأي والاعتماد النهائي بيد المراجع البشري.</p><div class="kcw-proof" aria-label="ضمانات التجربة"><span>أرقام حتمية</span><span>أدلة قابلة للتتبع</span><span>اعتماد بشري</span></div><div class="kcw-actions"><button type="button" class="kcw-action primary" data-kc-go="rounds">ابدأ جولة مراجعة</button><button type="button" class="kcw-action secondary" data-kc-go="v38-reports">افتح التقارير المحكومة</button></div><small class="kcw-release">KOSIF Studio · v40</small></div></section>');
 }
 function premiumActions(){
  const host=$('#view-overview'),hero=host?.querySelector('.card.hero'),pathCard=host?.querySelector('#steps')?.closest('.card');if(pathCard)pathCard.id='kosif-overview-path-card';if(!host||!hero||$('#kosif-premium-actions'))return;
@@ -111,7 +111,7 @@ function premiumNavigation(){
 }
 function premiumMount(){
  loadCanvaPremiumStyles();premiumTopbar();premiumWelcome();premiumActions();premiumHeroCTA();
- document.documentElement.dataset.kosifVisual='kitab-editorial-v39';
+ document.documentElement.dataset.kosifVisual='kosif-studio-v40';
 }
 function premiumWatch(){
  if(premiumObserver||!document.body)return;

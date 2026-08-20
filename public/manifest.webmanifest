@@ -1,1 +1,48 @@
-{"id":"/","name":"Kosif Native","short_name":"Kosif","description":"منصة Kosif للمراجعة والامتثال الذكي","start_url":"/","scope":"/","display":"standalone","background_color":"#FBF4E1","theme_color":"#2B1D0E","lang":"ar","dir":"rtl","icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "id": "/audit/",
+  "name": "KOSIF | منصة المراجعة والامتثال",
+  "short_name": "KOSIF",
+  "description": "منصة عربية احترافية للمراجعة، الأدلة، المعايير، التقارير والتحليل الحتمي.",
+  "start_url": "/audit/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#FBF4E1",
+  "theme_color": "#2B1D0E",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "ميزان المراجعة",
+      "short_name": "الميزان",
+      "description": "فتح شاشة ميزان المراجعة",
+      "url": "/audit/?view=tb&source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "التقارير المحكومة",
+      "short_name": "التقارير",
+      "description": "فتح شاشة التقارير المحكومة",
+      "url": "/audit/?view=v38-reports&source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "مجلس المراجعين",
+      "short_name": "المجلس",
+      "description": "فتح مجلس المراجعين المستقل",
+      "url": "/audit/?view=v38-council&source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "launch_handler": { "client_mode": ["navigate-existing", "auto"] },
+  "handle_links": "preferred",
+  "prefer_related_applications": false
+}
