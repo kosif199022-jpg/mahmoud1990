@@ -4,9 +4,11 @@ This document is the binding implementation baseline for KOSIF after the user-se
 
 ## 1. Visual authority
 
-- `public/kosif-kitab-theme.css` is the final visual authority for KOSIF.
-- `public/kosif-kitab-theme.js` must keep that stylesheet last when legacy, Phase-D, Canva, analytics, reader, or dynamically injected CSS is added later.
+- `public/kosif-kitab-theme.css` defines the shared visual tokens and cross-module compatibility bridge.
+- `public/kosif-editorial-v39.css` is the final audit-workspace authority. It must load after legacy, Phase-D, Canva, analytics, and v38 polish layers; `public/v36-continuity.js` must never point its final runtime import back to `kosif-canva-premium-v2.css`.
+- `public/kosif-kitab-theme.js` owns saved light/dark preference and shared palette pinning; it must not displace the audit-only v39 final authority.
 - Core identity: warm paper `#FBF4E1`, espresso/coffee, and a restrained `#F5A623` orange-gold accent; Arabic-first typography; correct RTL; high legibility; premium but calm hierarchy.
+- Original generated imagery may be used for high-value hero sections when it preserves legibility and performance. The current required assets are `kosif-audit-hero-v39.webp`, `kosif-reports-hero-v39.webp`, and `kosif-live-hero-v39.webp`; reference-site imagery, logos, or copy must never be copied.
 - The theme is a presentation layer. It must never alter accounting calculations, audit conclusions, evidence, source authority, security, persistence, or business logic.
 - New UI work must extend the theme variables instead of creating another competing color/typography namespace.
 
@@ -97,4 +99,4 @@ When requirements conflict, use this precedence:
 8. Visual consistency and polish
 9. Performance and implementation convenience
 
-The Kitab Caffe visual system is therefore the **design authority**, while the deterministic accounting/audit/security/source engines remain the **functional authority**.
+The KOSIF cream/espresso/gold editorial system is therefore the **design authority**, while the deterministic accounting/audit/security/source engines remain the **functional authority**.
