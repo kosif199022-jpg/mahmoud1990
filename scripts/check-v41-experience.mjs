@@ -9,6 +9,8 @@ const runtime = read('public/kosif-editorial-v41.js');
 const edge = read('src/suite-edge.js');
 const sw = read('public/sw.js');
 const deploy = read('.github/workflows/deploy-cloudflare.yml');
+const productionWorkflow = read('.github/workflows/verify-v36.yml');
+const runtimeWorkflow = read('.github/workflows/verify-v36-3-runtime.yml');
 const continuity = read('public/v36-continuity.js');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
 
@@ -32,6 +34,7 @@ for (const marker of [
 need(css.includes("url('/assets/kosif-studio-hero-v40.webp')") && css.includes("url('/assets/kosif-reports-hero-v39.webp')") && css.includes("url('/assets/kosif-live-hero-v39.webp')"), 'existing original KOSIF artwork is not reused across the editorial covers');
 need(css.includes('(hover:hover) and (pointer:fine)') && css.includes('prefers-reduced-motion:reduce'), 'motion is not bounded by pointer and reduced-motion preferences');
 need(!/animation-duration:[^;]*(?:10ms|20ms|50ms)!important/.test(css), 'reduced-motion fallback should use a near-zero duration only');
+need(css.includes('margin-block-end:4px!important') && css.includes('margin-block-start:0!important'), 'mobile cover-to-actions rhythm is not explicitly bounded');
 
 for (const marker of [
   '__KOSIF_EDITORIAL_V41__', "root.dataset.kosifEdition = 'v41'", "root.dataset.kosifExperience = 'v41'",
@@ -75,6 +78,8 @@ need(sw.includes("'/kosif-editorial-v41.css'") && sw.includes("'/kosif-editorial
 need(manifest.theme_color === '#102825' && manifest.background_color === '#F7F0E2', 'PWA colors do not match the v41 magazine masthead');
 need(deploy.includes('/kosif-editorial-v41.css') && deploy.includes('/kosif-editorial-v41.js'), 'production route verification does not include v41 assets');
 need(deploy.includes('v41-editorial-cinematic-canva') && deploy.includes('experienceVersion') && deploy.includes('baseVisualVersion'), 'production health gate does not verify the v41 contract');
+need(productionWorkflow.includes('41-editorial-cinematic-canva'), 'browser production workflow does not accept the v41 build identity');
+need(runtimeWorkflow.includes('kosif-v41-mobile-default.png') && !runtimeWorkflow.includes('kosif-v40-mobile-default.png'), 'runtime workflow does not preserve the current v41 mobile screenshot');
 
 if (failures.length) {
   console.error('KOSIF_V41_EXPERIENCE_FAILED');

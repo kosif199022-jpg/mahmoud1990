@@ -48,7 +48,7 @@ jobs:
         with:
           name: kosif-v36-4-runtime
           path: |
-            kosif-v40-mobile-default.png
+            kosif-v41-mobile-default.png
             kosif-v36-3-mobile.png
             kosif-v36-3-council-v2.png
           if-no-files-found: ignore
