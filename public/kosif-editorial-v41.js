@@ -12,7 +12,8 @@
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
   const finePointer = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches === true;
-  const touchFirst = window.matchMedia?.('(hover: none), (pointer: coarse), (max-width: 840px)').matches === true;
+  const touchFirst = window.matchMedia?.('(hover: none), (pointer: coarse), (max-width: 840px)').matches === true ||
+    Number(navigator.maxTouchPoints || 0) > 0 || (window.innerWidth > 0 && window.innerWidth <= 840);
   let revealObserver = null;
   let decorateQueued = false;
   let revealQueued = false;
@@ -119,29 +120,38 @@
       '#toc > .ci'
     ].join(',');
     $$(selector, scope).forEach((element, index) => {
-      if (element.dataset.k41Reveal) return;
+      if (element.dataset.k41Reveal) {
+        if (reduced || touchFirst) exposeTarget(element, true);
+        return;
+      }
       element.dataset.k41Reveal = '1';
       element.style.setProperty('--k41-delay', Math.min(index, 9) * 48 + 'ms');
-      if (reduced || touchFirst || !revealObserver) element.classList.add('k41-in');
+      if (reduced || touchFirst || !revealObserver) exposeTarget(element, reduced || touchFirst);
       else revealObserver.observe(element);
     });
+  }
+
+  function exposeTarget(element, force = false) {
+    element.classList.add('k41-in');
+    if (force) {
+      element.style.setProperty('opacity', '1', 'important');
+      element.style.setProperty('filter', 'none', 'important');
+      element.style.setProperty('transform', 'none', 'important');
+    }
+    revealObserver?.unobserve(element);
   }
 
   function revealVisibleTargets() {
     $$('section[data-view].show [data-k41-reveal], #view.show [data-k41-reveal]').forEach(element => {
       const rect = element.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0 && rect.top < innerHeight * .98 && rect.bottom > 0) {
-        element.classList.add('k41-in');
-        revealObserver?.unobserve(element);
+        exposeTarget(element, reduced || touchFirst);
       }
     });
   }
 
   function revealAllTargets() {
-    $$('[data-k41-reveal]').forEach(element => {
-      element.classList.add('k41-in');
-      revealObserver?.unobserve(element);
-    });
+    $$('[data-k41-reveal]').forEach(element => exposeTarget(element, reduced || touchFirst));
   }
 
   function queueVisibleReveal() {
@@ -158,8 +168,7 @@
       revealObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add('k41-in');
-          revealObserver.unobserve(entry.target);
+          exposeTarget(entry.target);
         });
       }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
     }
@@ -223,6 +232,7 @@
     updateChrome();
     mountFolio();
     revealTargets();
+    if (reduced || touchFirst) revealAllTargets();
     requestAnimationFrame(() => requestAnimationFrame(revealVisibleTargets));
   }
 

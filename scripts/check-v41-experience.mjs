@@ -53,6 +53,7 @@ for (const marker of [
   '--k41-tilt-x', '--k41-x', 'kosif-view-change', 'touchFirst', 'revealAllTargets', 'setTimeout(revealAllTargets, 1000)',
   "root.dataset.kosifRevision = 'v41.2'", 'syncDomain', 'mountScrollProgress', 'queueScrollProgress'
 ]) need(runtime.includes(marker), `missing v41 runtime marker: ${marker}`);
+need(runtime.includes('navigator.maxTouchPoints') && runtime.includes("element.style.setProperty('opacity', '1', 'important')") && runtime.includes('if (reduced || touchFirst) revealAllTargets()'), 'touch-first content visibility is not enforced deterministically');
 
 need(runtime.includes('new MutationObserver(queueDecorate).observe(document.body, { childList: true, subtree: true })'), 'editorial observer is not scoped to structural changes');
 need(!runtime.includes('attributes: true'), 'editorial runtime observes broad attribute churn');

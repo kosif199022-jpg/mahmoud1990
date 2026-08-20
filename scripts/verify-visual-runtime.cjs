@@ -47,7 +47,13 @@ async function verifyRoute(page, path, domain, label, mobile) {
       lineHeight: parseFloat(getComputedStyle(body).lineHeight),
       horizontalOverflow: root.scrollWidth - root.clientWidth,
       heading: headings[0]?.textContent?.replace(/\s+/g, ' ').trim() || '',
-      hiddenReveals: hiddenReveals.length,
+      hiddenReveals: hiddenReveals.map(element => ({
+        tag: element.tagName,
+        id: element.id || '',
+        className: String(element.className || '').slice(0, 120),
+        view: element.closest('section[data-view]')?.dataset.view || '',
+        opacity: getComputedStyle(element).opacity
+      })),
       progressVisible: visible(progress),
       progressWidth: progress?.getBoundingClientRect().width || 0,
       accent: getComputedStyle(root).getPropertyValue('--k41-accent').trim(),
@@ -62,7 +68,7 @@ async function verifyRoute(page, path, domain, label, mobile) {
   fail(Number.isFinite(state.lineHeight) && state.lineHeight >= 24, `${label}:${path} Arabic line height is cramped`);
   fail(state.horizontalOverflow <= 1, `${label}:${path} horizontal overflow ${state.horizontalOverflow}px`);
   fail(Boolean(state.heading), `${label}:${path} has no visible editorial heading`);
-  fail(state.hiddenReveals === 0, `${label}:${path} cinematic reveal hid ${state.hiddenReveals} surfaces`);
+  fail(state.hiddenReveals.length === 0, `${label}:${path} cinematic reveal hid surfaces ${JSON.stringify(state.hiddenReveals)}`);
   fail(state.progressVisible && state.progressWidth > 100, `${label}:${path} reading progress is missing`);
   fail(Boolean(state.accent), `${label}:${path} functional accent token is missing`);
   fail(!state.bodyLocked, `${label}:${path} opened with the document scroll locked`);
