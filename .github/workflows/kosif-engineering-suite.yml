@@ -24,6 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           test -s frontend/index.html
+          test -s package.json
           test -s config/engineering-suite.json
           test -s config/source-registry.json
           test -s scripts/engineering-suite/browser-smoke.mjs
@@ -61,7 +62,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run accounting golden gate
+      - name: Run existing v38 core suite
+        run: npm run v38-core
+      - name: Run Engineering Suite golden gate
         run: node scripts/engineering-suite/accounting-golden.mjs
 
   provenance-gate:
@@ -95,7 +98,6 @@ jobs:
           node-version: '22'
       - name: Install browser test stack
         run: |
-          npm init -y >/dev/null 2>&1
           npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2 pixelmatch@7.1.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
       - name: Start static server
@@ -141,9 +143,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install Lighthouse
-        run: |
-          npm init -y >/dev/null 2>&1
-          npm install --no-save lighthouse@12.8.2
+        run: npm install --no-save lighthouse@12.8.2
       - name: Start static server
         run: |
           mkdir -p artifacts
