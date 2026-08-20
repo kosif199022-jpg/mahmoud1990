@@ -117,12 +117,20 @@ jobs:
           [ "$ok" = 1 ] || { echo "OAuth MCP health failed (HTTP ${code:-none})"; cat /tmp/kosif-mcp-health.json 2>/dev/null || true; exit 1; }
           echo "healthz -> HTTP 200"
 
-          VISUAL_STATUS=$(curl -sS --connect-timeout 10 --max-time 45 -o /tmp/kosif-visual-smoke.json -w '%{http_code}' \
-            -H "x-kosif-visual-smoke: $VISUAL_SMOKE_KEY" \
-            "$MCP_BASE_URL/internal/visual-smoke")
-          echo "browser_run_visual_smoke -> HTTP $VISUAL_STATUS"
-          [ "$VISUAL_STATUS" = "200" ] || { cat /tmp/kosif-visual-smoke.json || true; exit 1; }
-          grep -q '"ok":true' /tmp/kosif-visual-smoke.json
+          visual_ok=0
+          VISUAL_STATUS="000"
+          for attempt in $(seq 1 20); do
+            VISUAL_STATUS=$(curl -sS --connect-timeout 10 --max-time 45 -o /tmp/kosif-visual-smoke.json -w '%{http_code}' \
+              -H "x-kosif-visual-smoke: $VISUAL_SMOKE_KEY" \
+              "$MCP_BASE_URL/internal/visual-smoke" || true)
+            echo "browser_run_visual_smoke attempt $attempt -> HTTP $VISUAL_STATUS"
+            if [ "$VISUAL_STATUS" = "200" ] && grep -q '"ok":true' /tmp/kosif-visual-smoke.json 2>/dev/null; then
+              visual_ok=1
+              break
+            fi
+            sleep 3
+          done
+          [ "$visual_ok" = 1 ] || { echo "Browser Run visual smoke failed after retries"; cat /tmp/kosif-visual-smoke.json 2>/dev/null || true; exit 1; }
           node - <<'NODE'
           const fs=require('fs');const j=JSON.parse(fs.readFileSync('/tmp/kosif-visual-smoke.json','utf8'));
           if(!(j.bytes>1000)){console.error(j);process.exit(2)}
