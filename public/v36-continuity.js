@@ -31,7 +31,14 @@ function loadCanvaPremiumStyles(){
 function loadAnalytics3D(){if(window.KosifAnalytics3D){window.KosifAnalytics3D.mount?.();return Promise.resolve(window.KosifAnalytics3D)}if(analytics3DPromise)return analytics3DPromise;analytics3DPromise=new Promise((resolve,reject)=>{const old=$('#kosif-analytics-3d-script');if(old){old.addEventListener('load',()=>resolve(window.KosifAnalytics3D),{once:true});old.addEventListener('error',reject,{once:true});return}const s=document.createElement('script');s.id='kosif-analytics-3d-script';s.src=ANALYTICS_3D_SRC;s.defer=true;s.dataset.kosifModule='analytics3d';s.onload=()=>{window.KosifAnalytics3D?.mount?.();resolve(window.KosifAnalytics3D)};s.onerror=e=>{analytics3DPromise=null;reject(e)};document.head.appendChild(s)});return analytics3DPromise}
 function analytics3DGuard(){const trigger=()=>{const run=()=>loadAnalytics3D().catch(()=>{});if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:900});else setTimeout(run,30)};window.addEventListener('kosif-view-change',e=>{if(e.detail?.view==='analytics')trigger()});const initial=()=>{if($('#view-analytics.show'))trigger()};if(document.readyState==='complete')setTimeout(initial,0);else window.addEventListener('load',initial,{once:true})}
 function lockBody(preferredY){
- if(bodySnapshot)return;
+ if(bodySnapshot){
+  if(Number.isFinite(preferredY)){
+   lockY=Math.max(0,preferredY);
+   document.body.style.top=`-${lockY}px`;
+   window.dispatchEvent(new CustomEvent('kosif-dialog-lock',{detail:{locked:true,scrollY:lockY,retargeted:true}}));
+  }
+  return;
+ }
  lockY=Math.max(0,Number.isFinite(preferredY)?preferredY:(window.scrollY||document.documentElement.scrollTop||0));
  const b=document.body,r=document.documentElement;
  bodySnapshot={position:b.style.position,top:b.style.top,left:b.style.left,right:b.style.right,width:b.style.width,overflow:b.style.overflow,touchAction:b.style.touchAction};
