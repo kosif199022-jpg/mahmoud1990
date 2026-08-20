@@ -39,11 +39,11 @@ for (const f of ['v38-ultimate.css', 'v38-ultimate.js', 'v38-io.js', 'v38-report
   ok(fs.existsSync('public/' + f) && read('public/' + f).length > 500, 'client module ' + f + ' exists and is substantial');
 }
 
-ok(edge.includes("version:'v38.1.1-root'"), 'suite version is v38.1.1-root');
-ok(edge.includes('2026.08.20-v38.1.3-editorial-visual-experience'), 'editorial visual production build identity is explicit');
-ok(edge.includes("designAuthority:'KOSIF cream/espresso/gold editorial system with original generated imagery'"), 'editorial generated-image design authority is explicit');
+ok(edge.includes("version:'v40.0.0-root'"), 'suite version is v40.0.0-root');
+ok(edge.includes('2026.08.20-v40-vibrant-professional-pwa'), 'v40 production build identity is explicit');
+ok(edge.includes("designAuthority:'KOSIF Studio v40 warm editorial system with governed cobalt, teal, coral, violet and gold accents'"), 'v40 generated-image design authority is explicit');
 ok(edge.includes('/kosif-kitab-theme.js') && edge.includes('/kosif-kitab-theme.css?v=1.0.0-kitab'), 'audit shell wires the Kitab Caffe final theme authority');
-ok(edge.includes('/kosif-editorial-v39.css?v=2026.08.20-editorial-v39-2') && edge.includes('/assets/kosif-audit-hero-v39.webp'), 'audit shell wires and preloads the final editorial experience');
+ok(edge.includes('/kosif-studio-v40.css?v=2026.08.20-v40') && edge.includes('/assets/kosif-studio-hero-v40.webp'), 'audit shell wires and preloads the final v40 experience');
 ok(edge.includes('handleRealtimeSession') && edge.indexOf('handleRealtimeSession') < edge.lastIndexOf('handleV38(req'), 'owner-session realtime router runs before legacy v38 handler');
 ok(edge.includes('/v38-live.js?v=38.1.2'), 'audit shell cache-busts the text+voice live client');
 ok(edge.includes('/v38-ultimate.js?v=38') && edge.includes('/v38-ultimate.css?v=38'), 'audit shell injects the v38 visual layer');
@@ -75,9 +75,9 @@ ok(reports.includes('/accounting/trial-balance-summary') && reports.includes('mi
 ok(reports.includes('v38-report-gate') && reports.includes("gate('اعتماد المراجع والشريك', 'human'"), 'reports expose completion and non-automatable human gates');
 ok(reports.includes("gate('مسودة تقرير موجودة'") && reports.includes('model.hasReportDraft && model.findings.length === 0'), 'reports require a real draft before completion readiness');
 ok(reports.includes("const materialityAmount = st?.mat?.val ?? ''") && !reports.includes('st?.mat?.value'), 'reports never promote a legacy computed materiality display back into a source');
-ok(deploy.includes('KOSIF cream/espresso/gold editorial system with original generated imagery') && deploy.includes('v38.1.3-editorial-visual-experience'), 'Cloudflare production verification matches the current editorial release identity');
-ok(deepRuntime.includes('38\\.1\\.3-editorial-visual-experience'), 'deep runtime verifier accepts the current editorial release identity');
-ok(mainRuntime.includes('38\\.1\\.3-editorial-visual-experience'), 'main runtime verifier accepts the current editorial release identity');
+ok(deploy.includes('KOSIF Studio v40 warm editorial system with governed cobalt, teal, coral, violet and gold accents') && deploy.includes('v40-vibrant-professional-pwa'), 'Cloudflare production verification matches the current v40 release identity');
+ok(deepRuntime.includes('40-vibrant-professional-pwa'), 'deep runtime verifier accepts the current v40 release identity');
+ok(mainRuntime.includes('40-vibrant-professional-pwa'), 'main runtime verifier accepts the current v40 release identity');
 
 ok(proxy.includes('#mixLaunch') && proxy.includes('#smartPebble'), 'Mafateeh reader hides Mix and Smart AI launchers by default');
 ok(proxy.includes('kosif-reader-home') && proxy.includes('kosif-reader-library-home'), 'Mafateeh reader has explicit home/library navigation');

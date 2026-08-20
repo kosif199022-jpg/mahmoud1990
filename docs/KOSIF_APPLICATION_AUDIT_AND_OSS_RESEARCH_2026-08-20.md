@@ -2,7 +2,7 @@
 
 ## Executive outcome
 
-This review converted the Kitab Caffe reference into a KOSIF-specific visual system without copying the reference site's content or assets. A follow-up visual release added three original generated hero images, replaced the late Canva Rose runtime authority with `kosif-editorial-v39.css`, and bumped the PWA cache so production cannot silently retain the old pink experience. It also hardened the report and live-chat paths: trial-balance totals now come from an exact BigInt API, report completion gates are explicit, text chat is memory-only with opt-in context and consent, and the final theme layer owns desktop/mobile navigation state.
+This review converted the Kitab Caffe reference into a KOSIF-specific visual system without copying the reference site's content or assets. KOSIF Studio v40 retains the warm editorial base, adds bounded cobalt/teal/coral/violet/gold accents, introduces an original audit hero, a searchable capability center, a real installable PWA surface, a shared visual layer for hub/libraries/sales/standards, deterministic report visualizations, and a clearer three-stage reviewers council. Trial-balance totals remain sourced from the exact BigInt API, text chat remains memory-only with opt-in context and consent, and human approval remains non-automatable.
 
 The accompanying machine-readable sample is [`KOSIF_OSS_500_SCAN_2026-08-20.json`](./KOSIF_OSS_500_SCAN_2026-08-20.json).
 
@@ -120,8 +120,12 @@ No source code was copied from these repositories. The review adopted architectu
 12. **Theme-toggle fragility:** a fallback observes theme-control clicks and acts only when the existing app handler made no change.
 13. **Duplicate theme link risk:** the audit shell now declares the theme stylesheet before its runtime, preventing a second same-ID link during parsing.
 14. **Stale production workflow identity:** the production check now accepts the current editorial visual build ID.
-15. **Late Canva Rose override:** the legacy pink stylesheet was loading after the warm theme and winning the cascade. The final runtime import now targets `kosif-editorial-v39.css`, the audit shell preloads the generated hero, and CI rejects the old rose palette.
-16. **Stale visual service-worker cache:** the root PWA cache generation is now `kosif-native-v39-editorial-app-2`, with the new CSS and three generated WebP assets required before activation; the follow-up bump ensures existing clients receive the mobile readability refinements.
+15. **Late Canva Rose override:** the legacy pink stylesheet was loading after the warm theme and winning the cascade. The final runtime import now targets `kosif-studio-v40.css`, the audit shell preloads the generated v40 hero, and CI rejects the old rose palette.
+16. **Stale visual service-worker cache:** the root PWA cache generation is now `kosif-native-v40-studio-app`, with the v40 CSS/JS, manifest, icons and generated imagery required before activation.
+17. **Installability gap:** the root app now ships standard 192/512/maskable icons, manifest shortcuts, an explicit Service Worker registration path, a browser install prompt, standalone detection and iOS-specific add-to-home-screen guidance.
+18. **Capability sprawl:** all existing screens remain present but are additionally exposed through a five-domain searchable launcher with keyboard navigation, focus trapping and mobile sheet behavior.
+19. **Report readability:** the governed report now includes an explicitly non-opinion readiness percentage and deterministic SVG charts derived from exact minor-unit values and recorded finding counts.
+20. **Council ambiguity:** the Council now displays blind review, deterministic matrix and human decision as separate stages; its human-record button remains disabled until a matrix exists.
 
 ## Deliberate boundaries and follow-up work
 

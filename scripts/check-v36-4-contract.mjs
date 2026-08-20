@@ -27,12 +27,12 @@ ok('runtime wires historical voice guide instead of leaving it as dead code',/fu
 ok('runtime wires history restoration independently of view timing',/function loadHistoryRestore\(\)/.test(zai)&&/\/v36-history-restore\.js\?v=36\.3-history1/.test(zai)&&/loadHistoryRestore\(\)/.test(zai));
 ok('historical Council loader identifier remains stable',/\/v36-council-v2\.js\?v=36\.3-council2/.test(zai));
 ok('shared guarded module loader prevents duplicate injections',/function loadModule\(globalName,selector,src,datasetKey\)/.test(zai)&&/window\[globalName\]\|\|document\.querySelector\(selector\)/.test(zai));
-ok('root app SW cache generation is v39 while preserving v36.4 migration',/const C='kosif-native-v39-editorial-app-2'/.test(sw)&&/kosif-native-v/.test(sw));
+ok('root app SW cache generation is v40 while preserving v36.4 migration',/const C='kosif-native-v40-studio-app'/.test(sw)&&/kosif-native-v/.test(sw));
 ok('standards SW cache generation is v36.4',/const C='kosif-native-v36-4-standards'/.test(stdSw));
 ok('reviewer media voice guide and history restoration are available offline',/\/v36-reviewer-media\.js/.test(sw)&&/\/v36-voice-guide\.js/.test(sw)&&/\/v36-history-restore\.js/.test(sw));
 ok('app SW excludes APIs and release diagnostics',/pathname\.startsWith\('\/api\/'\)/.test(sw)&&/u\.pathname==='\/__version'/.test(sw)&&/u\.pathname==='\/__health'/.test(sw));
 ok('old Kosif and Tamhees caches remain purgeable',/tamhees/i.test(sw)&&/kosif-native-v/.test(sw)&&/tamhees/i.test(stdSw));
-ok('package declares its lineage and this contract (v38 carries v36.4 compatibility)',/"version"\s*:\s*"38\.0\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
+ok('package declares its lineage and this contract (v40 carries v36.4 compatibility)',/"version"\s*:\s*"40\.0\.0"/.test(pkg)&&/check-v36-4-contract\.mjs/.test(pkg));
 ok('all restored regression gates remain in full CI',/npm run reviewer-media/.test(pkg)&&/npm run history-restoration/.test(pkg)&&/npm run feature-reachability/.test(pkg)&&/npm run accounting/.test(pkg));
 ok('master anti-regressions still require iPhone modal and autoscroll safety',/iPhone/.test(req)&&/auto-scroll continuing while a modal\/body lock is active/.test(req)&&/body-scroll\/modal-scroll conflicts/.test(req));
 console.log(`KOSIF_V36_4_CONTRACT ${failures.length?'FAILED':'OK'} failures=${failures.length}`);if(failures.length){for(const x of failures)console.error(' - '+x);process.exit(2)}
