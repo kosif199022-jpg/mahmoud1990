@@ -21,6 +21,13 @@ export const PRIORITY_ORDER = Object.freeze([
   'performance'
 ]);
 
+/*
+ * Evidence entries below are repository artifacts, not virtual HTTP routes.
+ * The Wealth/Mafateeh reader itself is supplied at runtime through suite-proxy.js;
+ * therefore /wealth/reader.html and /wealth/books/library.json are verified by
+ * the proxy/edge implementation plus production smoke tests rather than treated
+ * as physical files that must exist under public/.
+ */
 export const REQUIRED_EVIDENCE_PATHS = Object.freeze([
   'src/requirements/v42-control-plane.mjs',
   'src/engine/v38-core.mjs',
@@ -29,15 +36,17 @@ export const REQUIRED_EVIDENCE_PATHS = Object.freeze([
   'src/security-edge.js',
   'src/v38-api.js',
   'src/v38-source-intelligence.js',
+  'src/suite-edge.js',
+  'src/suite-proxy.js',
   'public/v36-ai-gate.js',
   'public/v36-governance.js',
   'public/kosif-studio-v40.js',
   'public/kosif-studio-v40.css',
   'public/kosif-editorial-v41.js',
   'public/kosif-editorial-v41.css',
-  'public/wealth/reader.html',
   'public/wealth-library-v37.js',
   'public/standards',
+  'public/standards/data/library.json',
   'governance/review-state.json',
   'governance/rollback-registry.json',
   'ops/kosif-main-monitor.mjs',
@@ -50,10 +59,10 @@ export const DOMAIN_EVIDENCE = Object.freeze({
   'الشاشة الرئيسية والتنقل': ['public/kosif-studio-v40.js', 'public/index.html'],
   'تجربة الموبايل': ['public/v38-user-polish.js', 'public/kosif-editorial-v41.css'],
   'PWA والتثبيت': ['public/manifest.webmanifest', 'public/index.html'],
-  'محرك الكتب': ['public/wealth-library-v37.js', 'public/wealth/reader.html'],
-  'قارئ مفاتيح الثروة': ['public/wealth/reader.html', 'public/wealth-library-v37.js'],
-  'تنظيف كتب المعايير': ['public/standards', 'public/wealth/books/library.json'],
-  'قالب استيراد الكتب': ['public/wealth-library-v37.js', 'public/wealth/books/library.json'],
+  'محرك الكتب': ['src/suite-proxy.js', 'public/wealth-library-v37.js', 'src/suite-edge.js'],
+  'قارئ مفاتيح الثروة': ['src/suite-proxy.js', 'public/wealth-library-v37.js'],
+  'تنظيف كتب المعايير': ['public/standards', 'public/standards/data/library.json'],
+  'قالب استيراد الكتب': ['public/wealth-library-v37.js', 'src/suite-edge.js', 'public/standards/data/library.json'],
   'عقل النظام': ['src/engine/v38-core.mjs', 'src/requirements/v42-control-plane.mjs'],
   'المصادر الرسمية': ['src/v38-source-intelligence.js', 'public/data/kosif-official-sources-2026.json'],
   'تاريخ سريان المعايير': ['src/v38-source-intelligence.js', 'public/standards'],
