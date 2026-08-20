@@ -3,12 +3,15 @@ import edgeWorker from '../src/security-edge.js';
 
 const edge=fs.readFileSync('src/security-edge.js','utf8');
 const suite=fs.readFileSync('src/suite-edge.js','utf8');
+const suiteV43=fs.existsSync('src/suite-edge-v43.js')?fs.readFileSync('src/suite-edge-v43.js','utf8'):'';
 const wrangler=fs.readFileSync('wrangler.toml','utf8');
 const legacy=fs.readFileSync('src/legacy-worker.js','utf8');
 const failures=[];
 const ok=(name,v)=>{console.log((v?'✅':'❌')+' '+name);if(!v)failures.push(name)};
 
-ok('Wrangler production enters suite edge then canonical security edge',/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler)&&suite.includes("import securityEdge from './security-edge.js'")&&suite.includes('securityEdge.fetch'));
+const directSuiteEntry=/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler);
+const governedV43Entry=/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler)&&suiteV43.includes("import suite from './suite-edge.js'")&&suiteV43.includes('await suite.fetch(req,env,ctx)');
+ok('Wrangler production enters governed suite edge then canonical security edge',(directSuiteEntry||governedV43Entry)&&suite.includes("import securityEdge from './security-edge.js'")&&suite.includes('securityEdge.fetch'));
 ok('Security edge delegates allowed traffic to canonical worker',edge.includes("import appWorker from './worker.js'")&&edge.includes('return appWorker.fetch(req,env,ctx)'));
 ok('Legacy shared state is owner-gated',edge.includes("'/api/state'")&&/LEGACY_SHARED_PATHS/.test(edge));
 ok('Legacy notes/files/office storage is owner-gated',edge.includes("'/api/notes'")&&edge.includes("'/api/files'")&&edge.includes("'/api/office/upload'")&&edge.includes("'/api/office/files'"));
