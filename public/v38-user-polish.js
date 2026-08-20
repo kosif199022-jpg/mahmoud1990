@@ -69,13 +69,16 @@
     }
   }
 
-  /* Old release-integrity warning is only removed after live version proves this is v38. */
+  /* Remove the legacy warning only after the live endpoint proves a compatible
+     v38 root or the exact v40 Studio shell with its embedded v38 core. */
   async function reconcileReleaseWarning() {
     let ok = false;
     try {
       const r = await fetch('/__version', {cache:'no-store', credentials:'same-origin'});
       const d = await r.json();
-      ok = r.ok && /^v38\./i.test(String(d.version || '')) && /v38/i.test(String(d.buildId || d.build || ''));
+      const v38 = /^v38\./i.test(String(d.version || '')) && /v38/i.test(String(d.buildId || d.build || ''));
+      const studio = d.productName === 'Kosif' && d.version === 'v40.0.0-root' && d.buildId === '2026.08.20-v40-vibrant-professional-pwa' && d.experienceVersion === 'v40.0.0' && d.installable === true;
+      ok = r.ok && (v38 || studio);
     } catch (_) {}
     if (!ok) return;
     const old = 'يوجد اختلاف في مكونات الإصدار. اضغط لتحميل Kosif الحالي بالكامل.';

@@ -719,10 +719,23 @@ html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions .kpa-title{
   font-family:var(--ke-font)!important;
   font-size:18px!important;
   font-weight:900!important;
+  margin-bottom:12px!important;
+}
+
+html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions .kpa-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:11px!important;
 }
 
 html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions button{
+  width:100%!important;
+  min-width:0!important;
   min-height:106px!important;
+  padding:13px 10px!important;
+  display:grid!important;
+  place-items:center!important;
+  align-content:center!important;
   color:var(--ke-espresso)!important;
   background:linear-gradient(155deg,#FFFDF7,#F8EFD9)!important;
   border:1px solid var(--ke-line)!important;
@@ -737,15 +750,34 @@ html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions button:hover{
 }
 
 html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions .kpa-ic{
+  display:grid!important;
+  place-items:center!important;
   width:40px!important;
   height:40px!important;
+  margin:0 auto 8px!important;
   color:var(--ke-gold)!important;
   background:var(--ke-espresso)!important;
   border-radius:13px!important;
   box-shadow:0 12px 24px -18px rgba(43,29,14,.65)!important;
 }
 
+html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions b,
 html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions small{
+  display:block!important;
+  min-width:0!important;
+  text-align:center!important;
+  white-space:normal!important;
+}
+
+html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions b{
+  font-size:14px!important;
+  font-weight:900!important;
+}
+
+html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions small{
+  margin-top:3px!important;
+  font-size:11px!important;
+  line-height:1.45!important;
   color:var(--ke-muted)!important;
 }
 
@@ -1010,6 +1042,33 @@ html[data-kosif-visual="kosif-studio-v40"] .drawer-h{
   background:linear-gradient(135deg,var(--ke-espresso),#4A3419)!important;
 }
 
+/* The legacy drawer lives inside #app. Pin it to the viewport so the app's
+   entrance transform cannot turn the closed drawer into visible page content. */
+html[data-kosif-visual="kosif-studio-v40"] #app>.drawer{
+  position:fixed!important;
+  margin:0!important;
+}
+
+@media (min-width:721px){
+  html[data-kosif-visual="kosif-studio-v40"] #app>.drawer{
+    top:0!important;
+    bottom:0!important;
+    inset-inline-start:0!important;
+    inset-inline-end:auto!important;
+    width:min(480px,94vw)!important;
+    height:auto!important;
+  }
+  html[data-kosif-visual="kosif-studio-v40"] #app>.drawer:not(.show){
+    transform:translateX(-105%)!important;
+  }
+  html[dir="rtl"][data-kosif-visual="kosif-studio-v40"] #app>.drawer:not(.show){
+    transform:translateX(105%)!important;
+  }
+  html[data-kosif-visual="kosif-studio-v40"] #app>.drawer.show{
+    transform:none!important;
+  }
+}
+
 html[data-kosif-visual="kosif-studio-v40"] #kosif-progress .kp-card{
   color:var(--ke-espresso)!important;
   background:var(--ke-paper)!important;
@@ -1057,6 +1116,9 @@ html[data-kosif-visual="kosif-studio-v40"] .ratio-bar>i{
   html[data-kosif-visual="kosif-studio-v40"] section[data-view="v38-reports"]>.v38-hero,
   html[data-kosif-visual="kosif-studio-v40"] section[data-view="v38-live"]>.v38-hero{
     padding-left:46%!important;
+  }
+  html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions .kpa-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
 
@@ -1149,6 +1211,19 @@ html[data-kosif-visual="kosif-studio-v40"] .ratio-bar>i{
     display:grid!important;
     grid-template-columns:1fr!important;
     gap:10px!important;
+  }
+  html[data-kosif-visual="kosif-studio-v40"] #app>.drawer{
+    position:fixed!important;
+    top:auto!important;
+    bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    inset-inline:12px!important;
+    width:auto!important;
+    height:auto!important;
+    max-height:calc(100dvh - 112px - env(safe-area-inset-bottom))!important;
+    transform:translateY(calc(100% + 120px))!important;
+  }
+  html[data-kosif-visual="kosif-studio-v40"] #app>.drawer.show{
+    transform:none!important;
   }
   html[data-kosif-visual="kosif-studio-v40"] #kosif-premium-actions button{
     width:100%!important;
