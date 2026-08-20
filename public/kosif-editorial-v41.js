@@ -135,6 +135,7 @@
     element.classList.add('k41-in');
     if (force) {
       element.style.setProperty('opacity', '1', 'important');
+      element.style.setProperty('visibility', 'visible', 'important');
       element.style.setProperty('filter', 'none', 'important');
       element.style.setProperty('transform', 'none', 'important');
     }
