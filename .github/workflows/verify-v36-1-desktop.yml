@@ -9,6 +9,8 @@ on:
       - 'public/v36-continuity.css'
       - 'public/v36-ai-gate.js'
       - 'public/v36-zai.js'
+      - 'public/system-brain-v1.js'
+      - 'public/data/kosif-system-brain-v1.json'
       - 'public/sw.js'
       - 'src/worker.js'
       - 'src/security-edge.js'
@@ -24,6 +26,8 @@ on:
       - 'public/v36-continuity.css'
       - 'public/v36-ai-gate.js'
       - 'public/v36-zai.js'
+      - 'public/system-brain-v1.js'
+      - 'public/data/kosif-system-brain-v1.json'
       - 'public/sw.js'
       - 'src/worker.js'
       - 'src/security-edge.js'
@@ -109,7 +113,7 @@ jobs:
               ok(metrics.main&&metrics.main.width>=width*.9,`main constrained at ${width}`);
               ok(metrics.tabsBox&&metrics.tabsBox.width>=width*.9,`tabs constrained at ${width}`);
               ok(metrics.body<=width+1,`horizontal overflow at ${width}`);
-              ok(metrics.tabCount===22,`expected 22 choices (12 core + 10 v38), got ${metrics.tabCount}`);
+              ok(metrics.tabCount>=23,`expected at least 23 choices after System Brain integration, got ${metrics.tabCount}`);
               ok(metrics.overlaps.length===0,`choice buttons overlap at ${width}`);
               ok(metrics.minTabWidth>=70,`choice buttons too narrow at ${width}`);
               ok(metrics.navDisplay!=='none'&&metrics.navDisplay!=='missing',`desktop tab list hidden at ${width}`);
@@ -122,6 +126,7 @@ jobs:
               ok(metrics.rows>=1&&metrics.rows<=4,`unexpected choice-list row count at ${width}: ${metrics.rows}`);
               const labels=await page.locator('#tabbar .tab').allTextContents();
               ok(labels.every(x=>x.trim().length>0),'empty choice label');
+              ok(labels.some(x=>x.includes('عقل النظام')),'System Brain choice missing');
               for(const tab of await page.locator('#tabbar .tab').all()){
                 const go=await tab.getAttribute('data-go');
                 await tab.click();await page.waitForTimeout(40);
