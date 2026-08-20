@@ -36,6 +36,9 @@
   --k41-coral:#D8654D;
   --k41-plum:#65435F;
   --k41-mint:#BDE6D9;
+  --k41-accent:#D7AE58;
+  --k41-accent-soft:#F8EDCF;
+  --k41-accent-rgb:215,174,88;
   --k41-font:"KOSIF Alexandria",Alexandria,"SF Arabic","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
   --k41-display:"KOSIF Alexandria",Alexandria,"SF Arabic","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
   --k41-ease:cubic-bezier(.2,.78,.2,1);
@@ -119,7 +122,7 @@ html[data-kosif-edition="v41"] ::selection{
 }
 
 html[data-kosif-edition="v41"] :is(button,a,input,select,textarea,[tabindex]):focus-visible{
-  outline:3px solid color-mix(in srgb,var(--k41-cobalt) 34%,transparent)!important;
+  outline:3px solid color-mix(in srgb,var(--k41-accent) 42%,transparent)!important;
   outline-offset:3px!important;
   box-shadow:0 0 0 6px color-mix(in srgb,var(--k41-paper) 86%,transparent)!important;
 }
@@ -196,9 +199,9 @@ html[data-kosif-edition="v41"] .tab:hover{
 html[data-kosif-edition="v41"] .tab.active,
 html[data-kosif-edition="v41"] .tab[aria-current="page"]{
   color:#fff!important;
-  background:linear-gradient(135deg,var(--k41-ink),var(--k41-teal))!important;
+  background:linear-gradient(135deg,var(--k41-ink),color-mix(in srgb,var(--k41-accent) 66%,var(--k41-ink)))!important;
   border-color:transparent!important;
-  box-shadow:0 14px 30px -19px rgba(11,139,124,.72)!important;
+  box-shadow:0 14px 30px -19px rgba(var(--k41-accent-rgb),.72)!important;
 }
 
 /* Main reading rhythm and layered paper surfaces. */
@@ -223,14 +226,14 @@ html[data-kosif-edition="v41"] :is(.card,.v38-card,.v38-tile,.panel,.mini-card,.
   pointer-events:none;
   border-radius:inherit;
   opacity:0;
-  background:radial-gradient(360px circle at var(--k41-x,50%) var(--k41-y,50%),rgba(49,91,232,.09),transparent 66%);
+  background:radial-gradient(360px circle at var(--k41-x,50%) var(--k41-y,50%),rgba(var(--k41-accent-rgb),.11),transparent 66%);
   transition:opacity .35s ease;
 }
 
 @media (hover:hover) and (pointer:fine){
   html[data-kosif-edition="v41"] :is(.card,.v38-card,.v38-tile,.panel,.mini-card,.issue,.module,.book,.principle,.source-policy,.ks40-standard-item):hover{
     z-index:2;
-    border-color:color-mix(in srgb,var(--k41-teal) 34%,var(--k41-line))!important;
+    border-color:color-mix(in srgb,var(--k41-accent) 38%,var(--k41-line))!important;
     box-shadow:var(--k41-shadow-lift)!important;
     transform:translateY(-4px)!important;
   }
@@ -256,8 +259,8 @@ html[data-kosif-edition="v41"] :is(.card-h h2,.v38-cardh h3)::before{
   height:7px;
   margin-inline-end:8px;
   border-radius:50%;
-  background:var(--k41-coral);
-  box-shadow:0 0 0 5px rgba(216,101,77,.1);
+  background:var(--k41-accent);
+  box-shadow:0 0 0 5px rgba(var(--k41-accent-rgb),.11);
   vertical-align:middle;
 }
 
@@ -802,12 +805,10 @@ html[data-kosif-edition="v41"] :is(#dock,.sheet){
 /* Motion is an editorial cue, never a blocker. Elements are hidden only after JS marks the page ready. */
 html[data-kosif-edition="v41"].k41-ready [data-k41-reveal]{
   opacity:0;
-  filter:blur(2px);
-  transform:translate3d(0,18px,0) scale(.992);
+  transform:translate3d(0,14px,0) scale(.995);
   transition:
-    opacity .72s var(--k41-ease-cinema) var(--k41-delay,0ms),
-    transform .82s var(--k41-ease-cinema) var(--k41-delay,0ms),
-    filter .66s ease var(--k41-delay,0ms);
+    opacity .58s var(--k41-ease-cinema) var(--k41-delay,0ms),
+    transform .66s var(--k41-ease-cinema) var(--k41-delay,0ms);
 }
 
 html[data-kosif-edition="v41"].k41-ready [data-k41-reveal].k41-in{
@@ -831,8 +832,8 @@ html[data-kosif-edition="v41"] .ambient i{
 }
 
 @keyframes k41-page-in{
-  from{opacity:0;filter:blur(3px);transform:translateY(16px)}
-  to{opacity:1;filter:none;transform:none}
+  from{opacity:.72;transform:translateY(12px) scale(.997)}
+  to{opacity:1;transform:none}
 }
 @keyframes k41-sheet-in{
   from{opacity:0;transform:translateY(28px) scale(.975)}
@@ -844,6 +845,122 @@ html[data-kosif-edition="v41"] .ambient i{
 }
 @keyframes k41-orbit{
   to{transform:rotate(360deg)}
+}
+
+/* v41.2 — one visual language, with a functional accent for every workspace. */
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"]{
+  --k41-accent:var(--k41-gold);
+  --k41-accent-soft:#F8EDCF;
+  --k41-accent-rgb:215,174,88;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"][data-kosif-domain="assurance"],
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"][data-kosif-domain="reports"],
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"][data-kosif-domain="system"]{
+  --k41-accent:var(--k41-cobalt);
+  --k41-accent-soft:#E7EEFF;
+  --k41-accent-rgb:49,91,232;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"][data-kosif-domain="evidence"],
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"][data-kosif-domain="standards"]{
+  --k41-accent:var(--k41-teal);
+  --k41-accent-soft:#E2F2EC;
+  --k41-accent-rgb:11,139,124;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"][data-kosif-domain="council"]{
+  --k41-accent:var(--k41-plum);
+  --k41-accent-soft:#F0E5EE;
+  --k41-accent-rgb:101,67,95;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"][data-kosif-domain="sales"]{
+  --k41-accent:var(--k41-coral);
+  --k41-accent-soft:#F8E8E2;
+  --k41-accent-rgb:216,101,77;
+}
+
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] body{
+  line-height:1.78;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] body::after{
+  content:none!important;
+  display:none!important;
+}
+
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] #k41-scroll-progress{
+  position:fixed;
+  z-index:2147483500;
+  inset:0 0 auto;
+  height:3px;
+  overflow:hidden;
+  pointer-events:none;
+  background:rgba(255,255,255,.18);
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] #k41-scroll-progress i{
+  display:block;
+  width:100%;
+  height:100%;
+  transform:scaleX(var(--k41-scroll-progress,0));
+  transform-origin:right center;
+  background:linear-gradient(90deg,var(--k41-coral),var(--k41-gold),var(--k41-teal),var(--k41-cobalt));
+  box-shadow:0 0 14px rgba(var(--k41-accent-rgb),.52);
+  transition:transform .12s linear;
+}
+
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] section[data-view]{
+  scroll-margin-block-start:132px;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] section[data-view].show > :is(.card,.v38-card,.v38-hero){
+  border-block-start-color:color-mix(in srgb,var(--k41-accent) 58%,var(--k41-line))!important;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] :is(input,select,textarea){
+  accent-color:var(--k41-accent);
+  caret-color:var(--k41-accent);
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] :is(input,select,textarea):focus{
+  border-color:var(--k41-accent)!important;
+  box-shadow:0 0 0 4px rgba(var(--k41-accent-rgb),.12)!important;
+}
+
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] :is(.twrap,.table-wrap,.v38-table-wrap){
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-inline:contain;
+  scrollbar-color:color-mix(in srgb,var(--k41-accent) 46%,transparent) transparent;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] :is(.twrap,.table-wrap,.v38-table-wrap) thead th{
+  position:sticky;
+  z-index:2;
+  top:0;
+  background:color-mix(in srgb,var(--k41-paper) 90%,var(--k41-accent-soft))!important;
+}
+
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] :is(.ks40-launcher,.kosif-sheet,.modal,.drawer,.sheet){
+  border-color:color-mix(in srgb,var(--k41-accent) 34%,var(--k41-line))!important;
+  box-shadow:0 36px 110px -48px rgba(8,27,25,.72),0 0 0 1px rgba(var(--k41-accent-rgb),.06)!important;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] #kosif-bottom-nav{
+  background:color-mix(in srgb,var(--k41-paper) 87%,transparent)!important;
+  border-color:var(--k41-line)!important;
+  box-shadow:0 -22px 58px -42px rgba(8,27,25,.62)!important;
+  backdrop-filter:blur(22px) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(150%)!important;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] #kosif-bottom-nav button.active{
+  color:var(--k41-accent)!important;
+  background:var(--k41-accent-soft)!important;
+}
+
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] .ks40-launch-item{
+  --k41-item-accent:var(--k41-gold);
+  --k41-item-soft:#F8EDCF;
+}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] .ks40-launch-item[data-group="assurance"]{--k41-item-accent:var(--k41-cobalt);--k41-item-soft:#E7EEFF}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] .ks40-launch-item[data-group="evidence"]{--k41-item-accent:var(--k41-teal);--k41-item-soft:#E2F2EC}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] .ks40-launch-item[data-group="deliver"]{--k41-item-accent:var(--k41-plum);--k41-item-soft:#F0E5EE}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] .ks40-launch-item[data-group="system"]{--k41-item-accent:var(--k41-coral);--k41-item-soft:#F8E8E2}
+html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] .ks40-launch-item .ic{
+  color:var(--k41-ink)!important;
+  background:linear-gradient(145deg,var(--k41-item-soft),color-mix(in srgb,var(--k41-item-accent) 24%,#fff))!important;
+  box-shadow:0 15px 30px -22px color-mix(in srgb,var(--k41-item-accent) 78%,transparent)!important;
 }
 
 /* Dark mode keeps paper depth and the same semantic accents. */
@@ -939,6 +1056,9 @@ html[data-kosif-edition="v41"][data-theme="night"] :is(p,.hint,.sub,.meta,small,
 @media (max-width:720px){
   html[data-kosif-edition="v41"]{scroll-behavior:auto}
   html[data-kosif-edition="v41"] body{background-attachment:scroll!important}
+  html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] #k41-scroll-progress{height:2px}
+  html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] :is(input,select,textarea){font-size:16px!important}
+  html[data-kosif-edition="v41"][data-kosif-revision="v41.2"] section[data-view]{scroll-margin-block-start:86px}
   html[data-kosif-edition="v41"] .topbar{padding:12px 14px!important}
   html[data-kosif-edition="v41"] .topbar-inner{min-height:58px!important}
   html[data-kosif-edition="v41"] .brand-name{font-size:32px!important}
