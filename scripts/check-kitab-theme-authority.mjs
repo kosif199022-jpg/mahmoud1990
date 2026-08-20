@@ -28,6 +28,7 @@ if(exists('public/kosif-kitab-theme.js')){
   const js=read('public/kosif-kitab-theme.js');
   need(js.includes('kitab-caffe'),'runtime theme authority marker missing');
   need(js.includes('MutationObserver'),'runtime theme pinning missing');
+  need(js.includes("localStorage.setItem('kosif_theme', 'light')"),'warm-paper default is not persisted against the legacy dark fallback');
 }
 for(const f of ['public/suite.js','public/suite-shell.js','public/standards/bridge.js']){
   if(!exists(f))continue;

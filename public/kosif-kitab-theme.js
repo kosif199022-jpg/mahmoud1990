@@ -35,6 +35,13 @@
     if (value === 'light' || value === 'sepia') return 'light';
     return '';
   };
+  /* Warm paper is the product default. Persist it once so the legacy
+     continuity layer cannot reinterpret a missing preference as dark mode. */
+  try {
+    const saved = String(localStorage.getItem('kosif_theme') || '').toLowerCase();
+    if (saved === 'dark' || saved === 'light' || saved === 'sepia') root.dataset.theme = saved;
+    else { root.dataset.theme = 'light'; localStorage.setItem('kosif_theme', 'light'); }
+  } catch { if (!explicitMode()) root.dataset.theme = 'light'; }
   const applyMode = () => {
     const mode = explicitMode();
     const vars = mode === 'dark' ? DARK : mode === 'light' ? LIGHT : null;
