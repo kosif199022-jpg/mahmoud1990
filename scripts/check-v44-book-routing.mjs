@@ -8,6 +8,7 @@ const brain=read('public/system-brain-v1.js');
 const importer=read('public/system-brain-import-v44.js');
 const vault=read('public/kosif-book-vault-v44.js');
 const sw=read('public/standards/sw.js');
+const build=read('scripts/build-assets.mjs');
 must(reader.includes('modal-safe auto-scroll'),'legacy professional reader must remain intact');
 must(reader.includes('lockPanel')&&reader.includes('touchstart'),'iPhone reader safety must remain intact');
 must(bridge.includes('/kosif-book-vault-v44.js'),'bridge must load Book Vault');
@@ -23,4 +24,5 @@ must(vault.includes('BOOK_EXTRACTION_REQUIRED'),'unsupported binary extraction g
 must(vault.includes('consecutive-exact-duplicate'),'conservative duplicate cleanup missing');
 must(sw.includes("kosif-native-v36-4-standards"),'v36.4 cache compatibility must remain intact');
 must(sw.includes('/standards/custom-books-v44.js'),'custom reader addon not precached');
+must(build.includes("setTimeout(()=>switchBook(initialId),700)")&&build.includes("queueMicrotask(()=>switchBook(initialId))"),'production build must remove delayed Mafateeh-first prepared-book switch');
 console.log('v44 direct books + System Brain ingestion gate passed');
