@@ -1,0 +1,22 @@
+{
+  "name": "kosif-engineering-copilot",
+  "version": "0.1.0",
+  "description": "Engineering and design workflows for reviewing, improving, and releasing KOSIF safely.",
+  "repository": "https://github.com/kosif199022-jpg/mahmoud1990",
+  "keywords": ["kosif", "design", "frontend", "code-review", "release", "quality"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "KOSIF Engineering Copilot",
+    "shortDescription": "Design, code, and release guardian for KOSIF",
+    "longDescription": "Reusable KOSIF-specific workflows for visual review, code review, responsive and RTL checks, issue triage, and release readiness.",
+    "developerName": "KOSIF",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Review KOSIF design and code changes before release.",
+      "Check this KOSIF pull request for regressions and release risks.",
+      "Audit KOSIF UI consistency, RTL, iPhone scrolling, and accessibility."
+    ],
+    "brandColor": "#0F3D31"
+  }
+}
