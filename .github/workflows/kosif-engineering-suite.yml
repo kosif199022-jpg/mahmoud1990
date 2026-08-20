@@ -1,0 +1,94 @@
+name: KOSIF Engineering Suite
+
+on:
+  pull_request:
+  push:
+    branches: [main, 'feat/**', 'fix/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kosif-engineering-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-gate:
+    name: Repository integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s frontend/index.html
+          test -s config/engineering-suite.json
+          test -s scripts/engineering-suite/browser-smoke.mjs
+      - name: Reject obvious secret files
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=$(find . -type f \( -iname '*.pem' -o -iname '*.key' -o -iname '.env' -o -iname '.env.*' \) -not -path './.git/*' | head -20)
+          if [ -n "$bad" ]; then
+            echo "Potential secret files found:"
+            echo "$bad"
+            exit 1
+          fi
+      - name: HTML integrity
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('frontend/index.html')
+          s=p.read_text(encoding='utf-8', errors='replace')
+          assert '<html' in s.lower(), 'Missing html element'
+          assert '<body' in s.lower(), 'Missing body element'
+          assert len(s) > 1000, 'Frontend entry unexpectedly small'
+          print('HTML integrity passed:', len(s), 'chars')
+          PY
+
+  browser-gate:
+    name: Browser / Visual / A11y smoke
+    needs: repository-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start static server
+        run: |
+          mkdir -p artifacts
+          python3 -m http.server 4173 --directory frontend > /tmp/kosif-server.log 2>&1 &
+          echo $! > /tmp/kosif-server.pid
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/kosif-server.log
+          exit 1
+      - name: Run browser smoke
+        env:
+          KOSIF_BASE_URL: http://127.0.0.1:4173
+          KOSIF_ROUTES: /
+        run: node scripts/engineering-suite/browser-smoke.mjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-visual-smoke-${{ github.run_id }}
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
+
+  release-sentinel:
+    name: Release sentinel
+    needs: [repository-gate, browser-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All mandatory gates passed
+        run: echo 'KOSIF Engineering Suite gates are green.'
