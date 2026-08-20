@@ -45,6 +45,7 @@ if(exists('public/kosif-editorial-v39.css')){
   need((css.match(/max-width:1840px!important;/g)||[]).length>=3,'editorial desktop shell is still constrained instead of using the wide workspace');
   need(css.includes('grid-template-columns:1fr!important')&&css.includes('grid-template-columns:48px minmax(0,1fr)!important'),'mobile quick actions do not preserve a readable single-column layout');
   need(css.includes('[data-kosif-company-state="none"] #view-overview>.card.hero'),'empty mobile engagement card still leaves a dead zone');
+  need(css.includes(':has(>#steps:empty)'),'empty mobile engagement path still leaves a dead zone');
   need(css.includes('[data-theme="dark"] #kosif-premium-actions'),'dark-mode quick actions are not integrated with the editorial palette');
   need(!/#c87f8d|#b487a4|#dca8b1|#c98794|#b77483/i.test(css),'legacy Canva Rose colors leaked into the final editorial layer');
   need(css.includes('@media (max-width:720px)'),'mobile editorial layout missing');
