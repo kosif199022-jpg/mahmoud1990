@@ -128,8 +128,8 @@ html[data-kosif-visual="kitab-editorial-v39"] .topbar::after{
 }
 
 html[data-kosif-visual="kitab-editorial-v39"] .topbar-inner{
-  width:100%!important;
-  max-width:1280px!important;
+  width:calc(100% - 32px)!important;
+  max-width:1840px!important;
   min-height:62px!important;
   margin:auto!important;
   display:grid!important;
@@ -259,8 +259,8 @@ html[data-kosif-visual="kitab-editorial-v39"] .tabs{
 }
 
 html[data-kosif-visual="kitab-editorial-v39"] .tabs-inner{
-  width:100%!important;
-  max-width:1280px!important;
+  width:calc(100% - 32px)!important;
+  max-width:1840px!important;
   height:auto!important;
   margin:auto!important;
   padding:8px 14px!important;
@@ -319,8 +319,9 @@ html[data-kosif-visual="kitab-editorial-v39"] .tab .n{
 
 /* Main workspace and common paper components. */
 html[data-kosif-visual="kitab-editorial-v39"] main{
-  width:100%!important;
-  max-width:1320px!important;
+  width:calc(100% - 32px)!important;
+  max-width:1840px!important;
+  box-sizing:border-box!important;
   margin:0 auto!important;
   padding:28px 22px 110px!important;
 }

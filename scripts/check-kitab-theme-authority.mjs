@@ -42,6 +42,7 @@ if(exists('public/kosif-editorial-v39.css')){
   need(css.includes('kitab-editorial-v39'),'editorial runtime authority selector missing');
   need(css.includes('section[data-view="v38-reports"]')&&css.includes('section[data-view="v38-live"]'),'report/live generated-image selectors missing');
   need(css.includes('display:flex!important')&&css.includes('overflow-x:auto!important'),'single-rail desktop navigation contract missing');
+  need((css.match(/max-width:1840px!important;/g)||[]).length>=3,'editorial desktop shell is still constrained instead of using the wide workspace');
   need(!/#c87f8d|#b487a4|#dca8b1|#c98794|#b77483/i.test(css),'legacy Canva Rose colors leaked into the final editorial layer');
   need(css.includes('@media (max-width:720px)'),'mobile editorial layout missing');
 }
