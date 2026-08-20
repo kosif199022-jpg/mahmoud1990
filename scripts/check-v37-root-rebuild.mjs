@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const ok=(c,m)=>{if(!c)throw new Error('V37_ROOT_REBUILD_FAIL: '+m);console.log('  ✅ '+m)};
-const wr=read('wrangler.toml'),edge=read('src/suite-edge.js'),proxy=read('src/suite-proxy.js'),hub=read('public/hub.html'),sw=read('public/sw.js'),out=read('public/v36-outputs.js'),bp=JSON.parse(read('config/kosif.blueprint.json'));
-ok(/main\s*=\s*"src\/suite-edge\.js"/.test(wr),'unified suite edge is Cloudflare entrypoint');
+const wr=read('wrangler.toml'),edge=read('src/suite-edge.js'),edgeV43=fs.existsSync('src/suite-edge-v43.js')?read('src/suite-edge-v43.js'):'',proxy=read('src/suite-proxy.js'),hub=read('public/hub.html'),sw=read('public/sw.js'),out=read('public/v36-outputs.js'),bp=JSON.parse(read('config/kosif.blueprint.json'));
+const directSuiteEntry=/main\s*=\s*"src\/suite-edge\.js"/.test(wr);
+const governedV43Entry=/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wr)&&edgeV43.includes("import suite from './suite-edge.js'")&&edgeV43.includes('await suite.fetch(req,env,ctx)');
+ok(directSuiteEntry||governedV43Entry,'unified governed suite edge is Cloudflare entrypoint');
 ok(edge.includes("modules:{audit:'/audit/',libraries:'/libraries/',wealth:'/wealth/reader.html',sales:'/sales/'}"),'Audit, Libraries, Wealth and Sales have canonical routes');
 ok(hub.includes('/audit/')&&hub.includes('/libraries/')&&hub.includes('/sales/'),'hub exposes Audit, Libraries and general Sales');
 ok(proxy.includes('env?.MAFATEEH')&&proxy.includes('/wealth/'),'Wealth Keys uses existing service binding under a scoped route');
