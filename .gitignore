@@ -9,6 +9,10 @@ package-lock.json
 .dev.vars
 .dev.vars.*
 
+# Playwright browser QA artefacts
+playwright-report/
+test-results/
+
 # Gemini CLI local/runtime state
 .gemini/
 gha-creds-*.json
