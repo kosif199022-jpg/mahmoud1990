@@ -2,7 +2,7 @@
 (()=>{'use strict';
 const EXPECTED='v36.4',BUILD='2026.08.18-v36.4-mobile-release-integrity';
 const STUDIO_VERSION='v41.0.0-root',STUDIO_BUILD='2026.08.20-v41-editorial-cinematic-canva';
-const PHASE_B_CSS='/v36-mobile-phase-b.css?v=36.4-phase-b-2-scroll';
+const PHASE_B_CSS='/v36-mobile-phase-b.css?v=36.4-phase-b-3-fixed-context';
 const ANALYTICS_3D_SRC='/v36-analytics-3d.js?v=36.4-phase-c-1';
 const CANVA_PREMIUM_CSS='/kosif-studio-v40.css?v=2026.08.20-v40';
 const EDITORIAL_CSS='/kosif-editorial-v41.css?v=2026.08.20-v41';

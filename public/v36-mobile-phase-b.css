@@ -13,6 +13,7 @@
 html,body,#app{max-width:100%;}
 html{background:var(--v36-bg,#f8fafc);}
 body{min-height:100dvh;min-height:-webkit-fill-available;}
+body.kosif-ready>#app{animation-fill-mode:none!important;}
 body[data-kosif-dialog-open="1"]{touch-action:auto!important;overscroll-behavior:none;}
 body[data-kosif-dialog-open="1"] #app{pointer-events:none;}
 body[data-kosif-dialog-open="1"] :is(#kosif-more,#kosif-company-sheet,#kosif-ai-sheet,#kosif-command-sheet,#kosif-font-sheet,#kosif-ai-gate,#ks40-launch-overlay,.ks40-launcher,.ks40-launch-body,.modal-bg,.modal,.drawer-bg,.drawer){pointer-events:auto;}
