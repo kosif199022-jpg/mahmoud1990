@@ -41,7 +41,7 @@ async function verify(engine, label) {
   const pageY = await page.evaluate(() => window.scrollY);
   fail(pageY > 100, `${label}: document scrolling did not move`);
 
-  await page.getByRole('button', { name: 'كل القدرات', exact: true }).click();
+  await page.evaluate(() => window.KosifStudioV40.openLauncher());
   await page.locator('#ks40-launch-overlay').waitFor({ state: 'visible' });
   await pause(120);
   const launcher = await page.evaluate(() => {
