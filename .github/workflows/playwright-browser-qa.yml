@@ -80,14 +80,19 @@ jobs:
           set -euo pipefail
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             target='http://127.0.0.1:4173'
+            mode='static'
           elif [ -n "${MANUAL_BASE_URL:-}" ]; then
             target="$MANUAL_BASE_URL"
+            mode='live'
           else
             target='https://mahmoud-eldesouky.kosif199022.workers.dev'
+            mode='live'
           fi
           echo "KOSIF_BASE_URL=$target" >> "$GITHUB_ENV"
+          echo "KOSIF_QA_MODE=$mode" >> "$GITHUB_ENV"
           echo "### Playwright target" >> "$GITHUB_STEP_SUMMARY"
-          echo "- $target" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URL: $target" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Mode: $mode" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run browser automation gate
         run: npx playwright test --config=playwright.config.mjs
@@ -111,7 +116,8 @@ jobs:
           echo '### Coverage' >> "$GITHUB_STEP_SUMMARY"
           echo '- Desktop Chromium' >> "$GITHUB_STEP_SUMMARY"
           echo '- iPhone 14 / WebKit (Mobile Safari engine)' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Core KOSIF routes' >> "$GITHUB_STEP_SUMMARY"
+          echo '- PR mode: built static candidate routes and responsive/browser-runtime regressions' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Live mode: full Worker-backed KOSIF routes and reader integration' >> "$GITHUB_STEP_SUMMARY"
           echo '- Mobile document scrolling and horizontal-overflow regression' >> "$GITHUB_STEP_SUMMARY"
           echo '- Shared Mafateeh reader routing for mafateeh/std2025/std2018/dipifr' >> "$GITHUB_STEP_SUMMARY"
           echo '- Reader runtime D/CH bindings and hidden default smart/mixer controls' >> "$GITHUB_STEP_SUMMARY"
