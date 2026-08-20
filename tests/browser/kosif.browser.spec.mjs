@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-const coreRoutes = ['/', '/audit/', '/libraries/', '/sales/', '/standards/'];
+const qaMode = process.env.KOSIF_QA_MODE || 'live';
+const coreRoutes = qaMode === 'static'
+  ? ['/', '/libraries/', '/sales/', '/standards/']
+  : ['/', '/audit/', '/libraries/', '/sales/', '/standards/'];
 const books = ['mafateeh', 'std2025', 'std2018', 'dipifr'];
 
 function observeRuntime(page) {
@@ -21,7 +24,7 @@ function observeRuntime(page) {
 
 async function attachRuntimeEvidence(testInfo, evidence) {
   await testInfo.attach('browser-runtime.json', {
-    body: Buffer.from(JSON.stringify(evidence, null, 2)),
+    body: Buffer.from(JSON.stringify({ qaMode, ...evidence }, null, 2)),
     contentType: 'application/json',
   });
 }
@@ -59,6 +62,7 @@ test.describe('KOSIF browser smoke', () => {
 });
 
 test('audit page can actually scroll on iPhone-sized viewport', async ({ page }, testInfo) => {
+  test.skip(qaMode === 'static', 'Audit route is served by the Cloudflare Worker, not the static PR origin');
   test.skip(testInfo.project.name !== 'mobile-safari', 'Mobile-specific regression gate');
 
   const evidence = observeRuntime(page);
@@ -86,6 +90,8 @@ test('audit page can actually scroll on iPhone-sized viewport', async ({ page },
 test.describe('shared Mafateeh reader routing and hydration', () => {
   for (const book of books) {
     test(`${book} opens directly in the shared reader`, async ({ page }, testInfo) => {
+      test.skip(qaMode === 'static', 'Shared reader is composed through the Cloudflare Worker and service binding');
+
       const evidence = observeRuntime(page);
       const response = await page.goto(`/wealth/reader.html?book=${book}`, { waitUntil: 'domcontentloaded' });
 
