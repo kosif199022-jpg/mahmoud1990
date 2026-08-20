@@ -74,6 +74,16 @@
     });
   }
 
+  function revealVisibleTargets() {
+    $$('section[data-view].show [data-k41-reveal], #view.show [data-k41-reveal]').forEach(element => {
+      const rect = element.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0 && rect.top < innerHeight * .98 && rect.bottom > 0) {
+        element.classList.add('k41-in');
+        revealObserver?.unobserve(element);
+      }
+    });
+  }
+
   function setupReveal() {
     if (!reduced && 'IntersectionObserver' in window) {
       revealObserver = new IntersectionObserver(entries => {
@@ -127,6 +137,7 @@
     updateChrome();
     mountFolio();
     revealTargets();
+    requestAnimationFrame(() => requestAnimationFrame(revealVisibleTargets));
   }
 
   function queueDecorate() {

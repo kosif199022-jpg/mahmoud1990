@@ -39,7 +39,7 @@ need(css.includes('margin-block-end:4px!important') && css.includes('margin-bloc
 for (const marker of [
   '__KOSIF_EDITORIAL_V41__', "root.dataset.kosifEdition = 'v41'", "root.dataset.kosifExperience = 'v41'",
   'prefers-reduced-motion: reduce', '(hover: hover) and (pointer: fine)', 'IntersectionObserver',
-  'MutationObserver', 'data-kosif-editorial', 'KOSIF REVIEW', 'ISSUE 41',
+  'MutationObserver', 'revealVisibleTargets', 'getBoundingClientRect', 'data-kosif-editorial', 'KOSIF REVIEW', 'ISSUE 41',
   '--k41-tilt-x', '--k41-x', 'kosif-view-change'
 ]) need(runtime.includes(marker), `missing v41 runtime marker: ${marker}`);
 
