@@ -12,6 +12,8 @@ const deploy = read('.github/workflows/deploy-cloudflare.yml');
 const productionWorkflow = read('.github/workflows/verify-v36.yml');
 const runtimeWorkflow = read('.github/workflows/verify-v36-3-runtime.yml');
 const continuity = read('public/v36-continuity.js');
+const mobile = read('public/v36-mobile-phase-b.css');
+const studioRuntime = read('public/kosif-studio-v40.js');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
 
 need(css.length > 25000, 'editorial stylesheet is unexpectedly small');
@@ -41,7 +43,7 @@ for (const marker of [
   '__KOSIF_EDITORIAL_V41__', "root.dataset.kosifEdition = 'v41'", "root.dataset.kosifExperience = 'v41'",
   'prefers-reduced-motion: reduce', '(hover: hover) and (pointer: fine)', 'IntersectionObserver',
   'MutationObserver', 'revealVisibleTargets', 'getBoundingClientRect', 'data-kosif-editorial', 'KOSIF REVIEW', 'ISSUE 41',
-  '--k41-tilt-x', '--k41-x', 'kosif-view-change'
+  '--k41-tilt-x', '--k41-x', 'kosif-view-change', 'touchFirst', 'revealAllTargets', 'setTimeout(revealAllTargets, 1600)'
 ]) need(runtime.includes(marker), `missing v41 runtime marker: ${marker}`);
 
 for (const forbidden of ['localStorage.setItem(', 'sessionStorage.setItem(', '/api/kosif/', 'fetch(', 'indexedDB', 'WebSocket']) {
@@ -74,8 +76,14 @@ need(edge.includes("else if(!text.includes('/kosif-editorial-v41.css'))"), 'audi
 need(continuity.includes("EDITORIAL_CSS='/kosif-editorial-v41.css?v=2026.08.20-v41'") && continuity.indexOf('CANVA_PREMIUM_CSS') < continuity.indexOf('EDITORIAL_CSS'), 'legacy continuity does not restore v41 after the stable v40 base');
 
 for (const asset of ['/kosif-editorial-v41.css?v=2026.08.20-v41', '/kosif-editorial-v41.js?v=2026.08.20-v41']) need(sw.includes(asset), `service worker missing v41 asset: ${asset}`);
-need(sw.includes("const C='kosif-native-v41-editorial-app'"), 'service worker cache generation was not bumped to v41');
+need(sw.includes("const C='kosif-native-v41-1-scroll-runtime-app'"), 'service worker cache generation was not bumped for the scroll repair');
 need(sw.includes("'/kosif-editorial-v41.css'") && sw.includes("'/kosif-editorial-v41.js'"), 'v41 assets are not protected by integrity refresh');
+need(css.includes('scroll-behavior:auto') && css.includes('background-attachment:scroll!important'), 'page scrolling is not configured for immediate Safari-safe movement');
+need(css.includes('@media (hover:none),(pointer:coarse)') && css.includes('@keyframes k41-page-in-touch'), 'touch-first motion fallback is missing');
+need(mobile.includes('body[data-kosif-dialog-open="1"]{touch-action:auto!important') && mobile.includes('#ks40-launch-overlay .ks40-launch-body'), 'Safari dialog gestures are still blocked by the page lock');
+need(!continuity.includes("b.style.touchAction='none'") && continuity.includes("'#ks40-launch-overlay','#modal-bg','#drawer'") && continuity.includes("attributeFilter:['class','hidden']"), 'dialog continuity does not cover every active window safely');
+need(studioRuntime.includes('lockLauncherPage') && studioRuntime.includes('unlockLauncherPage') && studioRuntime.includes('window.KosifContinuity?.registerDialogs?.()') && studioRuntime.includes('continuity.syncDialogLock(preferredY)'), 'capability launcher does not use a reversible page lock');
+need(continuity.includes('retargeted:true') && continuity.includes('p.style.top=`-${lockY}px`'), 'nested dialog lock cannot retarget the preserved Safari scroll position');
 
 need(manifest.theme_color === '#102825' && manifest.background_color === '#F7F0E2', 'PWA colors do not match the v41 magazine masthead');
 need(deploy.includes('/kosif-editorial-v41.css') && deploy.includes('/kosif-editorial-v41.js'), 'production route verification does not include v41 assets');

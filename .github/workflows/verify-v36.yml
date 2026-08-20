@@ -61,6 +61,10 @@ jobs:
           done
           cat /tmp/wrangler-production.log
           exit 1
+      - name: Safari and mobile scroll regression
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8788
+        run: node scripts/verify-scroll-runtime.cjs
       - name: Mobile production smoke test
         shell: bash
         run: |

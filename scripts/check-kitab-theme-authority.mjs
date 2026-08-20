@@ -78,7 +78,7 @@ if(exists('src/suite-edge.js')){
 if(exists('public/sw.js')){
   const sw=read('public/sw.js');
   for(const asset of ['/kosif-kitab-theme.css?v=1.0.0-kitab','/kosif-kitab-theme.js?v=1.0.0-kitab','/kosif-studio-v40.css?v=2026.08.20-v40','/kosif-studio-v40.js?v=40','/kosif-editorial-v41.css?v=2026.08.20-v41','/kosif-editorial-v41.js?v=2026.08.20-v41','/assets/kosif-studio-hero-v40.webp','/assets/kosif-reports-hero-v39.webp','/assets/kosif-live-hero-v39.webp','/fonts/alexandria-arabic-500-normal.woff2','/fonts/alexandria-arabic-700-normal.woff2'])need(sw.includes(asset),`service worker missing theme asset: ${asset}`);
-  need(sw.includes("const C='kosif-native-v41-editorial-app'"),'service-worker cache was not bumped for the v41 experience');
+  need(sw.includes("const C='kosif-native-v41-1-scroll-runtime-app'"),'service-worker cache was not bumped for the v41.1 scroll-safe experience');
   need(sw.includes('KOSIF_SW_REQUIRED_CORE_FAILED'),'service-worker required-core fail-safe missing');
 }
 if(exists('GEMINI.md'))need(read('GEMINI.md').includes('KOSIF_UNIFIED_REQUIREMENTS_2026-08-20.md'),'agent instructions do not reference unified requirements');

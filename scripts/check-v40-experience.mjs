@@ -86,7 +86,7 @@ for (const [name, source] of [['audit safety', safety], ['user polish', polish]]
 
 const sw = read('public/sw.js');
 for (const asset of ['/kosif-studio-v40.css?v=2026.08.20-v40', '/kosif-studio-v40.js?v=40', '/kosif-suite-v40.css?v=40', '/assets/kosif-studio-hero-v40.webp', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/maskable-512.png']) need(sw.includes(asset), `service worker missing v40 asset: ${asset}`);
-need(sw.includes("const C='kosif-native-v41-editorial-app'") && sw.includes("u.pathname.startsWith('/library/')") && sw.includes("u.pathname.startsWith('/api/')"), 'service worker cache/privacy contract is incomplete');
+need(sw.includes("const C='kosif-native-v41-1-scroll-runtime-app'") && sw.includes("u.pathname.startsWith('/library/')") && sw.includes("u.pathname.startsWith('/api/')"), 'service worker cache/privacy contract is incomplete');
 need(sw.includes("await c.match(e.request)||Response.error()") && sw.includes("await c.put(e.request,r.clone())"), 'integrity assets do not retain an offline fallback');
 
 if (failures.length) {
