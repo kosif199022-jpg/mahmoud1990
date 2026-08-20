@@ -59,8 +59,14 @@ jobs:
           [ "$ok" = 1 ] || { echo 'Live Kosif verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
 
           for path in / /audit/ /libraries/ /sales/ /standards/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-user-polish.css /v38-user-polish.js /kosif-studio-v40.css /kosif-studio-v40.js /kosif-suite-v40.css /manifest.webmanifest /icons/icon-192.png /icons/icon-512.png /icons/maskable-512.png /assets/kosif-studio-hero-v40.webp /assets/kosif-reports-hero-v39.webp /assets/kosif-live-hero-v39.webp /v38-reports.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
-            code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
-            case "$code" in 200|204|301|302|307|308) ;; *) echo "Bad live route $path -> $code"; exit 1;; esac
+            route_ok=0
+            code=000
+            for attempt in $(seq 1 15); do
+              code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
+              case "$code" in 200|204|301|302|307|308) route_ok=1; break;; esac
+              sleep 2
+            done
+            [ "$route_ok" = 1 ] || { echo "Bad live route after propagation retries $path -> $code"; exit 1; }
           done
 
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/audit/?deploy=$GITHUB_SHA" -o /tmp/kosif-v40-audit.html

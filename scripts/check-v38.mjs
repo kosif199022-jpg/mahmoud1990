@@ -76,6 +76,7 @@ ok(reports.includes('v38-report-gate') && reports.includes("gate('اعتماد �
 ok(reports.includes("gate('مسودة تقرير موجودة'") && reports.includes('model.hasReportDraft && model.findings.length === 0'), 'reports require a real draft before completion readiness');
 ok(reports.includes("const materialityAmount = st?.mat?.val ?? ''") && !reports.includes('st?.mat?.value'), 'reports never promote a legacy computed materiality display back into a source');
 ok(deploy.includes('KOSIF Studio v40 warm editorial system with governed cobalt, teal, coral, violet and gold accents') && deploy.includes('v40-vibrant-professional-pwa'), 'Cloudflare production verification matches the current v40 release identity');
+ok(deploy.includes('route_ok=0') && deploy.includes('seq 1 15') && deploy.includes('Bad live route after propagation retries'), 'Cloudflare static asset verification tolerates bounded propagation delay');
 ok(deepRuntime.includes('40-vibrant-professional-pwa'), 'deep runtime verifier accepts the current v40 release identity');
 ok(mainRuntime.includes('40-vibrant-professional-pwa'), 'main runtime verifier accepts the current v40 release identity');
 
