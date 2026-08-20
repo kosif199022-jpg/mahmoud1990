@@ -69,7 +69,8 @@ for (const html of ['public/hub.html', 'public/libraries/index.html', 'public/sa
 need(edge.includes("version:'v41.0.0-root'") && edge.includes("buildId:'2026.08.20-v41-editorial-cinematic-canva'"), 'v41 product identity is missing');
 need(edge.includes("experienceVersion:'v41.0.0'") && edge.includes("baseVisualVersion:'v40.0.0'"), 'v41/base visual relationship is not explicit');
 need(edge.includes("designAuthority:'KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color'"), 'Canva-informed design authority is missing');
-need(edge.includes('/kosif-editorial-v41.css?v=2026.08.20-v41') && edge.indexOf('/kosif-studio-v40.css?v=2026.08.20-v40') < edge.indexOf('/kosif-editorial-v41.css?v=2026.08.20-v41'), 'audit shell does not load v41 after v40');
+need(edge.includes('/kosif-editorial-v41.css?v=2026.08.20-v41') && /kosif-studio-v40\.css\?v=2026\.08\.20-v40">'\+editorial/.test(edge), 'audit shell does not load v41 after v40');
+need(edge.includes("else if(!text.includes('/kosif-editorial-v41.css'))"), 'audit shell incorrectly couples v41 injection to an older privacy marker');
 need(continuity.includes("EDITORIAL_CSS='/kosif-editorial-v41.css?v=2026.08.20-v41'") && continuity.indexOf('CANVA_PREMIUM_CSS') < continuity.indexOf('EDITORIAL_CSS'), 'legacy continuity does not restore v41 after the stable v40 base');
 
 for (const asset of ['/kosif-editorial-v41.css?v=2026.08.20-v41', '/kosif-editorial-v41.js?v=2026.08.20-v41']) need(sw.includes(asset), `service worker missing v41 asset: ${asset}`);
@@ -79,6 +80,7 @@ need(sw.includes("'/kosif-editorial-v41.css'") && sw.includes("'/kosif-editorial
 need(manifest.theme_color === '#102825' && manifest.background_color === '#F7F0E2', 'PWA colors do not match the v41 magazine masthead');
 need(deploy.includes('/kosif-editorial-v41.css') && deploy.includes('/kosif-editorial-v41.js'), 'production route verification does not include v41 assets');
 need(deploy.includes('v41-editorial-cinematic-canva') && deploy.includes('experienceVersion') && deploy.includes('baseVisualVersion'), 'production health gate does not verify the v41 contract');
+need(deploy.includes('audit_shell_ok=0') && deploy.includes('attempt=$attempt') && deploy.includes('did not converge after propagation retries'), 'production audit-shell verification does not tolerate bounded propagation delay');
 need(productionWorkflow.includes('41-editorial-cinematic-canva'), 'browser production workflow does not accept the v41 build identity');
 need(runtimeWorkflow.includes('kosif-v41-mobile-default.png') && !runtimeWorkflow.includes('kosif-v40-mobile-default.png'), 'runtime workflow does not preserve the current v41 mobile screenshot');
 

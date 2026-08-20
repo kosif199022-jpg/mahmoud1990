@@ -69,12 +69,20 @@ jobs:
             [ "$route_ok" = 1 ] || { echo "Bad live route after propagation retries $path -> $code"; exit 1; }
           done
 
-          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/audit/?deploy=$GITHUB_SHA" -o /tmp/kosif-v41-audit.html
-          grep -q 'kosif-studio-v40.css' /tmp/kosif-v41-audit.html || { echo 'Stable v40 base stylesheet is not wired into the audit shell'; exit 1; }
-          grep -q 'kosif-editorial-v41.css' /tmp/kosif-v41-audit.html || { echo 'Final v41 editorial stylesheet is not wired after the base'; exit 1; }
-          grep -q 'kosif-editorial-v41.js' /tmp/kosif-v41-audit.html || { echo 'Final v41 cinematic runtime is not wired'; exit 1; }
-          grep -q 'kosif-studio-hero-v40.webp' /tmp/kosif-v41-audit.html || { echo 'Original KOSIF hero is not preloaded'; exit 1; }
-          grep -q 'manifest.webmanifest' /tmp/kosif-v41-audit.html || { echo 'PWA manifest is not wired into the audit shell'; exit 1; }
+          audit_shell_ok=0
+          for attempt in $(seq 1 15); do
+            if curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/audit/?deploy=$GITHUB_SHA&attempt=$attempt" -o /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-studio-v40.css' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-editorial-v41.css' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-editorial-v41.js' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-studio-hero-v40.webp' /tmp/kosif-v41-audit.html \
+              && grep -q 'manifest.webmanifest' /tmp/kosif-v41-audit.html; then
+              audit_shell_ok=1
+              break
+            fi
+            sleep 2
+          done
+          [ "$audit_shell_ok" = 1 ] || { echo 'Final v41 audit shell markers did not converge after propagation retries'; exit 1; }
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/kosif-studio-v40.css?deploy=$GITHUB_SHA" -o /tmp/kosif-studio-v40.css
           grep -q 'kosif-studio-v40' /tmp/kosif-studio-v40.css || { echo 'Studio visual authority marker missing'; exit 1; }
           grep -q '/assets/kosif-studio-hero-v40.webp' /tmp/kosif-studio-v40.css || { echo 'Generated v40 hero is not consumed'; exit 1; }
