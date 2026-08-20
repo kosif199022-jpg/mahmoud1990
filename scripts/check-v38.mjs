@@ -15,6 +15,7 @@ const realtimeSession = read('src/v38-realtime-session.js');
 const live = read('public/v38-live.js');
 const reports = read('public/v38-reports.js');
 const deploy = read('.github/workflows/deploy-cloudflare.yml');
+const deepRuntime = read('scripts/verify-v36-2-1-runtime.cjs');
 const publicAI = read('src/public-ai-provider.js');
 const wrangler = read('wrangler.toml');
 const pkg = JSON.parse(read('package.json'));
@@ -74,6 +75,7 @@ ok(reports.includes('v38-report-gate') && reports.includes("gate('اعتماد �
 ok(reports.includes("gate('مسودة تقرير موجودة'") && reports.includes('model.hasReportDraft && model.findings.length === 0'), 'reports require a real draft before completion readiness');
 ok(reports.includes("const materialityAmount = st?.mat?.val ?? ''") && !reports.includes('st?.mat?.value'), 'reports never promote a legacy computed materiality display back into a source');
 ok(deploy.includes('KOSIF cream/espresso/gold editorial system with original generated imagery') && deploy.includes('v38.1.3-editorial-visual-experience'), 'Cloudflare production verification matches the current editorial release identity');
+ok(deepRuntime.includes('38\\.1\\.3-editorial-visual-experience'), 'deep runtime verifier accepts the current editorial release identity');
 
 ok(proxy.includes('#mixLaunch') && proxy.includes('#smartPebble'), 'Mafateeh reader hides Mix and Smart AI launchers by default');
 ok(proxy.includes('kosif-reader-home') && proxy.includes('kosif-reader-library-home'), 'Mafateeh reader has explicit home/library navigation');
