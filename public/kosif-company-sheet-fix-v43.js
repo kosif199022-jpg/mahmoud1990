@@ -9,8 +9,7 @@
 
   const $ = (selector, scope = document) => scope.querySelector(selector);
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
-  const OVERLAYS = ['#kosif-more', '#kosif-company-sheet', '#kosif-ai-sheet', '#kosif-command-sheet', '#kosif-font-sheet'];
-  const legacyOpenCompanies = typeof window.openCompanies === 'function' ? window.openCompanies.bind(window) : null;
+  const OVERLAYS = ['#kosif-company-sheet'];
   const legacyNewCompanyForm = typeof window.newCompanyForm === 'function' ? window.newCompanyForm.bind(window) : null;
   const legacyPrivateOpenForm = typeof window.privateOpenForm === 'function' ? window.privateOpenForm.bind(window) : null;
   let lockedScrollY = 0;
