@@ -1,0 +1,76 @@
+name: Deploy and verify Kosif short Worker
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-kosif-short-worker
+  cancel-in-progress: true
+
+jobs:
+  deploy-and-verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build
+        run: npm run build
+
+      - name: Full governed gate
+        run: npm run check
+
+      - name: Deploy Worker and assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
+          CLOUDFLARE_ACCOUNT_ID: 9ff3d8494afab356ecbf95a2a231a6b5
+        run: npx --yes wrangler@4 deploy
+
+      - name: Verify short live URL and v43 requirements
+        shell: bash
+        env:
+          LIVE_URL: https://kosif.kosif199022.workers.dev
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            if curl -fsS --connect-timeout 10 --max-time 20 "$LIVE_URL/__health?sha=$GITHUB_SHA" -o /tmp/health.json; then
+              break
+            fi
+            sleep 4
+          done
+          test -s /tmp/health.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const h=JSON.parse(fs.readFileSync('/tmp/health.json','utf8'));
+          if(h?.productName!=='Kosif' || h?.modules?.audit!=='/audit/' || h?.installable!==true){
+            console.error(h); process.exit(2);
+          }
+          console.log('KOSIF_SHORT_WORKER_HEALTH_OK',h.version,h.buildId);
+          NODE
+
+          curl -fsS --connect-timeout 10 --max-time 20 "$LIVE_URL/__requirements?sha=$GITHUB_SHA" -o /tmp/requirements.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('/tmp/requirements.json','utf8'));
+          if(r?.complete!==true || r?.implemented!==50000 || r?.missing!==0){console.error(r);process.exit(2)}
+          console.log('KOSIF_REQUIREMENTS_LIVE_OK',r.implemented,r.missing);
+          NODE
+
+          for path in /audit/ /kosif-workspace-stability-v42.js /kosif-workspace-stability-v42.css /kosif-workspace-stability-loader-v42.js; do
+            code=$(curl -sS -L -o /tmp/kosif-live-body -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?sha=$GITHUB_SHA")
+            test "$code" = 200
+          done
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/audit/?sha=$GITHUB_SHA" -o /tmp/audit.html
+          grep -q 'kosif-workspace-stability-loader-v42.js' /tmp/audit.html
+          grep -q 'kosif-editorial-v41' /tmp/audit.html
+          echo "KOSIF_SHORT_WORKER_PRODUCTION_OK $LIVE_URL/audit/"
