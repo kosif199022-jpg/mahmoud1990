@@ -2,6 +2,7 @@ name = "kosif"
 main = "src/suite-edge-v43.js"
 compatibility_date = "2026-08-17"
 workers_dev = true
+keep_vars = true
 
 [[kv_namespaces]]
 binding = "DATA"
