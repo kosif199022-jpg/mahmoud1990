@@ -43,13 +43,24 @@
     document.head.appendChild(link);
   }
 
+  function ensureSharpLayer() {
+    root.dataset.kosifSharp = 'v46';
+    if ($('link[data-kosif-sharp="v46"]') || $('#kosif-sharp-command-center-v46')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/kosif-sharp-command-center-v46.css?v=2026.08.21-v46-1';
+    link.id = 'kosif-sharp-command-center-v46';
+    link.dataset.kosifSharp = 'v46';
+    document.head.appendChild(link);
+  }
+
   function updateChrome() {
     const theme = $('meta[name="theme-color"]');
-    if (theme) theme.content = '#102825';
+    if (theme) theme.content = '#f4f6f8';
     const release = $('.kcw-release');
-    if (release) release.textContent = 'KOSIF Editorial · v41.2 · UNIFIED EDITION';
+    if (release) release.textContent = 'KOSIF · v46 · SHARP COMMAND CENTER';
     const suiteVersion = $('#suite-version');
-    if (suiteVersion) suiteVersion.textContent = 'KOSIF Editorial v41.2';
+    if (suiteVersion) suiteVersion.textContent = 'KOSIF Sharp Command Center v46';
   }
 
   function mountFolio() {
@@ -58,7 +69,7 @@
     const folio = document.createElement('div');
     folio.className = 'k41-folio';
     folio.setAttribute('aria-hidden', 'true');
-    folio.innerHTML = '<b>KOSIF REVIEW</b><span>ISSUE 41.2</span>';
+    folio.innerHTML = '<b>KOSIF COMMAND</b><span>SHARP v46</span>';
     hero.appendChild(folio);
   }
 
@@ -73,6 +84,7 @@
 
   function syncDomain() {
     root.dataset.kosifDomain = currentDomain();
+    root.dataset.kosifSharp = 'v46';
   }
 
   function mountScrollProgress() {
@@ -228,6 +240,7 @@
     root.dataset.kosifEdition = 'v41';
     root.dataset.kosifExperience = 'v41';
     root.dataset.kosifRevision = 'v41.2';
+    root.dataset.kosifSharp = 'v46';
     root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
     syncDomain();
     updateChrome();
@@ -245,9 +258,11 @@
 
   function boot() {
     ensureStyles();
+    ensureSharpLayer();
     root.dataset.kosifEdition = 'v41';
     root.dataset.kosifExperience = 'v41';
     root.dataset.kosifRevision = 'v41.2';
+    root.dataset.kosifSharp = 'v46';
     root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
     syncDomain();
     updateChrome();
