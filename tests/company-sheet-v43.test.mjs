@@ -47,5 +47,5 @@ test('audit stability loader ships the company patch with a fresh cache generati
   const edge = await read('src/suite-edge-v43.js');
   assert.match(loader, /kosif-company-sheet-fix-v43\.css\?v=2026\.08\.21-1/);
   assert.match(loader, /kosif-company-sheet-fix-v43\.js\?v=2026\.08\.21-1/);
-  assert.match(edge, /kosif-workspace-stability-loader-v42\.js\?v=2026\.08\.21-4/);
+  assert.match(edge, /kosif-workspace-stability-loader-v42\.js\?v=2026\.08\.21-5/);
 });
