@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "kosif-gemini-orchestrator",
+  "version": "2.0.0",
+  "executionMode": "fail-closed",
+  "defaultModel": "gemini-2.5-pro",
+  "temperature": 0.2,
+  "serverOnlySecrets": ["GEMINI_API_KEY", "SUPABASE_SERVICE_ROLE_KEY"],
+  "mcp": {
+    "server": "kosif-engineering-copilot",
+    "transport": "oauth-protected-http",
+    "allowedTools": [
+      "kosif-code-review",
+      "kosif-design-review",
+      "kosif-implementation-architect",
+      "kosif-issue-triage",
+      "kosif-release-gate"
+    ]
+  },
+  "guardrails": {
+    "humanApprovalForAccountingPostings": true,
+    "humanApprovalForFinalAuditOpinion": true,
+    "deterministicMathAuthority": true,
+    "allowBrowserApiKeys": false,
+    "allowArbitraryMcpOrigins": false
+  }
+}

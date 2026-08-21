@@ -1,0 +1,64 @@
+:root {
+  --kosif-bg-app-dark: #0b0f17;
+  --kosif-bg-surface-card: #111827;
+  --kosif-bg-surface-hover: #1f2937;
+  --kosif-border-glass: rgba(255, 255, 255, 0.08);
+  --kosif-accent-emerald: #10b981;
+  --kosif-accent-emerald-glow: rgba(16, 185, 129, 0.15);
+  --kosif-accent-sapphire: #3b82f6;
+  --kosif-accent-sapphire-glow: rgba(59, 130, 246, 0.15);
+  --kosif-status-warning: #f59e0b;
+  --kosif-status-danger: #ef4444;
+  --kosif-text-primary: #f9fafb;
+  --kosif-text-muted: #9ca3af;
+  --kosif-glass-bg: rgba(17, 24, 39, 0.75);
+  --kosif-glass-backdrop: 12px;
+  --kosif-radius-sm: 10px;
+  --kosif-radius-md: 14px;
+  --kosif-radius-lg: 18px;
+  --kosif-space-1: 4px;
+  --kosif-space-2: 8px;
+  --kosif-space-3: 12px;
+  --kosif-space-4: 16px;
+  --kosif-space-6: 24px;
+  --kosif-space-8: 32px;
+  --kosif-motion-fast: 140ms;
+  --kosif-motion-normal: 220ms;
+  --kosif-motion-slow: 360ms;
+  --kosif-ease-standard: cubic-bezier(.2,.8,.3,1);
+}
+
+[data-kosif-theme='enterprise'] {
+  color-scheme: dark;
+  --kosif-bg-app: var(--kosif-bg-app-dark);
+  --kosif-bg-surface: var(--kosif-bg-surface-card);
+  --kosif-text: var(--kosif-text-primary);
+}
+
+[data-kosif-theme='light'] {
+  color-scheme: light;
+  --kosif-bg-app: #f8fafc;
+  --kosif-bg-surface: #ffffff;
+  --kosif-bg-surface-hover: #f1f5f9;
+  --kosif-border-glass: rgba(15, 23, 42, 0.08);
+  --kosif-accent-emerald: #059669;
+  --kosif-accent-sapphire: #2563eb;
+  --kosif-text: #0f172a;
+  --kosif-text-muted: #64748b;
+}
+
+.kosif-glass-card {
+  background: var(--kosif-glass-bg);
+  border: 1px solid var(--kosif-border-glass);
+  border-radius: var(--kosif-radius-lg);
+  backdrop-filter: blur(var(--kosif-glass-backdrop));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

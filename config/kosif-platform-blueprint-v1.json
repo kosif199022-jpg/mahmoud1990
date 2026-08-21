@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "project": "Kosif Cloud Platform",
+  "architectureVersion": "45.0.0-enterprise",
+  "updated": "2026-08-21",
+  "principles": [
+    "deterministic-financial-core",
+    "human-approval-required",
+    "server-only-secrets",
+    "oauth-protected-mcp",
+    "modular-service-boundaries",
+    "fail-closed-release-gates"
+  ],
+  "paths": {
+    "geminiService": "src/services/gemini.service.ts",
+    "mcpClient": "src/services/mcp-client.service.ts",
+    "designTokens": "src/styles/tokens.css",
+    "agentTypes": "src/types/agent.types.ts",
+    "mcpServer": "mcp/kosif-engineering-copilot/src/index.ts",
+    "vectorMigration": "supabase/migrations/20260821_system_brain_pgvector.sql"
+  },
+  "workflows": [
+    ".github/workflows/ci-quality-gate.yml",
+    ".github/workflows/deploy-production.yml",
+    ".github/workflows/gemini-mcp-agent.yml"
+  ],
+  "design": {
+    "theme": "Deep Slate & Neon Emerald / Sapphire",
+    "storybook": true,
+    "reducedMotion": true,
+    "rtlFirst": true
+  }
+}

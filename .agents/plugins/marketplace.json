@@ -1,7 +1,15 @@
 {
   "name": "kosif-local-plugins",
+  "version": "2.0.0",
+  "description": "KOSIF governed plugin registry for the OAuth-protected engineering MCP server and server-side AI orchestration.",
   "interface": {
     "displayName": "KOSIF Local Plugins"
+  },
+  "orchestratorConfig": "../configs/gemini-orchestrator.json",
+  "capabilities": {
+    "tools": true,
+    "resources": true,
+    "prompts": true
   },
   "plugins": [
     {

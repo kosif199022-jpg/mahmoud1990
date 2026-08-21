@@ -1,0 +1,188 @@
+name: Deploy Kosif to Cloudflare
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-kosif-cloudflare
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Verify repository contract
+        run: npm run check
+
+      - name: Deploy Worker and assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
+          CLOUDFLARE_ACCOUNT_ID: 9ff3d8494afab356ecbf95a2a231a6b5
+        run: npx --yes wrangler@4 deploy
+
+      - name: Verify live Kosif suite
+        shell: bash
+        env:
+          LIVE_URL: https://kosif.kosif199022.workers.dev
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 30); do
+            if curl -fsS --connect-timeout 10 --max-time 20 "$LIVE_URL/__health?deploy=$GITHUB_SHA" -o /tmp/kosif-live-health.json; then
+              if node - <<'NODE'
+          const fs=require('fs');
+          const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));
+          const ok=h?.productName==='Kosif' && h?.version==='v41.0.0-root' && h?.modules?.audit==='/audit/' && h?.modules?.libraries==='/libraries/' && h?.modules?.wealth==='/wealth/reader.html' && h?.modules?.sales==='/sales/' && h?.designAuthority==='KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color' && h?.experienceVersion==='v41.0.0' && h?.baseVisualVersion==='v40.0.0' && h?.installable===true;
+          if(!ok || !String(h?.buildId||'').includes('v41-editorial-cinematic-canva')){console.error('Unexpected live health',h);process.exit(2)}
+          console.log('LIVE_KOSIF_OK',h.version,h.buildId);
+          NODE
+              then ok=1; break; fi
+            fi
+            sleep 4
+          done
+          [ "$ok" = 1 ] || { echo 'Live Kosif verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
+
+          for path in / /audit/ /libraries/ /sales/ /standards/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-user-polish.css /v38-user-polish.js /kosif-studio-v40.css /kosif-studio-v40.js /kosif-suite-v40.css /kosif-editorial-v41.css /kosif-editorial-v41.js /kosif-workspace-stability-v42.js /kosif-workspace-stability-v42.css /kosif-workspace-stability-loader-v42.js /manifest.webmanifest /icons/icon-192.png /icons/icon-512.png /icons/maskable-512.png /assets/kosif-studio-hero-v40.webp /assets/kosif-reports-hero-v39.webp /assets/kosif-live-hero-v39.webp /v38-reports.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
+            route_ok=0
+            code=000
+            for attempt in $(seq 1 15); do
+              code=$(curl -sS -L -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL$path?deploy=$GITHUB_SHA")
+              case "$code" in 200|204|301|302|307|308) route_ok=1; break;; esac
+              sleep 2
+            done
+            [ "$route_ok" = 1 ] || { echo "Bad live route after propagation retries $path -> $code"; exit 1; }
+          done
+
+          audit_shell_ok=0
+          for attempt in $(seq 1 15); do
+            if curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/audit/?deploy=$GITHUB_SHA&attempt=$attempt" -o /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-studio-v40.css' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-editorial-v41.css' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-editorial-v41.js' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-workspace-stability-loader-v42.js' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-studio-hero-v40.webp' /tmp/kosif-v41-audit.html \
+              && grep -q 'manifest.webmanifest' /tmp/kosif-v41-audit.html; then
+              audit_shell_ok=1
+              break
+            fi
+            sleep 2
+          done
+          [ "$audit_shell_ok" = 1 ] || { echo 'Final audit shell and stability markers did not converge after propagation retries'; exit 1; }
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/kosif-studio-v40.css?deploy=$GITHUB_SHA" -o /tmp/kosif-studio-v40.css
+          grep -q 'kosif-studio-v40' /tmp/kosif-studio-v40.css || { echo 'Studio visual authority marker missing'; exit 1; }
+          grep -q '/assets/kosif-studio-hero-v40.webp' /tmp/kosif-studio-v40.css || { echo 'Generated v40 hero is not consumed'; exit 1; }
+          grep -q '/assets/kosif-reports-hero-v39.webp' /tmp/kosif-studio-v40.css || { echo 'Generated report hero is not consumed'; exit 1; }
+          grep -q '/assets/kosif-live-hero-v39.webp' /tmp/kosif-studio-v40.css || { echo 'Generated live hero is not consumed'; exit 1; }
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/kosif-editorial-v41.css?deploy=$GITHUB_SHA" -o /tmp/kosif-editorial-v41.css
+          grep -q 'KOSIF Editorial Cinematic v41' /tmp/kosif-editorial-v41.css || { echo 'Editorial visual authority marker missing'; exit 1; }
+          grep -q 'prefers-reduced-motion:reduce' /tmp/kosif-editorial-v41.css || { echo 'Reduced-motion contract missing'; exit 1; }
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/kosif-editorial-v41.js?deploy=$GITHUB_SHA" -o /tmp/kosif-editorial-v41.js
+          grep -q 'data-kosif-editorial' /tmp/kosif-editorial-v41.js || { echo 'Editorial runtime stylesheet guard missing'; exit 1; }
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/manifest.webmanifest?deploy=$GITHUB_SHA" -o /tmp/kosif-v40-manifest.json
+          node - <<'NODE'
+          const fs=require('fs');const m=JSON.parse(fs.readFileSync('/tmp/kosif-v40-manifest.json','utf8'));
+          if(m?.id!=='/audit/'||m?.display!=='standalone'||!String(m?.start_url||'').startsWith('/audit/')||!m?.icons?.some(x=>x.sizes==='512x512')||!m?.icons?.some(x=>String(x.purpose).includes('maskable'))){console.error('Unexpected PWA manifest',m);process.exit(2)}
+          console.log('LIVE_KOSIF_PWA_OK',m.id,m.display,m.icons.length);
+          NODE
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/demo/v38/manifest.json?deploy=$GITHUB_SHA" -o /tmp/kosif-v38-demo.json
+          node - <<'NODE'
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync('/tmp/kosif-v38-demo.json','utf8'));
+          if(d?.seed!==380019||!d?.counts||d.counts.accounts!==1000||d.synthetic_only!==true){console.error('Unexpected v38 demo manifest',d);process.exit(2)}
+          console.log('LIVE_KOSIF_V38_DEMO_OK',d.seed,d.counts.accounts);
+          NODE
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/library.json?deploy=$GITHUB_SHA" -o /tmp/kosif-library.json
+          node - <<'NODE'
+          const fs=require('fs');const lib=JSON.parse(fs.readFileSync('/tmp/kosif-library.json','utf8'));const ids=new Set((Array.isArray(lib)?lib:[]).map(x=>x.id));
+          for(const id of ['mafateeh','std2025','std2018','dipifr'])if(!ids.has(id))throw new Error('Missing prepared library book '+id);
+          const wealth=lib.find(x=>x.id==='mafateeh');if(!wealth?.embedded||!wealth?.audio)throw new Error('Mafateeh must remain embedded with audio');
+          console.log('LIVE_KOSIF_LIBRARY_OK',[...ids].join(','));
+          NODE
+
+          for book in std2025 std2018 dipifr; do
+            curl -fsSL --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/$book.json?deploy=$GITHUB_SHA" -o "/tmp/kosif-index-$book.json"
+            curl -fsSL --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/books/$book/1.json?deploy=$GITHUB_SHA" -o "/tmp/kosif-chapter-$book.json"
+            BOOK="$book" node - <<'NODE'
+          const fs=require('fs');const b=process.env.BOOK;const expected={std2018:'b1',std2025:'b3',dipifr:'b2'};
+          const idx=JSON.parse(fs.readFileSync(`/tmp/kosif-index-${b}.json`,'utf8'));const chapter=JSON.parse(fs.readFileSync(`/tmp/kosif-chapter-${b}.json`,'utf8'));
+          if(idx?.id!==expected[b]||!Array.isArray(idx.chapters)||!idx.chapters.length)throw new Error('Bad native reader index '+b);
+          if(!Array.isArray(chapter.body)||!chapter.body.length)throw new Error('Bad chapter body '+b);
+          console.log('LIVE_KOSIF_BOOK_OK',b,idx.id,idx.chapters.length,chapter.no);
+          NODE
+          done
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth-library-v37.js?deploy=$GITHUB_SHA" -o /tmp/kosif-wealth-library.js
+          grep -q "__KOSIF_WEALTH_LIBRARY__" /tmp/kosif-wealth-library.js || { echo 'Missing shared Mafateeh library layer'; exit 1; }
+          grep -q "window.D=D;window.CH=CH" /tmp/kosif-wealth-library.js || { echo 'Shared reader no longer updates D/CH'; exit 1; }
+          grep -q "function normalizeIndex(raw,info,id)" /tmp/kosif-wealth-library.js || { echo 'Missing prepared book index normalization'; exit 1; }
+          grep -q "#libBtn{display:none!important" /tmp/kosif-wealth-library.js || { echo 'Internal library button is visible by default'; exit 1; }
+
+          for book in mafateeh std2025 std2018 dipifr; do
+            code=$(curl -sS -o "/tmp/kosif-reader-$book.html" -w '%{http_code}' --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?book=$book&deploy=$GITHUB_SHA")
+            [ "$code" = 200 ] || { echo "Shared reader did not return 200 for $book -> $code"; exit 1; }
+            grep -q "var D = " "/tmp/kosif-reader-$book.html" || { echo "Reader D binding is not mutable for $book"; exit 1; }
+            grep -q "var CH = " "/tmp/kosif-reader-$book.html" || { echo "Reader CH binding is not mutable for $book"; exit 1; }
+            grep -q "wealth-library-v37.js" "/tmp/kosif-reader-$book.html" || { echo "Shared library layer missing for $book"; exit 1; }
+            grep -q "data-kosif-book-bootstrap=\"$book\"" "/tmp/kosif-reader-$book.html" || { echo "Exact book bootstrap missing for $book"; exit 1; }
+            grep -q "#mixerDock,#smartHubDock,#libBtn,#mixLaunch" "/tmp/kosif-reader-$book.html" || { echo "Default Mix/Smart controls are not hidden for $book"; exit 1; }
+            grep -q "#smartPebble,.smart-pebble" "/tmp/kosif-reader-$book.html" || { echo "Smart Library pebble is not hidden for $book"; exit 1; }
+          done
+
+          curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/wealth/reader.html?deploy=$GITHUB_SHA" -o /tmp/kosif-reader-default.html
+          grep -q "data-kosif-book-bootstrap=\"mafateeh\"" /tmp/kosif-reader-default.html || { echo 'Default reader does not force Mafateeh'; exit 1; }
+          grep -q "مفاتيح الثروة" /tmp/kosif-reader-default.html || { echo 'Original Mafateeh document missing'; exit 1; }
+          if grep -q "wealth-theme-v37.css" /tmp/kosif-reader-default.html; then echo 'Default reader is still visually overridden by Wealth theme'; exit 1; fi
+          if grep -q "suite-shell.js" /tmp/kosif-reader-default.html; then echo 'Default reader still injects Kosif suite switcher'; exit 1; fi
+
+      - name: Publish successful production verification
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LIVE_URL: https://kosif.kosif199022.workers.dev
+        run: |
+          set -euo pipefail
+          node - <<'NODE' >/tmp/kosif-deploy-status.md
+          const fs=require('fs');const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));const run=`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Workspace stability layer: **verified live on /audit/**\n- Shared Mafateeh reader books: \`mafateeh, std2025, std2018, dipifr\`\n- Reader model: **one original Mafateeh runtime; book content only is switched**\n- Default: **Mafateeh**\n- Initial screen: **original navy/gold; Mixer / Smart Library / internal library docks hidden**\n- Native indexes + first chapter bodies: **verified live**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe deployment gate verifies the canonical short Worker URL, the audit stability layer, and all four prepared books through /wealth/reader.html without weakening accounting, security, source, or reader contracts.`);
+          NODE
+          gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md
+
+      - name: Publish failed production verification
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cat >/tmp/kosif-deploy-status.md <<EOF
+          ## Deployment status
+
+          ❌ **DEPLOYMENT OR LIVE VERIFICATION FAILED**
+
+          - Commit: \`$GITHUB_SHA\`
+          - Canonical Worker: https://kosif.kosif199022.workers.dev
+          - Workflow run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          The release was not marked verified. Review the failed step before treating the Cloudflare deployment as production-ready.
+          EOF
+          gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md

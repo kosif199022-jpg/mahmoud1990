@@ -1,0 +1,148 @@
+name: Continuous Integration & Quality Gate
+
+on:
+  push:
+    branches: [main, develop, 'feat/**', 'fix/**', 'refactor/**']
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kosif-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Build, deterministic tests & architecture
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reject committed secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=$(find . -type f \( -iname '*.pem' -o -iname '*.key' -o -name '.env' -o -name '.env.local' -o -name '.env.production' \) -not -path './.git/*' | head -20)
+          if [ -n "$bad" ]; then
+            echo "Potential secret files found:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Type-check modular TypeScript services
+        run: npx --yes -p typescript@5.9.2 tsc --noEmit -p tsconfig.json
+
+      - name: Run complete KOSIF deterministic gate
+        run: npm run check
+
+      - name: Validate modular architecture contract
+        run: node scripts/check-platform-architecture-v46.mjs
+
+  storybook:
+    name: Storybook design-system smoke
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build Storybook
+        run: npm run storybook:build
+
+  browser-a11y:
+    name: Browser, responsive & accessibility
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install browser QA stack
+        run: |
+          npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2 pixelmatch@7.1.0 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+      - name: Start production-static server
+        run: |
+          mkdir -p artifacts
+          python3 -m http.server 4173 --directory public >/tmp/kosif-server.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/kosif-server.log
+          exit 1
+      - name: Browser smoke
+        env:
+          KOSIF_BASE_URL: http://127.0.0.1:4173
+          KOSIF_ROUTES: /,/audit/,/libraries/,/sales/,/standards/
+        run: node scripts/engineering-suite/browser-smoke.mjs
+      - name: Axe accessibility smoke
+        env:
+          KOSIF_BASE_URL: http://127.0.0.1:4173
+          KOSIF_ROUTES: /,/audit/,/libraries/,/sales/,/standards/
+        run: node scripts/engineering-suite/axe-smoke.mjs
+      - name: Upload browser artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-browser-quality-${{ github.run_id }}
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 30
+
+  security:
+    name: Security & SBOM
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare artifacts
+        run: mkdir -p artifacts
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: artifacts/kosif-sbom.cdx.json
+      - name: Trivy HIGH/CRITICAL scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+
+  release-sentinel:
+    name: Unified release sentinel
+    needs: [quality, storybook, browser-a11y, security]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'KOSIF unified quality gate passed.'
