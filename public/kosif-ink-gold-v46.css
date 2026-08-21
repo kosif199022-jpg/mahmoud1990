@@ -1,0 +1,176 @@
+/*
+ * KOSIF v46 — Ink & Gold Editorial final identity layer.
+ * Implements the approved v46 design decision set:
+ *   - one governed accent role per color (DESIGN.md / tokens v44),
+ *   - ONE unified warm night theme replacing the legacy violet dark mode,
+ *   - engagement-lifecycle tab grouping for the audit workspace,
+ *   - sales workspace retinted onto the KOSIF identity,
+ *   - hub audit module emphasis and libraries authority badges.
+ * Presentation only: accounting, audit, security and approval logic untouched.
+ */
+
+/* ============ 1) Audit tab bar: lifecycle groups ============ */
+#tabbar{align-items:center;gap:3px}
+#tabbar .tab-group-label{
+  flex:0 0 auto;align-self:center;white-space:nowrap;
+  margin-inline:7px 2px;padding-block:4px;
+  font-size:9.5px;font-weight:900;letter-spacing:.09em;
+  color:var(--muted,#6F746C);opacity:.9;
+}
+#tabbar .tab-sep{
+  flex:0 0 auto;width:1px;height:22px;margin:0 5px;
+  background:rgba(22,59,54,.25);
+}
+html[data-theme="dark"] #tabbar .tab-sep{background:rgba(233,228,214,.2)}
+@media(max-width:720px){#tabbar .tab-group-label,#tabbar .tab-sep{display:none!important}}
+
+/* ============ 2) Unified warm night theme (audit + v38 surfaces) ============ */
+html[data-theme="dark"]{
+  --paper:#0F1714; --ink:#E9E4D6; --muted:#A8A291;
+  --line:rgba(233,228,214,.13); --line2:rgba(233,228,214,.2);
+  --pine:#E4BE6B; --pine2:#C9A24E; --pinesoft:rgba(228,190,107,.10);
+  --viridian:#6FC2B0; --viridian2:#4FA793; --virsoft:rgba(79,167,147,.14);
+  --seal:#E4BE6B; --seal2:#C9A24E; --sealsoft:rgba(228,190,107,.10); --sealline:rgba(228,190,107,.30);
+  --danger:#E2917A; --dangersoft:rgba(226,145,122,.12);
+  --ok:#6FC2B0; --oksoft:rgba(111,194,176,.12);
+  --warn:#E4BE6B; --warnsoft:rgba(228,190,107,.10);
+  --info:#8FB8A5; --infosoft:rgba(143,184,165,.10);
+  --v38-ink:#E9E4D6; --v38-muted:#A8A291; --v38-paper:#0F1714; --v38-surface:#16211C;
+  --v38-line:rgba(233,228,214,.13); --v38-line2:rgba(233,228,214,.2);
+  --v38-navy:#1C2822; --v38-navy-2:#22322A; --v38-navy-3:#2A3A30;
+  --v38-gold:#E4BE6B; --v38-gold-2:#C9A24E; --v38-goldsoft:rgba(228,190,107,.10); --v38-goldline:rgba(228,190,107,.30);
+  --v38-ok:#6FC2B0; --v38-oksoft:rgba(111,194,176,.10);
+  --v38-danger:#E2917A; --v38-dangersoft:rgba(226,145,122,.10);
+  --v38-warn:#E4BE6B; --v38-warnsoft:rgba(228,190,107,.10);
+  --v38-info:#8FB8A5; --v38-infosoft:rgba(143,184,165,.10);
+  --v38-ai:#C9A2B8; --v38-aisoft:rgba(201,162,184,.10);
+  --v38-fact:#6FC2B0; --v38-factsoft:rgba(111,194,176,.10);
+  color-scheme:dark;
+}
+html[data-theme="dark"] body{
+  background:
+    radial-gradient(1000px 520px at 85% -5%,rgba(228,190,107,.07),transparent 60%),
+    radial-gradient(900px 480px at -10% 8%,rgba(79,167,147,.06),transparent 55%),
+    linear-gradient(180deg,#0C1210 0%,#0F1714 55%,#0C1210 100%)!important;
+  color:#E9E4D6;
+}
+html[data-theme="dark"] body::before{
+  background-image:
+    linear-gradient(rgba(233,228,214,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(233,228,214,.04) 1px,transparent 1px)!important;
+}
+html[data-theme="dark"] .topbar,
+html[data-theme="dark"] .tabs{
+  background:rgba(15,23,20,.84)!important;
+  border-color:rgba(233,228,214,.13)!important;
+}
+html[data-theme="dark"] .brand-name{
+  background:linear-gradient(120deg,#F3EEDF,#E4BE6B 55%,#8FB8A5)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .drawer{
+  background:#16211C!important;border-color:rgba(233,228,214,.13);
+}
+html[data-theme="dark"] .kpi,html[data-theme="dark"] .step,html[data-theme="dark"] .std-card,
+html[data-theme="dark"] .upd,html[data-theme="dark"] .finding,html[data-theme="dark"] .docreq,
+html[data-theme="dark"] .src-card,html[data-theme="dark"] .pbc-item,html[data-theme="dark"] .hr-item,
+html[data-theme="dark"] .file-row{background:#131E19!important}
+html[data-theme="dark"] .kpi.gold{background:linear-gradient(160deg,rgba(228,190,107,.12),#131E19)!important}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{
+  background:#0D1512!important;color:#E9E4D6!important;border-color:rgba(233,228,214,.2);
+}
+html[data-theme="dark"] .btn.primary{background:linear-gradient(135deg,#0B4A40,#0B8B7C)!important}
+html[data-theme="dark"] .btn.gold{background:linear-gradient(135deg,#C9A24E,#E4BE6B)!important;color:#171207!important}
+html[data-theme="dark"] .toast{background:#1C2822}
+html[data-theme="dark"] .tab.active{
+  background:linear-gradient(135deg,#1C2822,#2A3A30)!important;
+  color:#E4BE6B!important;box-shadow:none;
+}
+html[data-theme="dark"] .card.hero{background:linear-gradient(135deg,#12302A,#0F1714)!important}
+html[data-theme="dark"] .voicebar{background:rgba(22,33,28,.95)!important}
+html[data-theme="dark"] .moresheet{background:#131E19!important}
+html[data-theme="dark"] #kosif-boot{background:linear-gradient(180deg,#081B19,#102825)!important}
+
+/* ============ 3) Mobile bottom navigation on the identity ============ */
+#kosif-bottom-nav{
+  border-color:rgba(22,59,54,.14)!important;
+  background:rgba(255,252,245,.93)!important;
+  box-shadow:0 18px 50px -18px rgba(8,27,25,.4)!important;
+}
+#kosif-bottom-nav button{color:#6F746C!important}
+#kosif-bottom-nav button.active{
+  color:#102825!important;
+  background:linear-gradient(135deg,#F8EDCF,#FFFCF5)!important;
+  box-shadow:inset 0 0 0 1px rgba(169,120,34,.28);
+}
+#kosif-bottom-nav button.active svg{color:#A97822}
+html[data-theme="dark"] #kosif-bottom-nav{
+  background:rgba(15,23,20,.93)!important;
+  border-color:rgba(233,228,214,.13)!important;
+}
+html[data-theme="dark"] #kosif-bottom-nav button{color:#A8A291!important}
+html[data-theme="dark"] #kosif-bottom-nav button.active{
+  color:#E4BE6B!important;background:rgba(228,190,107,.12)!important;box-shadow:none;
+}
+
+/* ============ 4) Hub: the audit module is the story ============ */
+.module-grid{grid-template-columns:1.35fr 1fr 1fr!important;align-items:stretch}
+.module.audit{border-top:4px solid #D7AE58!important}
+.module.audit h3{font-size:26px}
+.module.audit .module-icon{background:#F8EDCF!important;color:#A97822!important}
+@media(max-width:840px){.module-grid{grid-template-columns:1fr!important}}
+
+/* ============ 5) Libraries: authority badges ============ */
+.book .auth{
+  display:inline-flex;align-items:center;gap:5px;vertical-align:middle;
+  margin-inline-start:7px;border-radius:999px;padding:2.5px 10px;
+  font-size:10.5px;font-weight:800;border:1px solid;
+}
+.book .auth::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.book .auth.ok{background:#E4F2ED;color:#0B8B7C;border-color:rgba(11,139,124,.3)}
+.book .auth.info{background:#EAF0FF;color:#315BE8;border-color:rgba(49,91,232,.3)}
+.book .auth.warn{background:#F8EDCF;color:#A97822;border-color:rgba(169,120,34,.3)}
+.book .auth.mut{background:#F7F0E2;color:#6F746C;border-color:rgba(22,59,54,.16)}
+html[data-theme="dark"] .book .auth.ok{background:rgba(111,194,176,.12);color:#6FC2B0;border-color:rgba(111,194,176,.3)}
+html[data-theme="dark"] .book .auth.info{background:rgba(143,184,165,.12);color:#8FB8A5;border-color:rgba(143,184,165,.3)}
+html[data-theme="dark"] .book .auth.warn{background:rgba(228,190,107,.12);color:#E4BE6B;border-color:rgba(228,190,107,.3)}
+html[data-theme="dark"] .book .auth.mut{background:rgba(233,228,214,.08);color:#A8A291;border-color:rgba(233,228,214,.16)}
+
+/* ============ 6) Sales workspace onto the KOSIF identity ============ */
+.sales-tabs button.active,
+.sales-tabs button.on{
+  background:linear-gradient(135deg,#102825,#1C4A42)!important;
+  color:#fff!important;outline:transparent!important;
+  box-shadow:0 12px 26px -16px rgba(8,27,25,.55)!important;
+}
+.sales-tabs button:hover,.sales-tabs .side-link:hover{color:#102825!important}
+.side-revenue{background:linear-gradient(145deg,#081B19,#123B34)!important}
+.side-revenue small{color:#BDE6D9!important}
+.side-revenue span{color:#8FB8A5!important}
+.sales-hero h1{
+  background:linear-gradient(100deg,#102825,#A97822 55%,#0B8B7C)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.sales-brand small,.sales-mobile-brand small,.chapter-head small{color:#0B8B7C!important}
+.hero-badge{color:#0B8B7C!important;border-color:rgba(11,139,124,.3)!important}
+.sales-actions button{color:#A97822!important}
+.sales-actions .btnlike{background:linear-gradient(135deg,#102825,#0B8B7C)!important;box-shadow:0 10px 24px -14px rgba(11,139,124,.7)!important}
+.chapter-head{border-image:linear-gradient(90deg,transparent,#0B8B7C,#102825) 1!important}
+.sales-brand-icon,.chapter-icon{background:linear-gradient(135deg,#102825,#0B8B7C)!important;box-shadow:0 14px 32px -17px rgba(11,139,124,.6)!important}
+.hero-deco i svg{color:#0B8B7C}
+.sales-side{box-shadow:-18px 0 50px -44px rgba(8,27,25,.4)!important}
+
+/* Sales grouped navigation (التحليل / العلاقات / التشغيل). */
+.sales-tabs .sgroup{display:contents}
+.sales-tabs em{
+  font-style:normal;display:block;font-size:9.5px;font-weight:900;
+  letter-spacing:.08em;color:#94a3b8;padding:14px 12px 3px;
+}
+@media(max-width:760px){.sales-tabs em{display:none!important}}
+
+/* ============ 7) Shared focus ring on the governed gold ============ */
+:is(button,a,input,select,textarea,[tabindex]):focus-visible{
+  outline-color:rgba(169,120,34,.55)!important;
+}
