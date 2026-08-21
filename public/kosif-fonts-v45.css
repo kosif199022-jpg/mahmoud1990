@@ -109,9 +109,9 @@
   font-feature-settings:'tnum' 1;
 }
 
-/* Accessibility floor shared by the legacy audit shell. This file is loaded by
-   every shell, and the higher specificity prevents older 42px tab rules from
-   undercutting the governed 44px minimum touch target. */
+/* Shared accessibility floor for legacy shell controls. The unified font file
+   is already present on every shell, so it is also the safest compatibility
+   point for the governed minimum touch target during incremental migration. */
 html body button.tab,
 html body .tab[role="tab"],
 html body [role="tab"].tab{
