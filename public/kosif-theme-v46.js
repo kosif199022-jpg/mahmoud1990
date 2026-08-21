@@ -64,6 +64,15 @@
     queueMicrotask(enforceTheme);
   }
 
+  // A child settings sheet should replace the More sheet rather than stack on
+  // top of it. This preserves the governed dialog lock/focus trap, avoids a
+  // hidden interactive overlay after Escape, and keeps bottom navigation usable
+  // once the child sheet closes.
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest?.('#kosif-font-open')) return;
+    document.getElementById('kosif-more')?.classList.remove('show');
+  }, true);
+
   const observer = new MutationObserver((records) => {
     const lateStyleAdded = records.some((record) =>
       Array.from(record.addedNodes).some((node) =>
