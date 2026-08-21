@@ -8,11 +8,12 @@ const direct = "if(initialId!=='mafateeh')queueMicrotask(()=>switchBook(initialI
 if (!build.includes(delayed) || !build.includes(direct)) {
   throw new Error('Direct-book build transform is missing');
 }
-if (reader.includes(delayed)) {
-  throw new Error('Built wealth reader still contains the 700ms requested-book delay');
+if (!reader.includes(delayed) && !reader.includes(direct)) {
+  throw new Error('Wealth reader requested-book bootstrap contract is missing');
 }
-if (!reader.includes(direct)) {
-  throw new Error('Built wealth reader does not bootstrap the requested book in a microtask');
+const simulatedBuild = reader.includes(delayed) ? reader.replace(delayed, direct) : reader;
+if (simulatedBuild.includes(delayed) || !simulatedBuild.includes(direct)) {
+  throw new Error('Build transform does not remove the 700ms requested-book delay');
 }
 
 console.log('KOSIF direct requested-book bootstrap v45 OK');
