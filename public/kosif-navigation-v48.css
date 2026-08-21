@@ -1,0 +1,134 @@
+/* KOSIF v48 — Navigation, iconography and information hierarchy
+ * Presentation-only. No accounting, audit, evidence, AI or approval logic.
+ */
+:root{
+  --k48-nav-w:88px;
+  --k48-icon:20px;
+  --k48-icon-sm:17px;
+  --k48-icon-lg:28px;
+  --k48-touch:44px;
+  --k48-radius:12px;
+  --k48-line:color-mix(in srgb,var(--ink,#102825) 13%,transparent);
+  --k48-muted:color-mix(in srgb,var(--ink,#102825) 62%,transparent);
+  --k48-active:var(--viridian,#0B8B7C);
+  --k48-active-soft:color-mix(in srgb,var(--viridian,#0B8B7C) 11%,transparent);
+}
+
+/* One icon language everywhere: outline, currentColor, fixed optical sizes. */
+.k48-icon,
+#k48-desktop-rail svg,
+#kosif-bottom-nav svg,
+#kosif-more .k48-action-icon svg{
+  width:var(--k48-icon);height:var(--k48-icon);display:block;flex:0 0 auto;
+  fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+:is(.tab,.btn,.v38-btn,.kosif-action) > svg{width:var(--k48-icon-sm);height:var(--k48-icon-sm);flex:0 0 auto}
+:is(.module-icon,.v38-tile .ic,.agent-avatar,.council-avatar) svg{width:var(--k48-icon-lg);height:var(--k48-icon-lg)}
+
+/* Header = identity + company/period context + utilities, never a wall of icons. */
+.topbar-inner{gap:12px!important}
+.top-status{gap:6px!important;align-items:center!important}
+.top-status .pill{min-height:34px;padding:5px 10px!important}
+.top-status :is(button,a){min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center}
+.brand{min-width:max-content}
+
+/* Financial hierarchy: value first, icon/color second. */
+:is(.kpi,.v38-kpi,.metric,.hero-metric){position:relative}
+:is(.kpi .v,.v38-kpi .v,.metric .value,.hero-metric b){font-variant-numeric:tabular-nums lining-nums;font-weight:850!important;letter-spacing:-.025em}
+:is(.kpi .l,.v38-kpi .l,.metric .label,.hero-metric span){font-size:11.5px!important;color:var(--muted,#6F746C)!important}
+:is(.kpi,.v38-kpi) > :is(svg,.ic,.icon){opacity:.72}
+
+/* Desktop command rail. */
+#k48-desktop-rail{
+  display:none;position:fixed;z-index:58;inset-inline-start:14px;top:92px;bottom:18px;width:var(--k48-nav-w);
+  padding:8px 7px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;
+  border:1px solid var(--k48-line);border-radius:18px;background:color-mix(in srgb,var(--surface,#fff) 92%,transparent);
+  box-shadow:0 18px 54px -42px rgba(8,27,25,.55);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%);
+}
+#k48-desktop-rail::-webkit-scrollbar{display:none}
+#k48-desktop-rail button{
+  appearance:none;width:100%;min-height:58px;margin:0 0 4px;padding:7px 4px;border:1px solid transparent;border-radius:11px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:transparent;color:var(--k48-muted);
+  font:700 10.5px/1.25 inherit;cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease,transform .16s ease;
+}
+#k48-desktop-rail button:hover{background:color-mix(in srgb,var(--ink,#102825) 4%,transparent);color:var(--ink,#102825);border-color:var(--k48-line);transform:translateY(-1px)}
+#k48-desktop-rail button.active{background:var(--k48-active-soft);color:var(--k48-active);border-color:color-mix(in srgb,var(--k48-active) 27%,transparent)}
+#k48-desktop-rail button[data-k48-more]{margin-top:8px;border-top-color:var(--k48-line)}
+#k48-desktop-rail .k48-rail-label{max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+@media (min-width:1180px){
+  #k48-desktop-rail{display:flex;flex-direction:column}
+  body:has(#k48-desktop-rail) main{padding-inline-start:calc(var(--k48-nav-w) + 34px)!important}
+  body:has(#k48-desktop-rail) .tabs{display:none!important}
+}
+
+/* Mobile nav: exactly five primary destinations, equal weight, icon above label. */
+#kosif-bottom-nav.k48-ready{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:3px!important;padding:6px max(7px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(7px,env(safe-area-inset-left))!important;
+}
+#kosif-bottom-nav.k48-ready button{
+  min-width:0!important;min-height:52px!important;padding:5px 3px!important;border-radius:11px!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;
+  font-size:10.5px!important;font-weight:750!important;line-height:1.15!important;white-space:nowrap!important;
+}
+#kosif-bottom-nav.k48-ready button svg{width:20px!important;height:20px!important}
+#kosif-bottom-nav.k48-ready button span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#kosif-bottom-nav.k48-ready button.active{transform:none!important}
+
+/* More sheet becomes an icon-led action catalogue with compact descriptions. */
+#kosif-more .kosif-sheet{padding-bottom:max(24px,env(safe-area-inset-bottom))!important}
+#kosif-more .kosif-sheet-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+#kosif-more .kosif-action.k48-action{
+  min-height:76px!important;padding:11px!important;border-radius:12px!important;display:grid!important;
+  grid-template-columns:38px minmax(0,1fr)!important;grid-template-rows:auto!important;align-items:center!important;gap:10px!important;text-align:start!important;
+}
+#kosif-more .k48-action-icon{
+  width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--k48-active-soft);color:var(--k48-active);
+  border:1px solid color-mix(in srgb,var(--k48-active) 18%,transparent);
+}
+#kosif-more .k48-action-copy{min-width:0;display:flex;flex-direction:column;gap:2px}
+#kosif-more .k48-action-copy b{font-size:12.5px;line-height:1.35;color:var(--ink,#102825);font-weight:800}
+#kosif-more .k48-action-copy small{display:block!important;font-size:10.5px!important;line-height:1.45!important;color:var(--muted,#6F746C)!important;white-space:normal!important}
+
+/* Tables: controls stay at the trailing edge and never dominate the financial values. */
+:is(table.data,.v38-table) td :is(button,.btn,.v38-btn){min-height:32px!important;padding:5px 8px!important;font-size:11.5px!important}
+:is(table.data,.v38-table) td :is(button,.btn,.v38-btn) svg{width:15px!important;height:15px!important}
+:is(table.data,.v38-table) td.amt,
+:is(table.data,.v38-table) td.num{font-variant-numeric:tabular-nums lining-nums;font-weight:650}
+
+/* Dialog anatomy: fixed chrome, only content scrolls. */
+:is(#kosif-more,#kosif-company-sheet,#kosif-ai-sheet,#kosif-command-sheet,.modal,.drawer,[role="dialog"]) .kosif-sheet,
+:is(.modal,.drawer,[role="dialog"]){overscroll-behavior:contain}
+.kosif-sheet{max-height:min(88dvh,880px)!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
+.kosif-close{position:sticky!important;top:0!important;z-index:4!important;margin-inline-start:auto!important;min-width:40px!important;min-height:40px!important}
+
+/* Lifecycle cards use status color as a signal, not decoration. */
+.kw47-stage{border-radius:12px!important;box-shadow:none!important}
+.kw47-stage span::before{width:7px!important;height:7px!important;box-shadow:none!important}
+.kw47-progress{border-radius:11px!important}
+
+/* Accessibility: compact labels must stay above WCAG AA contrast thresholds. */
+.kw42-stat span{color:#53615d!important}
+.kw47-guardrails span{color:#4f5c58!important}
+
+html[data-theme="dark"] #k48-desktop-rail{background:rgba(15,23,20,.92);border-color:rgba(233,228,214,.13);box-shadow:0 18px 54px -42px rgba(0,0,0,.8)}
+html[data-theme="dark"] #k48-desktop-rail button{color:#A8A291}
+html[data-theme="dark"] #k48-desktop-rail button:hover{color:#E9E4D6;background:rgba(233,228,214,.055);border-color:rgba(233,228,214,.12)}
+html[data-theme="dark"] #k48-desktop-rail button.active{color:#E4BE6B;background:rgba(228,190,107,.1);border-color:rgba(228,190,107,.24)}
+html[data-theme="dark"] #kosif-more .k48-action-copy b{color:#E9E4D6}
+html[data-theme="dark"] #kosif-more .k48-action-icon{background:rgba(228,190,107,.1);color:#E4BE6B;border-color:rgba(228,190,107,.22)}
+html[data-theme="dark"] .kw42-stat span{color:#c8d2ce!important}
+html[data-theme="dark"] .kw47-guardrails span{color:#d9c9ad!important}
+
+@media (max-width:760px){
+  #kosif-more .kosif-sheet-grid{grid-template-columns:1fr!important}
+  #kosif-more .kosif-action.k48-action{min-height:68px!important}
+  .top-status .pill{max-width:min(46vw,210px);overflow:hidden;text-overflow:ellipsis}
+  .card-h,.v38-cardh{align-items:flex-start!important}
+}
+@media (max-width:420px){
+  #kosif-bottom-nav.k48-ready button{font-size:9.75px!important}
+  #kosif-bottom-nav.k48-ready button svg{width:19px!important;height:19px!important}
+}
+@media (prefers-reduced-motion:reduce){#k48-desktop-rail button{transition:none!important;transform:none!important}}

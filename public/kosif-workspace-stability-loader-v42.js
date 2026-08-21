@@ -40,11 +40,13 @@
     addCss('kosif-workspace-stability-css', '/kosif-workspace-stability-v42.css?v=2026.08.21-4');
     addCss('kosif-company-sheet-fix-css', '/kosif-company-sheet-fix-v43.css?v=2026.08.21-1');
     addCss('kosif-audit-workspace-v47-css', '/kosif-audit-workspace-v47.css?v=2026.08.22-1');
+    addCss('kosif-navigation-v48-css', '/kosif-navigation-v48.css?v=2026.08.22-1');
     keepFinalVisualAuthority();
 
     addScript('kosif-workspace-stability-runtime', '/kosif-workspace-stability-v42.js?v=2026.08.21-4');
     addScript('kosif-company-sheet-fix-runtime', '/kosif-company-sheet-fix-v43.js?v=2026.08.21-1');
     addScript('kosif-audit-workspace-v47-runtime', '/kosif-audit-workspace-v47.js?v=2026.08.22-1');
+    addScript('kosif-navigation-v48-runtime', '/kosif-navigation-v48.js?v=2026.08.22-1');
   }
 
   if (document.readyState === 'complete') setTimeout(mount, 0);
