@@ -31,6 +31,14 @@ html[data-kosif-visual-system="v45"] body .amb-surface.on small{
 html[data-kosif-visual-system="v45"] body .amb-sound:not(.on){
   color:#5b4a32!important;
 }
+/* Audit overview text was visually de-emphasized below WCAG AA at desktop.
+   Keep the hierarchy but raise only the foreground contrast. */
+html[data-kosif-visual-system="v45"] body .kw42-stat > span,
+html[data-kosif-visual-system="v45"] body #kosif-overview-path-card > .card-h > .hint,
+html[data-kosif-visual-system="v45"] body .step > p,
+html[data-kosif-visual-system="v45"] body .k41-in.tight > p > b{
+  color:#475569!important;
+}
 @media (prefers-color-scheme:dark){
   html[data-theme="dark"][data-kosif-visual-system="v45"] body .principle span{color:#c4b5fd!important}
 }
