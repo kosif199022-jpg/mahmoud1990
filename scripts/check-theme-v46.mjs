@@ -35,6 +35,8 @@ assert(guard.includes("const ROOT_ATTR = 'data-kosif-theme'"), 'cascade guard ro
 assert(guard.includes("const VERSION = 'v46'"), 'cascade guard version missing');
 assert(guard.includes('MutationObserver'), 'cascade guard observer missing');
 assert(guard.includes("document.head.append(link)"), 'cascade guard cannot keep v46 last');
+assert(guard.includes("event.target.closest?.('#kosif-font-open')"), 'font sheet transition trigger missing');
+assert(guard.includes("document.getElementById('kosif-more')?.classList.remove('show')"), 'font sheet does not replace the More sheet');
 
 for (const needle of [
   "const themeV46CssHref = '/kosif-sharp-command-center-v46.css?v=2026.08.22-1'",
