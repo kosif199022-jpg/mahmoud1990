@@ -132,7 +132,7 @@ jobs:
           path: storybook-static/
           retention-days: 14
       - name: Publish visual regression to Chromatic when configured
-        if: ${{ secrets.CHROMATIC_PROJECT_TOKEN != '' }}
+        if: env.CHROMATIC_PROJECT_TOKEN != ''
         env:
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
         run: npx --yes chromatic@latest --storybook-build-dir=storybook-static --exit-zero-on-changes --project-token="$CHROMATIC_PROJECT_TOKEN"
