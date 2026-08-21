@@ -21,6 +21,16 @@ html[data-kosif-visual-system="v45"] body .sales-3d-toggle button{
 html[data-kosif-visual-system="v45"] body .sales-3d-toggle button[aria-pressed="true"]{
   color:#312e81!important;
 }
+html[data-kosif-visual-system="v45"] body .amb-surface.on,
+html[data-kosif-visual-system="v45"] body .amb-sound.on{
+  color:#0d2b45!important;
+}
+html[data-kosif-visual-system="v45"] body .amb-surface.on small{
+  color:#24384a!important;
+}
+html[data-kosif-visual-system="v45"] body .amb-sound:not(.on){
+  color:#5b4a32!important;
+}
 @media (prefers-color-scheme:dark){
   html[data-theme="dark"][data-kosif-visual-system="v45"] body .principle span{color:#c4b5fd!important}
 }
