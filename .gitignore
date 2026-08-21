@@ -35,3 +35,6 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# Generated source export — CI artifact only; repository tree remains source of truth
+Kosif-Full-Application-Source.json
