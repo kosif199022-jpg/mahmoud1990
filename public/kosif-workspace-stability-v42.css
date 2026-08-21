@@ -1,0 +1,103 @@
+/* KOSIF Workspace Stability v42
+ * Mobile-first density, scroll and sheet fixes layered after the governed v41 design system.
+ * Presentation only: no accounting or audit calculations live here.
+ */
+:root{
+  --kw42-ink:#12312c;
+  --kw42-muted:#66736d;
+  --kw42-paper:#fffdf8;
+  --kw42-paper-2:#f8f2e7;
+  --kw42-line:rgba(18,49,44,.14);
+  --kw42-teal:#168875;
+  --kw42-gold:#d0a64f;
+  --kw42-shadow:0 12px 32px -24px rgba(14,39,35,.35);
+}
+
+/* Make useful content visible immediately; keep old cinematic layer as design authority only. */
+html[data-kosif-workspace="stable-v42"] #kosif-boot,
+html[data-kosif-workspace="stable-v42"] #k41-scroll-progress,
+html[data-kosif-workspace="stable-v42"] #kosif-motion-bg,
+html[data-kosif-workspace="stable-v42"] .k-orb,
+html[data-kosif-workspace="stable-v42"] .k-particle{display:none!important}
+html[data-kosif-workspace="stable-v42"] body{overflow-x:hidden!important;padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}
+html[data-kosif-workspace="stable-v42"] main{width:min(100%,1240px)!important;max-width:1240px!important;min-height:0!important;margin-inline:auto!important;padding:14px 14px calc(102px + env(safe-area-inset-bottom))!important}
+html[data-kosif-workspace="stable-v42"] section[data-view]{min-height:0!important;margin-block:0!important}
+html[data-kosif-workspace="stable-v42"] section[data-view]:not(.show){display:none!important}
+html[data-kosif-workspace="stable-v42"] section[data-view].show{display:block!important;opacity:1!important;visibility:visible!important;filter:none!important;transform:none!important;animation:none!important}
+html[data-kosif-workspace="stable-v42"] section[data-view].show :is(.card,.kpi,.step,.finding,.docreq,.std-card,[data-k41-reveal]){opacity:1!important;visibility:visible!important;filter:none!important;transform:none!important;animation:none!important}
+
+/* Compact page rhythm: borders belong to content, not giant page frames. */
+html[data-kosif-workspace="stable-v42"] :is(.card,.kpi,.step,.finding,.docreq,.std-card){border-color:var(--kw42-line)!important;border-radius:18px!important;box-shadow:var(--kw42-shadow)!important}
+html[data-kosif-workspace="stable-v42"] .card{padding:15px 16px!important;margin-block-end:11px!important}
+html[data-kosif-workspace="stable-v42"] .card.tight{padding:12px 13px!important}
+html[data-kosif-workspace="stable-v42"] .card-h{gap:8px!important;margin-block-end:9px!important}
+html[data-kosif-workspace="stable-v42"] .card-h :is(h2,h3){line-height:1.45!important}
+html[data-kosif-workspace="stable-v42"] .card-h h2{font-size:18px!important}
+html[data-kosif-workspace="stable-v42"] .card-h h3{font-size:15px!important}
+html[data-kosif-workspace="stable-v42"] .grid{gap:9px!important}
+html[data-kosif-workspace="stable-v42"] :is(.g2,.g3,.g4){grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))!important}
+html[data-kosif-workspace="stable-v42"] .hint{line-height:1.55!important}
+html[data-kosif-workspace="stable-v42"] .field label{margin-block-end:4px!important}
+html[data-kosif-workspace="stable-v42"] :is(.field input,.field select,.field textarea){min-height:43px!important;padding:9px 11px!important;border-radius:12px!important}
+html[data-kosif-workspace="stable-v42"] .btn{min-height:40px!important;padding:8px 13px!important;border-radius:12px!important}
+
+/* Compact top chrome and single mobile navigation. */
+html[data-kosif-workspace="stable-v42"] .topbar{padding:9px 13px!important;box-shadow:0 10px 28px -26px rgba(18,49,44,.65)!important}
+html[data-kosif-workspace="stable-v42"] .topbar-inner{min-height:0!important;gap:7px!important;flex-wrap:wrap!important}
+html[data-kosif-workspace="stable-v42"] .brand-seal{width:34px!important;height:34px!important}
+html[data-kosif-workspace="stable-v42"] .brand-name{font-size:27px!important;line-height:1.05!important}
+html[data-kosif-workspace="stable-v42"] .top-status{width:100%!important;display:flex!important;gap:6px!important;flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none!important;margin:0!important}
+html[data-kosif-workspace="stable-v42"] .top-status::-webkit-scrollbar{display:none!important}
+html[data-kosif-workspace="stable-v42"] .pill{min-height:31px!important;padding:5px 9px!important;font-size:10.5px!important;white-space:nowrap!important}
+html[data-kosif-workspace="stable-v42"] .tabs{display:none!important}
+html[data-kosif-workspace="stable-v42"] :is(#bottomnav,.bottomnav,#moresheet,#moresheet-bg){display:none!important}
+html[data-kosif-workspace="stable-v42"] #kosif-bottom-nav{position:fixed!important;z-index:2147482000!important;left:10px!important;right:10px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;padding:6px!important;border:1px solid var(--kw42-line)!important;border-radius:19px!important;background:color-mix(in srgb,var(--kw42-paper) 96%,transparent)!important;box-shadow:0 15px 42px -22px rgba(18,49,44,.55)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+html[data-kosif-workspace="stable-v42"] #kosif-bottom-nav button{min-width:0!important;min-height:52px!important;padding:5px 2px!important;border:0!important;border-radius:13px!important;background:transparent!important;font-size:9.5px!important;display:grid!important;place-items:center!important;gap:1px!important}
+html[data-kosif-workspace="stable-v42"] #kosif-bottom-nav button svg{width:19px!important;height:19px!important}
+html[data-kosif-workspace="stable-v42"] #kosif-bottom-nav button.active{background:rgba(22,136,117,.10)!important;color:var(--kw42-teal)!important}
+
+/* iPhone-safe bottom sheets: no phantom scroll or blank page above/below. */
+html[data-kosif-workspace="stable-v42"] :is(#kosif-more,#kosif-company-sheet,#kosif-ai-sheet,#kosif-command-sheet,#kosif-font-sheet){padding:8px!important;align-items:flex-end!important;overflow:hidden!important;overscroll-behavior:contain!important}
+html[data-kosif-workspace="stable-v42"] .kosif-sheet{box-sizing:border-box!important;width:min(720px,100%)!important;max-height:min(86dvh,760px)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding:15px 15px calc(18px + env(safe-area-inset-bottom))!important;border-radius:21px!important;animation:none!important}
+html[data-kosif-workspace="stable-v42"] .kosif-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+html[data-kosif-workspace="stable-v42"] .kosif-action{min-height:58px!important;padding:10px!important;border-radius:13px!important}
+html[data-kosif-workspace="stable-v42"] .kosif-action small{font-size:9.5px!important;line-height:1.4!important;margin-block-start:2px!important}
+html[data-kosif-workspace="stable-v42"] .modal{width:min(520px,calc(100vw - 24px))!important;max-height:calc(100dvh - 30px)!important;overflow:auto!important;border-radius:18px!important;padding:16px!important;animation:none!important}
+html[data-kosif-workspace="stable-v42"] :is(.drawer,.drawer-b){max-height:100dvh!important;overscroll-behavior:contain!important}
+html[data-kosif-workspace="stable-v42"] .drawer-b{-webkit-overflow-scrolling:touch!important;padding-block-end:calc(96px + env(safe-area-inset-bottom))!important}
+
+/* Command center. */
+.kw42-command{display:grid;gap:10px;margin-block-end:12px;padding:15px;border:1px solid var(--kw42-line);border-radius:20px;background:linear-gradient(145deg,var(--kw42-paper),var(--kw42-paper-2));box-shadow:var(--kw42-shadow)}
+.kw42-command-head{display:flex;align-items:flex-start;gap:9px;flex-wrap:wrap}.kw42-command-head h1{font-size:19px!important;line-height:1.4!important;margin:0;color:var(--kw42-ink)}.kw42-command-head p{margin:2px 0 0;color:var(--kw42-muted);font-size:11px}.kw42-command-company{margin-inline-start:auto;max-width:100%;padding:6px 10px;border-radius:999px;background:var(--kw42-paper);border:1px solid var(--kw42-line);font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.kw42-command-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.kw42-stat{min-width:0;padding:9px;border:1px solid var(--kw42-line);border-radius:13px;background:var(--kw42-paper)}.kw42-stat b{display:block;font-size:17px;color:var(--kw42-ink);font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis}.kw42-stat span{display:block;font-size:9.5px;color:var(--kw42-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kw42-command-actions{display:flex;gap:7px;flex-wrap:wrap}.kw42-command-actions button{min-height:38px;border:1px solid var(--kw42-line);border-radius:11px;padding:7px 12px;background:var(--kw42-paper);color:var(--kw42-ink);font:700 11px inherit}.kw42-command-actions button.primary{background:var(--kw42-teal);color:white;border-color:transparent}
+
+/* Entity setup becomes an explicit three-step flow. */
+.kw42-entity-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 12px}.kw42-entity-step{padding:8px;border:1px solid var(--kw42-line);border-radius:12px;background:var(--kw42-paper);font-size:10px;color:var(--kw42-muted)}.kw42-entity-step b{display:block;color:var(--kw42-ink);font-size:11px}.kw42-entity-step.done{background:rgba(22,136,117,.08);border-color:rgba(22,136,117,.25)}
+
+/* Rounds are summaries first; evidence/detail is one tap away. */
+html[data-kosif-workspace="stable-v42"] #view-rounds .timeline{padding-inline-start:42px!important}
+html[data-kosif-workspace="stable-v42"] #view-rounds .round{margin-block-end:10px!important;padding:12px 13px!important;border:1px solid var(--kw42-line)!important;border-radius:15px!important;box-shadow:var(--kw42-shadow)!important}
+html[data-kosif-workspace="stable-v42"] #view-rounds .round-seal{inset-inline-start:-42px!important;width:31px!important;height:31px!important;font-size:13px!important}
+html[data-kosif-workspace="stable-v42"] #view-rounds .round:not(.kw42-expanded) :is(.finding,.docreq,.round-detail,.round-results,.stds){display:none!important}
+html[data-kosif-workspace="stable-v42"] #view-rounds .round:not(.kw42-expanded) p:nth-of-type(n+2){display:none!important}
+.kw42-round-toggle{width:100%;min-height:36px;margin-block-start:7px;border:1px solid var(--kw42-line);border-radius:10px;background:var(--kw42-paper-2);color:var(--kw42-ink);font:700 10.5px inherit}
+
+html[data-kosif-workspace="stable-v42"] .twrap{max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;border-radius:13px!important}
+html[data-kosif-workspace="stable-v42"] table.data{font-size:12px!important}
+html[data-kosif-workspace="stable-v42"] table.data :is(th,td){padding:7px 9px!important}
+
+@media(max-width:720px){
+ html[data-kosif-workspace="stable-v42"] main{padding:9px 9px calc(96px + env(safe-area-inset-bottom))!important}
+ html[data-kosif-workspace="stable-v42"] .topbar{padding:8px 10px!important}
+ html[data-kosif-workspace="stable-v42"] .brand-seal{width:31px!important;height:31px!important}
+ html[data-kosif-workspace="stable-v42"] .brand-name{font-size:24px!important}
+ html[data-kosif-workspace="stable-v42"] .brand-sub{display:none!important}
+ html[data-kosif-workspace="stable-v42"] .card{padding:12px!important;margin-block-end:9px!important;border-radius:15px!important}
+ html[data-kosif-workspace="stable-v42"] .card-h h2{font-size:16px!important}
+ html[data-kosif-workspace="stable-v42"] .card-h h3{font-size:14px!important}
+ html[data-kosif-workspace="stable-v42"] :is(.g2,.g3,.g4){grid-template-columns:1fr!important}
+ html[data-kosif-workspace="stable-v42"] .steps{grid-template-columns:1fr 1fr!important;gap:7px!important}
+ .kw42-command{padding:11px;border-radius:16px}.kw42-command-head h1{font-size:16px!important}.kw42-command-company{width:100%;margin-inline-start:0}.kw42-command-grid{grid-template-columns:1fr 1fr}.kw42-stat b{font-size:15px}.kw42-entity-steps{grid-template-columns:1fr}.kw42-entity-step{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:6px}
+ html[data-kosif-workspace="stable-v42"] .kosif-sheet{max-height:calc(100dvh - 14px)!important;border-radius:18px 18px 0 0!important}
+}
+@media(max-width:390px){html[data-kosif-workspace="stable-v42"] .kosif-sheet-grid{grid-template-columns:1fr!important}}
+@media(prefers-reduced-motion:reduce){html[data-kosif-workspace="stable-v42"] *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
