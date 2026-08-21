@@ -49,7 +49,7 @@ need(css.includes('padding:34px 24px 240px!important') && css.includes('grid-tem
 for (const marker of [
   '__KOSIF_EDITORIAL_V41__', "root.dataset.kosifEdition = 'v41'", "root.dataset.kosifExperience = 'v41'",
   'prefers-reduced-motion: reduce', '(hover: hover) and (pointer: fine)', 'IntersectionObserver',
-  'MutationObserver', 'revealVisibleTargets', 'getBoundingClientRect', 'data-kosif-editorial', 'KOSIF REVIEW', 'ISSUE 41.2',
+  'MutationObserver', 'revealVisibleTargets', 'getBoundingClientRect', 'data-kosif-editorial', 'KOSIF COMMAND', 'SHARP v46',
   '--k41-tilt-x', '--k41-x', 'kosif-view-change', 'touchFirst', 'revealAllTargets', 'setTimeout(revealAllTargets, 1000)',
   "root.dataset.kosifRevision = 'v41.2'", 'syncDomain', 'mountScrollProgress', 'queueScrollProgress'
 ]) need(runtime.includes(marker), `missing v41 runtime marker: ${marker}`);
