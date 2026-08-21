@@ -2,6 +2,7 @@ import fs from 'node:fs';
 
 const css=fs.readFileSync('public/kosif-visual-system-v45.css','utf8');
 const edge=fs.readFileSync('src/suite-edge-v43.js','utf8');
+const stabilityLoader=fs.readFileSync('public/kosif-workspace-stability-loader-v42.js','utf8');
 
 const checks=[
   ['scoped visual authority',css.includes('html[data-kosif-visual-system="v45"]')],
@@ -29,7 +30,9 @@ const checks=[
   ['edge stylesheet injection',edge.includes('kosif-visual-system-v45.css?v=2026.08.21-1')],
   ['edge visual attribute',edge.includes("setAttribute('data-kosif-visual-system','v45')")],
   ['original wealth reader preserved',edge.includes("const preserveWealthReader=url.pathname==='/wealth'||url.pathname.startsWith('/wealth/')")],
-  ['visual system excluded from wealth reader',edge.includes('if(!preserveWealthReader)head.append(VISUAL_SYSTEM_V45')]
+  ['visual system excluded from wealth reader',edge.includes('if(!preserveWealthReader)head.append(VISUAL_SYSTEM_V45')],
+  ['audit late CSS cannot outrank v45',stabilityLoader.includes("document.head.appendChild(visual)")],
+  ['single v45 stylesheet reused',stabilityLoader.includes("document.querySelector('#kosif-visual-system-v45')")]
 ];
 
 let failed=0;
