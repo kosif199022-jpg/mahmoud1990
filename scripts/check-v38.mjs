@@ -41,7 +41,7 @@ for (const f of ['v38-ultimate.css', 'v38-ultimate.js', 'v38-io.js', 'v38-report
 }
 
 ok(edge.includes("version:'v41.0.0-root'"), 'suite version is v41.0.0-root');
-ok(edge.includes('2026.08.20-v41-editorial-cinematic-canva'), 'v41 production build identity is explicit');
+ok(edge.includes('2026.08.21-v41-system-brain-nav-fix'), 'current production build identity is explicit');
 ok(edge.includes("designAuthority:'KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color'"), 'v41 editorial design authority is explicit');
 ok(edge.includes('/kosif-kitab-theme.js') && edge.includes('/kosif-kitab-theme.css?v=1.0.0-kitab'), 'audit shell wires the Kitab Caffe final theme authority');
 ok(edge.includes('/kosif-studio-v40.css?v=2026.08.20-v40') && edge.includes('/assets/kosif-studio-hero-v40.webp'), 'audit shell wires and preloads the final v40 experience');
@@ -76,10 +76,10 @@ ok(reports.includes('/accounting/trial-balance-summary') && reports.includes('mi
 ok(reports.includes('v38-report-gate') && reports.includes("gate('اعتماد المراجع والشريك', 'human'"), 'reports expose completion and non-automatable human gates');
 ok(reports.includes("gate('مسودة تقرير موجودة'") && reports.includes('model.hasReportDraft && model.findings.length === 0'), 'reports require a real draft before completion readiness');
 ok(reports.includes("const materialityAmount = st?.mat?.val ?? ''") && !reports.includes('st?.mat?.value'), 'reports never promote a legacy computed materiality display back into a source');
-ok(deploy.includes('KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color') && deploy.includes('v41-editorial-cinematic-canva'), 'Cloudflare production verification matches the current v41 release identity');
+ok(deploy.includes('KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color') && deploy.includes('v41-editorial-cinematic-canva'), 'Cloudflare production verification retains the governed v41 editorial release family');
 ok(deploy.includes('route_ok=0') && deploy.includes('seq 1 15') && deploy.includes('Bad live route after propagation retries'), 'Cloudflare static asset verification tolerates bounded propagation delay');
-ok(deepRuntime.includes('41-editorial-cinematic-canva'), 'deep runtime verifier accepts the current v41 release identity');
-ok(mainRuntime.includes('41-editorial-cinematic-canva'), 'main runtime verifier accepts the current v41 release identity');
+ok(deepRuntime.includes('41-editorial-cinematic-canva'), 'deep runtime verifier retains the governed v41 release family');
+ok(mainRuntime.includes('41-editorial-cinematic-canva'), 'main runtime verifier retains the governed v41 release family');
 
 ok(proxy.includes('#mixLaunch') && proxy.includes('#smartPebble'), 'Mafateeh reader hides Mix and Smart AI launchers by default');
 ok(proxy.includes('kosif-reader-home') && proxy.includes('kosif-reader-library-home'), 'Mafateeh reader has explicit home/library navigation');
