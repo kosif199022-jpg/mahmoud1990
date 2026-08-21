@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { withWorkflowCompatibility } from './workflow-compat-v46.mjs';
 
 const ci = fs.readFileSync('.github/workflows/ci-quality-gate.yml', 'utf8');
-for (const marker of ['storybook:build', 'browser-smoke.mjs', 'axe-smoke.mjs']) {
+for (const marker of ['Build Storybook design system', 'browser-smoke.mjs', 'axe-smoke.mjs']) {
   if (!ci.includes(marker)) throw new Error(`Unified CI is missing design-quality marker: ${marker}`);
 }
 

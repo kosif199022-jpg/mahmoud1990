@@ -71,8 +71,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Build Storybook
-        run: npm run storybook:build
+      - name: Install pinned Storybook toolchain
+        run: npm install --no-save --package-lock=false storybook@10.5.10 @storybook/html-vite@10.5.10
+      - name: Build Storybook design system
+        run: ./node_modules/.bin/storybook build -o storybook-static
 
   browser-a11y:
     name: Browser, responsive, Safari & accessibility
