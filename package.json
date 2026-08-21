@@ -47,6 +47,15 @@
     "storybook:build": "npx --yes --package storybook@latest --package @storybook/html-vite@latest storybook build -o storybook-static",
     "lighthouse": "npx --yes @lhci/cli@latest autorun --config=lighthouserc.json",
     "visual:chromatic": "npx --yes chromatic@latest --storybook-build-dir=storybook-static --exit-zero-on-changes",
-    "v38-demo": "node scripts/generate-v38-demo.mjs"
+    "v38-demo": "node scripts/generate-v38-demo.mjs",
+    "motion:remotion:install": "npm --prefix motion/remotion install",
+    "motion:remotion:studio": "npm --prefix motion/remotion run studio",
+    "motion:remotion:check": "npm --prefix motion/remotion run check",
+    "motion:remotion:render": "npm --prefix motion/remotion run render",
+    "motion:hyperframes:doctor": "npm --prefix motion/hyperframes run doctor",
+    "motion:hyperframes:lint": "npm --prefix motion/hyperframes run lint",
+    "motion:hyperframes:inspect": "npm --prefix motion/hyperframes run inspect",
+    "motion:hyperframes:preview": "npm --prefix motion/hyperframes run preview",
+    "motion:hyperframes:render": "npm --prefix motion/hyperframes run render"
   }
 }
