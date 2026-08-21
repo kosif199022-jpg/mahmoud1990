@@ -1,10 +1,11 @@
-/* KOSIF System Brain v1 — unified map of experience, books, authority and audit workflow. */
+/* KOSIF System Brain v2 — unified map + fast PDF semantic memory. */
 (() => {
   'use strict';
   const V = window.KosifV38;
   if (!V) return;
 
   const esc = V.esc;
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const statusLabel = s => {
     const x = String(s || '').toLowerCase();
     if (x === 'effective') return ['fact', 'نافذ'];
@@ -35,6 +36,119 @@
       '<span class="v38-chip">' + esc(String(b.year || '—')) + '</span><span class="v38-chip">' + esc(String(b.chapters || 0)) + ' فصل/قسم</span></div></div>';
   }
 
+  async function readJson(res) {
+    let data = null;
+    try { data = await res.json(); } catch (_) {}
+    if (!res.ok) {
+      const err = new Error(data?.message || data?.error || ('HTTP_' + res.status));
+      err.status = res.status;
+      err.code = data?.error || '';
+      throw err;
+    }
+    return data || {};
+  }
+
+  function memoryState(status) {
+    const item = (ok, label) => '<span class="v38-chip ' + (ok ? 'fact' : 'risk-m') + '">' + (ok ? '✓ ' : '○ ') + esc(label) + '</span>';
+    return '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
+      item(status?.postgres?.configured, 'PostgreSQL + pgvector') +
+      item(status?.parser?.configured, 'LlamaParse') +
+      item(status?.embeddings?.configured, 'Embeddings') +
+      '<span class="v38-chip ' + (status?.ready ? 'fact' : 'source') + '">' + (status?.ready ? 'جاهز للفهرسة السريعة' : 'بانتظار ربط الخدمات') + '</span></div>';
+  }
+
+  function showMemoryMessage(text, kind = 'info') {
+    const el = V.$('#kosif-brain-memory-msg');
+    if (el) el.innerHTML = '<div class="v38-note ' + kind + '" style="margin:0"><span>' + (kind === 'danger' ? '⛔' : kind === 'ok' ? '✓' : 'ℹ️') + '</span><span>' + esc(text) + '</span></div>';
+  }
+
+  function renderSearchResults(rows) {
+    const el = V.$('#kosif-brain-memory-results');
+    if (!el) return;
+    if (!rows?.length) {
+      el.innerHTML = V.empty('لا توجد نتيجة مطابقة', 'جرّب صياغة مختلفة أو أضف كتاباً إلى الذاكرة السريعة.');
+      return;
+    }
+    el.innerHTML = '<div style="display:grid;gap:9px">' + rows.map((r, i) => {
+      const similarity = Number.isFinite(Number(r.similarity)) ? Math.round(Number(r.similarity) * 100) + '%' : '—';
+      const page = r.page_start ? ('صفحة ' + esc(String(r.page_start))) : 'موضع مفهرس';
+      return '<div style="padding:12px;border:1px solid var(--v38-line);border-radius:14px">' +
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="v38-badge">' + (i + 1) + '</span><b>' + esc(r.title || r.document_key || 'مرجع') + '</b><span class="v38-chip source">' + page + '</span><span class="v38-chip fact">تشابه ' + esc(similarity) + '</span></div>' +
+        '<div style="margin-top:8px;line-height:1.9">' + esc(String(r.content || '').slice(0, 900)) + '</div>' +
+        '<div class="hint" style="margin-top:6px">' + esc(r.authority || 'reference') + ' · ' + esc(r.jurisdiction || '—') + '</div></div>';
+    }).join('') + '</div>';
+  }
+
+  async function initFastMemory() {
+    const statusBox = V.$('#kosif-brain-memory-status');
+    if (!statusBox) return;
+    let status = null;
+    try {
+      status = await readJson(await fetch('/api/kosif/v38/brain/status', { cache: 'no-store', credentials: 'same-origin' }));
+      statusBox.innerHTML = memoryState(status);
+      if (!status.ready) showMemoryMessage('الكود السريع مفعّل داخل KOSIF، لكن الفهرسة السحابية تحتاج ربط PostgreSQL/pgvector وLlamaParse ومفتاح Embeddings على الخادم.', 'info');
+      else showMemoryMessage('الذاكرة السريعة جاهزة: PDF → LlamaParse → pgvector. البحث لا يعيد قراءة الكتاب بالكامل كل مرة.', 'ok');
+    } catch (e) {
+      statusBox.innerHTML = '<span class="v38-chip risk-m">تعذر قراءة حالة الذاكرة</span>';
+      showMemoryMessage(e.message, 'danger');
+    }
+
+    const searchBtn = V.$('#kosif-brain-search-btn');
+    const searchInput = V.$('#kosif-brain-search-q');
+    if (searchBtn && searchInput) searchBtn.addEventListener('click', async () => {
+      const q = String(searchInput.value || '').trim();
+      if (!q) return showMemoryMessage('اكتب سؤالاً أو عبارة بحث أولاً.', 'info');
+      searchBtn.disabled = true;
+      showMemoryMessage('أبحث دلالياً داخل الأجزاء الأقرب للسؤال…');
+      try {
+        const data = await readJson(await fetch('/api/kosif/v38/brain/search', {
+          method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ query: q, limit: 8 })
+        }));
+        renderSearchResults(data.results || []);
+        showMemoryMessage('تم البحث في الفهرس الدلالي بدون تحميل الكتب كاملة.', 'ok');
+      } catch (e) {
+        showMemoryMessage(e.status === 401 ? 'افتح جلسة المالك أولاً لاستخدام ذاكرة الكتب الخاصة.' : e.message, 'danger');
+      } finally { searchBtn.disabled = false; }
+    });
+
+    const uploadBtn = V.$('#kosif-brain-upload-btn');
+    const fileInput = V.$('#kosif-brain-pdf');
+    if (uploadBtn && fileInput) uploadBtn.addEventListener('click', async () => {
+      const file = fileInput.files?.[0];
+      if (!file) return showMemoryMessage('اختر ملف PDF أولاً.', 'info');
+      if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') return showMemoryMessage('الاستيراد السريع هنا مخصص لملفات PDF.', 'danger');
+      uploadBtn.disabled = true;
+      try {
+        const form = new FormData();
+        form.set('file', file, file.name);
+        form.set('title', file.name.replace(/\.pdf$/i, ''));
+        form.set('documentKey', 'upload-' + Date.now() + '-' + file.name.replace(/\.pdf$/i, '').slice(0, 80));
+        form.set('language', 'ar');
+        showMemoryMessage('تم رفع PDF إلى طبقة التحليل. جاري إنشاء خريطة الصفحات…');
+        const started = await readJson(await fetch('/api/kosif/v38/brain/parse/upload', { method: 'POST', credentials: 'same-origin', body: form }));
+        const jobId = started.jobId;
+        let complete = false;
+        for (let i = 0; i < 90; i++) {
+          await sleep(i < 3 ? 1200 : 2200);
+          const job = await readJson(await fetch('/api/kosif/v38/brain/parse/job/' + encodeURIComponent(jobId), { cache: 'no-store', credentials: 'same-origin' }));
+          const state = String(job.status || job.job?.status || '').toUpperCase();
+          showMemoryMessage('LlamaParse: ' + (state || 'RUNNING') + ' — جاري تجهيز الكتاب للفهرسة…');
+          if (['SUCCESS', 'COMPLETED', 'COMPLETE'].includes(state)) { complete = true; break; }
+          if (['FAILED', 'ERROR', 'CANCELLED'].includes(state)) throw new Error('فشل تحليل PDF: ' + state);
+        }
+        if (!complete) throw new Error('التحليل ما زال يعمل؛ أعد المحاولة بعد قليل وسيظل Job محفوظاً لمدة 24 ساعة.');
+        showMemoryMessage('اكتمل تحليل الصفحات. جاري إنشاء embeddings وحفظها في pgvector…');
+        const indexed = await readJson(await fetch('/api/kosif/v38/brain/parse/job/' + encodeURIComponent(jobId) + '/ingest', {
+          method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: '{}'
+        }));
+        showMemoryMessage('تمت فهرسة ' + String(indexed.pages || 0) + ' صفحة في ' + String(indexed.chunks || 0) + ' جزء دلالي. الكتاب أصبح جاهزاً للبحث السريع.', 'ok');
+        fileInput.value = '';
+      } catch (e) {
+        showMemoryMessage(e.status === 401 ? 'افتح جلسة المالك أولاً قبل رفع الكتب.' : e.message, 'danger');
+      } finally { uploadBtn.disabled = false; }
+    });
+  }
+
   V.registerView({
     id: 'v38-brain', title: 'عقل النظام', icon: '🧠', order: 952,
     render(sec) {
@@ -44,11 +158,19 @@
         [['fact', 'Source of Truth'], ['source', 'Official-first'], ['human', 'Human approval']]
       ) +
       '<div id="kosif-brain-summary"><div class="v38-loading">تحميل خريطة النظام…</div></div>' +
+      '<div class="v38-card"><div class="v38-cardh"><h3>⚡ ذاكرة المعرفة السريعة</h3><span class="hint">PDF لا يُقرأ بالكامل عند كل سؤال: يُحلل مرة ويُفهرس دلالياً</span></div>' +
+        '<div id="kosif-brain-memory-status"><div class="v38-loading">فحص PostgreSQL / pgvector…</div></div>' +
+        '<div class="v38-grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:12px">' +
+          '<div style="padding:12px;border:1px solid var(--v38-line);border-radius:14px"><b>إضافة كتاب PDF</b><div class="hint">LlamaParse يحافظ على الصفحات والجداول ثم تُخزن الأجزاء في pgvector.</div><input id="kosif-brain-pdf" type="file" accept="application/pdf,.pdf" style="width:100%;margin-top:10px"><button id="kosif-brain-upload-btn" class="v38-btn gold" style="margin-top:10px">تحليل وفهرسة الكتاب</button></div>' +
+          '<div style="padding:12px;border:1px solid var(--v38-line);border-radius:14px"><b>بحث دلالي سريع</b><div class="hint">يسترجع فقط المقاطع الأقرب للسؤال مع الصفحة والمصدر.</div><input id="kosif-brain-search-q" type="search" placeholder="مثال: ما متطلبات الاعتراف بالإيراد؟" style="width:100%;margin-top:10px"><button id="kosif-brain-search-btn" class="v38-btn gold" style="margin-top:10px">ابحث في عقل النظام</button></div>' +
+        '</div><div id="kosif-brain-memory-msg" style="margin-top:12px"></div><div id="kosif-brain-memory-results" style="margin-top:12px"></div></div>' +
       '<div class="v38-card"><div class="v38-cardh"><h3>طبقات السلطة المهنية</h3><span class="hint">الأعلى يحكم الأدنى عند التعارض</span></div><div id="kosif-brain-authority"></div></div>' +
       '<div class="v38-card"><div class="v38-cardh"><h3>كتب المعرفة داخل KOSIF</h3><span class="hint">الكتاب يحتفظ بدوره المهني ولا يتحول تلقائياً إلى مصدر إلزامي</span><span class="v38-spacer"></span><a class="v38-btn sm gold" href="/wealth/reader.html">فتح القارئ الموحد</a></div><div id="kosif-brain-books" class="v38-grid"></div></div>' +
       '<div class="v38-card"><div class="v38-cardh"><h3>المصادر الرسمية الحالية</h3><span class="hint">نافذ ≠ مشروع للتعليق</span></div><div id="kosif-brain-sources"><div class="v38-loading">تحميل السجل الرسمي…</div></div></div>' +
       '<div class="v38-card"><div class="v38-cardh"><h3>رحلة المراجعة الموحدة</h3><span class="hint">كل مرحلة تأخذ مدخلات محددة وتنتج مخرجات قابلة للتتبع</span></div><div id="kosif-brain-workflow"></div></div>' +
       '<div class="v38-card"><div class="v38-cardh"><h3>مجلس المراجعين</h3><span class="hint">مهمة فردية أو مهمة للمجلس ككل</span></div><div id="kosif-brain-council"></div></div>';
+
+      initFastMemory();
 
       Promise.all([
         fetch('/data/kosif-system-brain-v1.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error('SYSTEM_BRAIN_CONFIG_UNAVAILABLE'))),
