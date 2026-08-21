@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KOSIF HyperFrames — Brand Intro</title>
+</head>
+<body>
+  <div data-composition-id="kosif-brand-intro" data-width="1920" data-height="1080">
+    <div id="scene-1" data-start="0" data-duration="8" data-track-index="0" class="scene">
+      <div class="orb orb-a" aria-hidden="true"></div>
+      <div class="orb orb-b" aria-hidden="true"></div>
+      <main class="scene-content">
+        <section class="panel">
+          <p id="eyebrow" class="eyebrow">المراجعة والامتثال الذكي</p>
+          <div class="brand-row" dir="ltr">
+            <h1 id="title">KOSIF</h1>
+            <span id="status-dot" class="status-dot" aria-hidden="true"></span>
+          </div>
+          <div id="rule" class="rule" aria-hidden="true"></div>
+          <p id="subtitle" class="subtitle" dir="ltr">Trusted Audit Intelligence OS</p>
+          <div class="chips" dir="ltr">
+            <span id="chip-1">IFRS / SOCPA</span>
+            <span id="chip-2">Audit Intelligence</span>
+            <span id="chip-3">Arabic-first</span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <style>
+      :root{
+        --ink:#12211C;
+        --paper:#F3F5F1;
+        --surface:#FFFFFF;
+        --line:#DDE4DC;
+        --line2:#C7D2C6;
+        --pine:#0F3D31;
+        --pinesoft:#E7EFEA;
+        --viridian:#0E7A5F;
+        --seal:#A97E2F;
+        --sealline:#D9C08A;
+        --muted:#5C6B62;
+      }
+      *{box-sizing:border-box}
+      html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--paper)}
+      body{font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;color:var(--ink)}
+      [data-composition-id="kosif-brand-intro"]{position:relative;width:100%;height:100%;overflow:hidden;background:var(--paper)}
+      .scene{position:absolute;inset:0;overflow:hidden}
+      .scene::before{content:"";position:absolute;inset:0;background:
+        radial-gradient(circle at 18% 22%,rgba(169,126,47,.12),transparent 28%),
+        radial-gradient(circle at 82% 74%,rgba(14,122,95,.10),transparent 30%)}
+      .scene-content{position:relative;width:100%;height:100%;padding:86px;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+      .panel{width:min(1360px,88%);min-height:620px;padding:86px 104px;display:flex;flex-direction:column;justify-content:center;background:var(--surface);border:1px solid var(--line);border-radius:44px;box-shadow:0 28px 80px -38px rgba(18,33,28,.30);z-index:2}
+      .eyebrow{margin:0 0 28px;color:var(--seal);font-size:30px;font-weight:700;letter-spacing:.4px}
+      .brand-row{display:flex;align-items:baseline;gap:28px}
+      h1{margin:0;font-family:Alexandria,"IBM Plex Sans Arabic",sans-serif;font-size:156px;line-height:1;font-weight:800;letter-spacing:-4px;color:var(--pine)}
+      .status-dot{width:18px;height:18px;border-radius:50%;background:var(--viridian);box-shadow:0 0 0 10px rgba(14,122,95,.10)}
+      .rule{width:510px;height:4px;margin:34px 0 32px;background:var(--seal);border-radius:999px;transform-origin:right center}
+      .subtitle{margin:0;color:var(--muted);font-size:42px;line-height:1.4;font-weight:600;text-align:left}
+      .chips{display:flex;gap:16px;margin-top:54px;flex-wrap:wrap}
+      .chips span{border-radius:999px;border:1px solid var(--line2);color:var(--pine);background:var(--pinesoft);padding:12px 22px;font-size:23px;font-weight:700}
+      .orb{position:absolute;border-radius:50%;border:2px solid var(--sealline);pointer-events:none}
+      .orb-a{width:640px;height:640px;left:-220px;top:-250px;opacity:.28}
+      .orb-b{width:420px;height:420px;left:-110px;top:-145px;opacity:.18;border-width:1px}
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({paused:true});
+      tl.from('.panel',{y:40,scale:.985,opacity:0,duration:.75,ease:'power3.out'},.18);
+      tl.from('#eyebrow',{y:20,opacity:0,duration:.52,ease:'power2.out'},.45);
+      tl.from('#title',{y:34,opacity:0,duration:.72,ease:'expo.out'},.62);
+      tl.from('#status-dot',{scale:.6,opacity:0,duration:.38,ease:'back.out(1.5)'},.92);
+      tl.from('#rule',{scaleX:0,opacity:0,duration:.58,ease:'power3.out'},1.05);
+      tl.from('#subtitle',{y:24,opacity:0,duration:.58,ease:'power2.out'},1.22);
+      tl.from('#chip-1',{y:16,opacity:0,duration:.42,ease:'power2.out'},1.48);
+      tl.from('#chip-2',{y:12,opacity:0,duration:.42,ease:'power3.out'},1.58);
+      tl.from('#chip-3',{y:8,opacity:0,duration:.42,ease:'expo.out'},1.68);
+      tl.from('.orb-a',{scale:.96,opacity:0,duration:.8,ease:'power2.out'},.28);
+      tl.from('.orb-b',{scale:.94,opacity:0,duration:.8,ease:'power3.out'},.4);
+      tl.to('.scene',{opacity:0,duration:.55,ease:'power2.in'},7.25);
+      window.__timelines['kosif-brand-intro'] = tl;
+    </script>
+  </div>
+</body>
+</html>
