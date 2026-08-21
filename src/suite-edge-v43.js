@@ -14,6 +14,7 @@ const COVERAGE = REQUIREMENTS.verifyEveryRequirement();
 const STRUCTURE = REQUIREMENTS.verifyStructure();
 const PRIMITIVES = REQUIREMENTS.highRiskPrimitiveCheck();
 const READY = Boolean(COVERAGE.complete && STRUCTURE.complete && PRIMITIVES.ok);
+const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safety" href="/kosif-touch-reveal-safety-v44.css?v=1">';
 
 function reqJson(body,status=200){
   return new Response(JSON.stringify(body),{
@@ -34,7 +35,16 @@ function decorateRequirements(response){
   h.set('x-kosif-requirements-implemented',String(COVERAGE.implemented));
   h.set('x-kosif-requirements-missing',String(COVERAGE.missing));
   h.set('x-kosif-requirements-ready',READY?'true':'false');
-  return new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
+  const decorated=new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
+  const contentType=h.get('content-type')||'';
+  if(!/text\/html/i.test(contentType))return decorated;
+
+  // Touch-first browsers must never depend on IntersectionObserver timing to
+  // make primary content visible. The override is an external same-origin
+  // stylesheet so it remains compatible with restrictive style-src policies.
+  return new HTMLRewriter().on('head',{
+    element(head){head.append(TOUCH_REVEAL_SAFETY,{html:true});}
+  }).transform(decorated);
 }
 function isSensitiveMutation(req,url){
   return !['GET','HEAD','OPTIONS'].includes(req.method) &&
