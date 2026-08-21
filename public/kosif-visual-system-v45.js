@@ -11,7 +11,11 @@
 
   const ID = 'kosif-visual-system-v45';
   const FLOOR_ID = 'kosif-visual-system-v45-floor';
+  const A11Y_CSS_ID = 'kosif-a11y-v46-css';
+  const A11Y_JS_ID = 'kosif-a11y-v46-js';
   const HREF = '/kosif-visual-system-v45.css?v=2026.08.21-2';
+  const A11Y_CSS_HREF = '/kosif-a11y-v46.css?v=2026.08.21-2';
+  const A11Y_JS_HREF = '/kosif-a11y-v46.js?v=2026.08.21-1';
   let queued = false;
 
   function visualLink() {
@@ -23,6 +27,26 @@
     link.href = HREF;
     document.head.appendChild(link);
     return link;
+  }
+
+  function a11yLink() {
+    let link = document.getElementById(A11Y_CSS_ID);
+    if (link) return link;
+    link = document.createElement('link');
+    link.id = A11Y_CSS_ID;
+    link.rel = 'stylesheet';
+    link.href = A11Y_CSS_HREF;
+    document.head.appendChild(link);
+    return link;
+  }
+
+  function a11yRuntime() {
+    if (document.getElementById(A11Y_JS_ID)) return;
+    const script = document.createElement('script');
+    script.id = A11Y_JS_ID;
+    script.src = A11Y_JS_HREF;
+    script.defer = true;
+    document.head.appendChild(script);
   }
 
   function visualFloor() {
@@ -50,12 +74,17 @@
   function ensureLast() {
     queued = false;
     const link = visualLink();
+    const a11y = a11yLink();
     const floor = visualFloor();
     const styles = [...document.head.children].filter(isPresentationStyle);
     if (styles.at(-1) !== floor) {
       document.head.appendChild(link);
+      document.head.appendChild(a11y);
       document.head.appendChild(floor);
+    } else if (a11y.nextElementSibling !== floor) {
+      document.head.insertBefore(a11y, floor);
     }
+    a11yRuntime();
   }
 
   function queueEnsureLast() {
@@ -65,11 +94,11 @@
   }
 
   // Observe only presentation-node insertions in <head>; never observe the page
-  // subtree or attributes. Own v45 nodes are excluded to prevent self-trigger loops.
+  // subtree or attributes. Own governed nodes are excluded to prevent self-trigger loops.
   const observer = new MutationObserver(records => {
     const lateStyleAdded = records.some(record =>
       [...record.addedNodes].some(node =>
-        isPresentationStyle(node) && node.id !== ID && node.id !== FLOOR_ID
+        isPresentationStyle(node) && node.id !== ID && node.id !== FLOOR_ID && node.id !== A11Y_CSS_ID
       )
     );
     if (lateStyleAdded) queueEnsureLast();

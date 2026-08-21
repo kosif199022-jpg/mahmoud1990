@@ -14,6 +14,12 @@ const browser = await chromium.launch({ headless: true });
 const report = [];
 let blocking = 0;
 
+const compactNode = (node) => ({
+  target: node.target,
+  html: String(node.html || '').slice(0, 500),
+  failureSummary: node.failureSummary || '',
+});
+
 for (const viewport of viewports) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
@@ -40,8 +46,14 @@ for (const viewport of viewports) {
         help: v.help,
         helpUrl: v.helpUrl,
         nodes: v.nodes.length,
+        samples: v.nodes.slice(0, 8).map(compactNode),
       })),
-      blocking: critical.map(v => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
+      blocking: critical.map(v => ({
+        id: v.id,
+        impact: v.impact,
+        nodes: v.nodes.length,
+        samples: v.nodes.slice(0, 8).map(compactNode),
+      })),
     });
   }
   await context.close();

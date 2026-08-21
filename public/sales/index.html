@@ -10,10 +10,8 @@
   <link rel="manifest" href="/manifest.webmanifest?v=41">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=41">
   <link rel="stylesheet" href="/kosif-fonts-v45.css?v=45">
-  <link rel="stylesheet" href="/suite.css">
-  <link rel="stylesheet" href="/sales/sales.css">
-  <link rel="stylesheet" href="/sales/sales-motion-v1.css">
-  <link rel="stylesheet" href="/suite-shell.css">
+  <link rel="stylesheet" href="/bundles/kosif-suite-core-v46.css?v=46">
+  <link rel="stylesheet" href="/sales/sales-ui-v46.css?v=46">
   <link rel="stylesheet" href="/kosif-suite-v40.css?v=40">
   <link rel="stylesheet" id="kosif-editorial-v41" data-kosif-editorial="v41" href="/kosif-editorial-v41.css?v=2026.08.20-v41-2">
 </head>
@@ -79,12 +77,11 @@
     </main>
   </div>
 
-  <script src="/sales/sales-general-bootstrap.js"></script>
   <script src="/sales/sales.js"></script>
   <script>
   (()=>{
     const fmt=n=>new Intl.NumberFormat('ar-SA',{maximumFractionDigits:0}).format(Number(n)||0);
-    const read=()=>{try{return JSON.parse(localStorage.getItem('kosif:aghnam:v7:native')||'null')}catch{return null}};
+    const read=()=>{try{return JSON.parse(localStorage.getItem(window.__KOSIF_SALES_STORE_KEY__||'kosif:sales:v1')||'null')}catch{return null}};
     const paint=()=>{const d=read(),rows=Array.isArray(d?.sales)?d.sales:[];if(!rows.length)return;const rev=rows.reduce((s,x)=>s+(+x.revenue||0),0),clients=new Set(rows.map(x=>x.phone||x.customer).filter(Boolean)).size,products=new Set(rows.map(x=>x.product).filter(Boolean)).size;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};set('sideRevenue',fmt(rev)+' ر.س');set('heroRevenue',fmt(rev)+' ر.س');set('heroInvoices',fmt(rows.length));set('heroClients',fmt(clients));set('heroProducts',fmt(products))};
     paint();addEventListener('storage',paint);document.addEventListener('click',e=>{if(e.target.closest('.sales-tabs button'))setTimeout(paint,0)});
   })();

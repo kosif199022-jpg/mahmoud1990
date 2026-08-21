@@ -1,0 +1,176 @@
+name: Continuous Integration & Quality Gate
+
+on:
+  push:
+    branches: [main, develop, 'feat/**', 'fix/**', 'refactor/**']
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  KOSIF_EXPECTED_BUILD_ID: 2026.08.20-v41-editorial-cinematic-canva
+  KOSIF_VISUAL_BASELINE: kosif-v41-mobile-default.png
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kosif-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Build, deterministic tests & architecture
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Reject committed secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=$(find . -type f \( -iname '*.pem' -o -iname '*.key' -o -name '.env' -o -name '.env.local' -o -name '.env.production' \) -not -path './.git/*' | head -20)
+          if [ -n "$bad" ]; then
+            echo "Potential secret files found:"
+            echo "$bad"
+            exit 1
+          fi
+      - name: Build production assets
+        run: npm run build
+      - name: Type-check modular TypeScript services
+        run: npx --yes -p typescript@5.9.2 tsc --noEmit -p tsconfig.json
+      - name: Run complete KOSIF deterministic gate
+        run: npm run check
+      - name: Validate modular architecture contract
+        run: node scripts/check-platform-architecture-v46.mjs
+      - name: Generate complete source snapshot artifact
+        run: npm run source-export
+      - name: Validate generated source snapshot
+        run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('Kosif-Full-Application-Source.json','utf8'));if(!d.file_count||!d.files||d.commit!==process.env.GITHUB_SHA)process.exit(1);console.log('KOSIF_SOURCE_ARTIFACT_OK',d.file_count,d.commit)"
+      - name: Upload complete source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-full-source-${{ github.sha }}
+          path: Kosif-Full-Application-Source.json
+          if-no-files-found: error
+          retention-days: 30
+
+  storybook:
+    name: Storybook design-system smoke
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install pinned Storybook toolchain
+        run: npm install --no-save --package-lock=false storybook@10.5.10 @storybook/html-vite@10.5.10
+      - name: Build Storybook design system
+        run: ./node_modules/.bin/storybook build -o storybook-static
+
+  browser-a11y:
+    name: Browser, responsive, Safari & accessibility
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install browser QA stack
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0 @axe-core/playwright@4.10.2 pixelmatch@7.1.0 pngjs@7.0.0
+          npx playwright install --with-deps chromium webkit
+      - name: Start local Cloudflare Worker
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          nohup npx wrangler dev --local --port 8788 >/tmp/kosif-worker-v46.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8788/__health >/tmp/kosif-v46-health.json 2>/dev/null; then
+              cat /tmp/kosif-v46-health.json
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/kosif-worker-v46.log
+          exit 1
+      - name: Safari and mobile scroll regression
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8788
+        run: node scripts/verify-scroll-runtime.cjs
+      - name: Unified visual runtime across laptop and iPhone
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8788
+        run: node scripts/verify-visual-runtime.cjs
+      - name: Browser smoke
+        env:
+          KOSIF_BASE_URL: http://127.0.0.1:8788
+          KOSIF_ROUTES: /,/audit/,/libraries/,/sales/,/standards/
+        run: node scripts/engineering-suite/browser-smoke.mjs
+      - name: Axe accessibility smoke
+        env:
+          KOSIF_BASE_URL: http://127.0.0.1:8788
+          KOSIF_ROUTES: /,/audit/,/libraries/,/sales/,/standards/
+        run: node scripts/engineering-suite/axe-smoke.mjs
+      - name: Upload browser artifacts and Worker log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-browser-quality-${{ github.run_id }}
+          path: |
+            artifacts/
+            /tmp/kosif-worker-v46.log
+          if-no-files-found: warn
+          retention-days: 30
+
+  security:
+    name: Security & SBOM
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare artifacts
+        run: mkdir -p artifacts
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: artifacts/kosif-sbom.cdx.json
+      - name: Trivy HIGH/CRITICAL scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+
+  release-sentinel:
+    name: Unified release sentinel
+    needs: [quality, storybook, browser-a11y, security]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'KOSIF unified quality gate passed.'
