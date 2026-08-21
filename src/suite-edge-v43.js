@@ -5,6 +5,7 @@
 import suite from './suite-edge.js';
 import { createFullyImplementedRequirementsRuntime } from './requirements/v43-control-implementation.mjs';
 import { resolveRequirement, KOSIF_REQUIREMENTS_VERSION } from './requirements/v43-full-registry.mjs';
+import { enterpriseReadiness, KOSIF_ENTERPRISE_CONTRACT_VERSION } from './enterprise-readiness-v45.mjs';
 
 const REQUIREMENTS = createFullyImplementedRequirementsRuntime({
   buildId: '2026.08.20-v43-complete-50000',
@@ -26,7 +27,8 @@ function reqJson(body,status=200){
       'x-content-type-options':'nosniff',
       'x-kosif-requirements-version':KOSIF_REQUIREMENTS_VERSION,
       'x-kosif-requirements-implemented':String(COVERAGE.implemented),
-      'x-kosif-requirements-missing':String(COVERAGE.missing)
+      'x-kosif-requirements-missing':String(COVERAGE.missing),
+      'x-kosif-enterprise-contract':KOSIF_ENTERPRISE_CONTRACT_VERSION
     }
   });
 }
@@ -36,6 +38,7 @@ function decorateRequirements(response,url){
   h.set('x-kosif-requirements-implemented',String(COVERAGE.implemented));
   h.set('x-kosif-requirements-missing',String(COVERAGE.missing));
   h.set('x-kosif-requirements-ready',READY?'true':'false');
+  h.set('x-kosif-enterprise-contract',KOSIF_ENTERPRISE_CONTRACT_VERSION);
   const decorated=new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
   const contentType=h.get('content-type')||'';
   if(!/text\/html/i.test(contentType))return decorated;
@@ -83,6 +86,10 @@ export default {
       headers.set('x-kosif-short-alias','/a');
       headers.set('cache-control','no-store');
       return new Response(decorated.body,{status:decorated.status,statusText:decorated.statusText,headers});
+    }
+
+    if(p==='/__enterprise'){
+      return reqJson(enterpriseReadiness(env));
     }
 
     if(p==='/__requirements'){
