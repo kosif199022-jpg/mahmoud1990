@@ -9,6 +9,10 @@ on:
     types: [published]
   workflow_dispatch:
 
+env:
+  KOSIF_EXPECTED_BUILD_ID: 2026.08.20-v41-editorial-cinematic-canva
+  KOSIF_VISUAL_BASELINE: kosif-v41-mobile-default.png
+
 permissions:
   contents: read
 
@@ -71,9 +75,10 @@ jobs:
         run: npm run storybook:build
 
   browser-a11y:
-    name: Browser, responsive & accessibility
+    name: Browser, responsive, Safari & accessibility
     needs: quality
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -84,31 +89,48 @@ jobs:
       - run: npm run build
       - name: Install browser QA stack
         run: |
-          npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2 pixelmatch@7.1.0 pngjs@7.0.0
-          npx playwright install --with-deps chromium
-      - name: Start production-static server
+          npm install --no-save --package-lock=false playwright@1.55.0 @axe-core/playwright@4.10.2 pixelmatch@7.1.0 pngjs@7.0.0
+          npx playwright install --with-deps chromium webkit
+      - name: Start local Cloudflare Worker
+        shell: bash
         run: |
           mkdir -p artifacts
-          python3 -m http.server 4173 --directory public >/tmp/kosif-server.log 2>&1 &
-          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
-          cat /tmp/kosif-server.log
+          nohup npx wrangler dev --local --port 8788 >/tmp/kosif-worker-v46.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8788/__health >/tmp/kosif-v46-health.json 2>/dev/null; then
+              cat /tmp/kosif-v46-health.json
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/kosif-worker-v46.log
           exit 1
+      - name: Safari and mobile scroll regression
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8788
+        run: node scripts/verify-scroll-runtime.cjs
+      - name: Unified visual runtime across laptop and iPhone
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8788
+        run: node scripts/verify-visual-runtime.cjs
       - name: Browser smoke
         env:
-          KOSIF_BASE_URL: http://127.0.0.1:4173
+          KOSIF_BASE_URL: http://127.0.0.1:8788
           KOSIF_ROUTES: /,/audit/,/libraries/,/sales/,/standards/
         run: node scripts/engineering-suite/browser-smoke.mjs
       - name: Axe accessibility smoke
         env:
-          KOSIF_BASE_URL: http://127.0.0.1:4173
+          KOSIF_BASE_URL: http://127.0.0.1:8788
           KOSIF_ROUTES: /,/audit/,/libraries/,/sales/,/standards/
         run: node scripts/engineering-suite/axe-smoke.mjs
-      - name: Upload browser artifacts
+      - name: Upload browser artifacts and Worker log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kosif-browser-quality-${{ github.run_id }}
-          path: artifacts/
+          path: |
+            artifacts/
+            /tmp/kosif-worker-v46.log
           if-no-files-found: warn
           retention-days: 30
 
