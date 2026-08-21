@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const css=fs.readFileSync('public/kosif-visual-system-v45.css','utf8');
 const edge=fs.readFileSync('src/suite-edge-v43.js','utf8');
 const stabilityLoader=fs.readFileSync('public/kosif-workspace-stability-loader-v42.js','utf8');
+const sw=fs.readFileSync('public/sw.js','utf8');
 
 const checks=[
   ['scoped visual authority',css.includes('html[data-kosif-visual-system="v45"]')],
@@ -32,7 +33,9 @@ const checks=[
   ['original wealth reader preserved',edge.includes("const preserveWealthReader=url.pathname==='/wealth'||url.pathname.startsWith('/wealth/')")],
   ['visual system excluded from wealth reader',edge.includes('if(!preserveWealthReader)head.append(VISUAL_SYSTEM_V45')],
   ['audit late CSS cannot outrank v45',stabilityLoader.includes("document.head.appendChild(visual)")],
-  ['single v45 stylesheet reused',stabilityLoader.includes("document.querySelector('#kosif-visual-system-v45')")]
+  ['single v45 stylesheet reused',stabilityLoader.includes("document.querySelector('#kosif-visual-system-v45')")],
+  ['visual system is precached for PWA offline use',sw.includes("'/kosif-visual-system-v45.css?v=2026.08.21-1'" )],
+  ['visual system participates in integrity refresh',sw.includes("'/kosif-visual-system-v45.css'" )]
 ];
 
 let failed=0;
