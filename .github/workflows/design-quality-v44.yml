@@ -121,8 +121,10 @@ jobs:
         with:
           node-version: 22
       - run: npm run build
+      - name: Install ephemeral Storybook runtime
+        run: npm install --no-save --package-lock=false storybook@latest @storybook/html-vite@latest
       - name: Build Storybook design system
-        run: npm run storybook:build
+        run: npx storybook build -o storybook-static
       - name: Upload Storybook
         uses: actions/upload-artifact@v4
         with:
