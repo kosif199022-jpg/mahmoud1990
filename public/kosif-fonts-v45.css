@@ -108,3 +108,13 @@
   font-variant-numeric:tabular-nums;
   font-feature-settings:'tnum' 1;
 }
+
+/* Shared accessibility floor for legacy shell controls. The unified font file
+   is already present on every shell, so it is also the safest compatibility
+   point for the governed minimum touch target during incremental migration. */
+html body button.tab,
+html body .tab[role="tab"],
+html body [role="tab"].tab{
+  min-height:44px!important;
+  min-block-size:44px!important;
+}

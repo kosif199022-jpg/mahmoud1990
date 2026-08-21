@@ -4,6 +4,8 @@ const source = 'frontend/index.html';
 const target = 'public/index.html';
 const cssHref = '/kosif-design-system-v44.css';
 const jsSrc = '/kosif-design-system-v44.js';
+const fontHref = '/kosif-fonts-v45.css?v=45';
+const masterThemeHref = '/kosif-master-theme.css?v=2026.08.21-master-1';
 
 let html = fs.readFileSync(source, 'utf8');
 
@@ -13,6 +15,17 @@ if (!html.includes('name="kosif-design-system"')) {
 
 if (!html.includes(cssHref)) {
   html = html.replace('</head>', `  <link rel="stylesheet" href="${cssHref}">\n</head>`);
+}
+
+// The canonical audit shell must use the same font and final master-theme layer
+// in static/browser QA as it does when suite-edge wraps it in production. Keep
+// these links after the legacy/module styles so --kosif-* and the 44px target
+// contract are evaluated by the candidate that the browser gates actually test.
+if (!html.includes('/kosif-fonts-v45.css')) {
+  html = html.replace('</head>', `  <link rel="stylesheet" href="${fontHref}">\n</head>`);
+}
+if (!html.includes('/kosif-master-theme.css')) {
+  html = html.replace('</head>', `  <link rel="stylesheet" id="kosif-master-theme" href="${masterThemeHref}">\n</head>`);
 }
 
 if (!html.includes(jsSrc)) {
@@ -38,4 +51,4 @@ if (fs.existsSync(wealthLibrary)) {
   if (src.includes(delayed)) fs.writeFileSync(wealthLibrary, src.replace(delayed, direct));
 }
 
-console.log('Kosif Native assets ready with Design Quality Stack v44 + direct book bootstrap v45');
+console.log('Kosif Native assets ready with Design Quality Stack v44 + master theme + direct book bootstrap v45');

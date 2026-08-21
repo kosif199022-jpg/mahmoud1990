@@ -55,6 +55,31 @@ Use tabular numerals for financial values. Never trade numeric legibility for de
 - Avoid horizontal overflow at 320–430px mobile widths.
 - Keep captions and critical labels inside safe margins.
 
+## Runtime Design Hierarchy
+
+KOSIF uses one governed presentation hierarchy. New visual work must extend it instead of creating a new independent theme:
+
+1. `config/design-tokens-v44.json` — canonical machine-readable values for color, typography, spacing, radius, shadow, motion and layout.
+2. `public/kosif-fonts-v45.css` — single bundled font authority shared by all shells.
+3. `public/kosif-master-theme.css` — final runtime compatibility and shared-primitives layer for the hub, audit workspace, libraries and sales surfaces.
+4. Module CSS such as `suite.css`, `suite-shell.css`, `kosif-suite-v40.css`, `kosif-editorial-v41.css`, `v38-ultimate.css`, `libraries/libraries.css` and `sales/sales.css` — module-specific layout and transitional compatibility only.
+
+The production release identity remains the established v41 contract while the master theme is introduced incrementally. Changing visual-layer version labels must not silently break deployment/runtime gates that protect the existing release contract.
+
+### Required load order
+
+Load foundational/module styles first and `kosif-master-theme.css` last wherever the master layer is enabled. This lets canonical `--kosif-*` tokens govern shared presentation without deleting stable module rules.
+
+The `/wealth/` Mafateeh reader is an explicit exception: preserve its reader-specific visual contract unless a reader migration is separately reviewed and approved.
+
+### Migration rules
+
+- New shared UI should use `--kosif-*` variables and the `.kosif-*` primitives where appropriate.
+- When touching an existing v40/v41/`--ke-*` rule, migrate the value to its canonical token when this can be done without changing behavior.
+- Keep accounting calculations, audit conclusions, materiality, standards authority, evidence semantics, security gates, APIs and approval logic outside the presentation layer.
+- Never solve a visual mismatch by changing a financial value, hiding evidence, weakening a gate or making a deterministic result decorative/non-deterministic.
+- Maintain the governed 44px minimum touch target even when legacy module CSS contains smaller historical values.
+
 ## What NOT to Do
 
 - No generic SaaS-blue visual system that overrides v44 tokens.
