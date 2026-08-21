@@ -22,7 +22,17 @@ s=s.replace("$('#importFile').onchange=async e=>{",parser+"$('#importFile').onch
 s=s.replace(/else\{const sep=f\.name\.toLowerCase\(\)\.endsWith\('\.tsv'\)\?'\\t':',',[\s\S]*?return o\}\)\}/,"else{const sep=f.name.toLowerCase().endsWith('.tsv')?'\\t':',';db.sales=rowsFromDelimited(t,sep);if(!db.sales.length)throw Error('لا توجد صفوف بيانات صالحة للاستيراد')}")}
 write(p,s);
 const m='public/sales/sales-motion-v1.js';if(fs.existsSync(m))write(m,read(m).replace("const STORE='kosif:aghnam:v7:native';","const STORE=window.__KOSIF_SALES_STORE_KEY__||'kosif:sales:v1';"))}
-function applyProfessionalCopyV46(){const b='src/v38-books.js';if(fs.existsSync(b)){let s=read(b);for(const [a,z] of [['التواصل مع أولياء الأمور','التواصل مع المكلفين بالحوكمة'],['البيانات المكتوبة','الإقرارات المكتوبة'],['استخدام عمل المدققين الداخليين','استخدام عمل المراجعين الداخليين'],['فقرات لفت الانتباه وفقرات أمور أخرى','فقرات لفت الانتباه وفقرات الأمور الأخرى في تقرير المراجع المستقل'],['مسؤوليات المدقق المتعلقة بالمعلومات الأخرى','مسؤوليات المراجع المتعلقة بالمعلومات الأخرى']])s=s.replaceAll(a,z);write(b,s)}const a='src/v38-api.js';if(fs.existsSync(a))write(a,read(a).replaceAll('لا يمكن استبدال معرّف ملاحظة موجود.','لا تُستبدل معرّفات الملاحظات القائمة بصمت؛ استخدم تعديلًا صريحًا.'))}
+function applyProfessionalCopyV46(){const b='src/v38-books.js';if(fs.existsSync(b)){let s=read(b);for(const [a,z] of [
+['التواصل مع أولياء الأمور','التواصل مع المكلفين بالحوكمة'],
+['التمثيلات','الإقرارات المكتوبة'],
+['البيانات المكتوبة','الإقرارات المكتوبة'],
+['استخدام عمل مراجعة الوظائف','استخدام عمل المراجعين الداخليين'],
+['استخدام عمل المدققين الداخليين','استخدام عمل المراجعين الداخليين'],
+['فقرات التأكيد والقيود في التقرير','فقرات لفت الانتباه وفقرات الأمور الأخرى في تقرير المراجع المستقل'],
+['فقرات لفت الانتباه وفقرات أمور أخرى','فقرات لفت الانتباه وفقرات الأمور الأخرى في تقرير المراجع المستقل'],
+['مسؤوليات المراجع عن المعلومات المصاحبة','مسؤوليات المراجع المتعلقة بالمعلومات الأخرى'],
+['مسؤوليات المدقق المتعلقة بالمعلومات الأخرى','مسؤوليات المراجع المتعلقة بالمعلومات الأخرى']
+])s=s.replaceAll(a,z);write(b,s)}const a='src/v38-api.js';if(fs.existsSync(a))write(a,read(a).replaceAll('لا يمكن استبدال معرّف ملاحظة موجود.','لا تُستبدل معرّفات الملاحظات القائمة بصمت؛ استخدم تعديلًا صريحًا.'))}
 function applyDialogA11yV46(){const p='public/v36-voice-guide.js';if(!fs.existsSync(p))return;let s=read(p);s=s.replace('aria-labelledby="kvg-title" aria-hidden="true">','aria-labelledby="kvg-title" aria-hidden="true" inert>');s=s.replace("x.classList.add('show');x.setAttribute('aria-hidden','false');","x.inert=false;x.classList.add('show');x.setAttribute('aria-hidden','false');");s=s.replace("x.classList.remove('show');x.setAttribute('aria-hidden','true')","x.classList.remove('show');x.setAttribute('aria-hidden','true');x.inert=true");write(p,s)}
 function applyServiceWorkerV46(){const p='public/sw.js';if(!fs.existsSync(p))return;let s=read(p);s=s.replace("'/suite.css'","'/bundles/kosif-suite-core-v46.css?v=46','/suite.css'").replace("'/sales/sales.css'","'/sales/sales-ui-v46.css?v=46','/sales/sales.css'").replace(",'/sales/sales-general-bootstrap.js'",'');write(p,s)}
 
