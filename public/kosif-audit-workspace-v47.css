@@ -1,0 +1,67 @@
+/* KOSIF v47 — Audit Workspace Lifecycle Layer
+   Presentation only. Does not alter accounting calculations or review conclusions. */
+
+#kw47-audit-lifecycle{
+  margin:18px 0 22px;
+  padding:18px;
+  border:1px solid color-mix(in srgb,var(--ink,#2b241c) 14%,transparent);
+  border-radius:22px;
+  background:color-mix(in srgb,var(--paper,#fffaf1) 94%,white 6%);
+  box-shadow:0 12px 34px rgba(35,29,22,.07);
+}
+#kw47-audit-lifecycle *{box-sizing:border-box}
+.kw47-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.kw47-head h2{margin:0;font-size:clamp(18px,2vw,24px);line-height:1.35;color:var(--ink,#2b241c)}
+.kw47-head p{margin:6px 0 0;color:color-mix(in srgb,var(--ink,#2b241c) 64%,transparent);font-size:13px;line-height:1.7}
+.kw47-progress{min-width:92px;text-align:center;padding:9px 12px;border-radius:14px;background:color-mix(in srgb,var(--gold,#a97822) 10%,transparent);border:1px solid color-mix(in srgb,var(--gold,#a97822) 28%,transparent)}
+.kw47-progress b{display:block;font-size:22px;color:var(--gold-text,#8a5f13);line-height:1}
+.kw47-progress span{display:block;margin-top:4px;font-size:11px;color:color-mix(in srgb,var(--ink,#2b241c) 66%,transparent)}
+.kw47-stage-grid{display:grid;grid-template-columns:repeat(8,minmax(116px,1fr));gap:8px;overflow-x:auto;padding-bottom:3px;scrollbar-width:thin}
+.kw47-stage{appearance:none;border:1px solid color-mix(in srgb,var(--ink,#2b241c) 12%,transparent);background:rgba(255,255,255,.58);border-radius:14px;padding:11px 10px;text-align:right;min-height:76px;cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease}
+.kw47-stage:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--gold,#a97822) 42%,transparent)}
+.kw47-stage b{display:block;font-size:12px;line-height:1.45;color:var(--ink,#2b241c)}
+.kw47-stage span{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:color-mix(in srgb,var(--ink,#2b241c) 62%,transparent)}
+.kw47-stage span::before{content:"";width:8px;height:8px;border-radius:50%;background:#b9afa1;box-shadow:0 0 0 3px rgba(185,175,161,.16)}
+.kw47-stage[data-status="complete"]{background:color-mix(in srgb,#0a6b5e 7%,white);border-color:color-mix(in srgb,#0a6b5e 24%,transparent)}
+.kw47-stage[data-status="complete"] span::before{background:#0a6b5e;box-shadow:0 0 0 3px rgba(10,107,94,.14)}
+.kw47-stage[data-status="in_progress"]{background:color-mix(in srgb,var(--gold,#a97822) 8%,white);border-color:color-mix(in srgb,var(--gold,#a97822) 36%,transparent)}
+.kw47-stage[data-status="in_progress"] span::before{background:var(--gold-text,#8a5f13);box-shadow:0 0 0 3px rgba(138,95,19,.13)}
+.kw47-stage[data-status="blocked"] span::before{background:#8f3d35;box-shadow:0 0 0 3px rgba(143,61,53,.12)}
+.kw47-governance{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid color-mix(in srgb,var(--ink,#2b241c) 10%,transparent)}
+.kw47-guardrails{display:flex;flex-wrap:wrap;gap:7px}
+.kw47-guardrails span{font-size:11px;padding:7px 9px;border-radius:999px;background:color-mix(in srgb,var(--ink,#2b241c) 5%,transparent);color:color-mix(in srgb,var(--ink,#2b241c) 72%,transparent)}
+.kw47-next{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;font-size:12px;background:var(--ink,#2b241c);color:var(--paper,#fffaf1);cursor:pointer;white-space:nowrap}
+.kw47-blockers{margin-top:12px;display:grid;gap:7px}
+.kw47-blocker{display:flex;gap:8px;align-items:flex-start;padding:9px 10px;border-radius:12px;background:rgba(143,61,53,.06);border:1px solid rgba(143,61,53,.14);font-size:12px;line-height:1.6;color:#6f302b}
+.kw47-blocker strong{white-space:nowrap}
+
+[data-theme="dark"] #kw47-audit-lifecycle,
+html[data-theme="dark"] #kw47-audit-lifecycle{background:color-mix(in srgb,#1e1914 94%,#2b241c 6%);border-color:rgba(236,220,195,.13)}
+[data-theme="dark"] .kw47-stage,
+html[data-theme="dark"] .kw47-stage{background:rgba(255,248,235,.035);border-color:rgba(236,220,195,.12)}
+[data-theme="dark"] .kw47-head h2,
+[data-theme="dark"] .kw47-stage b,
+html[data-theme="dark"] .kw47-head h2,
+html[data-theme="dark"] .kw47-stage b{color:#f3e8d5}
+[data-theme="dark"] .kw47-head p,
+[data-theme="dark"] .kw47-stage span,
+html[data-theme="dark"] .kw47-head p,
+html[data-theme="dark"] .kw47-stage span{color:#c7b69c}
+[data-theme="dark"] .kw47-guardrails span,
+html[data-theme="dark"] .kw47-guardrails span{background:rgba(255,248,235,.06);color:#d9c9ad}
+[data-theme="dark"] .kw47-next,
+html[data-theme="dark"] .kw47-next{background:#e5c98b;color:#241d16}
+
+@media (max-width:760px){
+  #kw47-audit-lifecycle{margin:12px 0 16px;padding:14px;border-radius:18px}
+  .kw47-head{align-items:center}
+  .kw47-head p{font-size:12px}
+  .kw47-progress{min-width:74px;padding:8px 9px}
+  .kw47-progress b{font-size:19px}
+  .kw47-stage-grid{grid-template-columns:repeat(8,136px);margin-inline:0;padding-inline:0 4px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .kw47-stage{scroll-snap-align:start;min-height:72px}
+  .kw47-governance{grid-template-columns:1fr}
+  .kw47-next{width:100%;min-height:44px}
+}
+
+@media (prefers-reduced-motion:reduce){.kw47-stage{transition:none}.kw47-stage:hover{transform:none}}
