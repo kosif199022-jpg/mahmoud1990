@@ -21,12 +21,15 @@ test('v43 production wrapper exposes runtime coverage and gates sensitive mutati
   ]) assert.ok(src.includes(marker),`missing production integration marker: ${marker}`);
 });
 
-test('short /a alias redirects safe reads to canonical audit route and preserves query',()=>{
+test('short /a alias serves the governed audit shell internally without browser redirect',()=>{
   const src=fs.readFileSync(new URL('../src/suite-edge-v43.js',import.meta.url),'utf8');
   assert.ok(src.includes("(p==='/a'||p==='/a/')"));
-  assert.ok(src.includes("u.pathname='/audit/'"));
+  assert.ok(src.includes("auditUrl.pathname='/audit/'"));
   assert.ok(src.includes("req.method==='GET'||req.method==='HEAD'"));
-  assert.ok(src.includes("Response.redirect(u.toString(),302)"));
+  assert.ok(src.includes('new Request(auditUrl.toString(),req)'));
+  assert.ok(src.includes("headers.set('x-kosif-short-alias','/a')"));
+  assert.ok(src.includes("headers.set('cache-control','no-store')"));
+  assert.ok(!src.includes("Response.redirect(u.toString(),302)"));
 });
 
 test('every sampled edge ID is runtime implemented through the production registry',async()=>{
