@@ -1,13 +1,14 @@
 {
-  "schema": "kosif.system-brain.v1",
+  "schema": "kosif.system-brain.v2",
   "title": "KOSIF System Brain",
-  "updated_at": "2026-08-20",
+  "updated_at": "2026-08-21",
   "principles": [
     "صحة الأرقام قبل الذكاء الاصطناعي",
     "المصدر الرسمي أعلى من الشرح والكتاب التدريبي",
     "كل استنتاج مهني قابل للتتبع إلى مصدر وفترة ودولة",
     "الذكاء الاصطناعي استشاري ولا يعتمد قيداً أو رأياً نهائياً",
     "المحتوى الأصلي للكتب محفوظ مع خريطة الصفحة والسطر",
+    "الكتاب يحلل مرة واحدة ثم يسترجع منه فقط ما يلزم للسؤال بدلاً من إعادة قراءته كاملاً",
     "التطبيق يقرأ من مصدر حقيقة واحد بدلاً من نسخ واجهات متباعدة"
   ],
   "layers": [
@@ -19,12 +20,12 @@
     {
       "id": "books",
       "name": "محرك الكتب الموحد",
-      "responsibilities": ["فتح الكتاب مباشرة", "تنظيف OCR محافظ", "إزالة التكرار الدقيق", "بناء باب/فصل/قسم/عنوان", "الاحتفاظ بالصفحة الأصلية", "فهرسة البحث والقراءة"]
+      "responsibilities": ["فتح الكتاب مباشرة", "تنظيف OCR محافظ", "إزالة التكرار الدقيق", "بناء باب/فصل/قسم/عنوان", "الاحتفاظ بالصفحة الأصلية", "فهرسة البحث والقراءة", "فهرسة دلالية سريعة للـPDF"]
     },
     {
       "id": "knowledge",
       "name": "عقل المعرفة والمصادر",
-      "responsibilities": ["سجل مصادر رسمي-أولاً", "فصل نافذ/مشروع/شرح", "تحديثات دورية", "ربط الدولة بالمصدر", "بناء Evidence Pack للاستدلال"]
+      "responsibilities": ["سجل مصادر رسمي-أولاً", "فصل نافذ/مشروع/شرح", "تحديثات دورية", "ربط الدولة بالمصدر", "بناء Evidence Pack للاستدلال", "استرجاع دلالي من pgvector"]
     },
     {
       "id": "audit",
@@ -82,11 +83,23 @@
     "rules": ["جولة مستقلة عمياء", "تجريد حقول السلطة", "توافق النماذج لا يعد اعتماداً", "القرار النهائي بشري موثق"]
   },
   "book_engine": {
-    "schema": "kosif.book.v1",
-    "accepted_extraction_inputs": ["text-pages", "txt", "structured-json"],
-    "pdf_policy": "PDF يمر أولاً عبر طبقة استخراج موثقة؛ لا يختلق Book Engine نصاً مفقوداً من OCR.",
+    "schema": "kosif.book.v2",
+    "accepted_extraction_inputs": ["pdf-via-llamaparse", "text-pages", "txt", "structured-json"],
+    "pdf_policy": "PDF يمر أولاً عبر LlamaParse أو طبقة استخراج موثقة؛ لا يختلق Book Engine نصاً مفقوداً من OCR.",
     "hierarchy": ["part", "chapter", "section", "heading", "paragraph", "list_item"],
     "cleanup": ["unicode/spacing normalization", "page-number removal", "repeating header/footer removal", "exact duplicate removal", "OCR suspicion flags"],
     "provenance_required": true
+  },
+  "semantic_memory": {
+    "schema": "kosif.semantic-memory.v2",
+    "pipeline": ["LlamaParse", "page-aware chunking", "embeddings", "PostgreSQL", "pgvector HNSW", "semantic retrieval"],
+    "database": "Supabase PostgreSQL + pgvector",
+    "default_embedding_model": "text-embedding-3-small",
+    "embedding_dimensions": 1536,
+    "chunk_chars": 1800,
+    "chunk_overlap": 220,
+    "max_search_results": 20,
+    "security": "service-role and parser keys stay server-side; private ingest/search requires owner session",
+    "fallback": "existing KOSIF book engine remains available while the semantic database is not configured"
   }
 }
