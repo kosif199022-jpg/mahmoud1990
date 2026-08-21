@@ -16,7 +16,8 @@ const STRUCTURE = REQUIREMENTS.verifyStructure();
 const PRIMITIVES = REQUIREMENTS.highRiskPrimitiveCheck();
 const READY = Boolean(COVERAGE.complete && STRUCTURE.complete && PRIMITIVES.ok);
 const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safety" href="/kosif-touch-reveal-safety-v44.css?v=1">';
-const WORKSPACE_STABILITY = '<script id="kosif-workspace-stability-loader" src="/kosif-workspace-stability-loader-v42.js?v=2026.08.21-4" defer></script>';
+const VISUAL_SYSTEM_V45 = '<link rel="stylesheet" id="kosif-visual-system-v45" href="/kosif-visual-system-v45.css?v=2026.08.21-2">';
+const WORKSPACE_STABILITY = '<script id="kosif-workspace-stability-loader" src="/kosif-workspace-stability-loader-v42.js?v=2026.08.21-5" defer></script>';
 
 function reqJson(body,status=200){
   return new Response(JSON.stringify(body),{
@@ -39,12 +40,24 @@ function decorateRequirements(response,url){
   h.set('x-kosif-requirements-missing',String(COVERAGE.missing));
   h.set('x-kosif-requirements-ready',READY?'true':'false');
   h.set('x-kosif-enterprise-contract',KOSIF_ENTERPRISE_CONTRACT_VERSION);
+  h.set('x-kosif-visual-system','v45');
   const decorated=new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
   const contentType=h.get('content-type')||'';
   if(!/text\/html/i.test(contentType))return decorated;
 
-  const rewriter=new HTMLRewriter().on('head',{
-    element(head){head.append(TOUCH_REVEAL_SAFETY,{html:true});}
+  // Keep the original Mafateeh reader shell intentionally isolated from suite theming.
+  const preserveWealthReader=url.pathname==='/wealth'||url.pathname.startsWith('/wealth/');
+  const rewriter=new HTMLRewriter();
+  if(!preserveWealthReader){
+    rewriter.on('html',{
+      element(html){html.setAttribute('data-kosif-visual-system','v45');}
+    });
+  }
+  rewriter.on('head',{
+    element(head){
+      head.append(TOUCH_REVEAL_SAFETY,{html:true});
+      if(!preserveWealthReader)head.append(VISUAL_SYSTEM_V45,{html:true});
+    }
   });
   // Audit workspace enhancements are layered after the existing shell instead of replacing
   // governed v41 presentation/runtime contracts. This keeps historical parity testable.
