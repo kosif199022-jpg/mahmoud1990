@@ -18,6 +18,11 @@
   const A11Y_JS_HREF = '/kosif-a11y-v46.js?v=2026.08.21-1';
   let queued = false;
 
+  function themeV46Present() {
+    return document.documentElement.getAttribute('data-kosif-theme') === 'v46' ||
+      Boolean(document.getElementById('kosif-theme-v46'));
+  }
+
   function visualLink() {
     let link = document.getElementById(ID);
     if (link) return link;
@@ -76,6 +81,13 @@
     const link = visualLink();
     const a11y = a11yLink();
     const floor = visualFloor();
+    a11yRuntime();
+
+    // Theme v46 is the final presentation authority. v45 and the v46 a11y layer
+    // stay loaded as compatibility foundations but stop competing for the last
+    // cascade slot once the approved v46 theme is present.
+    if (themeV46Present()) return;
+
     const styles = [...document.head.children].filter(isPresentationStyle);
     if (styles.at(-1) !== floor) {
       document.head.appendChild(link);
@@ -84,11 +96,10 @@
     } else if (a11y.nextElementSibling !== floor) {
       document.head.insertBefore(a11y, floor);
     }
-    a11yRuntime();
   }
 
   function queueEnsureLast() {
-    if (queued) return;
+    if (queued || themeV46Present()) return;
     queued = true;
     queueMicrotask(ensureLast);
   }
@@ -96,6 +107,7 @@
   // Observe only presentation-node insertions in <head>; never observe the page
   // subtree or attributes. Own governed nodes are excluded to prevent self-trigger loops.
   const observer = new MutationObserver(records => {
+    if (themeV46Present()) return;
     const lateStyleAdded = records.some(record =>
       [...record.addedNodes].some(node =>
         isPresentationStyle(node) && node.id !== ID && node.id !== FLOOR_ID && node.id !== A11Y_CSS_ID
