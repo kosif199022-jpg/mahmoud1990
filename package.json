@@ -48,6 +48,7 @@
     "lighthouse": "npx --yes @lhci/cli@latest autorun --config=lighthouserc.json",
     "visual:chromatic": "npx --yes chromatic@latest --storybook-build-dir=storybook-static --exit-zero-on-changes",
     "v38-demo": "node scripts/generate-v38-demo.mjs",
+    "egypt-5000-lab": "node scripts/run-egypt-om-eldonia-5000.mjs --write=artifacts/egypt-om-eldonia-5000",
     "motion:remotion:install": "npm --prefix motion/remotion install",
     "motion:remotion:studio": "npm --prefix motion/remotion run studio",
     "motion:remotion:check": "npm --prefix motion/remotion run check",
