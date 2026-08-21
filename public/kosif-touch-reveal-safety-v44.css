@@ -1,0 +1,10 @@
+/* KOSIF touch-first reveal safety.
+   Primary content must never depend on IntersectionObserver timing on phones/tablets.
+   Desktop keeps the cinematic reveal system. */
+@media (max-width:1023px),(hover:none),(pointer:coarse){
+  .k-reveal{
+    opacity:1!important;
+    transform:none!important;
+    filter:none!important;
+  }
+}
