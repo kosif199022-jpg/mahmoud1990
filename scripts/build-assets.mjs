@@ -5,6 +5,7 @@ const target = 'public/index.html';
 const cssHref = '/kosif-design-system-v44.css';
 const jsSrc = '/kosif-design-system-v44.js';
 const visualCssHref = '/kosif-visual-system-v45.css?v=2026.08.21-2';
+const visualJsSrc = '/kosif-visual-system-v45.js?v=2026.08.21-1';
 
 function applyVisualSystemV45(sourceHtml) {
   let output = sourceHtml;
@@ -13,6 +14,9 @@ function applyVisualSystemV45(sourceHtml) {
   }
   if (!output.includes(visualCssHref)) {
     output = output.replace('</head>', `  <link rel="stylesheet" id="kosif-visual-system-v45" href="${visualCssHref}">\n</head>`);
+  }
+  if (!output.includes(visualJsSrc)) {
+    output = output.replace('</head>', `  <script id="kosif-visual-system-v45-guard" src="${visualJsSrc}" defer></script>\n</head>`);
   }
   return output;
 }
@@ -32,15 +36,14 @@ if (!html.includes(jsSrc)) {
 }
 
 // Visual System v45 must also exist in the static/PWA build. Browser QA serves
-// `public/` directly and therefore does not pass through suite-edge-v43. Keeping
-// the same scoped attribute + stylesheet in the built shell makes static, offline
-// and Worker-rendered experiences use the same final visual authority.
+// `public/` directly and therefore does not pass through suite-edge-v43. The
+// lightweight v45 guard observes only new presentation styles in <head> and
+// keeps the single v45 stylesheet last when historical v40/v41 runtimes inject
+// their CSS after initial parsing.
 html = applyVisualSystemV45(html);
 
 // `frontend/index.html` and `public/index.html` are the two canonical shell
 // copies and the regression contract requires them to remain byte-identical.
-// The design-stack transform therefore becomes canonical in both places,
-// rather than mutating only the public build artifact and breaking deployment.
 fs.writeFileSync(source, html);
 fs.writeFileSync(target, html);
 
@@ -70,4 +73,4 @@ if (fs.existsSync(wealthLibrary)) {
   if (src.includes(delayed)) fs.writeFileSync(wealthLibrary, src.replace(delayed, direct));
 }
 
-console.log('Kosif Native assets ready with Design Quality Stack v44 + Visual System v45 + direct book bootstrap v45');
+console.log('Kosif Native assets ready with Design Quality Stack v44 + Visual System v45 cascade guard + direct book bootstrap v45');
