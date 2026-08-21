@@ -13,6 +13,10 @@ package-lock.json
 playwright-report/
 test-results/
 
+# Design quality / Storybook / Lighthouse artefacts
+storybook-static/
+.lighthouseci/
+
 # Gemini CLI local/runtime state
 .gemini/
 gha-creds-*.json

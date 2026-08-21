@@ -1,0 +1,138 @@
+name: KOSIF Design Quality v44
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'public/**'
+      - 'config/design-tokens-v44.json'
+      - 'stories/**'
+      - '.storybook/**'
+      - 'tests/browser/**'
+      - 'scripts/build-assets.mjs'
+      - 'scripts/check-design-quality-v44.mjs'
+      - 'playwright.config.mjs'
+      - 'lighthouserc.json'
+      - 'package.json'
+      - '.github/workflows/design-quality-v44.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: design-quality-v44-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Design contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run build
+      - run: npm run design-quality-v44
+
+  browser-accessibility:
+    name: Browser + axe
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install ephemeral browser QA dependencies
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.0 @axe-core/playwright@4.10.2
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+      - run: npm run build
+      - name: Start static candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory public >/tmp/kosif-design-server.log 2>&1 &
+          echo $! >/tmp/kosif-design-server.pid
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/kosif-design-server.log || true
+          exit 1
+      - name: Run design browser gate
+        env:
+          KOSIF_BASE_URL: http://127.0.0.1:4173
+          KOSIF_QA_MODE: static
+        run: npx playwright test tests/browser/design-quality.spec.mjs --config=playwright.config.mjs
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-browser-evidence-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run build
+      - name: Start static candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory public >/tmp/kosif-lh-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/kosif-lh-server.log || true
+          exit 1
+      - name: Run Lighthouse thresholds
+        run: npx --yes @lhci/cli@latest autorun --config=lighthouserc.json
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-v44-${{ github.run_id }}
+          path: .lighthouseci/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  storybook:
+    name: Storybook + optional Chromatic
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run build
+      - name: Install ephemeral Storybook runtime
+        run: npm install --no-save --package-lock=false storybook@latest @storybook/html-vite@latest
+      - name: Build Storybook design system
+        run: npx storybook build -o storybook-static
+      - name: Upload Storybook
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-storybook-v44-${{ github.run_id }}
+          path: storybook-static/
+          retention-days: 14
+      - name: Publish visual regression to Chromatic when configured
+        if: ${{ secrets.CHROMATIC_PROJECT_TOKEN != '' }}
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        run: npx --yes chromatic@latest --storybook-build-dir=storybook-static --exit-zero-on-changes --project-token="$CHROMATIC_PROJECT_TOKEN"

@@ -46,8 +46,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Playwright test runtime
-        run: npm install --no-save --package-lock=false @playwright/test@1.55.0
+      - name: Install Playwright and accessibility runtime
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.0 @axe-core/playwright@4.10.2
 
       - name: Install Chromium and WebKit
         run: npx playwright install --with-deps chromium webkit
@@ -121,4 +121,5 @@ jobs:
           echo '- Mobile document scrolling and horizontal-overflow regression' >> "$GITHUB_STEP_SUMMARY"
           echo '- Shared Mafateeh reader routing for mafateeh/std2025/std2018/dipifr' >> "$GITHUB_STEP_SUMMARY"
           echo '- Reader runtime D/CH bindings and hidden default smart/mixer controls' >> "$GITHUB_STEP_SUMMARY"
+          echo '- KOSIF v44 design tokens, touch targets and axe accessibility gate' >> "$GITHUB_STEP_SUMMARY"
           echo '- Screenshots, traces, video-on-failure and runtime diagnostics as artifacts' >> "$GITHUB_STEP_SUMMARY"
