@@ -14,7 +14,7 @@ const COVERAGE = REQUIREMENTS.verifyEveryRequirement();
 const STRUCTURE = REQUIREMENTS.verifyStructure();
 const PRIMITIVES = REQUIREMENTS.highRiskPrimitiveCheck();
 const READY = Boolean(COVERAGE.complete && STRUCTURE.complete && PRIMITIVES.ok);
-const TOUCH_REVEAL_SAFETY = '<style id="kosif-touch-reveal-safety">@media (max-width:1023px),(hover:none),(pointer:coarse){.k-reveal{opacity:1!important;transform:none!important;filter:none!important}}</style>';
+const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safety" href="/kosif-touch-reveal-safety-v44.css?v=1">';
 
 function reqJson(body,status=200){
   return new Response(JSON.stringify(body),{
@@ -40,8 +40,8 @@ function decorateRequirements(response){
   if(!/text\/html/i.test(contentType))return decorated;
 
   // Touch-first browsers must never depend on IntersectionObserver timing to
-  // make primary content visible. Desktop keeps the cinematic reveal layer;
-  // iPhone/iPad/Android get a fail-visible CSS override injected at the edge.
+  // make primary content visible. The override is an external same-origin
+  // stylesheet so it remains compatible with restrictive style-src policies.
   return new HTMLRewriter().on('head',{
     element(head){head.append(TOUCH_REVEAL_SAFETY,{html:true});}
   }).transform(decorated);
