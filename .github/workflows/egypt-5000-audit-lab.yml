@@ -39,11 +39,12 @@ jobs:
           test -f artifacts/egypt-om-eldonia-5000/trial-balance.csv
           test -f artifacts/egypt-om-eldonia-5000/journals.jsonl
           test -f artifacts/egypt-om-eldonia-5000/audit-execution-report.json
-          test "$(($(wc -l < artifacts/egypt-om-eldonia-5000/accounts.csv)-1))" -eq 5000
           node - <<'NODE'
           const fs=require('fs');
-          const p='artifacts/egypt-om-eldonia-5000/audit-execution-report.json';
-          const r=JSON.parse(fs.readFileSync(p,'utf8'));
+          const dir='artifacts/egypt-om-eldonia-5000';
+          const accountRows=fs.readFileSync(dir+'/accounts.csv','utf8').trimEnd().split(/\r?\n/).length-1;
+          if(accountRows!==5000) throw new Error('accounts.csv row count '+accountRows);
+          const r=JSON.parse(fs.readFileSync(dir+'/audit-execution-report.json','utf8'));
           if(r.overall!=='PASS') throw new Error('Audit lab did not pass');
           if(r.company?.name!=='شركة مصر أم الدنيا القابضة') throw new Error('Wrong synthetic company');
           if(r.counts?.accounts!==5000) throw new Error('Wrong account count');
@@ -54,6 +55,7 @@ jobs:
           NODE
 
       - name: Upload complete synthetic company and audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kosif-egypt-om-eldonia-5000
