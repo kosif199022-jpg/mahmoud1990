@@ -70,6 +70,13 @@ export default {
     const u=new URL(req.url);
     const p=u.pathname;
 
+    // Short, shareable audit alias. Keep query parameters (for example cache-bust/debug flags)
+    // while redirecting only safe read methods to the canonical governed audit route.
+    if((req.method==='GET'||req.method==='HEAD') && (p==='/a'||p==='/a/')){
+      u.pathname='/audit/';
+      return Response.redirect(u.toString(),302);
+    }
+
     if(p==='/__requirements'){
       return reqJson({
         ok:READY,
