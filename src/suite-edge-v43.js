@@ -70,11 +70,19 @@ export default {
     const u=new URL(req.url);
     const p=u.pathname;
 
-    // Short, shareable audit alias. Keep query parameters (for example cache-bust/debug flags)
-    // while redirecting only safe read methods to the canonical governed audit route.
+    // Short, shareable audit alias. Serve the governed audit shell internally instead of
+    // issuing a browser redirect, so iOS/in-app browsers and stale navigation caches cannot
+    // break the short URL. Query parameters are preserved and the visible URL remains /a.
     if((req.method==='GET'||req.method==='HEAD') && (p==='/a'||p==='/a/')){
-      u.pathname='/audit/';
-      return Response.redirect(u.toString(),302);
+      const auditUrl=new URL(u.toString());
+      auditUrl.pathname='/audit/';
+      const routedReq=new Request(auditUrl.toString(),req);
+      const response=await suite.fetch(routedReq,env,ctx);
+      const decorated=decorateRequirements(response,auditUrl);
+      const headers=new Headers(decorated.headers);
+      headers.set('x-kosif-short-alias','/a');
+      headers.set('cache-control','no-store');
+      return new Response(decorated.body,{status:decorated.status,statusText:decorated.statusText,headers});
     }
 
     if(p==='/__requirements'){
