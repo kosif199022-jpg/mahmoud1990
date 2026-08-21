@@ -78,8 +78,8 @@ ok(reports.includes("gate('مسودة تقرير موجودة'") && reports.incl
 ok(reports.includes("const materialityAmount = st?.mat?.val ?? ''") && !reports.includes('st?.mat?.value'), 'reports never promote a legacy computed materiality display back into a source');
 ok(deploy.includes('KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color') && deploy.includes('v41-editorial-cinematic-canva'), 'Cloudflare production verification retains the governed v41 editorial release family');
 ok(deploy.includes('route_ok=0') && deploy.includes('seq 1 15') && deploy.includes('Bad live route after propagation retries'), 'Cloudflare static asset verification tolerates bounded propagation delay');
-ok(deepRuntime.includes('41-editorial-cinematic-canva'), 'deep runtime verifier retains the governed v41 release family');
-ok(mainRuntime.includes('41-editorial-cinematic-canva'), 'main runtime verifier retains the governed v41 release family');
+ok(deepRuntime.includes('41-system-brain-nav-fix'), 'deep runtime verifier recognizes the current v41 build');
+ok(mainRuntime.includes('41-system-brain-nav-fix'), 'main runtime verifier recognizes the current v41 build');
 
 ok(proxy.includes('#mixLaunch') && proxy.includes('#smartPebble'), 'Mafateeh reader hides Mix and Smart AI launchers by default');
 ok(proxy.includes('kosif-reader-home') && proxy.includes('kosif-reader-library-home'), 'Mafateeh reader has explicit home/library navigation');
