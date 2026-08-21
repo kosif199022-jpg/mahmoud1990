@@ -79,8 +79,8 @@ html[data-theme="dark"] .v38-tile b{color:#DCE5F4}
 html[data-theme="dark"] .v38-table th{color:#D5DFF0}
 .v38-table td{padding:8px 10px;border-bottom:1px solid var(--v38-line);vertical-align:middle}
 .v38-table tr:hover td{background:color-mix(in srgb,var(--v38-navy) 3%,transparent)}
-.v38-table .num{font-variant-numeric:tabular-nums;direction:ltr;text-align:end;font-family:"IBM Plex Sans Arabic",system-ui}
-.v38-scroll{overflow-x:auto;border:1px solid var(--v38-line);border-radius:12px}
+.v38-table .num{font-variant-numeric:tabular-nums;direction:ltr;text-align:end;font-family:Alexandria,"SF Arabic",system-ui}
+.v38-scroll{overflow-x:auto;border:1px solid var(--v38-line);border-radius:12px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 .v38-scroll thead th{position:sticky;top:0}
 
 /* ——— أزرار ——— */

@@ -1,0 +1,110 @@
+/*
+ * KOSIF v45 — unified font authority.
+ * Single load point for the governed Arabic identity font (DESIGN.md / tokens v44).
+ * Loads on every shell: hub, audit, libraries, sales, standards.
+ *
+ * The two Alexandria Arabic subset files are the only bundled faces. They are
+ * registered once under the canonical family names and again as compatibility
+ * aliases for legacy layers that still reference Tajawal / Cairo / IBM Plex
+ * Sans Arabic / Plus Jakarta Sans without ever loading them — so every shell
+ * renders the real brand font instead of falling back to system fonts.
+ */
+
+@font-face{
+  font-family:"KOSIF Alexandria";
+  src:url('/fonts/alexandria-arabic-500-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"KOSIF Alexandria";
+  src:url('/fonts/alexandria-arabic-700-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+
+@font-face{
+  font-family:"Alexandria";
+  src:url('/fonts/alexandria-arabic-500-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Alexandria";
+  src:url('/fonts/alexandria-arabic-700-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+
+/* Compatibility aliases: legacy layers name these families but never loaded
+   a face for them. Aliasing keeps their typography on the governed family. */
+@font-face{
+  font-family:"Tajawal";
+  src:url('/fonts/alexandria-arabic-500-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Tajawal";
+  src:url('/fonts/alexandria-arabic-700-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Cairo";
+  src:url('/fonts/alexandria-arabic-500-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Cairo";
+  src:url('/fonts/alexandria-arabic-700-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+@font-face{
+  font-family:"IBM Plex Sans Arabic";
+  src:url('/fonts/alexandria-arabic-500-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"IBM Plex Sans Arabic";
+  src:url('/fonts/alexandria-arabic-700-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Plus Jakarta Sans";
+  src:url('/fonts/alexandria-arabic-500-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Plus Jakarta Sans";
+  src:url('/fonts/alexandria-arabic-700-normal.woff2') format('woff2');
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+
+:root{
+  --kosif-font:"KOSIF Alexandria",Alexandria,"SF Arabic","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+}
+
+/* Numeric legibility (DESIGN.md): tabular figures everywhere money is shown. */
+.kosif-nums, .num, .amt, .money, output, td.num, .kpi .v, .v38-kpi .v, .v38-table .num{
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum' 1;
+}

@@ -7,7 +7,7 @@ import { handleSystemBrainV2 } from './system-brain-v2.js';
 const SUITE={
   productName:'Kosif',
   version:'v41.0.0-root',
-  buildId:'2026.08.21-v41-system-brain-nav-fix',
+  buildId:'2026.08.20-v41-editorial-cinematic-canva',
   architecture:'suite-edge → security-edge → native-worker + v38 trusted core',
   modules:{audit:'/audit/',libraries:'/libraries/',wealth:'/wealth/reader.html',sales:'/sales/'},
   systemBrain:'/data/kosif-system-brain-v1.json',
