@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 
 const css=fs.readFileSync('public/kosif-visual-system-v45.css','utf8');
+const guard=fs.readFileSync('public/kosif-visual-system-v45.js','utf8');
 const fonts=fs.readFileSync('public/kosif-fonts-v45.css','utf8');
 const edge=fs.readFileSync('src/suite-edge-v43.js','utf8');
 const loader=fs.readFileSync('public/kosif-workspace-stability-loader-v42.js','utf8');
@@ -31,19 +32,25 @@ const checks=[
   ['iOS input zoom prevention',css.includes('font-size:16px!important')],
   ['reduced motion support',css.includes('@media (prefers-reduced-motion:reduce)')],
   ['dark theme compatibility',css.includes('[data-theme="dark"]')],
+  ['cascade guard is presentation-only head observer',guard.includes('observer.observe(document.head, { childList: true })') && !guard.includes('subtree: true') && !guard.includes('attributes: true')],
+  ['cascade guard reuses one stylesheet node',guard.includes("document.getElementById(ID)") && guard.includes('document.head.appendChild(link)')],
+  ['cascade guard reacts only to late presentation styles',guard.includes('isPresentationStyle(node)') && guard.includes('node.id !== ID')],
   ['edge stylesheet injection',edge.includes('kosif-visual-system-v45.css?v=2026.08.21-2')],
+  ['edge cascade guard injection',edge.includes('kosif-visual-system-v45.js?v=2026.08.21-1')],
   ['edge visual system response marker',edge.includes("h.set('x-kosif-visual-system','v45')")],
   ['edge html visual attribute',edge.includes("setAttribute('data-kosif-visual-system','v45')")],
   ['original wealth reader preserved',edge.includes("const preserveWealthReader=url.pathname==='/wealth'||url.pathname.startsWith('/wealth/')")],
-  ['visual system excluded from wealth reader',edge.includes('if(!preserveWealthReader)head.append(VISUAL_SYSTEM_V45')],
+  ['visual system excluded from wealth reader',edge.includes('if(!preserveWealthReader){') && edge.includes('head.append(VISUAL_SYSTEM_V45_GUARD')],
   ['static/PWA shell gets visual css',build.includes("const visualCssHref = '/kosif-visual-system-v45.css?v=2026.08.21-2'")],
+  ['static/PWA shell gets cascade guard',build.includes("const visualJsSrc = '/kosif-visual-system-v45.js?v=2026.08.21-1'")],
   ['static/PWA shell gets scoped attribute',build.includes('data-kosif-visual-system="v45"')],
   ['first-class static shells use same authority',build.includes("'public/hub.html'") && build.includes("'public/libraries/index.html'") && build.includes("'public/sales/index.html'") && build.includes("'public/standards/index.html'")],
   ['wealth static reader remains excluded',!build.includes("'public/wealth/reader.html'")],
   ['late audit css cannot outrank v45',loader.includes('document.head.appendChild(visual)')],
   ['single v45 stylesheet node reused',loader.includes("document.querySelector('#kosif-visual-system-v45')")],
   ['visual css precached offline',sw.includes("'/kosif-visual-system-v45.css?v=2026.08.21-2'")],
-  ['visual css integrity refreshed',sw.includes("'/kosif-visual-system-v45.css'")]
+  ['visual guard precached offline',sw.includes("'/kosif-visual-system-v45.js?v=2026.08.21-1'")],
+  ['visual assets integrity refreshed',sw.includes("'/kosif-visual-system-v45.css'") && sw.includes("'/kosif-visual-system-v45.js'")]
 ];
 
 let failed=0;
