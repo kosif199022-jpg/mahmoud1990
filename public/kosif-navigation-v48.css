@@ -108,12 +108,18 @@
 .kw47-stage span::before{width:7px!important;height:7px!important;box-shadow:none!important}
 .kw47-progress{border-radius:11px!important}
 
+/* Accessibility: compact labels must stay above WCAG AA contrast thresholds. */
+.kw42-stat span{color:#53615d!important}
+.kw47-guardrails span{color:#4f5c58!important}
+
 html[data-theme="dark"] #k48-desktop-rail{background:rgba(15,23,20,.92);border-color:rgba(233,228,214,.13);box-shadow:0 18px 54px -42px rgba(0,0,0,.8)}
 html[data-theme="dark"] #k48-desktop-rail button{color:#A8A291}
 html[data-theme="dark"] #k48-desktop-rail button:hover{color:#E9E4D6;background:rgba(233,228,214,.055);border-color:rgba(233,228,214,.12)}
 html[data-theme="dark"] #k48-desktop-rail button.active{color:#E4BE6B;background:rgba(228,190,107,.1);border-color:rgba(228,190,107,.24)}
 html[data-theme="dark"] #kosif-more .k48-action-copy b{color:#E9E4D6}
 html[data-theme="dark"] #kosif-more .k48-action-icon{background:rgba(228,190,107,.1);color:#E4BE6B;border-color:rgba(228,190,107,.22)}
+html[data-theme="dark"] .kw42-stat span{color:#c8d2ce!important}
+html[data-theme="dark"] .kw47-guardrails span{color:#d9c9ad!important}
 
 @media (max-width:760px){
   #kosif-more .kosif-sheet-grid{grid-template-columns:1fr!important}
