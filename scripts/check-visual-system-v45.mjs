@@ -5,6 +5,7 @@ const fonts=fs.readFileSync('public/kosif-fonts-v45.css','utf8');
 const edge=fs.readFileSync('src/suite-edge-v43.js','utf8');
 const loader=fs.readFileSync('public/kosif-workspace-stability-loader-v42.js','utf8');
 const sw=fs.readFileSync('public/sw.js','utf8');
+const build=fs.readFileSync('scripts/build-assets.mjs','utf8');
 
 const checks=[
   ['scoped visual authority',css.includes('html[data-kosif-visual-system="v45"]')],
@@ -19,6 +20,7 @@ const checks=[
   ['spacing 24',css.includes('--k45-s6:24px')],
   ['spacing 32',css.includes('--k45-s8:32px')],
   ['spacing 48',css.includes('--k45-s12:48px')],
+  ['governed touch target',css.includes('--k45-touch:46px') && css.includes('min-height:var(--k45-touch)!important')],
   ['small modal contract',css.includes('.modal[data-size="s"]')],
   ['medium modal contract',css.includes('.modal[data-size="m"]')],
   ['large modal contract',css.includes('.modal[data-size="l"]')],
@@ -34,6 +36,10 @@ const checks=[
   ['edge html visual attribute',edge.includes("setAttribute('data-kosif-visual-system','v45')")],
   ['original wealth reader preserved',edge.includes("const preserveWealthReader=url.pathname==='/wealth'||url.pathname.startsWith('/wealth/')")],
   ['visual system excluded from wealth reader',edge.includes('if(!preserveWealthReader)head.append(VISUAL_SYSTEM_V45')],
+  ['static/PWA shell gets visual css',build.includes("const visualCssHref = '/kosif-visual-system-v45.css?v=2026.08.21-2'")],
+  ['static/PWA shell gets scoped attribute',build.includes('data-kosif-visual-system="v45"')],
+  ['first-class static shells use same authority',build.includes("'public/hub.html'") && build.includes("'public/libraries/index.html'") && build.includes("'public/sales/index.html'") && build.includes("'public/standards/index.html'")],
+  ['wealth static reader remains excluded',!build.includes("'public/wealth/reader.html'")],
   ['late audit css cannot outrank v45',loader.includes('document.head.appendChild(visual)')],
   ['single v45 stylesheet node reused',loader.includes("document.querySelector('#kosif-visual-system-v45')")],
   ['visual css precached offline',sw.includes("'/kosif-visual-system-v45.css?v=2026.08.21-2'")],
