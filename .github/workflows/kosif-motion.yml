@@ -44,6 +44,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
       - name: Verify FFmpeg
         run: ffmpeg -version | head -n 1
       - name: Lint HyperFrames composition
