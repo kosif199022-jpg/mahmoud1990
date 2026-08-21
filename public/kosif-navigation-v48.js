@@ -45,7 +45,10 @@
 
   function setNavButton(button, view, label, iconName) {
     if (!button) return;
+    const signature = `${view}|${label}|${iconName}`;
+    if (button.dataset.k48Nav === signature) return;
     button.dataset.kgo = view;
+    button.dataset.k48Nav = signature;
     button.setAttribute('aria-label', label);
     button.innerHTML = `${icon(iconName)}<span>${esc(label)}</span>`;
   }
@@ -60,7 +63,8 @@
     setNavButton(buttons[2], 'analytics', 'التحليلات', 'chart');
     setNavButton(buttons[3], councilView(), 'المجلس', 'council');
     const more = $('#kosif-more-btn', nav);
-    if (more) {
+    if (more && more.dataset.k48Nav !== 'more') {
+      more.dataset.k48Nav = 'more';
       more.setAttribute('aria-label','المزيد');
       more.innerHTML = `${icon('more')}<span>المزيد</span>`;
     }
@@ -125,6 +129,7 @@
 
   function mountDesktopRail() {
     let rail = $('#k48-desktop-rail');
+    if (rail?.dataset.k48Mounted === '1') { syncActive(); return; }
     if (!rail) {
       rail = document.createElement('nav');
       rail.id = 'k48-desktop-rail';
@@ -138,6 +143,7 @@
     }).join('') + `<button type="button" data-k48-more aria-label="المزيد">${icon('more')}<span class="k48-rail-label">المزيد</span></button>`;
     $$('[data-k48-view]', rail).forEach(button => button.addEventListener('click', () => goView(button.dataset.k48View)));
     $('[data-k48-more]', rail)?.addEventListener('click', () => $('#kosif-more')?.classList.add('show'));
+    rail.dataset.k48Mounted = '1';
     syncActive();
   }
 
@@ -170,6 +176,8 @@
 
   function markSemanticIcons() {
     $$('button svg,.btn svg,.v38-btn svg,.tab svg').forEach(svg => {
+      if (svg.dataset.k48Semantic === '1') return;
+      svg.dataset.k48Semantic = '1';
       svg.setAttribute('aria-hidden','true');
       svg.setAttribute('focusable','false');
     });
@@ -198,7 +206,9 @@
       if (event.target.closest?.('[data-kgo],[data-go2],[data-go],[data-view-target],#kosif-more-btn')) setTimeout(schedule,40);
     }, true);
     if ('MutationObserver' in window) {
-      new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+      new MutationObserver(records => {
+        if (records.some(record => record.type === 'childList' && [...record.addedNodes].some(node => node.nodeType === 1 && (node.id === 'kosif-bottom-nav' || node.id === 'kosif-more' || node.querySelector?.('#kosif-bottom-nav,#kosif-more'))))) schedule();
+      }).observe(document.body,{childList:true,subtree:true});
     }
   }
 
