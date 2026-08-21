@@ -1,0 +1,62 @@
+name: KOSIF Egypt 5000 Account Audit Lab
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: egypt-5000-audit-lab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-audit-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run all KOSIF application gates
+        run: npm run check
+
+      - name: Generate and execute Egypt 5000-account audit company
+        run: npm run egypt-5000-lab
+
+      - name: Verify generated audit artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f artifacts/egypt-om-eldonia-5000/accounts.csv
+          test -f artifacts/egypt-om-eldonia-5000/trial-balance.csv
+          test -f artifacts/egypt-om-eldonia-5000/journals.jsonl
+          test -f artifacts/egypt-om-eldonia-5000/audit-execution-report.json
+          test "$(($(wc -l < artifacts/egypt-om-eldonia-5000/accounts.csv)-1))" -eq 5000
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='artifacts/egypt-om-eldonia-5000/audit-execution-report.json';
+          const r=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(r.overall!=='PASS') throw new Error('Audit lab did not pass');
+          if(r.company?.name!=='شركة مصر أم الدنيا القابضة') throw new Error('Wrong synthetic company');
+          if(r.counts?.accounts!==5000) throw new Error('Wrong account count');
+          if(r.trialBalance?.balanced!==true||r.trialBalance?.difference!=='0') throw new Error('Trial balance failed');
+          if(r.adjustedTrialBalance?.balanced!==true||r.adjustedTrialBalance?.rejected!==1) throw new Error('Adjusted TB fail-closed test failed');
+          if(r.frameworks?.frameworks?.find(x=>x.id==='ZATCA_VAT_15')?.state!=='not-applicable') throw new Error('Egypt inherited Saudi VAT incorrectly');
+          console.log('EGYPT_5000_ARTIFACT_VERIFIED', r.counts, r.journalTesting, r.materiality);
+          NODE
+
+      - name: Upload complete synthetic company and audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-egypt-om-eldonia-5000
+          path: artifacts/egypt-om-eldonia-5000/
+          if-no-files-found: error
+          retention-days: 30
