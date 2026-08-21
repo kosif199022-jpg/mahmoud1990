@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,3 +75,40 @@ jobs:
           grep -q 'kosif-workspace-stability-loader-v42.js' /tmp/audit.html
           grep -q 'kosif-editorial-v41' /tmp/audit.html
           echo "KOSIF_SHORT_WORKER_PRODUCTION_OK $LIVE_URL/audit/"
+
+      - name: Publish successful short Worker verification
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LIVE_URL: https://kosif.kosif199022.workers.dev
+        run: |
+          cat >/tmp/kosif-short-worker-status.md <<EOF
+          ## Deployment status
+
+          ✅ **VERIFIED ON SHORT WORKER URL**
+
+          - Commit: \`$GITHUB_SHA\`
+          - Live Worker: $LIVE_URL
+          - Audit: $LIVE_URL/audit/
+          - Requirements: **50,000 / 50,000**
+          - Stability layer: **live and verified**
+          - Workflow run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          EOF
+          gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-short-worker-status.md
+
+      - name: Publish failed short Worker verification
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat >/tmp/kosif-short-worker-status.md <<EOF
+          ## Deployment status
+
+          ❌ **SHORT WORKER DEPLOYMENT OR VERIFICATION FAILED**
+
+          - Commit: \`$GITHUB_SHA\`
+          - Workflow run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          EOF
+          gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-short-worker-status.md
