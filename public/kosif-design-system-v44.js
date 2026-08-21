@@ -64,8 +64,13 @@
 
   function setupRevealMotion() {
     if (reduceQuery?.matches || !('IntersectionObserver' in window)) return;
-    const targets = [...document.querySelectorAll('main .card, main .panel, main section[data-view]')]
+
+    /* v41 already owns reveal timing for the existing application shell. v44 only
+     * animates surfaces that explicitly opt in, avoiding competing opacity state
+     * machines on Mobile Safari/WebKit. */
+    const targets = [...document.querySelectorAll('[data-kosif-v44-reveal]')]
       .filter((node) => !node.closest('[aria-hidden="true"]'))
+      .filter((node) => !node.matches('.k41-in,.k-reveal'))
       .slice(0, 80);
 
     if (!targets.length) return;
