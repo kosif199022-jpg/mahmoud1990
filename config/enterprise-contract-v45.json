@@ -1,0 +1,72 @@
+{
+  "schema": "kosif.enterprise-contract.v45",
+  "version": "45.0.0",
+  "sourcePack": {
+    "blueprint": {
+      "filename": "KOSIF_Enterprise_Implementation_Blueprint.json",
+      "sha256": "6187bdde60aac9ce28acaa7c0fc535875492b42854eb0cef45e4b01aa5ce3cab",
+      "bytes": 175195
+    },
+    "openapi": {
+      "filename": "KOSIF_Enterprise_OpenAPI_v1.yaml",
+      "sha256": "c4184af3835f8420178376ba026d4b9a0f6b1fea71170748769780a99ff2479d",
+      "bytes": 106775
+    },
+    "postgres": {
+      "filename": "KOSIF_PostgreSQL_Financial_Core.sql",
+      "sha256": "4f19ea94ce94dab99d4eb1d7236408f895382d8a7badef5a4432003b1705ec75",
+      "bytes": 46679
+    },
+    "audit": {
+      "filename": "KOSIF_Enterprise_Master_Audit_and_Architecture_AR.md",
+      "sha256": "5bef59b67c6ea9c0c21ff6ac71a5eb8822ab0d6abb8492e64b148f64b0f1f831",
+      "bytes": 76238
+    }
+  },
+  "blueprint": {
+    "id": "kosif.audit.intelligence.platform",
+    "version": "3.0.0",
+    "specVersion": "2026-08",
+    "locale": "ar-SA",
+    "runtimePlatform": "cloudflare-workers",
+    "deterministicNumbers": true,
+    "aiNarrativeOnly": true
+  },
+  "openapi": {
+    "version": "3.1.0",
+    "designVersion": "1.0.0-design",
+    "paths": 42,
+    "operations": 55,
+    "idempotentMutations": 38,
+    "auditEventMutations": 38,
+    "tenantIsolationOperations": 55,
+    "authoritativeMoney": "integer-minor-units-as-strings"
+  },
+  "postgres": {
+    "target": "PostgreSQL 15+",
+    "tables": 16,
+    "rlsEnableStatements": 2,
+    "forUpdateLocks": 4,
+    "containsJournalEntries": true,
+    "containsJournalLines": true,
+    "containsAuditEvents": true,
+    "containsIdempotency": true,
+    "containsOutbox": true,
+    "tenantSetting": true,
+    "postedImmutable": true,
+    "containsApprovalDecisions": true
+  },
+  "cutover": {
+    "currentProduction": "Cloudflare Worker + D1/KV compatibility",
+    "targetFinancialSourceOfTruth": "PostgreSQL financial core",
+    "blockedUntil": [
+      "database provisioned",
+      "migration applied",
+      "RLS/tenant integration verified",
+      "concurrency/idempotency verified",
+      "full repository gates green"
+    ],
+    "aiAuthority": "advisory-only",
+    "humanApprovalRequired": true
+  }
+}
