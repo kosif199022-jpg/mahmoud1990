@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-assets.mjs",
-    "check": "npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme && npm run v42-requirements && npm run v43-requirements && npm run design-quality-v44 && npm run enterprise-contract",
+    "check": "npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme && npm run v42-requirements && npm run v43-requirements && npm run design-quality-v44 && npm run enterprise-contract && npm run direct-books-v45",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
     "source-export-integrity": "node scripts/check-source-export-integrity.mjs",
@@ -44,6 +44,7 @@
     "v43-requirements": "node scripts/check-v43-requirements.mjs && node --test tests/v43-full-coverage.test.mjs tests/v43-edge-wrapper.test.mjs tests/company-sheet-v43.test.mjs",
     "design-quality-v44": "node scripts/check-design-quality-v44.mjs",
     "enterprise-contract": "node scripts/check-enterprise-contract.mjs && node --test tests/enterprise-readiness-v45.test.mjs",
+    "direct-books-v45": "node scripts/check-direct-book-bootstrap-v45.mjs",
     "storybook": "npx --yes --package storybook@latest --package @storybook/html-vite@latest storybook dev -p 6006",
     "storybook:build": "npx --yes --package storybook@latest --package @storybook/html-vite@latest storybook build -o storybook-static",
     "lighthouse": "npx --yes @lhci/cli@latest autorun --config=lighthouserc.json",
