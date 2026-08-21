@@ -174,3 +174,93 @@ html[data-theme="dark"] .book .auth.mut{background:rgba(233,228,214,.08);color:#
 :is(button,a,input,select,textarea,[tabindex]):focus-visible{
   outline-color:rgba(169,120,34,.55)!important;
 }
+
+/* ============ 8) Identity authority over parallel head layers ============
+ * Other presentation layers (visual-system v45, sharp v46) inject into <head>
+ * at runtime. This file loads at the end of <body>, so equal-specificity
+ * declarations here always win the cascade. The block below re-asserts the
+ * approved Ink & Gold identity properties (colors, surfaces, chrome) over
+ * those layers while leaving their layout metrics free to compose. */
+html:is([data-kosif-visual-system],[data-kosif-edition],[data-kosif-sharp]){
+  --k41-radius:26px;
+  --k41-shadow:0 1px 1px rgba(8,27,25,.04),0 10px 30px -18px rgba(8,27,25,.18),0 38px 90px -58px rgba(8,27,25,.42);
+  --k41-shadow-lift:0 2px 2px rgba(8,27,25,.05),0 20px 42px -24px rgba(8,27,25,.24),0 54px 120px -65px rgba(49,91,232,.34);
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) body{
+  background:
+    radial-gradient(980px 560px at 100% -12%,rgba(49,91,232,.11),transparent 68%),
+    radial-gradient(820px 520px at -8% 48%,rgba(11,139,124,.09),transparent 70%),
+    radial-gradient(680px 380px at 64% 108%,rgba(216,101,77,.07),transparent 72%),
+    linear-gradient(180deg,#F8F1E5 0%,#FFFCF5 48%,#F5EDDE 100%)!important;
+  color:#102825!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.topbar,.suite-head,.library-head,.sales-top,#bar){
+  background:color-mix(in srgb,#FFFCF5 86%,transparent)!important;
+  border-color:rgba(22,59,54,.14)!important;
+  box-shadow:0 16px 46px -40px rgba(8,27,25,.62)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) .tabs{
+  background:color-mix(in srgb,#FFFCF5 88%,transparent)!important;
+  border-bottom-color:rgba(22,59,54,.14)!important;
+  box-shadow:0 14px 38px -38px rgba(8,27,25,.6)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) .tab{
+  color:#6F746C!important;
+  border-radius:999px!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) .tab:hover{
+  color:#102825!important;
+  background:rgba(11,139,124,.08)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.tab.active,.tab[aria-current="page"]){
+  color:#fff!important;
+  background:linear-gradient(135deg,#102825,color-mix(in srgb,#D7AE58 55%,#102825))!important;
+  border-color:transparent!important;
+  box-shadow:0 14px 30px -19px rgba(169,120,34,.72)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) .tab .n{
+  background:#F8EDCF!important;color:#A97822!important;border:0!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.card,.v38-card,.v38-tile,.panel,.mini-card,.issue,.module,.book,.principle,.source-policy,.ks40-standard-item){
+  background-color:#FFFCF5!important;
+  border-color:rgba(22,59,54,.14)!important;
+  box-shadow:0 1px 1px rgba(8,27,25,.04),0 10px 30px -18px rgba(8,27,25,.18),0 38px 90px -58px rgba(8,27,25,.42)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.kpi,.v38-kpi,.metric,.hero-metric){
+  background:linear-gradient(155deg,#FFFCF5,#FBF6EB)!important;
+  border-color:rgba(22,59,54,.14)!important;
+  box-shadow:0 20px 46px -38px rgba(8,27,25,.46)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.card-h h2,.card-h h3,.v38-cardh h3,.section-title h2,.shelf-title h2,.panel-head h2){
+  color:#102825!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.card-h h2,.v38-cardh h3)::before{
+  background:#D7AE58!important;
+  box-shadow:0 0 0 5px rgba(215,174,88,.11)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.pill,.badge.mut){
+  background:#F7F0E2!important;
+  color:#5A5340!important;
+  border-color:rgba(22,59,54,.14)!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.brand-name,.brand b,.library-brand b){
+  color:#102825!important;
+  -webkit-text-fill-color:#102825!important;
+}
+html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.brand-sub,.suite-head .brand small,.library-head .library-brand small){
+  color:#6F746C!important;
+}
+html[data-theme="dark"]:is([data-kosif-visual-system],[data-kosif-edition]) body{
+  background:
+    radial-gradient(1000px 520px at 85% -5%,rgba(228,190,107,.07),transparent 60%),
+    linear-gradient(180deg,#0C1210 0%,#0F1714 55%,#0C1210 100%)!important;
+  color:#E9E4D6!important;
+}
+html[data-theme="dark"]:is([data-kosif-visual-system],[data-kosif-edition]) :is(.topbar,.tabs,.suite-head,.library-head,.sales-top,#bar){
+  background:rgba(15,23,20,.85)!important;
+  border-color:rgba(233,228,214,.13)!important;
+}
+html[data-theme="dark"]:is([data-kosif-visual-system],[data-kosif-edition]) :is(.card,.v38-card,.panel,.module,.book,.kpi,.v38-kpi){
+  background-color:#16211C!important;
+  border-color:rgba(233,228,214,.13)!important;
+}

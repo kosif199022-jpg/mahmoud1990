@@ -44,7 +44,13 @@
     document.head.appendChild(link);
   }
 
+  // The approved v46 Ink & Gold layer is the default presentation. The parallel
+  // Sharp Command Center skin stays available as an explicit opt-in (?sharp=1)
+  // so a competing identity cannot silently flip the governed product look.
+  const sharpOptIn = () => new URLSearchParams(location.search).has('sharp');
+
   function ensureSharpLayer() {
+    if (!sharpOptIn()) return;
     root.dataset.kosifSharp = 'v46';
     if ($('link[data-kosif-sharp="v46"]') || $('#kosif-sharp-command-center-v46')) return;
     const link = document.createElement('link');
@@ -57,11 +63,11 @@
 
   function updateChrome() {
     const theme = $('meta[name="theme-color"]');
-    if (theme) theme.content = '#f4f6f8';
+    if (theme) theme.content = sharpOptIn() ? '#f4f6f8' : '#102825';
     const release = $('.kcw-release');
-    if (release) release.textContent = 'KOSIF · v46 · SHARP COMMAND CENTER';
+    if (release) release.textContent = sharpOptIn() ? 'KOSIF · v46 · SHARP COMMAND CENTER' : 'KOSIF Editorial · v41.2 · UNIFIED EDITION';
     const suiteVersion = $('#suite-version');
-    if (suiteVersion) suiteVersion.textContent = 'KOSIF Sharp Command Center v46';
+    if (suiteVersion) suiteVersion.textContent = sharpOptIn() ? 'KOSIF Sharp Command Center v46' : 'KOSIF Editorial v41.2';
   }
 
   function mountFolio() {
@@ -70,7 +76,7 @@
     const folio = document.createElement('div');
     folio.className = 'k41-folio';
     folio.setAttribute('aria-hidden', 'true');
-    folio.innerHTML = '<b>KOSIF COMMAND</b><span>SHARP v46</span>';
+    folio.innerHTML = sharpOptIn() ? '<b>KOSIF COMMAND</b><span>SHARP v46</span>' : '<b>KOSIF REVIEW</b><span>ISSUE 41.2</span>';
     hero.appendChild(folio);
   }
 
@@ -85,7 +91,6 @@
 
   function syncDomain() {
     root.dataset.kosifDomain = currentDomain();
-    root.dataset.kosifSharp = 'v46';
   }
 
   function mountScrollProgress() {
@@ -241,7 +246,6 @@
     root.dataset.kosifEdition = 'v41';
     root.dataset.kosifExperience = 'v41';
     root.dataset.kosifRevision = 'v41.2';
-    root.dataset.kosifSharp = 'v46';
     root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
     syncDomain();
     updateChrome();
@@ -263,7 +267,6 @@
     root.dataset.kosifEdition = 'v41';
     root.dataset.kosifExperience = 'v41';
     root.dataset.kosifRevision = 'v41.2';
-    root.dataset.kosifSharp = 'v46';
     root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
     syncDomain();
     updateChrome();
