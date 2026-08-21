@@ -177,6 +177,9 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare security artifacts directory
+        shell: bash
+        run: mkdir -p artifacts
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
