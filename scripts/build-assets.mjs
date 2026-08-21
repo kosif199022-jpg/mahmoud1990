@@ -6,6 +6,7 @@ const cssHref = '/kosif-design-system-v44.css';
 const jsSrc = '/kosif-design-system-v44.js';
 const fontHref = '/kosif-fonts-v45.css?v=45';
 const masterThemeHref = '/kosif-master-theme.css?v=2026.08.21-master-1';
+const touchGuardId = 'kosif-touch-target-build-guard';
 
 let html = fs.readFileSync(source, 'utf8');
 
@@ -26,6 +27,14 @@ if (!html.includes('/kosif-fonts-v45.css')) {
 }
 if (!html.includes('/kosif-master-theme.css')) {
   html = html.replace('</head>', `  <link rel="stylesheet" id="kosif-master-theme" href="${masterThemeHref}">\n</head>`);
+}
+
+// A few legacy desktop navigation rules are injected dynamically after the
+// external design sheets and historically collapse the tabs to 42px. Keep a
+// final canonical-shell guard in the built HTML so both static QA and the
+// generated public shell honor the governed 44px interactive target.
+if (!html.includes(`id="${touchGuardId}"`)) {
+  html = html.replace('</head>', `  <style id="${touchGuardId}">html body button.tab{height:44px!important;min-height:44px!important;min-block-size:44px!important}</style>\n</head>`);
 }
 
 if (!html.includes(jsSrc)) {
@@ -51,4 +60,4 @@ if (fs.existsSync(wealthLibrary)) {
   if (src.includes(delayed)) fs.writeFileSync(wealthLibrary, src.replace(delayed, direct));
 }
 
-console.log('Kosif Native assets ready with Design Quality Stack v44 + master theme + direct book bootstrap v45');
+console.log('Kosif Native assets ready with Design Quality Stack v44 + master theme + 44px guard + direct book bootstrap v45');
