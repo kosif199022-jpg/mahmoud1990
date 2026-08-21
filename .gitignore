@@ -17,6 +17,10 @@ test-results/
 storybook-static/
 .lighthouseci/
 
+# Motion workspaces
+motion/remotion/out/
+motion/hyperframes/renders/
+
 # Gemini CLI local/runtime state
 .gemini/
 gha-creds-*.json
