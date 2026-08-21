@@ -34,17 +34,20 @@ assert(css.includes('@media (prefers-reduced-motion:reduce)'), 'reduced-motion c
 assert(guard.includes("const ROOT_ATTR = 'data-kosif-theme'"), 'cascade guard root attribute missing');
 assert(guard.includes("const VERSION = 'v46'"), 'cascade guard version missing');
 assert(guard.includes('MutationObserver'), 'cascade guard observer missing');
-assert(guard.includes("document.head.append(link)"), 'cascade guard cannot keep v46 last');
+assert(guard.includes('document.head.append(link)'), 'cascade guard cannot keep v46 last');
 assert(guard.includes("event.target.closest?.('#kosif-font-open')"), 'font sheet transition trigger missing');
 assert(guard.includes("document.getElementById('kosif-more')?.classList.remove('show')"), 'font sheet does not replace the More sheet');
 
 for (const needle of [
-  "const themeV46CssHref = '/kosif-sharp-command-center-v46.css?v=2026.08.22-1'",
-  "const themeV46GuardSrc = '/kosif-theme-v46.js?v=2026.08.22-1'",
+  "themeV46CssHref='/kosif-sharp-command-center-v46.css?v=2026.08.22-1'",
+  "themeV46GuardSrc='/kosif-theme-v46.js?v=2026.08.22-1'",
   'data-kosif-theme="v46"',
-  'html = applyThemeV46(html)',
-  'applyThemeV46(applyVisualSystemV45(shellHtml))'
-]) assert(build.includes(needle), `static build wiring missing: ${needle}`);
+  'function applyThemeV46(',
+  'html=applyThemeV46(applyA11yLayerV46(',
+  's=applyThemeV46(applyA11yLayerV46(',
+  "s.includes(themeV46CssHref)",
+  "'${themeV46CssHref}','${themeV46GuardSrc}'"
+]) assert(build.includes(needle), `unified static build wiring missing: ${needle}`);
 
 for (const needle of [
   'const THEME_V46 =',
