@@ -99,7 +99,7 @@ html[data-theme="dark"] #kosif-boot{background:linear-gradient(180deg,#081B19,#1
   background:rgba(255,252,245,.93)!important;
   box-shadow:0 18px 50px -18px rgba(8,27,25,.4)!important;
 }
-#kosif-bottom-nav button{color:#6F746C!important}
+#kosif-bottom-nav button{color:#5F655D!important}
 #kosif-bottom-nav button.active{
   color:#102825!important;
   background:linear-gradient(135deg,#F8EDCF,#FFFCF5)!important;
@@ -129,9 +129,9 @@ html[data-theme="dark"] #kosif-bottom-nav button.active{
   font-size:10.5px;font-weight:800;border:1px solid;
 }
 .book .auth::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.book .auth.ok{background:#E4F2ED;color:#0B8B7C;border-color:rgba(11,139,124,.3)}
+.book .auth.ok{background:#E4F2ED;color:#0A6B5E;border-color:rgba(11,139,124,.3)}
 .book .auth.info{background:#EAF0FF;color:#315BE8;border-color:rgba(49,91,232,.3)}
-.book .auth.warn{background:#F8EDCF;color:#A97822;border-color:rgba(169,120,34,.3)}
+.book .auth.warn{background:#F8EDCF;color:#8A5F13;border-color:rgba(169,120,34,.3)}
 .book .auth.mut{background:#F7F0E2;color:#6F746C;border-color:rgba(22,59,54,.16)}
 html[data-theme="dark"] .book .auth.ok{background:rgba(111,194,176,.12);color:#6FC2B0;border-color:rgba(111,194,176,.3)}
 html[data-theme="dark"] .book .auth.info{background:rgba(143,184,165,.12);color:#8FB8A5;border-color:rgba(143,184,165,.3)}
@@ -153,9 +153,9 @@ html[data-theme="dark"] .book .auth.mut{background:rgba(233,228,214,.08);color:#
   background:linear-gradient(100deg,#102825,#A97822 55%,#0B8B7C)!important;
   -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
 }
-.sales-brand small,.sales-mobile-brand small,.chapter-head small{color:#0B8B7C!important}
-.hero-badge{color:#0B8B7C!important;border-color:rgba(11,139,124,.3)!important}
-.sales-actions button{color:#A97822!important}
+.sales-brand small,.sales-mobile-brand small,.chapter-head small{color:#0A6B5E!important}
+.hero-badge{color:#0A6B5E!important;border-color:rgba(11,139,124,.3)!important}
+.sales-actions button{color:#8A5F13!important}
 .sales-actions .btnlike{background:linear-gradient(135deg,#102825,#0B8B7C)!important;box-shadow:0 10px 24px -14px rgba(11,139,124,.7)!important}
 .chapter-head{border-image:linear-gradient(90deg,transparent,#0B8B7C,#102825) 1!important}
 .sales-brand-icon,.chapter-icon{background:linear-gradient(135deg,#102825,#0B8B7C)!important;box-shadow:0 14px 32px -17px rgba(11,139,124,.6)!important}
@@ -219,7 +219,7 @@ html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.tab.active,.tab[ar
   box-shadow:0 14px 30px -19px rgba(169,120,34,.72)!important;
 }
 html:is([data-kosif-visual-system],[data-kosif-edition]) .tab .n{
-  background:#F8EDCF!important;color:#A97822!important;border:0!important;
+  background:#F8EDCF!important;color:#8A5F13!important;border:0!important;
 }
 html:is([data-kosif-visual-system],[data-kosif-edition]) :is(.card,.v38-card,.v38-tile,.panel,.mini-card,.issue,.module,.book,.principle,.source-policy,.ks40-standard-item){
   background-color:#FFFCF5!important;
