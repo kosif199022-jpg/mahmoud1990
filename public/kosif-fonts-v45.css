@@ -108,3 +108,13 @@
   font-variant-numeric:tabular-nums;
   font-feature-settings:'tnum' 1;
 }
+
+/* Accessibility floor shared by the legacy audit shell. This file is loaded by
+   every shell, and the higher specificity prevents older 42px tab rules from
+   undercutting the governed 44px minimum touch target. */
+html body button.tab,
+html body .tab[role="tab"],
+html body [role="tab"].tab{
+  min-height:44px!important;
+  min-block-size:44px!important;
+}
