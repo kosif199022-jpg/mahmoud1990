@@ -162,6 +162,14 @@ img,video{block-size:auto}
   min-block-size:var(--kosif-touch);
 }
 
+/* Explicit legacy-tab floor: legacy module CSS may still carry a 42px rule. */
+html body button.tab,
+html body .tab[role="tab"],
+html body [role="tab"].tab{
+  min-height:var(--kosif-touch)!important;
+  min-block-size:var(--kosif-touch)!important;
+}
+
 :where(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
   max-inline-size:100%;
 }
