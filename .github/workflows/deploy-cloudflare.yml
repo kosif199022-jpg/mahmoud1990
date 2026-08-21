@@ -39,7 +39,7 @@ jobs:
       - name: Verify live Kosif suite
         shell: bash
         env:
-          LIVE_URL: https://mahmoud-eldesouky.kosif199022.workers.dev
+          LIVE_URL: https://kosif.kosif199022.workers.dev
         run: |
           set -euo pipefail
           ok=0
@@ -58,7 +58,7 @@ jobs:
           done
           [ "$ok" = 1 ] || { echo 'Live Kosif verification failed'; cat /tmp/kosif-live-health.json 2>/dev/null || true; exit 1; }
 
-          for path in / /audit/ /libraries/ /sales/ /standards/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-user-polish.css /v38-user-polish.js /kosif-studio-v40.css /kosif-studio-v40.js /kosif-suite-v40.css /kosif-editorial-v41.css /kosif-editorial-v41.js /manifest.webmanifest /icons/icon-192.png /icons/icon-512.png /icons/maskable-512.png /assets/kosif-studio-hero-v40.webp /assets/kosif-reports-hero-v39.webp /assets/kosif-live-hero-v39.webp /v38-reports.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
+          for path in / /audit/ /libraries/ /sales/ /standards/ /wealth/reader.html /wealth-library-v37.js /v38-ultimate.css /v38-ultimate.js /v38-user-polish.css /v38-user-polish.js /kosif-studio-v40.css /kosif-studio-v40.js /kosif-suite-v40.css /kosif-editorial-v41.css /kosif-editorial-v41.js /kosif-workspace-stability-v42.js /kosif-workspace-stability-v42.css /kosif-workspace-stability-loader-v42.js /manifest.webmanifest /icons/icon-192.png /icons/icon-512.png /icons/maskable-512.png /assets/kosif-studio-hero-v40.webp /assets/kosif-reports-hero-v39.webp /assets/kosif-live-hero-v39.webp /v38-reports.js /v38-council-v3.js /v38-evidence-graph.js /v38-source-fabric.js /demo/v38/manifest.json; do
             route_ok=0
             code=000
             for attempt in $(seq 1 15); do
@@ -75,6 +75,7 @@ jobs:
               && grep -q 'kosif-studio-v40.css' /tmp/kosif-v41-audit.html \
               && grep -q 'kosif-editorial-v41.css' /tmp/kosif-v41-audit.html \
               && grep -q 'kosif-editorial-v41.js' /tmp/kosif-v41-audit.html \
+              && grep -q 'kosif-workspace-stability-loader-v42.js' /tmp/kosif-v41-audit.html \
               && grep -q 'kosif-studio-hero-v40.webp' /tmp/kosif-v41-audit.html \
               && grep -q 'manifest.webmanifest' /tmp/kosif-v41-audit.html; then
               audit_shell_ok=1
@@ -82,7 +83,7 @@ jobs:
             fi
             sleep 2
           done
-          [ "$audit_shell_ok" = 1 ] || { echo 'Final v41 audit shell markers did not converge after propagation retries'; exit 1; }
+          [ "$audit_shell_ok" = 1 ] || { echo 'Final audit shell and stability markers did not converge after propagation retries'; exit 1; }
           curl -fsS --connect-timeout 10 --max-time 30 "$LIVE_URL/kosif-studio-v40.css?deploy=$GITHUB_SHA" -o /tmp/kosif-studio-v40.css
           grep -q 'kosif-studio-v40' /tmp/kosif-studio-v40.css || { echo 'Studio visual authority marker missing'; exit 1; }
           grep -q '/assets/kosif-studio-hero-v40.webp' /tmp/kosif-studio-v40.css || { echo 'Generated v40 hero is not consumed'; exit 1; }
@@ -157,12 +158,12 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          LIVE_URL: https://mahmoud-eldesouky.kosif199022.workers.dev
+          LIVE_URL: https://kosif.kosif199022.workers.dev
         run: |
           set -euo pipefail
           node - <<'NODE' >/tmp/kosif-deploy-status.md
           const fs=require('fs');const h=JSON.parse(fs.readFileSync('/tmp/kosif-live-health.json','utf8'));const run=`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Shared Mafateeh reader books: \`mafateeh, std2025, std2018, dipifr\`\n- Reader model: **one original Mafateeh runtime; book content only is switched**\n- Default: **Mafateeh**\n- Initial screen: **original navy/gold; Mixer / Smart Library / internal library docks hidden**\n- Native indexes + first chapter bodies: **verified live**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe deployment gate proves all four prepared books return through /wealth/reader.html, expose the original mutable D/CH runtime, hydrate their own content, and no longer redirect to the isolated /libraries/reader.html implementation.`);
+          console.log(`## Deployment status\n\n✅ **VERIFIED IN PRODUCTION**\n\n- Verified at: ${new Date().toISOString()}\n- Commit: \`${process.env.GITHUB_SHA}\`\n- Live Worker: ${process.env.LIVE_URL}\n- Product: **${h.productName||'Kosif'}**\n- Version: \`${h.version}\`\n- Build: \`${h.buildId}\`\n- Audit: \`${h.modules?.audit}\`\n- Libraries: \`${h.modules?.libraries}\`\n- Wealth Keys: \`${h.modules?.wealth}\`\n- General Sales: \`${h.modules?.sales}\`\n- Workspace stability layer: **verified live on /audit/**\n- Shared Mafateeh reader books: \`mafateeh, std2025, std2018, dipifr\`\n- Reader model: **one original Mafateeh runtime; book content only is switched**\n- Default: **Mafateeh**\n- Initial screen: **original navy/gold; Mixer / Smart Library / internal library docks hidden**\n- Native indexes + first chapter bodies: **verified live**\n- Design authority: **${h.designAuthority}**\n- Security: \`${JSON.stringify(h.security||{})}\`\n- Workflow run: ${run}\n\nThe deployment gate verifies the canonical short Worker URL, the audit stability layer, and all four prepared books through /wealth/reader.html without weakening accounting, security, source, or reader contracts.`);
           NODE
           gh issue edit 55 --repo "$GITHUB_REPOSITORY" --body-file /tmp/kosif-deploy-status.md
 
@@ -179,6 +180,7 @@ jobs:
           ❌ **DEPLOYMENT OR LIVE VERIFICATION FAILED**
 
           - Commit: \`$GITHUB_SHA\`
+          - Canonical Worker: https://kosif.kosif199022.workers.dev
           - Workflow run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
 
           The release was not marked verified. Review the failed step before treating the Cloudflare deployment as production-ready.
