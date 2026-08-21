@@ -11,6 +11,7 @@
   --kosif-status-danger: #ef4444;
   --kosif-text-primary: #f9fafb;
   --kosif-text-muted: #9ca3af;
+  --kosif-a11y-muted-light: #526270;
   --kosif-glass-bg: rgba(17, 24, 39, 0.75);
   --kosif-glass-backdrop: 12px;
   --kosif-radius-sm: 10px;
@@ -59,12 +60,20 @@
  * overview text meets WCAG AA contrast on the governed light surfaces.
  * Specificity is intentionally higher than legacy !important theme rules.
  */
-html[data-kosif-visual-system='v45'] body #view-overview .kw42-stat span,
-html[data-kosif-visual-system='v45'] body #kosif-overview-path-card .card-h .hint,
-html[data-kosif-visual-system='v45'] body #view-overview .step p,
-html[data-kosif-visual-system='v45'] body #view-overview .k41-in.tight p,
-html[data-kosif-visual-system='v45'] body #view-overview .k41-in.tight p b {
-  color: var(--k45-muted, #667687) !important;
+html[data-kosif-visual-system='v45']:not([data-theme='dark']) body #view-overview .kw42-stat span,
+html[data-kosif-visual-system='v45']:not([data-theme='dark']) body #kosif-overview-path-card .card-h .hint,
+html[data-kosif-visual-system='v45']:not([data-theme='dark']) body #view-overview .step p,
+html[data-kosif-visual-system='v45']:not([data-theme='dark']) body #view-overview .k41-in.tight p,
+html[data-kosif-visual-system='v45']:not([data-theme='dark']) body #view-overview .k41-in.tight p b {
+  color: var(--kosif-a11y-muted-light) !important;
+}
+
+html[data-kosif-visual-system='v45'][data-theme='dark'] body #view-overview .kw42-stat span,
+html[data-kosif-visual-system='v45'][data-theme='dark'] body #kosif-overview-path-card .card-h .hint,
+html[data-kosif-visual-system='v45'][data-theme='dark'] body #view-overview .step p,
+html[data-kosif-visual-system='v45'][data-theme='dark'] body #view-overview .k41-in.tight p,
+html[data-kosif-visual-system='v45'][data-theme='dark'] body #view-overview .k41-in.tight p b {
+  color: #b7c3cd !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
