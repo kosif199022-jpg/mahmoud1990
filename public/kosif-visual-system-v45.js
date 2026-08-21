@@ -14,6 +14,11 @@
   const HREF = '/kosif-visual-system-v45.css?v=2026.08.21-2';
   let queued = false;
 
+  function themeV46Present() {
+    return document.documentElement.getAttribute('data-kosif-theme') === 'v46' ||
+      Boolean(document.getElementById('kosif-theme-v46'));
+  }
+
   function visualLink() {
     let link = document.getElementById(ID);
     if (link) return link;
@@ -49,6 +54,9 @@
 
   function ensureLast() {
     queued = false;
+    // v46 is the final presentation authority. Once present, v45 remains loaded
+    // as the compatibility base but must never fight v46 for the last cascade slot.
+    if (themeV46Present()) return;
     const link = visualLink();
     const floor = visualFloor();
     const styles = [...document.head.children].filter(isPresentationStyle);
@@ -59,7 +67,7 @@
   }
 
   function queueEnsureLast() {
-    if (queued) return;
+    if (queued || themeV46Present()) return;
     queued = true;
     queueMicrotask(ensureLast);
   }
@@ -67,6 +75,7 @@
   // Observe only presentation-node insertions in <head>; never observe the page
   // subtree or attributes. Own v45 nodes are excluded to prevent self-trigger loops.
   const observer = new MutationObserver(records => {
+    if (themeV46Present()) return;
     const lateStyleAdded = records.some(record =>
       [...record.addedNodes].some(node =>
         isPresentationStyle(node) && node.id !== ID && node.id !== FLOOR_ID
@@ -94,8 +103,7 @@
     requestAnimationFrame(restore);
   });
 
-  // Establish authority immediately. Mutation-driven repairs use a microtask so
-  // a legacy stylesheet cannot be measured by the next browser task before v45.
+  // Establish v45 authority only when no newer theme owns the cascade.
   ensureLast();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', queueEnsureLast, { once: true });
