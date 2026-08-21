@@ -8,10 +8,7 @@ function bindHiddenContainer(element){
   sync();
   new MutationObserver(sync).observe(element,{attributes:true,attributeFilter:['aria-hidden']});
 }
-function scan(){
-  bindHiddenContainer(document.getElementById('drawer'));
-  document.querySelectorAll('[aria-hidden="true"].drawer').forEach(bindHiddenContainer);
-}
+function scan(){bindHiddenContainer(document.getElementById('drawer'))}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scan,{once:true});else scan();
-new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true});
+window.addEventListener('kosif-dialog-lock',scan,{passive:true});
 })();
