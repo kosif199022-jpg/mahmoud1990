@@ -4,24 +4,35 @@
   if (window.__KOSIF_WORKSPACE_STABILITY_LOADER_V42__) return;
   window.__KOSIF_WORKSPACE_STABILITY_LOADER_V42__ = true;
 
-  function mount() {
-    if (!document.querySelector('#view-overview') || !document.querySelector('#kosif-bottom-nav')) return;
-    let css = document.querySelector('#kosif-workspace-stability-css');
+  function addCss(id, href) {
+    let css = document.querySelector('#' + id);
     if (!css) {
       css = document.createElement('link');
-      css.id = 'kosif-workspace-stability-css';
+      css.id = id;
       css.rel = 'stylesheet';
-      css.href = '/kosif-workspace-stability-v42.css?v=2026.08.21-3';
+      css.href = href;
+      document.head.appendChild(css);
     }
-    document.head.appendChild(css);
+    return css;
+  }
 
-    if (!document.querySelector('#kosif-workspace-stability-runtime')) {
-      const script = document.createElement('script');
-      script.id = 'kosif-workspace-stability-runtime';
-      script.src = '/kosif-workspace-stability-v42.js?v=2026.08.21-3';
-      script.defer = true;
-      document.body.appendChild(script);
-    }
+  function addScript(id, src) {
+    if (document.querySelector('#' + id)) return;
+    const script = document.createElement('script');
+    script.id = id;
+    script.src = src;
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
+  function mount() {
+    if (!document.querySelector('#view-overview') || !document.querySelector('#kosif-bottom-nav')) return;
+
+    addCss('kosif-workspace-stability-css', '/kosif-workspace-stability-v42.css?v=2026.08.21-4');
+    addCss('kosif-company-sheet-fix-css', '/kosif-company-sheet-fix-v43.css?v=2026.08.21-1');
+
+    addScript('kosif-workspace-stability-runtime', '/kosif-workspace-stability-v42.js?v=2026.08.21-4');
+    addScript('kosif-company-sheet-fix-runtime', '/kosif-company-sheet-fix-v43.js?v=2026.08.21-1');
   }
 
   if (document.readyState === 'complete') setTimeout(mount, 0);

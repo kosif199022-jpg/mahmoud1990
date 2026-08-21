@@ -1,0 +1,181 @@
+/* KOSIF Company Sheet Fix v43
+ * iPhone/Safari modal stacking, safe areas and background scroll lock.
+ */
+body.kosif-sheet-open{
+  position:fixed!important;
+  inset-inline:0!important;
+  top:var(--kosif-sheet-lock-top,0)!important;
+  width:100%!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  touch-action:none!important;
+}
+body.kosif-sheet-open #app{pointer-events:none!important}
+body.kosif-sheet-open #kosif-bottom-nav{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translate3d(0,130%,0)!important;
+}
+
+#kosif-more,
+#kosif-company-sheet,
+#kosif-ai-sheet,
+#kosif-command-sheet,
+#kosif-font-sheet{
+  z-index:2147483100!important;
+  box-sizing:border-box!important;
+  padding:
+    max(10px,env(safe-area-inset-top))
+    max(10px,env(safe-area-inset-right))
+    max(10px,env(safe-area-inset-bottom))
+    max(10px,env(safe-area-inset-left))!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+#kosif-progress{z-index:2147483200!important}
+
+#kosif-company-sheet{
+  align-items:flex-end!important;
+  justify-content:center!important;
+  touch-action:none!important;
+}
+#kosif-company-sheet>.kosif-sheet{
+  position:relative!important;
+  box-sizing:border-box!important;
+  width:min(720px,100%)!important;
+  max-height:calc(100dvh - max(58px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)))!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  scrollbar-gutter:stable both-edges;
+  padding:18px 18px calc(20px + env(safe-area-inset-bottom))!important;
+  border-radius:24px!important;
+}
+#kosif-company-sheet>.kosif-sheet>.kosif-close{
+  position:sticky!important;
+  top:0!important;
+  z-index:8!important;
+  float:left!important;
+  margin:0 0 8px 8px!important;
+  min-width:42px!important;
+  width:42px!important;
+  height:42px!important;
+  border:1px solid rgba(49,46,129,.14)!important;
+  background:rgba(248,250,252,.96)!important;
+  backdrop-filter:blur(12px)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+}
+#kosif-company-sheet>.kosif-sheet>h3{
+  margin-block:4px 14px!important;
+  min-height:42px!important;
+  display:flex!important;
+  align-items:center!important;
+}
+#kosif-company-list{
+  min-height:92px!important;
+  border-radius:16px!important;
+  overflow:visible!important;
+}
+#kosif-company-list.kosif-shimmer{padding:12px!important}
+.kcs-loading{
+  min-height:76px;
+  display:grid;
+  place-items:center;
+  color:#64748b;
+  font-size:13px;
+  text-align:center;
+}
+.kcs-state{
+  display:grid;
+  justify-items:center;
+  gap:8px;
+  padding:22px 16px;
+  border:1px dashed rgba(99,102,241,.24);
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(248,247,255,.98));
+  color:#64748b;
+  text-align:center;
+}
+.kcs-state strong{color:#312e81;font-size:15px;line-height:1.55}
+.kcs-state>span:not(.kcs-state-icon){font-size:12.5px;line-height:1.7}
+.kcs-state small{font-size:11.5px;line-height:1.6;color:#475569}
+.kcs-state-icon{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#f5f3ff;
+  color:#6d28d9;
+  font-size:18px;
+}
+.kcs-state-error{border-color:rgba(220,38,38,.24);background:linear-gradient(145deg,#fff,#fff7f7)}
+.kcs-state-error strong{color:#991b1b}
+.kcs-state-error .kcs-state-icon{background:#fee2e2;color:#b91c1c}
+.kcs-state-locked{border-color:rgba(217,164,65,.34);background:linear-gradient(145deg,#fffdf8,#fffaf0)}
+.kcs-state-locked .kcs-state-icon{background:#fff3d6;color:#8a5b09}
+
+.kosif-company-actions{
+  position:sticky;
+  bottom:calc(-20px - env(safe-area-inset-bottom));
+  z-index:7;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:12px -2px 0;
+  padding:12px 2px calc(14px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.96) 18%,rgba(255,255,255,.99) 100%);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.kosif-company-actions>.btn{flex:1 1 180px;justify-content:center!important}
+#kosif-company-sheet>.kosif-sheet.kcs-form-open .kosif-company-actions{position:static!important;padding-bottom:8px!important;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#kosif-company-form{padding-bottom:2px}
+#kosif-company-form:not(:empty){scroll-margin-block:20px 110px}
+#kosif-company-form .kosif-row{align-items:flex-start!important}
+#kosif-company-form .kosif-row>label{min-height:44px;display:flex;align-items:center;gap:7px}
+
+#kosif-company-sheet .kosif-company-item{
+  min-height:58px!important;
+  padding:11px 13px!important;
+  border-radius:14px!important;
+}
+#kosif-company-sheet .kosif-company-item small{display:block!important;margin-top:3px!important;line-height:1.45!important}
+
+@media(max-width:720px){
+  #kosif-company-sheet{
+    padding:
+      max(8px,env(safe-area-inset-top))
+      0
+      0
+      0!important;
+  }
+  #kosif-company-sheet>.kosif-sheet{
+    width:100%!important;
+    max-height:calc(100dvh - max(48px,env(safe-area-inset-top)))!important;
+    margin:0!important;
+    padding:16px 14px calc(18px + env(safe-area-inset-bottom))!important;
+    border-radius:24px 24px 0 0!important;
+    box-shadow:0 -18px 70px -28px rgba(15,23,42,.58)!important;
+  }
+  .kosif-company-actions{
+    bottom:calc(-18px - env(safe-area-inset-bottom));
+    margin-inline:-1px;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  }
+  .kosif-company-actions>.btn{flex:1 1 calc(50% - 6px);min-width:0!important;padding-inline:10px!important}
+  .kcs-state{padding:20px 13px}
+}
+
+@media(max-width:390px){
+  .kosif-company-actions{display:grid;grid-template-columns:1fr 1fr}
+  .kosif-company-actions>.btn{width:100%!important;font-size:12.5px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.kosif-sheet-open #kosif-bottom-nav{transition:none!important}
+}

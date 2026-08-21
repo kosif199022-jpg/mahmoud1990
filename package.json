@@ -41,7 +41,7 @@
     "v41-experience": "node scripts/check-v41-experience.mjs",
     "kitab-theme": "node scripts/check-kitab-theme-authority.mjs",
     "v42-requirements": "node scripts/check-v42-requirements.mjs && node --test tests/v42-requirements-control-plane.test.mjs",
-    "v43-requirements": "node scripts/check-v43-requirements.mjs && node --test tests/v43-full-coverage.test.mjs tests/v43-edge-wrapper.test.mjs",
+    "v43-requirements": "node scripts/check-v43-requirements.mjs && node --test tests/v43-full-coverage.test.mjs tests/v43-edge-wrapper.test.mjs tests/company-sheet-v43.test.mjs",
     "design-quality-v44": "node scripts/check-design-quality-v44.mjs",
     "storybook": "npx --yes --package storybook@latest --package @storybook/html-vite@latest storybook dev -p 6006",
     "storybook:build": "npx --yes --package storybook@latest --package @storybook/html-vite@latest storybook build -o storybook-static",
