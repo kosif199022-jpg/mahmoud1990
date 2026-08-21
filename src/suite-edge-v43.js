@@ -18,6 +18,8 @@ const READY = Boolean(COVERAGE.complete && STRUCTURE.complete && PRIMITIVES.ok);
 const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safety" href="/kosif-touch-reveal-safety-v44.css?v=2">';
 const VISUAL_SYSTEM_V45 = '<link rel="stylesheet" id="kosif-visual-system-v45" href="/kosif-visual-system-v45.css?v=2026.08.21-2">';
 const VISUAL_SYSTEM_V45_GUARD = '<script id="kosif-visual-system-v45-guard" src="/kosif-visual-system-v45.js?v=2026.08.21-1" defer></script>';
+const THEME_V46 = '<link rel="stylesheet" id="kosif-theme-v46" href="/kosif-sharp-command-center-v46.css?v=2026.08.22-1">';
+const THEME_V46_GUARD = '<script id="kosif-theme-v46-guard" src="/kosif-theme-v46.js?v=2026.08.22-1" defer></script>';
 const WORKSPACE_STABILITY = '<script id="kosif-workspace-stability-loader" src="/kosif-workspace-stability-loader-v42.js?v=2026.08.21-5" defer></script>';
 
 function reqJson(body,status=200){
@@ -42,6 +44,7 @@ function decorateRequirements(response,url){
   h.set('x-kosif-requirements-ready',READY?'true':'false');
   h.set('x-kosif-enterprise-contract',KOSIF_ENTERPRISE_CONTRACT_VERSION);
   h.set('x-kosif-visual-system','v45');
+  h.set('x-kosif-theme','v46');
   const decorated=new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
   const contentType=h.get('content-type')||'';
   if(!/text\/html/i.test(contentType))return decorated;
@@ -51,7 +54,10 @@ function decorateRequirements(response,url){
   const rewriter=new HTMLRewriter();
   if(!preserveWealthReader){
     rewriter.on('html',{
-      element(html){html.setAttribute('data-kosif-visual-system','v45');}
+      element(html){
+        html.setAttribute('data-kosif-visual-system','v45');
+        html.setAttribute('data-kosif-theme','v46');
+      }
     });
   }
   rewriter.on('head',{
@@ -60,6 +66,8 @@ function decorateRequirements(response,url){
       if(!preserveWealthReader){
         head.append(VISUAL_SYSTEM_V45,{html:true});
         head.append(VISUAL_SYSTEM_V45_GUARD,{html:true});
+        head.append(THEME_V46,{html:true});
+        head.append(THEME_V46_GUARD,{html:true});
       }
     }
   });
