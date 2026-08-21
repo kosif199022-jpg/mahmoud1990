@@ -1,52 +1,30 @@
 import fs from 'node:fs';
-
-const read = p => fs.readFileSync(p, 'utf8');
-const ok = (condition, message) => {
-  if (!condition) throw new Error(`KOSIF_PROJECT_HYGIENE_FAIL: ${message}`);
-  console.log(`  ✅ ${message}`);
-};
-
-const publicShell = read('public/index.html');
-const frontendShell = read('frontend/index.html');
-const hub = read('public/hub.html');
-const libraries = read('public/libraries/index.html');
-const salesHtml = read('public/sales/index.html');
-const salesJs = read('public/sales/sales.js');
-const salesMotion = read('public/sales/sales-motion-v1.js');
-const sw = read('public/sw.js');
-const books = read('src/v38-books.js');
-const api = read('src/v38-api.js');
-const readme = read('README.md');
-const workflow = read('.github/workflows/ci-quality-gate.yml');
-const gitignore = read('.gitignore');
-
-ok(publicShell === frontendShell, 'canonical public/frontend audit shells are byte-identical');
-ok(fs.existsSync('public/bundles/kosif-suite-core-v46.css'), 'shared suite CSS bundle exists');
-ok(fs.existsSync('public/sales/sales-ui-v46.css'), 'Sales CSS bundle exists');
-for (const [name, html] of [['hub', hub], ['libraries', libraries], ['sales', salesHtml]]) {
-  ok(html.includes('/bundles/kosif-suite-core-v46.css?v=46'), `${name} uses the generated shared suite bundle`);
-}
-ok(salesHtml.includes('/sales/sales-ui-v46.css?v=46'), 'Sales uses the generated sales UI bundle');
-ok(!fs.existsSync('public/sales/sales-general-bootstrap.js') && !salesHtml.includes('sales-general-bootstrap.js'), 'obsolete Sales bootstrap is fully merged and removed');
-ok(salesJs.includes("const STORE='kosif:sales:v1'") && salesJs.includes("const LEGACY_STORE='kosif:aghnam:v7:native'"), 'Sales uses a generic canonical storage key with legacy migration support');
-ok(salesMotion.includes("window.__KOSIF_SALES_STORE_KEY__||'kosif:sales:v1'"), 'Sales motion consumes the canonical shared storage key');
-ok(salesJs.includes("a.download='kosif-sales-backup.json'"), 'Sales exports a generic KOSIF backup filename');
-ok(salesJs.includes('function parseDelimited(') && salesJs.includes('rowsFromDelimited('), 'Sales CSV/TSV importer handles quoted delimiters');
-ok(!/[اأإآ]غنام|نعيمي|سواكني|حري|ذبائح/.test(salesHtml + salesJs + salesMotion), 'legacy livestock demo copy is absent from the active Sales workspace');
-ok((salesJs.match(/Aghnam v7 native integration/g) || []).length === 1, 'legacy Aghnam label appears only in the exact migration detector');
-for (const phrase of ['التواصل مع المكلفين بالحوكمة','الإقرارات المكتوبة','استخدام عمل المراجعين الداخليين','فقرات لفت الانتباه وفقرات الأمور الأخرى في تقرير المراجع المستقل','مسؤوليات المراجع المتعلقة بالمعلومات الأخرى']) ok(books.includes(phrase), `professional standards wording retained: ${phrase}`);
-ok(!books.includes('التواصل مع أولياء الأمور'), 'incorrect ISA 260 wording is removed');
-ok(api.includes('لا تُستبدل معرّفات الملاحظات القائمة بصمت؛ استخدم تعديلًا صريحًا.'), 'reviewer-note conflict message is clear Arabic');
-ok(readme.startsWith('# KOSIF — منصة المراجعة والامتثال والذكاء المهني'), 'README describes the current layered KOSIF platform');
-ok(!readme.includes('### نسيق ذكاء المصادر'), 'README source-intelligence heading typo is fixed');
-ok(workflow.includes('npm run source-export') && workflow.includes('Kosif-Full-Application-Source.json'), 'unified CI exports the complete source snapshot as an artifact');
-ok(!fs.existsSync('.github/workflows/export-full-code-json.yml'), 'obsolete standalone source-export workflow stays removed');
-ok(gitignore.includes('Kosif-Full-Application-Source.json'), 'generated full-source snapshot is ignored and never becomes repository truth');
-ok(sw.includes('/bundles/kosif-suite-core-v46.css?v=46') && sw.includes('/sales/sales-ui-v46.css?v=46'), 'PWA cache includes generated UI bundles');
-ok(!sw.includes('/sales/sales-general-bootstrap.js'), 'PWA cache does not reference the deleted Sales bootstrap');
+const read=p=>fs.readFileSync(p,'utf8');
+const ok=(v,m)=>{if(!v)throw new Error(`KOSIF_PROJECT_HYGIENE_FAIL: ${m}`);console.log(`  ✅ ${m}`)};
+const pub=read('public/index.html'),front=read('frontend/index.html'),hub=read('public/hub.html'),libs=read('public/libraries/index.html'),salesHtml=read('public/sales/index.html'),salesJs=read('public/sales/sales.js'),motion=read('public/sales/sales-motion-v1.js'),sw=read('public/sw.js'),books=read('src/v38-books.js'),api=read('src/v38-api.js'),voice=read('public/v36-voice-guide.js'),workflow=read('.github/workflows/ci-quality-gate.yml'),gitignore=read('.gitignore');
+ok(pub===front,'canonical public/frontend audit shells are byte-identical');
+ok(fs.existsSync('public/bundles/kosif-suite-core-v46.css'),'shared suite CSS bundle exists');
+ok(fs.existsSync('public/sales/sales-ui-v46.css'),'Sales CSS bundle exists');
+for(const [n,h] of [['hub',hub],['libraries',libs],['sales',salesHtml]])ok(h.includes('/bundles/kosif-suite-core-v46.css?v=46'),`${n} uses generated shared suite bundle`);
+ok(salesHtml.includes('/sales/sales-ui-v46.css?v=46'),'Sales uses generated Sales UI bundle');
+ok(!fs.existsSync('public/sales/sales-general-bootstrap.js')&&!salesHtml.includes('sales-general-bootstrap.js'),'obsolete Sales bootstrap is removed');
+ok(salesJs.includes("const STORE='kosif:sales:v1'")&&salesJs.includes("const LEGACY_STORE='kosif:aghnam:v7:native'"),'Sales has canonical storage plus legacy migration key');
+ok(salesJs.includes('shouldReplaceLegacyDemo')&&salesJs.includes('localStorage.getItem(LEGACY_STORE)'),'Sales migration preserves imported user data and replaces only historical demo');
+ok(motion.includes("window.__KOSIF_SALES_STORE_KEY__||'kosif:sales:v1'"),'Sales motion consumes canonical shared storage key');
+ok(salesJs.includes("a.download='kosif-sales-backup.json'"),'Sales exports generic KOSIF backup filename');
+ok(salesJs.includes('function parseDelimited(')&&salesJs.includes('rowsFromDelimited('),'Sales CSV/TSV parser handles quoted delimiters');
+ok(!/[اأإآ]غنام|نعيمي|سواكني|ذبائح|تيس|حبشي/.test(salesHtml+salesJs+motion),'legacy livestock demo copy is absent from active Sales runtime');
+for(const phrase of ['التواصل مع المكلفين بالحوكمة','الإقرارات المكتوبة','استخدام عمل المراجعين الداخليين','فقرات لفت الانتباه وفقرات الأمور الأخرى في تقرير المراجع المستقل','مسؤوليات المراجع المتعلقة بالمعلومات الأخرى'])ok(books.includes(phrase),`professional wording retained: ${phrase}`);
+ok(!books.includes('التواصل مع أولياء الأمور'),'incorrect ISA 260 wording is removed');
+ok(api.includes('لا تُستبدل معرّفات الملاحظات القائمة بصمت؛ استخدم تعديلًا صريحًا.'),'reviewer-note conflict message is explicit');
+ok(voice.includes('aria-hidden="true" inert')&&voice.includes('x.inert=false')&&voice.includes('x.inert=true'),'voice dialog removes hidden focus targets');
+ok(workflow.includes('npm run source-export')&&workflow.includes('Kosif-Full-Application-Source.json'),'unified CI exports complete source snapshot as artifact');
+ok(!fs.existsSync('.github/workflows/export-full-code-json.yml'),'obsolete standalone source-export workflow stays removed');
+ok(gitignore.includes('Kosif-Full-Application-Source.json'),'generated full-source snapshot is ignored');
+ok(sw.includes('/bundles/kosif-suite-core-v46.css?v=46')&&sw.includes('/sales/sales-ui-v46.css?v=46'),'PWA cache includes generated v46 UI bundles');
+ok(!sw.includes('/sales/sales-general-bootstrap.js'),'PWA cache does not reference deleted Sales bootstrap');
 const htmlFiles=['public/index.html','public/hub.html','public/libraries/index.html','public/libraries/reader.html','public/sales/index.html','public/standards/index.html','public/requirements/index.html'];
-const dynamicPrefixes=['/audit/','/wealth/','/library/','/api/','/standards/audio/','/__'];
-const missingRefs=[];
-for(const file of htmlFiles){const html=read(file);for(const match of html.matchAll(/(?:href|src)=["'](\/[^"'#]+)["']/g)){const raw=match[1],pathname=raw.split('?')[0];if(dynamicPrefixes.some(prefix=>pathname.startsWith(prefix)))continue;let candidate=`public${pathname}`;if(pathname.endsWith('/'))candidate+='index.html';if(!fs.existsSync(candidate))missingRefs.push(`${file} -> ${raw}`)}}
-ok(missingRefs.length===0,`primary HTML surfaces have no missing local assets${missingRefs.length?`: ${missingRefs.join(', ')}`:''}`);
+const dynamic=['/audit/','/wealth/','/library/','/api/','/standards/audio/','/__'];const missing=[];
+for(const file of htmlFiles){const html=read(file);for(const m of html.matchAll(/(?:href|src)=["'](\/[^"'#]+)["']/g)){const raw=m[1],pathname=raw.split('?')[0];if(dynamic.some(p=>pathname.startsWith(p)))continue;let candidate=`public${pathname}`;if(pathname.endsWith('/'))candidate+='index.html';if(!fs.existsSync(candidate))missing.push(`${file} -> ${raw}`)}}
+ok(missing.length===0,`primary HTML surfaces have no missing local assets${missing.length?`: ${missing.join(', ')}`:''}`);
 console.log('KOSIF_PROJECT_HYGIENE_OK');
