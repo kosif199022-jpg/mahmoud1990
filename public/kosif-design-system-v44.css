@@ -113,6 +113,15 @@ html[data-kosif-edition="v41"] :where(button,.btn,[role="button"],input,select){
   min-block-size:var(--k44-touch);
 }
 
+/* Legacy AI provider pills had an explicit 38px height. Preserve their compact
+ * visual treatment while bringing the actual interactive box up to the 44px
+ * accessibility/touch contract on both desktop and mobile. */
+html[data-kosif-design-system="v44"] button.pill.kosif-ai-pill,
+html[data-kosif-edition="v41"] button.pill.kosif-ai-pill{
+  block-size:auto!important;
+  min-block-size:var(--k44-touch)!important;
+}
+
 html[data-kosif-design-system="v44"] :where(button,.btn,[role="button"]),
 html[data-kosif-edition="v41"] :where(button,.btn,[role="button"]){
   transition:transform var(--k44-dur-fast) var(--k44-ease),box-shadow var(--k44-dur-normal) var(--k44-ease),background-color var(--k44-dur-normal) var(--k44-ease),border-color var(--k44-dur-normal) var(--k44-ease),color var(--k44-dur-normal) var(--k44-ease);
