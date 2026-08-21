@@ -1,275 +1,312 @@
-/*
- * KOSIF Editorial Cinematic v41
- * Progressive visual orchestration only. It never reads or writes audit values.
+/* KOSIF Editorial Stable — fast mobile-first orchestration.
+ * Keeps professional accounting/audit logic intact and only coordinates UI/state presentation.
  */
 (() => {
   'use strict';
-  if (window.__KOSIF_EDITORIAL_V41__) return;
-  window.__KOSIF_EDITORIAL_V41__ = true;
+  if (window.__KOSIF_EDITORIAL_STABLE__) return;
+  window.__KOSIF_EDITORIAL_STABLE__ = true;
 
   const root = document.documentElement;
-  const $ = (selector, scope = document) => scope.querySelector(selector);
-  const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
-  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
-  const finePointer = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches === true;
-  const touchFirst = window.matchMedia?.('(hover: none), (pointer: coarse), (max-width: 840px)').matches === true ||
-    Number(navigator.maxTouchPoints || 0) > 0 || (window.innerWidth > 0 && window.innerWidth <= 840);
-  let revealObserver = null;
-  let decorateQueued = false;
-  let revealQueued = false;
-  let scrollQueued = false;
-  let spotlightQueued = false;
-  let spotlightEvent = null;
-  let coverQueued = false;
-  let coverEvent = null;
-
-  const VIEW_DOMAINS = new Map([
-    ['overview', 'work'], ['tb', 'work'], ['rounds', 'work'], ['pbc', 'work'],
-    ['v38', 'assurance'], ['v38-core', 'assurance'], ['analytics', 'assurance'], ['map', 'evidence'],
-    ['v38-accounting', 'assurance'], ['v38-lab', 'assurance'], ['v38-graph', 'evidence'],
-    ['library', 'standards'], ['sources', 'evidence'], ['v38-sources', 'evidence'], ['reviewer', 'evidence'],
-    ['outputs', 'reports'], ['v38-reports', 'reports'], ['v38-io', 'reports'],
-    ['council', 'council'], ['v38-council', 'council'], ['v38-live', 'reports'],
-    ['v38-books', 'library'], ['settings', 'system'], ['about', 'system']
-  ]);
+  const $ = (s, scope = document) => scope.querySelector(s);
+  const $$ = (s, scope = document) => [...scope.querySelectorAll(s)];
+  const VIEW_KEY = 'kosif_ui_active_view_v42';
+  const SCROLL_KEY = 'kosif_ui_scroll_v42';
+  let scrollTimer = 0;
+  let roundTimer = 0;
 
   function ensureStyles() {
-    if ($('link[data-kosif-editorial="v41"]') || $('#kosif-editorial-v41')) return;
+    if ($('#kosif-editorial-v41')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/kosif-editorial-v41.css?v=2026.08.20-v41-2';
+    link.href = '/kosif-editorial-v41.css?v=2026.08.21-stable-1';
     link.id = 'kosif-editorial-v41';
-    link.dataset.kosifEditorial = 'v41';
     document.head.appendChild(link);
   }
 
-  function updateChrome() {
-    const theme = $('meta[name="theme-color"]');
-    if (theme) theme.content = '#102825';
-    const release = $('.kcw-release');
-    if (release) release.textContent = 'KOSIF Editorial · v41.2 · UNIFIED EDITION';
-    const suiteVersion = $('#suite-version');
-    if (suiteVersion) suiteVersion.textContent = 'KOSIF Editorial v41.2';
+  function currentView() {
+    return $('section[data-view].show')?.dataset.view || document.body?.dataset.kosifCurrentView || 'overview';
   }
 
-  function mountFolio() {
-    const hero = $('#kosif-premium-welcome');
-    if (!hero || $('.k41-folio', hero)) return;
-    const folio = document.createElement('div');
-    folio.className = 'k41-folio';
-    folio.setAttribute('aria-hidden', 'true');
-    folio.innerHTML = '<b>KOSIF REVIEW</b><span>ISSUE 41.2</span>';
-    hero.appendChild(folio);
+  function safeState() {
+    try { return typeof state !== 'undefined' && state && typeof state === 'object' ? state : {}; }
+    catch (_) { return {}; }
   }
 
-  function currentDomain() {
-    const path = location.pathname;
-    if (path.startsWith('/sales')) return 'sales';
-    if (path.startsWith('/libraries')) return 'library';
-    if (path.startsWith('/standards')) return 'standards';
-    const view = document.body?.dataset.kosifCurrentView || $('section[data-view].show')?.dataset.view || '';
-    return VIEW_DOMAINS.get(view) || 'work';
+  function asArray(value) { return Array.isArray(value) ? value : []; }
+
+  function entityOf() {
+    const s = safeState();
+    return s.entity && typeof s.entity === 'object' ? s.entity : {};
   }
 
-  function syncDomain() {
-    root.dataset.kosifDomain = currentDomain();
+  function companyName() {
+    const entity = entityOf();
+    return String(entity.name || $('#s-name')?.value || $('#pill-entity')?.textContent || 'اختر الشركة').trim() || 'اختر الشركة';
   }
 
-  function mountScrollProgress() {
-    if ($('#k41-scroll-progress')) return;
-    const progress = document.createElement('div');
-    progress.id = 'k41-scroll-progress';
-    progress.setAttribute('aria-hidden', 'true');
-    progress.innerHTML = '<i></i>';
-    document.body.appendChild(progress);
+  function trialBalance() {
+    const s = safeState();
+    return asArray(s.tb || s.trialBalance || s.accounts);
   }
 
-  function updateScrollProgress() {
-    scrollQueued = false;
-    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
-    const ratio = Math.max(0, Math.min(1, (scrollY || document.documentElement.scrollTop || 0) / max));
-    root.style.setProperty('--k41-scroll-progress', ratio.toFixed(4));
-    queueVisibleReveal();
+  function rounds() {
+    const s = safeState();
+    return asArray(s.rounds || s.auditRounds);
   }
 
-  function queueScrollProgress() {
-    if (scrollQueued) return;
-    scrollQueued = true;
-    requestAnimationFrame(updateScrollProgress);
+  function pbcItems() {
+    const s = safeState();
+    return asArray(s.pbc || s.requests || s.documentsRequired);
   }
 
-  function revealTargets(scope = document) {
-    const selector = [
-      '#kosif-premium-welcome',
-      '#kosif-premium-actions',
-      'section[data-view].show > .card',
-      'section[data-view].show > .v38-hero',
-      'section[data-view].show > .v38-card',
-      'section[data-view].show .v38-report-section',
-      'section[data-view].show .v38-tile',
-      '.hero:has(.hero-metrics)',
-      '.module',
-      '.library-hero',
-      '.book',
-      '.source-policy',
-      '.sales-hero',
-      '.chapter-head',
-      '.health-ribbon',
-      '#view > .grid',
-      '#library > .card',
-      '#toc > .ci'
-    ].join(',');
-    $$(selector, scope).forEach((element, index) => {
-      if (element.dataset.k41Reveal) {
-        if (reduced || touchFirst) exposeTarget(element, true);
+  function pendingPbcCount() {
+    return pbcItems().filter(item => {
+      const status = String(item?.status || item?.state || '').toLowerCase();
+      return !/done|complete|closed|received|تم|مكتمل|مستلم/.test(status);
+    }).length;
+  }
+
+  function progressValue() {
+    const entity = entityOf();
+    let score = 0;
+    if (entity.name) score += 15;
+    if (entity.period || $('#s-period')?.value) score += 10;
+    if (trialBalance().length) score += 30;
+    if (rounds().length) score += 25;
+    if (pbcItems().length && pendingPbcCount() === 0) score += 10;
+    const s = safeState();
+    if (s.report || s.finalReport || s.opinion) score += 10;
+    return Math.min(100, score);
+  }
+
+  function nextAction() {
+    if (!entityOf().name) return { view: 'settings', label: 'اختيار الشركة وبياناتها' };
+    if (!trialBalance().length) return { view: 'tb', label: 'تحميل ميزان الشركة' };
+    if (!rounds().length) return { view: 'rounds', label: 'بدء أول جولة مراجعة' };
+    if (pendingPbcCount()) return { view: 'pbc', label: 'استكمال المطالبات المفتوحة' };
+    return { view: 'outputs', label: 'مراجعة المخرجات والتقرير' };
+  }
+
+  function goView(view, restore = false) {
+    try {
+      if (typeof go === 'function') go(view);
+      else $('[data-kgo="' + CSS.escape(view) + '"]')?.click();
+    } catch (_) {
+      $('[data-kgo="' + view + '"]')?.click();
+    }
+    sessionStorage.setItem(VIEW_KEY, view);
+    setTimeout(() => {
+      syncNavState();
+      syncWorkspace();
+      if (restore) restoreScroll(view);
+      else window.scrollTo({ top: 0, behavior: 'auto' });
+    }, 20);
+  }
+
+  function syncNavState() {
+    const view = currentView();
+    $$('#kosif-bottom-nav [data-kgo]').forEach(button => button.classList.toggle('active', button.dataset.kgo === view));
+  }
+
+  function scrollMap() {
+    try { return JSON.parse(sessionStorage.getItem(SCROLL_KEY) || '{}') || {}; }
+    catch (_) { return {}; }
+  }
+
+  function saveScroll() {
+    const view = currentView();
+    const map = scrollMap();
+    map[view] = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
+    sessionStorage.setItem(SCROLL_KEY, JSON.stringify(map));
+    sessionStorage.setItem(VIEW_KEY, view);
+  }
+
+  function restoreScroll(view = currentView()) {
+    const top = Number(scrollMap()[view] || 0);
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top, behavior: 'auto' })));
+  }
+
+  function bindContinuity() {
+    try { history.scrollRestoration = 'manual'; } catch (_) {}
+    window.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(saveScroll, 90);
+    }, { passive: true });
+    window.addEventListener('pagehide', saveScroll, { passive: true });
+    window.addEventListener('pageshow', event => {
+      document.body.classList.add('kosif-ready');
+      $('#kosif-boot')?.remove();
+      const view = sessionStorage.getItem(VIEW_KEY) || currentView();
+      if (event.persisted || view !== currentView()) goView(view, true);
+      else restoreScroll(view);
+      setTimeout(syncWorkspace, 40);
+    }, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) saveScroll();
+      else { syncWorkspace(); restoreScroll(currentView()); }
+    }, { passive: true });
+    window.addEventListener('kosif-view-change', () => {
+      sessionStorage.setItem(VIEW_KEY, currentView());
+      syncWorkspace();
+      syncNavState();
+    });
+  }
+
+  function mountCommandCenter() {
+    const view = $('#view-overview');
+    if (!view) return;
+    let box = $('#k42-command-center');
+    if (!box) {
+      box = document.createElement('section');
+      box.id = 'k42-command-center';
+      box.className = 'k42-command';
+      view.prepend(box);
+    }
+    const next = nextAction();
+    box.innerHTML = `
+      <div class="k42-command-head">
+        <div><h1>مركز قيادة الارتباط</h1><p>شركة واحدة نشطة · حالة واحدة · والخطوة التالية واضحة.</p></div>
+        <button class="k42-command-company" type="button" data-k42-company>${escapeHtml(companyName())}</button>
+      </div>
+      <div class="k42-command-grid">
+        <div class="k42-stat"><b>${trialBalance().length}</b><span>حسابًا محمّلًا</span></div>
+        <div class="k42-stat"><b>${rounds().length}</b><span>جولات مراجعة</span></div>
+        <div class="k42-stat"><b>${pendingPbcCount()}</b><span>مطالبات مفتوحة</span></div>
+        <div class="k42-stat"><b>${progressValue()}%</b><span>تقدم الارتباط</span></div>
+      </div>
+      <div class="k42-command-actions">
+        <button class="primary" type="button" data-k42-go="${next.view}">أكمل: ${escapeHtml(next.label)}</button>
+        <button type="button" data-k42-go="settings">تحرير بيانات المنشأة</button>
+        <button type="button" data-k42-go="rounds">الجولات</button>
+      </div>`;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+  }
+
+  function syncCompanyNames() {
+    const name = companyName();
+    const pill = $('#pill-entity');
+    if (pill && pill.textContent.trim() !== name) pill.textContent = name;
+    const input = $('#s-name');
+    const entity = entityOf();
+    if (input && entity.name && input.value !== entity.name) input.value = entity.name;
+    document.title = name && name !== 'اختر الشركة' ? `Kosif · ${name}` : 'Kosif';
+  }
+
+  function decorateEntityFlow() {
+    const card = $('#view-settings > .card');
+    if (!card) return;
+    let steps = $('.k42-entity-steps', card);
+    if (!steps) {
+      steps = document.createElement('div');
+      steps.className = 'k42-entity-steps';
+      const header = $('.card-h', card);
+      header?.insertAdjacentElement('afterend', steps);
+    }
+    const e = entityOf();
+    const hasName = !!String(e.name || $('#s-name')?.value || '').trim();
+    const hasContext = !!String(e.period || $('#s-period')?.value || '').trim() && !!$('#s-framework')?.value;
+    const hasTb = trialBalance().length > 0;
+    steps.innerHTML = `
+      <div class="k42-entity-step ${hasName?'done':''}"><b>1 · الشركة</b><span>${hasName?'محددة':'اختر أو أنشئ شركة'}</span></div>
+      <div class="k42-entity-step ${hasContext?'done':''}"><b>2 · الإطار والفترة</b><span>${hasContext?'مكتمل':'أكمل بيانات الارتباط'}</span></div>
+      <div class="k42-entity-step ${hasTb?'done':''}"><b>3 · بيانات الشركة</b><span>${hasTb?'الميزان والحسابات محملة':'حمّل الميزان مرة واحدة'}</span></div>`;
+  }
+
+  function compactRounds() {
+    const view = $('#view-rounds');
+    if (!view) return;
+    $$('.round', view).forEach((round, index) => {
+      if (round.dataset.k42Compact === '1') return;
+      round.dataset.k42Compact = '1';
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'k42-round-toggle';
+      button.textContent = 'عرض تفاصيل الجولة';
+      button.setAttribute('aria-expanded', 'false');
+      button.addEventListener('click', () => {
+        const open = round.classList.toggle('k42-expanded');
+        button.setAttribute('aria-expanded', String(open));
+        button.textContent = open ? 'إخفاء التفاصيل' : 'عرض تفاصيل الجولة';
+      });
+      round.appendChild(button);
+      if (index === 0 && rounds().length <= 1) round.classList.add('k42-expanded');
+    });
+  }
+
+  function removeLegacyEffects() {
+    $('#kosif-motion-bg')?.remove();
+    $('#k41-scroll-progress')?.remove();
+    $$('.kosif-tilt,.k41-in,[data-k41-reveal]').forEach(el => {
+      el.classList.remove('kosif-tilt','k41-in');
+      el.style.removeProperty('transform');
+      el.style.removeProperty('opacity');
+      el.style.removeProperty('visibility');
+      delete el.dataset.k41Reveal;
+    });
+    const boot = $('#kosif-boot');
+    if (boot) boot.remove();
+    document.body.classList.add('kosif-ready');
+  }
+
+  function syncWorkspace() {
+    root.dataset.kosifEdition = 'v41';
+    root.dataset.kosifExperience = 'stable';
+    root.dataset.kosifRevision = '2026.08.21-stable-1';
+    syncCompanyNames();
+    mountCommandCenter();
+    decorateEntityFlow();
+    compactRounds();
+    syncNavState();
+  }
+
+  function bindActions() {
+    document.addEventListener('click', event => {
+      const goButton = event.target.closest?.('[data-k42-go]');
+      if (goButton) { event.preventDefault(); goView(goButton.dataset.k42Go); return; }
+      if (event.target.closest?.('[data-k42-company]')) {
+        event.preventDefault();
+        $('#pill-entity')?.click();
         return;
       }
-      element.dataset.k41Reveal = '1';
-      element.style.setProperty('--k41-delay', Math.min(index, 9) * 48 + 'ms');
-      if (reduced || touchFirst || !revealObserver) exposeTarget(element, reduced || touchFirst);
-      else revealObserver.observe(element);
-    });
-  }
-
-  function exposeTarget(element, force = false) {
-    element.classList.add('k41-in');
-    if (force) {
-      element.style.setProperty('opacity', '1', 'important');
-      element.style.setProperty('visibility', 'visible', 'important');
-      element.style.setProperty('filter', 'none', 'important');
-      element.style.setProperty('transform', 'none', 'important');
-    }
-    revealObserver?.unobserve(element);
-  }
-
-  function revealVisibleTargets() {
-    $$('section[data-view].show [data-k41-reveal], #view.show [data-k41-reveal]').forEach(element => {
-      const rect = element.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0 && rect.top < innerHeight * .98 && rect.bottom > 0) {
-        exposeTarget(element, reduced || touchFirst);
+      const selectedCompany = event.target.closest?.('#kosif-company-list [data-cid]');
+      if (selectedCompany) setTimeout(() => { syncWorkspace(); goView('overview'); }, 140);
+      if (event.target.closest?.('#btn-save-entity,#btn-import,#btn-start-round,#btn-next-round,#btn-gen-report')) setTimeout(syncWorkspace, 160);
+      const legacyEdit = event.target.closest?.('button,a');
+      if (legacyEdit && /تحرير بيانات المنشأة/.test(legacyEdit.textContent || '') && !legacyEdit.dataset.k42Go) {
+        event.preventDefault();
+        goView('settings');
+        setTimeout(() => $('#view-settings > .card')?.scrollIntoView({ block:'start', behavior:'auto' }), 30);
       }
     });
   }
 
-  function revealAllTargets() {
-    $$('[data-k41-reveal]').forEach(element => exposeTarget(element, reduced || touchFirst));
-  }
-
-  function queueVisibleReveal() {
-    if (revealQueued) return;
-    revealQueued = true;
-    requestAnimationFrame(() => {
-      revealQueued = false;
-      revealVisibleTargets();
-    });
-  }
-
-  function setupReveal() {
-    if (!reduced && !touchFirst && 'IntersectionObserver' in window) {
-      revealObserver = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          exposeTarget(entry.target);
-        });
-      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
-    }
-    revealTargets();
-    requestAnimationFrame(() => root.classList.add('k41-ready'));
-    setTimeout(revealAllTargets, 1000);
-  }
-
-  function setupSpotlight() {
-    if (!finePointer || reduced) return;
-    const selector = '.card,.v38-card,.v38-tile,.panel,.mini-card,.issue,.module,.book,.principle,.source-policy,.ks40-standard-item';
-    document.addEventListener('pointermove', event => {
-      spotlightEvent = event;
-      if (spotlightQueued) return;
-      spotlightQueued = true;
-      requestAnimationFrame(() => {
-        spotlightQueued = false;
-        const current = spotlightEvent;
-        const card = current?.target.closest?.(selector);
-        if (!card) return;
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--k41-x', current.clientX - rect.left + 'px');
-        card.style.setProperty('--k41-y', current.clientY - rect.top + 'px');
-      });
-    }, { passive: true });
-  }
-
-  function setupCoverParallax() {
-    if (!finePointer || reduced) return;
-    document.addEventListener('pointermove', event => {
-      coverEvent = event;
-      if (coverQueued) return;
-      coverQueued = true;
-      requestAnimationFrame(() => {
-        coverQueued = false;
-        const current = coverEvent;
-        const hero = current?.target.closest?.('#kosif-premium-welcome');
-        if (!hero) return;
-        const rect = hero.getBoundingClientRect();
-        const x = Math.max(-1, Math.min(1, ((current.clientX - rect.left) / rect.width - .5) * 2));
-        const y = Math.max(-1, Math.min(1, ((current.clientY - rect.top) / rect.height - .5) * 2));
-        hero.style.setProperty('--k41-tilt-x', (x * .8).toFixed(2) + 'deg');
-        hero.style.setProperty('--k41-tilt-y', (y * -.6).toFixed(2) + 'deg');
-      });
-    }, { passive: true });
-    document.addEventListener('pointerout', event => {
-      const hero = event.target.closest?.('#kosif-premium-welcome');
-      if (!hero || hero.contains(event.relatedTarget)) return;
-      hero.style.setProperty('--k41-tilt-x', '0deg');
-      hero.style.setProperty('--k41-tilt-y', '0deg');
-    }, { passive: true });
-  }
-
-  function decorate() {
-    decorateQueued = false;
-    root.dataset.kosifEdition = 'v41';
-    root.dataset.kosifExperience = 'v41';
-    root.dataset.kosifRevision = 'v41.2';
-    root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
-    syncDomain();
-    updateChrome();
-    mountFolio();
-    revealTargets();
-    if (reduced || touchFirst) revealAllTargets();
-    requestAnimationFrame(() => requestAnimationFrame(revealVisibleTargets));
-  }
-
-  function queueDecorate() {
-    if (decorateQueued) return;
-    decorateQueued = true;
-    requestAnimationFrame(decorate);
+  function observeRoundsOnly() {
+    const target = $('#view-rounds');
+    if (!target || !('MutationObserver' in window)) return;
+    new MutationObserver(() => {
+      clearTimeout(roundTimer);
+      roundTimer = setTimeout(() => { compactRounds(); mountCommandCenter(); }, 70);
+    }).observe(target, { childList:true, subtree:true });
   }
 
   function boot() {
     ensureStyles();
     root.dataset.kosifEdition = 'v41';
-    root.dataset.kosifExperience = 'v41';
-    root.dataset.kosifRevision = 'v41.2';
-    root.dataset.kosifMotion = reduced ? 'reduced' : 'cinematic';
-    syncDomain();
-    updateChrome();
-    mountFolio();
-    mountScrollProgress();
-    updateScrollProgress();
-    setupReveal();
-    setupSpotlight();
-    setupCoverParallax();
-    window.addEventListener('kosif-view-change', queueDecorate);
-    window.addEventListener('scroll', queueScrollProgress, { passive: true });
-    window.addEventListener('resize', queueScrollProgress, { passive: true });
-    window.addEventListener('pageshow', () => setTimeout(revealAllTargets, 80), { passive: true });
-    window.addEventListener('orientationchange', () => setTimeout(revealAllTargets, 180), { passive: true });
-    document.addEventListener('touchstart', revealAllTargets, { passive: true, once: true });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) revealAllTargets(); }, { passive: true });
-    document.addEventListener('click', event => {
-      if (event.target.closest?.('[data-go],[data-kgo],[data-view-target],.sales-tabs button')) setTimeout(queueDecorate, 80);
-    });
-    new MutationObserver(queueDecorate).observe(document.body, { childList: true, subtree: true });
+    root.dataset.kosifExperience = 'stable';
+    root.dataset.kosifRevision = '2026.08.21-stable-1';
+    removeLegacyEffects();
+    bindContinuity();
+    bindActions();
+    syncWorkspace();
+    observeRoundsOnly();
+    const remembered = sessionStorage.getItem(VIEW_KEY);
+    if (remembered && remembered !== currentView()) goView(remembered, true);
+    else restoreScroll(currentView());
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true });
   else boot();
 })();
