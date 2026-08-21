@@ -54,6 +54,19 @@
   backdrop-filter: blur(var(--kosif-glass-backdrop));
 }
 
+/* v46 accessibility bridge.
+ * Keep historical presentation layers intact while ensuring the final audit
+ * overview text meets WCAG AA contrast on the governed light surfaces.
+ * Specificity is intentionally higher than legacy !important theme rules.
+ */
+html[data-kosif-visual-system='v45'] body #view-overview .kw42-stat span,
+html[data-kosif-visual-system='v45'] body #kosif-overview-path-card .card-h .hint,
+html[data-kosif-visual-system='v45'] body #view-overview .step p,
+html[data-kosif-visual-system='v45'] body #view-overview .k41-in.tight p,
+html[data-kosif-visual-system='v45'] body #view-overview .k41-in.tight p b {
+  color: var(--k45-muted, #667687) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
