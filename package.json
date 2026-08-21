@@ -42,6 +42,15 @@
     "kitab-theme": "node scripts/check-kitab-theme-authority.mjs",
     "v42-requirements": "node scripts/check-v42-requirements.mjs && node --test tests/v42-requirements-control-plane.test.mjs",
     "v43-requirements": "node scripts/check-v43-requirements.mjs && node --test tests/v43-full-coverage.test.mjs tests/v43-edge-wrapper.test.mjs",
-    "v38-demo": "node scripts/generate-v38-demo.mjs"
+    "v38-demo": "node scripts/generate-v38-demo.mjs",
+    "motion:remotion:install": "npm --prefix motion/remotion install",
+    "motion:remotion:studio": "npm --prefix motion/remotion run studio",
+    "motion:remotion:check": "npm --prefix motion/remotion run check",
+    "motion:remotion:render": "npm --prefix motion/remotion run render",
+    "motion:hyperframes:doctor": "npm --prefix motion/hyperframes run doctor",
+    "motion:hyperframes:lint": "npm --prefix motion/hyperframes run lint",
+    "motion:hyperframes:inspect": "npm --prefix motion/hyperframes run inspect",
+    "motion:hyperframes:preview": "npm --prefix motion/hyperframes run preview",
+    "motion:hyperframes:render": "npm --prefix motion/hyperframes run render"
   }
 }
