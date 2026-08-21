@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:ui && node scripts/build-assets.mjs && npm run professional-copy-v46",
-    "check": "npm run professional-copy-v46 && npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run audit-lifecycle-v47 && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme && npm run v42-requirements && npm run v43-requirements && npm run design-quality-v44 && npm run visual-system-v45 && npm run enterprise-contract && npm run direct-books-v45 && npm run hygiene",
+    "check": "npm run professional-copy-v46 && npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run audit-lifecycle-v47 && npm run navigation-v48 && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme && npm run v42-requirements && npm run v43-requirements && npm run design-quality-v44 && npm run visual-system-v45 && npm run enterprise-contract && npm run direct-books-v45 && npm run hygiene",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
     "source-export-integrity": "node scripts/check-source-export-integrity.mjs",
@@ -37,6 +37,7 @@
     "v38-sales-audit": "node tests/v38-sales-audit-bridge.test.mjs",
     "v38-suite": "npm run v38-core && npm run v38-graph && npm run v38-sources && npm run v38-api && npm run v38-public-ai && npm run v38-realtime && npm run v38-sales-audit && node scripts/check-v38.mjs",
     "audit-lifecycle-v47": "node tests/audit-lifecycle-v47.test.mjs",
+    "navigation-v48": "node tests/navigation-icon-system-v48.test.mjs",
     "book-engine": "node tests/book-engine-v1.test.mjs",
     "v40-experience": "node scripts/check-v40-experience.mjs",
     "v41-experience": "node scripts/check-v41-experience.mjs",
