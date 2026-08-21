@@ -15,7 +15,6 @@
 
 /* Make useful content visible immediately; keep old cinematic layer as design authority only. */
 html[data-kosif-workspace="stable-v42"] #kosif-boot,
-html[data-kosif-workspace="stable-v42"] #k41-scroll-progress,
 html[data-kosif-workspace="stable-v42"] #kosif-motion-bg,
 html[data-kosif-workspace="stable-v42"] .k-orb,
 html[data-kosif-workspace="stable-v42"] .k-particle{display:none!important}
