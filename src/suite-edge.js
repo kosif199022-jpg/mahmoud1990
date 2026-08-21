@@ -2,6 +2,7 @@ import securityEdge from './security-edge.js';
 import { proxyWealth } from './suite-proxy.js';
 import { handleV38 } from './v38-api.js';
 import { handleRealtimeSession } from './v38-realtime-session.js';
+import { handleSystemBrainV2 } from './system-brain-v2.js';
 
 const SUITE={
   productName:'Kosif',
@@ -10,6 +11,7 @@ const SUITE={
   architecture:'suite-edge → security-edge → native-worker + v38 trusted core',
   modules:{audit:'/audit/',libraries:'/libraries/',wealth:'/wealth/reader.html',sales:'/sales/'},
   systemBrain:'/data/kosif-system-brain-v1.json',
+  semanticMemory:'LlamaParse → embeddings → Supabase PostgreSQL/pgvector',
   bookEngine:'kosif.book.v1',
   designAuthority:'KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color',
   experienceVersion:'v41.0.0',
@@ -77,6 +79,7 @@ export default{
     const blocked=await privacyGate(req,env,u);if(blocked)return blocked;
     if(p.startsWith('/api/kosif/v38/')){
       const owner=await ownerSession(req,env);
+      const brain=await handleSystemBrainV2(req,env,u,owner);if(brain)return sameOriginApi(brain,req);
       const rr=await handleRealtimeSession(req,env,u,owner);if(rr)return sameOriginApi(rr,req);
       const r38=await handleV38(req,env,u,owner);if(r38)return sameOriginApi(r38,req);
     }
