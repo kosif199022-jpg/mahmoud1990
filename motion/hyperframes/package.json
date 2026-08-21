@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "doctor": "npx hyperframes doctor",
-    "lint": "npx hyperframes lint",
-    "inspect": "npx hyperframes inspect",
-    "preview": "npx hyperframes preview",
-    "render": "npx hyperframes render --output renders/kosif-brand-intro.mp4"
+    "doctor": "npx --yes hyperframes doctor",
+    "lint": "npx --yes hyperframes lint",
+    "inspect": "npx --yes hyperframes inspect",
+    "preview": "npx --yes hyperframes preview",
+    "render": "npx --yes hyperframes render --output renders/kosif-brand-intro.mp4"
   },
   "engines": {
     "node": ">=22"
