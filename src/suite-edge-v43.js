@@ -15,7 +15,7 @@ const STRUCTURE = REQUIREMENTS.verifyStructure();
 const PRIMITIVES = REQUIREMENTS.highRiskPrimitiveCheck();
 const READY = Boolean(COVERAGE.complete && STRUCTURE.complete && PRIMITIVES.ok);
 const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safety" href="/kosif-touch-reveal-safety-v44.css?v=1">';
-const WORKSPACE_STABILITY = '<link rel="stylesheet" id="kosif-workspace-stability-css" href="/kosif-workspace-stability-v42.css?v=2026.08.21-2"><script id="kosif-workspace-stability-js" src="/kosif-workspace-stability-v42.js?v=2026.08.21-2" defer></script>';
+const WORKSPACE_STABILITY = '<script id="kosif-workspace-stability-js" src="/kosif-workspace-stability-v42.js?v=2026.08.21-3" defer></script>';
 
 function reqJson(body,status=200){
   return new Response(JSON.stringify(body),{
