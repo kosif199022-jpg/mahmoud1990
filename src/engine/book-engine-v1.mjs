@@ -128,7 +128,10 @@ function createNode(type, text, source, extra = {}) {
 export function buildBookDocument(input = {}) {
   const pages = Array.isArray(input.pages) ? input.pages : [];
   const boilerplate = discoverRepeatingBoilerplate(pages);
-  const seenExact = new Set();
+  // Exact prose repeated far away can be legitimate in standards. Only collapse nearby duplicates;
+  // preserve distant repeats and mark them for review instead of deleting professional wording.
+  const seenExact = new Map();
+  let emittedIndex = 0;
   const nodes = [];
   const removed = [];
   const outline = [];
@@ -151,12 +154,14 @@ export function buildBookDocument(input = {}) {
       const headingLevel = classifyHeading(line);
       const type = headingLevel || (looksLikeListItem(line) ? 'list_item' : 'paragraph');
       const duplicateKey = `${type}:${textFingerprint(line)}`;
-      // Only collapse exact duplicate prose/heading blocks. Repeated list items remain because numbering/context matters.
-      if (type !== 'list_item' && seenExact.has(duplicateKey)) {
+      const previous = type === 'list_item' ? null : seenExact.get(duplicateKey);
+      const pageDistance = previous && source.page && previous.page ? Math.abs(source.page - previous.page) : Infinity;
+      const nearbyDuplicate = Boolean(previous && pageDistance <= 1 && emittedIndex - previous.emittedIndex <= 8);
+      if (nearbyDuplicate) {
         removed.push({ reason: 'exact-duplicate', ...source });
         continue;
       }
-      if (type !== 'list_item') seenExact.add(duplicateKey);
+      if (type !== 'list_item') seenExact.set(duplicateKey, { page: source.page, emittedIndex });
 
       counters[type] = (counters[type] || 0) + 1;
       if (['part', 'chapter', 'section', 'heading'].includes(type)) {
@@ -165,19 +170,24 @@ export function buildBookDocument(input = {}) {
         if (type === 'chapter') { path.section = null; path.heading = null; }
         if (type === 'section') path.heading = null;
         const node = createNode(type, line, source, { order: counters[type], path: { ...path } });
+        if (previous && !node.flags.includes('repeated-text-review')) node.flags.push('repeated-text-review');
         path[type] = node.id;
         node.path = { ...path };
         nodes.push(node);
         outline.push({ id: node.id, level: type, title: node.text, page: node.source.page, path: { ...path } });
       } else {
-        nodes.push(createNode(type, line, source, { order: counters[type], path: { ...path } }));
+        const node = createNode(type, line, source, { order: counters[type], path: { ...path } });
+        if (previous && type !== 'list_item' && !node.flags.includes('repeated-text-review')) node.flags.push('repeated-text-review');
+        nodes.push(node);
       }
+      emittedIndex++;
     }
   }
 
   const sourcePages = pages.map(p => Number(p?.page ?? p?.number ?? 0) || 0).filter(Boolean);
   const flags = [];
   if (nodes.some(n => n.flags.includes('suspected-ocr-noise'))) flags.push('contains-suspected-ocr-noise');
+  if (nodes.some(n => n.flags.includes('repeated-text-review'))) flags.push('contains-distant-repeated-text');
   if (!outline.length && nodes.length) flags.push('flat-structure-needs-review');
 
   return {
@@ -200,7 +210,8 @@ export function buildBookDocument(input = {}) {
       nodes: nodes.length,
       outlineItems: outline.length,
       removedArtifacts: removed.length,
-      suspectedOcrNodes: nodes.filter(n => n.flags.includes('suspected-ocr-noise')).length
+      suspectedOcrNodes: nodes.filter(n => n.flags.includes('suspected-ocr-noise')).length,
+      repeatedTextReviewNodes: nodes.filter(n => n.flags.includes('repeated-text-review')).length
     },
     flags,
     outline,
