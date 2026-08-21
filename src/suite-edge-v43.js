@@ -15,6 +15,7 @@ const STRUCTURE = REQUIREMENTS.verifyStructure();
 const PRIMITIVES = REQUIREMENTS.highRiskPrimitiveCheck();
 const READY = Boolean(COVERAGE.complete && STRUCTURE.complete && PRIMITIVES.ok);
 const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safety" href="/kosif-touch-reveal-safety-v44.css?v=1">';
+const WORKSPACE_STABILITY = '<script id="kosif-workspace-stability-loader" src="/kosif-workspace-stability-loader-v42.js?v=2026.08.21-3" defer></script>';
 
 function reqJson(body,status=200){
   return new Response(JSON.stringify(body),{
@@ -29,7 +30,7 @@ function reqJson(body,status=200){
     }
   });
 }
-function decorateRequirements(response){
+function decorateRequirements(response,url){
   const h=new Headers(response.headers);
   h.set('x-kosif-requirements-version',KOSIF_REQUIREMENTS_VERSION);
   h.set('x-kosif-requirements-implemented',String(COVERAGE.implemented));
@@ -39,12 +40,17 @@ function decorateRequirements(response){
   const contentType=h.get('content-type')||'';
   if(!/text\/html/i.test(contentType))return decorated;
 
-  // Touch-first browsers must never depend on IntersectionObserver timing to
-  // make primary content visible. The override is an external same-origin
-  // stylesheet so it remains compatible with restrictive style-src policies.
-  return new HTMLRewriter().on('head',{
+  const rewriter=new HTMLRewriter().on('head',{
     element(head){head.append(TOUCH_REVEAL_SAFETY,{html:true});}
-  }).transform(decorated);
+  });
+  // Audit workspace enhancements are layered after the existing shell instead of replacing
+  // governed v41 presentation/runtime contracts. This keeps historical parity testable.
+  if(url.pathname==='/audit'||url.pathname.startsWith('/audit/')){
+    rewriter.on('body',{
+      element(body){body.append(WORKSPACE_STABILITY,{html:true});}
+    });
+  }
+  return rewriter.transform(decorated);
 }
 function isSensitiveMutation(req,url){
   return !['GET','HEAD','OPTIONS'].includes(req.method) &&
@@ -99,6 +105,6 @@ export default {
     }
 
     const response=await suite.fetch(req,env,ctx);
-    return decorateRequirements(response);
+    return decorateRequirements(response,u);
   }
 };
