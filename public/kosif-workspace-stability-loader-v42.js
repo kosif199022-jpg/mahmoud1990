@@ -25,11 +25,21 @@
     document.body.appendChild(script);
   }
 
+  function keepFinalVisualAuthority() {
+    const visual = document.querySelector('#kosif-visual-system-v45');
+    if (visual && visual.parentNode === document.head) {
+      // Reusing and moving the existing node keeps one request while ensuring late
+      // stability/company fixes cannot restore historical colors and dimensions.
+      document.head.appendChild(visual);
+    }
+  }
+
   function mount() {
     if (!document.querySelector('#view-overview') || !document.querySelector('#kosif-bottom-nav')) return;
 
     addCss('kosif-workspace-stability-css', '/kosif-workspace-stability-v42.css?v=2026.08.21-4');
     addCss('kosif-company-sheet-fix-css', '/kosif-company-sheet-fix-v43.css?v=2026.08.21-1');
+    keepFinalVisualAuthority();
 
     addScript('kosif-workspace-stability-runtime', '/kosif-workspace-stability-v42.js?v=2026.08.21-4');
     addScript('kosif-company-sheet-fix-runtime', '/kosif-company-sheet-fix-v43.js?v=2026.08.21-1');
