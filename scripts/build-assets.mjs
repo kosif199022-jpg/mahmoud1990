@@ -25,4 +25,17 @@ if (!html.includes(jsSrc)) {
 // rather than mutating only the public build artifact and breaking deployment.
 fs.writeFileSync(source, html);
 fs.writeFileSync(target, html);
-console.log('Kosif Native assets ready with Design Quality Stack v44');
+
+// Direct requested-book bootstrap. The historical 700ms delay visibly rendered
+// the default Mafateeh book before switching to std2025/std2018/dipifr. Preserve
+// the original shared reader shell, but perform the requested content switch in
+// the next microtask so the first meaningful render belongs to the requested book.
+const wealthLibrary = 'public/wealth-library-v37.js';
+if (fs.existsSync(wealthLibrary)) {
+  const src = fs.readFileSync(wealthLibrary, 'utf8');
+  const delayed = "if(initialId!=='mafateeh')setTimeout(()=>switchBook(initialId),700);";
+  const direct = "if(initialId!=='mafateeh')queueMicrotask(()=>switchBook(initialId));";
+  if (src.includes(delayed)) fs.writeFileSync(wealthLibrary, src.replace(delayed, direct));
+}
+
+console.log('Kosif Native assets ready with Design Quality Stack v44 + direct book bootstrap v45');
