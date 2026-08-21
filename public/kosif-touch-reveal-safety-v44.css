@@ -1,10 +1,15 @@
 /* KOSIF touch-first reveal safety.
-   Primary content must never depend on IntersectionObserver timing on phones/tablets.
-   Desktop keeps the cinematic reveal system. */
+   Primary content must never depend on IntersectionObserver or cinematic timing
+   on phones/tablets. Desktop keeps the full reveal system. */
 @media (max-width:1023px),(hover:none),(pointer:coarse){
-  .k-reveal{
+  .k-reveal,
+  html[data-kosif-edition="v41"] [data-k41-reveal],
+  html[data-kosif-edition="v41"].k41-ready [data-k41-reveal],
+  html[data-kosif-edition="v41"] #library [data-k41-reveal]{
     opacity:1!important;
+    visibility:visible!important;
     transform:none!important;
     filter:none!important;
+    animation:none!important;
   }
 }
