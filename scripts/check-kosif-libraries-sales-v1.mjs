@@ -7,7 +7,7 @@ const proxy=read('src/suite-proxy.js');
 const edge=read('src/suite-edge.js');
 const wealthLibrary=read('public/wealth-library-v37.js');
 const sales=read('public/sales/index.html');
-const boot=read('public/sales/sales-general-bootstrap.js');
+const salesRuntime=read('public/sales/sales.js');
 const motion=read('public/sales/sales-motion-v1.js');
 const motionCss=read('public/sales/sales-motion-v1.css');
 const sw=read('public/sw.js');
@@ -53,7 +53,7 @@ for(const id of ['b1','b2','b3','b4'])ok(stdLibrary.some(x=>x.id===id),`current 
 
 ok(sales.includes('<title>تحليل المبيعات | Kosif</title>')&&!sales.includes('أغنام الوادي'),'Sales workspace is general in its visible shell');
 ok(sales.includes('dir="rtl"')&&sales.includes('sales-side'),'general Sales preserves RTL right-side navigation structure');
-ok(boot.includes("d?.meta?.source==='Aghnam v7 native integration'")&&boot.includes("d.sales.every((x,i)=>x?.id===`S-${i+1}`)"),'only the exact historical demo sample is migrated; imported user data is preserved');
+ok(salesRuntime.includes("d?.meta?.source==='Aghnam v7 native integration'")&&salesRuntime.includes("d.sales.every((x,i)=>x?.id===`S-${i+1}`)")&&salesRuntime.includes('localStorage.getItem(LEGACY_STORE)'),'only the exact historical demo sample is migrated; imported user data is preserved');
 ok(!/Math\.random|crypto\.getRandomValues/.test(motion),'3D visualization never synthesizes random business data');
 ok(motion.includes("Number(r.revenue)||0")&&motion.includes('groupChannels()'),'3D channel heights come only from recorded deterministic revenue');
 ok(motion.includes("prefers-reduced-motion")&&motion.includes("pointer: coarse")&&motionCss.includes('@media(prefers-reduced-motion:reduce)'),'motion has reduced-motion and touch-device fallbacks');
