@@ -33,6 +33,29 @@ function applyEnterpriseTokensV46(sourceHtml) {
   return output;
 }
 
+function applyAccessibilityV46(sourceHtml, shell) {
+  let output = sourceHtml;
+  if (shell.endsWith('/standards/index.html')) {
+    output = output.replace(
+      'content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"',
+      'content="width=device-width,initial-scale=1,viewport-fit=cover"',
+    );
+    output = output.replace(
+      '<input type="range" id="rgFs" min="15" max="30" step="1">',
+      '<input type="range" id="rgFs" min="15" max="30" step="1" aria-label="حجم النص">',
+    );
+    output = output.replace(
+      '<input type="range" id="rgLh" min="16" max="26" step="1">',
+      '<input type="range" id="rgLh" min="16" max="26" step="1" aria-label="تباعد الأسطر">',
+    );
+    output = output.replace(
+      '<input id="q" type="search" placeholder="اكتب كلمة أو رقم فقرة…" autocomplete="off">',
+      '<input id="q" type="search" placeholder="اكتب كلمة أو رقم فقرة…" autocomplete="off" aria-label="بحث في الكتاب">',
+    );
+  }
+  return output;
+}
+
 let html = fs.readFileSync(source, 'utf8');
 
 if (!html.includes('name="kosif-design-system"')) {
@@ -47,27 +70,12 @@ if (!html.includes(jsSrc)) {
   html = html.replace('</body>', `  <script src="${jsSrc}" defer></script>\n</body>`);
 }
 
-// Visual System v45 must also exist in the static/PWA build. Browser QA serves
-// `public/` directly and therefore does not pass through suite-edge-v43. The
-// lightweight v45 guard observes only new presentation styles in <head> and
-// keeps the single v45 stylesheet last when historical v40/v41 runtimes inject
-// their CSS after initial parsing.
 html = applyVisualSystemV45(html);
-
-// v46 introduces a namespaced enterprise token layer. It is intentionally
-// additive: it exposes governed Deep Slate/Emerald/Sapphire variables to every
-// first-class shell without overriding the validated v45 visual authority until
-// each screen is migrated and passes visual regression.
 html = applyEnterpriseTokensV46(html);
 
-// `frontend/index.html` and `public/index.html` are the two canonical shell
-// copies and the regression contract requires them to remain byte-identical.
 fs.writeFileSync(source, html);
 fs.writeFileSync(target, html);
 
-// Other first-class static KOSIF shells receive the same presentation layers.
-// Wealth is intentionally excluded because its original Mafateeh reader remains
-// a preserved product surface with its own visual identity.
 for (const shell of [
   'public/hub.html',
   'public/libraries/index.html',
@@ -76,15 +84,12 @@ for (const shell of [
 ]) {
   if (!fs.existsSync(shell)) continue;
   let shellHtml = fs.readFileSync(shell, 'utf8');
+  shellHtml = applyAccessibilityV46(shellHtml, shell);
   shellHtml = applyVisualSystemV45(shellHtml);
   shellHtml = applyEnterpriseTokensV46(shellHtml);
   fs.writeFileSync(shell, shellHtml);
 }
 
-// Direct requested-book bootstrap. The historical 700ms delay visibly rendered
-// the default Mafateeh book before switching to std2025/std2018/dipifr. Preserve
-// the original shared reader shell, but perform the requested content switch in
-// the next microtask so the first meaningful render belongs to the requested book.
 const wealthLibrary = 'public/wealth-library-v37.js';
 if (fs.existsSync(wealthLibrary)) {
   const src = fs.readFileSync(wealthLibrary, 'utf8');
@@ -93,4 +98,4 @@ if (fs.existsSync(wealthLibrary)) {
   if (src.includes(delayed)) fs.writeFileSync(wealthLibrary, src.replace(delayed, direct));
 }
 
-console.log('Kosif Native assets ready with Design Quality Stack v44 + Visual System v45 + Enterprise Tokens v46 + direct book bootstrap v45');
+console.log('Kosif Native assets ready with Design Quality Stack v44 + Visual System v45 + Enterprise Tokens v46 + accessibility normalization + direct book bootstrap v45');
