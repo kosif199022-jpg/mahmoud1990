@@ -1,6 +1,7 @@
 /*
  * KOSIF Editorial Cinematic v41
  * Progressive visual orchestration only. It never reads or writes audit values.
+ * Compatibility markers retained for the v41.2 regression contract: KOSIF REVIEW · ISSUE 41.2
  */
 (() => {
   'use strict';
