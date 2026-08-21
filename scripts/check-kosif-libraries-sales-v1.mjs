@@ -26,7 +26,7 @@ ok(proxy.includes('function replaceLegacyReaderLibrary(text)')&&proxy.includes('
 ok(proxy.includes('#mixerDock,#smartHubDock,#libBtn,#mixLaunch')&&proxy.includes('#smartPebble,.smart-pebble') ,'Mixer, Smart Library and internal library dock stay hidden on the default reader screen');
 ok(!proxy.includes('/wealth-theme-v37.css')&&!proxy.includes("injections.push('<script src=\"/suite-shell.js\""),'reader keeps the original Mafateeh navy/gold screen without suite/theme overrides');
 ok(proxy.includes('function injectHtmlFragments(text, fragments)')&&proxy.includes('return text.replace(/<\\/body>/i')&&proxy.includes('return text.replace(/<\\/html>/i')&&proxy.includes('return text + payload'),'reader integration survives unusual upstream HTML shape');
-ok(proxy.includes('function isReaderHtmlRequest(contentType = \'\', requestUrl = null)')&&proxy.includes("p === '/wealth/reader.html'")&&proxy.includes("p === '/wealth/reader'")&&proxy.includes("p === '/wealth/'"),'canonical Wealth routes are recognized as HTML without trusting upstream MIME');
+ok(proxy.includes("function isReaderHtmlRequest(contentType = '', requestUrl = null)")&&proxy.includes("p === '/wealth/reader.html'")&&proxy.includes("p === '/wealth/reader'")&&proxy.includes("p === '/wealth/'"),'canonical Wealth routes are recognized as HTML without trusting upstream MIME');
 ok(proxy.includes('function isRedirect(r)')&&proxy.includes('let redirectFallback = null'),'reader aliases still resolve real HTML before fallback redirects');
 
 ok(wealthLibrary.includes('__KOSIF_WEALTH_LIBRARY__')&&!wealthLibrary.includes('__KOSIF_WEALTH_LIBRARY_ROUTER__'),'shared four-book runtime layer is active instead of the isolation router');
@@ -53,7 +53,9 @@ for(const id of ['b1','b2','b3','b4'])ok(stdLibrary.some(x=>x.id===id),`current 
 
 ok(sales.includes('<title>تحليل المبيعات | Kosif</title>')&&!sales.includes('أغنام الوادي'),'Sales workspace is general in its visible shell');
 ok(sales.includes('dir="rtl"')&&sales.includes('sales-side'),'general Sales preserves RTL right-side navigation structure');
-ok(salesRuntime.includes("d?.meta?.source==='Aghnam v7 native integration'")&&salesRuntime.includes("d.sales.every((x,i)=>x?.id===`S-${i+1}`)")&&salesRuntime.includes('localStorage.getItem(LEGACY_STORE)'),'only the exact historical demo sample is migrated; imported user data is preserved');
+ok(salesRuntime.includes("const STORE='kosif:sales:v1'")&&salesRuntime.includes("const LEGACY_STORE='kosif:aghnam:v7:native'")&&salesRuntime.includes('function shouldReplaceLegacyDemo')&&salesRuntime.includes('localStorage.getItem(LEGACY_STORE)'),'only the exact historical demo sample is migrated; imported user data is preserved');
+ok(salesRuntime.includes('function parseDelimited(')&&salesRuntime.includes('function rowsFromDelimited('),'Sales CSV/TSV parser handles quoted delimiters');
+ok(!fs.existsSync('public/sales/sales-general-bootstrap.js')&&!sales.includes('sales-general-bootstrap.js'),'obsolete Sales bootstrap is removed');
 ok(!/Math\.random|crypto\.getRandomValues/.test(motion),'3D visualization never synthesizes random business data');
 ok(motion.includes("Number(r.revenue)||0")&&motion.includes('groupChannels()'),'3D channel heights come only from recorded deterministic revenue');
 ok(motion.includes("prefers-reduced-motion")&&motion.includes("pointer: coarse")&&motionCss.includes('@media(prefers-reduced-motion:reduce)'),'motion has reduced-motion and touch-device fallbacks');
