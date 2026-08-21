@@ -1,7 +1,8 @@
 /*
- * KOSIF Visual System v45 — cascade authority guard.
- * Presentation only. Keeps the single v45 stylesheet last among presentation
- * styles when historical runtimes inject v40/v41 CSS after initial parsing.
+ * KOSIF Visual System v45 — cascade and UI continuity guard.
+ * UI-only: keeps the single v45 stylesheet last among presentation styles and
+ * preserves the reading position after historical dialog locks release.
+ * No accounting, audit, evidence, approval, AI or security authority lives here.
  */
 (() => {
   'use strict';
@@ -74,6 +75,24 @@
     if (lateStyleAdded) queueEnsureLast();
   });
   observer.observe(document.head, { childList: true });
+
+  // v36 continuity restores the exact page Y before dispatching this event. The
+  // Studio launcher then restores focus synchronously; Chromium can let that
+  // focus move the document again. Re-assert the saved Y after that task so a
+  // dialog close never loses the user's reading position. The frame fallback
+  // covers layout/focus work that lands one rendering phase later.
+  window.addEventListener('kosif-dialog-lock', event => {
+    const detail = event.detail || {};
+    if (detail.locked) return;
+    const savedY = Number(detail.scrollY);
+    if (!Number.isFinite(savedY)) return;
+    const restore = () => {
+      if (document.body?.dataset.kosifDialogOpen === '1') return;
+      if (Math.abs((window.scrollY || 0) - savedY) > 2) window.scrollTo(0, savedY);
+    };
+    queueMicrotask(restore);
+    requestAnimationFrame(restore);
+  });
 
   // Establish authority immediately. Mutation-driven repairs use a microtask so
   // a legacy stylesheet cannot be measured by the next browser task before v45.
