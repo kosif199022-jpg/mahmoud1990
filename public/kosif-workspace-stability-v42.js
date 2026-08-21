@@ -197,7 +197,7 @@
 
   function removeDelayArtifacts() {
     $('#kosif-boot')?.remove();
-    $('#k41-scroll-progress')?.remove();
+    // Preserve the v41 scroll-progress element: visual/runtime contracts query it directly.
     $('#kosif-motion-bg')?.remove();
     document.body?.classList.add('kosif-ready');
     $$('#view-overview [data-k41-reveal],section[data-view].show [data-k41-reveal]').forEach(el => {
