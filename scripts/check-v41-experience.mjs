@@ -80,7 +80,7 @@ for (const html of ['public/hub.html', 'public/libraries/index.html', 'public/sa
   need(source.indexOf('kosif-suite-v40.css') < source.indexOf('kosif-editorial-v41.css'), `v41 must load after the stable v40 base in ${html}`);
 }
 
-need(edge.includes("version:'v41.0.0-root'") && edge.includes("buildId:'2026.08.20-v41-editorial-cinematic-canva'"), 'v41 product identity is missing');
+need(edge.includes("version:'v41.0.0-root'") && edge.includes("buildId:'2026.08.21-v41-system-brain-nav-fix'"), 'current v41 product identity is missing');
 need(edge.includes("experienceVersion:'v41.0.0'") && edge.includes("baseVisualVersion:'v40.0.0'"), 'v41/base visual relationship is not explicit');
 need(edge.includes("designAuthority:'KOSIF Editorial v41 cinematic Arabic magazine system informed by Canva with governed motion and color'"), 'Canva-informed design authority is missing');
 need(edge.includes('/kosif-editorial-v41.css?v=2026.08.20-v41-2') && /kosif-studio-v40\.css\?v=2026\.08\.20-v40">'\+editorial/.test(edge), 'audit shell does not load v41 after v40');
