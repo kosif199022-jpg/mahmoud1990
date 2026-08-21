@@ -11,7 +11,7 @@ ok(!fs.existsSync('public/sales/sales-general-bootstrap.js')&&!salesHtml.include
 ok(salesJs.includes("const STORE='kosif:sales:v1'")&&salesJs.includes("const LEGACY_STORE='kosif:aghnam:v7:native'"),'Sales has canonical storage plus legacy migration key');
 ok(salesJs.includes('shouldReplaceLegacyDemo')&&salesJs.includes('localStorage.getItem(LEGACY_STORE)'),'Sales migration preserves imported user data and replaces only historical demo');
 ok(motion.includes("window.__KOSIF_SALES_STORE_KEY__||'kosif:sales:v1'"),'Sales motion consumes canonical shared storage key');
-ok(salesJs.includes("a.download='kosif-sales-backup.json'"),'Sales exports generic KOSIF backup filename');
+ok(/\.download\s*=\s*['"]kosif-sales-backup\.json['"]/.test(salesJs),'Sales exports generic KOSIF backup filename');
 ok(salesJs.includes('function parseDelimited(')&&salesJs.includes('rowsFromDelimited('),'Sales CSV/TSV parser handles quoted delimiters');
 ok(!/[اأإآ]غنام|نعيمي|سواكني|ذبائح|تيس|حبشي/.test(salesHtml+salesJs+motion),'legacy livestock demo copy is absent from active Sales runtime');
 for(const phrase of ['التواصل مع المكلفين بالحوكمة','الإقرارات المكتوبة','استخدام عمل المراجعين الداخليين','فقرات لفت الانتباه وفقرات الأمور الأخرى في تقرير المراجع المستقل','مسؤوليات المراجع المتعلقة بالمعلومات الأخرى'])ok(books.includes(phrase),`professional wording retained: ${phrase}`);
