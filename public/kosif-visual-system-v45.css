@@ -177,7 +177,7 @@ html[data-kosif-visual-system="v45"] .tabs{
   -webkit-backdrop-filter:blur(18px)!important;
 }
 html[data-kosif-visual-system="v45"] .tab{
-  min-height:42px!important;
+  min-height:var(--k45-touch)!important;
   border-radius:var(--k45-r-pill)!important;
   color:var(--k45-muted)!important;
   font-size:var(--k45-small)!important;
