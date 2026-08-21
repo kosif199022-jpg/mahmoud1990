@@ -6,6 +6,8 @@ const cssHref = '/kosif-design-system-v44.css';
 const jsSrc = '/kosif-design-system-v44.js';
 const visualCssHref = '/kosif-visual-system-v45.css?v=2026.08.21-2';
 const visualJsSrc = '/kosif-visual-system-v45.js?v=2026.08.21-1';
+const themeV46CssHref = '/kosif-sharp-command-center-v46.css?v=2026.08.22-1';
+const themeV46GuardSrc = '/kosif-theme-v46.js?v=2026.08.22-1';
 
 function applyVisualSystemV45(sourceHtml) {
   let output = sourceHtml;
@@ -17,6 +19,20 @@ function applyVisualSystemV45(sourceHtml) {
   }
   if (!output.includes(visualJsSrc)) {
     output = output.replace('</head>', `  <script id="kosif-visual-system-v45-guard" src="${visualJsSrc}" defer></script>\n</head>`);
+  }
+  return output;
+}
+
+function applyThemeV46(sourceHtml) {
+  let output = sourceHtml;
+  if (!output.includes('data-kosif-theme="v46"')) {
+    output = output.replace(/<html\b/, '<html data-kosif-theme="v46"');
+  }
+  if (!output.includes(themeV46CssHref)) {
+    output = output.replace('</head>', `  <link rel="stylesheet" id="kosif-theme-v46" href="${themeV46CssHref}">\n</head>`);
+  }
+  if (!output.includes(themeV46GuardSrc)) {
+    output = output.replace('</head>', `  <script id="kosif-theme-v46-guard" src="${themeV46GuardSrc}" defer></script>\n</head>`);
   }
   return output;
 }
@@ -42,12 +58,17 @@ if (!html.includes(jsSrc)) {
 // their CSS after initial parsing.
 html = applyVisualSystemV45(html);
 
+// Theme v46 is the approved final presentation layer. It intentionally sits
+// after v45 and has its own cascade guard because older runtime modules may
+// append legacy styles after initial parsing. Business/audit logic is unchanged.
+html = applyThemeV46(html);
+
 // `frontend/index.html` and `public/index.html` are the two canonical shell
 // copies and the regression contract requires them to remain byte-identical.
 fs.writeFileSync(source, html);
 fs.writeFileSync(target, html);
 
-// Other first-class static KOSIF shells receive the same v45 presentation layer.
+// Other first-class static KOSIF shells receive the same presentation layers.
 // Wealth is intentionally excluded because its original Mafateeh reader remains
 // a preserved product surface with its own visual identity.
 for (const shell of [
@@ -58,7 +79,7 @@ for (const shell of [
 ]) {
   if (!fs.existsSync(shell)) continue;
   const shellHtml = fs.readFileSync(shell, 'utf8');
-  fs.writeFileSync(shell, applyVisualSystemV45(shellHtml));
+  fs.writeFileSync(shell, applyThemeV46(applyVisualSystemV45(shellHtml)));
 }
 
 // Direct requested-book bootstrap. The historical 700ms delay visibly rendered
@@ -73,4 +94,4 @@ if (fs.existsSync(wealthLibrary)) {
   if (src.includes(delayed)) fs.writeFileSync(wealthLibrary, src.replace(delayed, direct));
 }
 
-console.log('Kosif Native assets ready with Design Quality Stack v44 + Visual System v45 cascade guard + direct book bootstrap v45');
+console.log('Kosif Native assets ready with Design Quality Stack v44 + Visual System v45 + Theme v46 cascade guard + direct book bootstrap v45');
