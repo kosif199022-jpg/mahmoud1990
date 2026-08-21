@@ -32,6 +32,18 @@ const repeatedList = buildBookDocument({
 });
 assert.equal(repeatedList.nodes.filter(n => n.type === 'list_item').length, 2, 'list items are not silently deduplicated');
 
+const distantRepeat = buildBookDocument({
+  title: 'معيار طويل',
+  pages: [
+    { page: 1, text: 'الفصل الأول\nيجب عرض المعلومة الجوهرية.' },
+    { page: 2, text: 'الفصل الثاني\nنص مختلف أول.\nنص مختلف ثان.\nنص مختلف ثالث.' },
+    { page: 3, text: 'الفصل الثالث\nنص مختلف رابع.\nنص مختلف خامس.\nنص مختلف سادس.' },
+    { page: 4, text: 'الفصل الرابع\nيجب عرض المعلومة الجوهرية.' }
+  ]
+});
+assert.equal(distantRepeat.nodes.filter(n => n.text === 'يجب عرض المعلومة الجوهرية.').length, 2, 'distant professional repeats must be preserved');
+assert.ok(distantRepeat.flags.includes('contains-distant-repeated-text'));
+
 const flat = buildBookDocument({ title: 'Flat', language: 'en', pages: [{ page: 1, text: 'A long paragraph that ends with a period.' }] });
 assert.ok(flat.flags.includes('flat-structure-needs-review'));
 
