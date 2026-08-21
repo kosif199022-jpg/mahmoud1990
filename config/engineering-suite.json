@@ -1,0 +1,85 @@
+{
+  "name": "KOSIF Engineering Suite",
+  "version": "2.0.0",
+  "mode": "fail-closed",
+  "priority": [
+    "numeric-integrity",
+    "security",
+    "compliance",
+    "source-integrity",
+    "quality",
+    "performance"
+  ],
+  "agents": {
+    "orchestrator": {"enabled": true, "role": "Coordinate all engineering gates and stop unsafe releases."},
+    "designDirector": {"enabled": true, "role": "Enforce design tokens, RTL, typography, spacing, responsive layout and visual consistency."},
+    "uiEngineer": {"enabled": true, "role": "Turn approved UI decisions into maintainable implementation."},
+    "visualQA": {"enabled": true, "role": "Detect overflow, clipping, broken modals, layout drift and mobile regressions."},
+    "browserTester": {"enabled": true, "role": "Exercise navigation and critical interactions in a real browser."},
+    "codeAuditor": {"enabled": true, "role": "Review code quality, duplicated logic, dead code, unsafe patterns and regressions."},
+    "performanceEngineer": {"enabled": true, "role": "Enforce Lighthouse and Core Web Vitals budgets."},
+    "accessibilityInspector": {"enabled": true, "role": "Run axe-based accessibility scans and enforce serious/critical findings."},
+    "numericIntegrityAgent": {"enabled": true, "role": "Run deterministic golden tests against the real v38 accounting core."},
+    "sourceIntegrityAgent": {"enabled": true, "role": "Validate standards/source provenance metadata and runtime source markers."},
+    "dependencyScout": {"enabled": true, "role": "Generate SBOM and reject HIGH/CRITICAL dependency, secret and configuration findings."},
+    "productAnalyticsAgent": {"enabled": true, "role": "Publish engineering outcomes to PostHog when repository credentials are configured."},
+    "issueRouter": {"enabled": true, "role": "Create Linear issues for failed engineering runs when repository credentials are configured."},
+    "productionSentinel": {"enabled": true, "role": "Independently verify Cloudflare production and roll back a newly deployed version when deployment succeeds but live verification fails."},
+    "releaseSentinel": {"enabled": true, "role": "Permit release only when all mandatory gates pass."}
+  },
+  "gates": {
+    "repository": true,
+    "security": true,
+    "sbom": true,
+    "htmlIntegrity": true,
+    "accountingGolden": true,
+    "sourceProvenance": true,
+    "browserSmoke": true,
+    "visualRegression": true,
+    "accessibilityAxe": true,
+    "lighthouseBudget": true,
+    "productionSmoke": true,
+    "automaticRollbackOnFailedLiveVerification": true
+  },
+  "qualityBudgets": {
+    "lighthouse": {
+      "minPerformance": 0.55,
+      "minAccessibility": 0.80,
+      "minBestPractices": 0.75,
+      "maxLcpMs": 6000,
+      "maxCls": 0.25,
+      "maxTbtMs": 1500
+    },
+    "visual": {
+      "maxPixelDiffRatio": 0.02,
+      "bootstrapMissingBaselinesAsArtifacts": true
+    },
+    "security": {
+      "blockSeverities": ["HIGH", "CRITICAL"],
+      "scanTypes": ["vuln", "secret", "misconfig"]
+    }
+  },
+  "criticalRoutes": ["/", "/audit/", "/libraries/", "/sales/", "/wealth/reader.html"],
+  "viewportMatrix": [
+    {"name": "iphone", "width": 390, "height": 844},
+    {"name": "tablet", "width": 820, "height": 1180},
+    {"name": "desktop", "width": 1440, "height": 1000}
+  ],
+  "integrations": {
+    "posthog": {"mode": "optional-until-repository-secret-configured", "secret": "POSTHOG_PROJECT_API_KEY", "hostVariable": "POSTHOG_HOST"},
+    "linear": {"mode": "optional-until-repository-secret-configured", "secret": "LINEAR_API_KEY", "teamVariable": "LINEAR_TEAM_ID"},
+    "cloudflare": {"productionWorkflow": "Deploy Kosif to Cloudflare", "rollbackWorkflow": "KOSIF Production Sentinel"}
+  },
+  "releasePolicy": {
+    "blockOnCritical": true,
+    "blockOnHigh": true,
+    "requireAccountingGolden": true,
+    "requireSourceProvenance": true,
+    "requireBrowserSmoke": true,
+    "requireAxe": true,
+    "requireLighthouseBudget": true,
+    "requireSbom": true,
+    "requireNoHorizontalOverflow": true,
+    "requireMainDocument": "frontend/index.html"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "policy": {
+    "mode": "fail-closed",
+    "requireLocalPathExists": true,
+    "requireAuthorityClass": true,
+    "requireProfessionalUseClassification": true,
+    "requireRuntimeProvenanceMarkers": true
+  },
+  "sources": [
+    {
+      "id": "standards-runtime-adapter",
+      "title": "KOSIF standards and library runtime adapter",
+      "kind": "derived-runtime",
+      "authorityClass": "derived-from-configured-standard-library",
+      "professionalUse": "verify-against-official-source-before-conclusion",
+      "path": "src/standards-mafateeh.js",
+      "requiredMarkers": [
+        "STD_REFS",
+        "STD_ZIPS",
+        "x-kosif-ref",
+        "مرجع رسمي",
+        "تطوير — ليس سندًا مهنيًا"
+      ]
+    },
+    {
+      "id": "deterministic-accounting-core",
+      "title": "KOSIF v38 deterministic accounting core",
+      "kind": "internal-engine",
+      "authorityClass": "kosif-internal-deterministic-implementation",
+      "professionalUse": "calculation-engine-subject-to-golden-tests-and-human-review",
+      "path": "src/engine/v38-core.mjs",
+      "requiredMarkers": [
+        "computeMateriality",
+        "aggregateMisstatements",
+        "frameworkApplicability",
+        "checkInvariants",
+        "التحقق من المصدر الرسمي"
+      ]
+    },
+    {
+      "id": "master-requirements",
+      "title": "KOSIF master requirements",
+      "kind": "internal-governance",
+      "authorityClass": "project-requirements",
+      "professionalUse": "governance-only-not-a-professional-standard",
+      "path": "docs/KOSIF_MASTER_REQUIREMENTS_2026-08-17.md",
+      "requiredMarkers": []
+    }
+  ]
+}
