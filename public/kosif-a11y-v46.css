@@ -1,0 +1,26 @@
+/* KOSIF v46 accessibility corrections.
+   Presentation-only: no accounting, audit, standards, AI or sales values are changed. */
+html[data-kosif-visual-system="v45"] body .principle span{
+  color:#5b21b6!important;
+}
+html[data-kosif-visual-system="v45"] body .devbadge{
+  color:#4c1d95!important;
+  border-color:#6d28d9!important;
+}
+html[data-kosif-visual-system="v45"] body #library .card .yr{
+  color:#334155!important;
+  border-color:#64748b!important;
+}
+html[data-kosif-visual-system="v45"] body #library .card p,
+html[data-kosif-visual-system="v45"] body #library .card .st{
+  color:#334155!important;
+}
+html[data-kosif-visual-system="v45"] body .sales-3d-toggle button{
+  color:#334155!important;
+}
+html[data-kosif-visual-system="v45"] body .sales-3d-toggle button[aria-pressed="true"]{
+  color:#312e81!important;
+}
+@media (prefers-color-scheme:dark){
+  html[data-theme="dark"][data-kosif-visual-system="v45"] body .principle span{color:#c4b5fd!important}
+}
