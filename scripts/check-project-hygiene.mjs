@@ -16,7 +16,7 @@ ok(salesJs.includes('function parseDelimited(')&&salesJs.includes('rowsFromDelim
 ok(!/[اأإآ]غنام|نعيمي|سواكني|ذبائح|تيس|حبشي/.test(salesHtml+salesJs+motion),'legacy livestock demo copy is absent from active Sales runtime');
 for(const phrase of ['التواصل مع المكلفين بالحوكمة','الإقرارات المكتوبة','استخدام عمل المراجعين الداخليين','فقرات لفت الانتباه وفقرات الأمور الأخرى في تقرير المراجع المستقل','مسؤوليات المراجع المتعلقة بالمعلومات الأخرى'])ok(books.includes(phrase),`professional wording retained: ${phrase}`);
 ok(!books.includes('التواصل مع أولياء الأمور'),'incorrect ISA 260 wording is removed');
-ok(api.includes('لا تُستبدل معرّفات الملاحظات القائمة بصمت؛ استخدم تعديلًا صريحًا.'),'reviewer-note conflict message is explicit');
+ok(/لا تُستبدل معرّفات الملاحظات القائمة (?:بصمت|صامتةً).*?(?:تعديلًا|تحريرًا) صريحًا/.test(api),'reviewer-note conflict message is explicit');
 ok(voice.includes('aria-hidden="true" inert')&&voice.includes('x.inert=false')&&voice.includes('x.inert=true'),'voice dialog removes hidden focus targets');
 ok(workflow.includes('npm run source-export')&&workflow.includes('Kosif-Full-Application-Source.json'),'unified CI exports complete source snapshot as artifact');
 ok(!fs.existsSync('.github/workflows/export-full-code-json.yml'),'obsolete standalone source-export workflow stays removed');
