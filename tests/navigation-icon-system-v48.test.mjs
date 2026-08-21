@@ -11,7 +11,7 @@ test('v48 navigation runtime remains syntactically valid', () => {
 });
 
 test('v48 exposes the five mobile navigation destinations', () => {
-  for (const marker of ["'overview', 'الرئيسية'", "'rounds', 'المراجعة'", "'analytics', 'التحليلات'", "'المجلس'", "<span>المزيد</span>"]) {
+  for (const marker of ["'overview','الرئيسية'", "'rounds','المراجعة'", "'analytics','التحليلات'", "'المجلس'", "<span>المزيد</span>"]) {
     assert.ok(js.includes(marker), `missing mobile navigation marker: ${marker}`);
   }
 });
@@ -20,6 +20,7 @@ test('v48 keeps desktop rail and semantic more actions', () => {
   assert.ok(js.includes('k48-desktop-rail'));
   assert.ok(js.includes('decorateMore'));
   assert.ok(js.includes('k48-action-icon'));
+  assert.ok(js.includes("dataset.k48Mounted === '1'"));
   assert.ok(css.includes('@media (min-width:1180px)'));
   assert.ok(css.includes('#k48-desktop-rail'));
   assert.ok(css.includes('#kosif-more .kosif-action.k48-action'));
