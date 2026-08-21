@@ -1,0 +1,13 @@
+{
+  "name": "@kosif/hyperframes-motion",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "doctor": "npx --yes hyperframes doctor",
+    "lint": "npx --yes hyperframes lint",
+    "inspect": "npx --yes hyperframes inspect",
+    "preview": "npx --yes hyperframes preview",
+    "render": "npx --yes hyperframes render --output renders/kosif-brand-intro.mp4"
+  },
+  "engines": {"node": ">=22"}
+}
