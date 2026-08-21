@@ -75,7 +75,7 @@ for (const marker of ['v38-council-steps', 'v38-council-presets', 'data-state="i
 need(council.includes('recordButton.disabled = false') && council.includes('قرار بشري'), 'human Council gate cannot be verified');
 
 const edge = read('src/suite-edge.js');
-need(edge.includes("version:'v41.0.0-root'") && edge.includes('2026.08.20-v41-editorial-cinematic-canva'), 'suite release identity does not preserve the v40 base under v41');
+need(edge.includes("version:'v41.0.0-root'") && edge.includes('2026.08.21-v41-system-brain-nav-fix'), 'suite release identity does not preserve the v40 base under the current v41 build');
 need(edge.includes("installable:true") && edge.includes('/kosif-studio-v40.css?v=2026.08.20-v40'), 'suite shell does not declare/wire installable v40');
 
 const continuity = read('public/v36-continuity.js');
