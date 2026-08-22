@@ -1,3 +1,4 @@
+// v43 remains a mandatory governed layer beneath the v51 production wrapper.
 import fs from 'node:fs';
 import {
   KOSIF_MASTER_SOURCE_SHA256,
