@@ -52,7 +52,21 @@ const base = process.env.KOSIF_TEST_URL || 'http://127.0.0.1:8788';
     if (fallback.startDisplay !== 'none') throw new Error(`Direct-capture button should be hidden on iPhone fallback: ${fallback.startDisplay}`);
     if (!fallback.fileInput) throw new Error('Recorded-video import input missing');
 
-    console.log('KOSIF_RECORDER_SCREEN_V55_OK', JSON.stringify({ injected, fallback }));
+    // The start prompt can be dismissed while the tester records with iOS Control Center.
+    await page.click('#ks-screen-close');
+    await page.waitForSelector('#ks-screen-panel.show', { state: 'hidden', timeout: 5000 });
+
+    // When the UX metadata session is finalized, v55 must reopen the native-video import panel.
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent('kosif-ux-replay-ready', { detail: { sessionId: 'qa-recorder-v55' } })));
+    await page.waitForSelector('#ks-screen-panel.show', { state: 'visible', timeout: 5000 });
+    const reopened = await page.evaluate(() => ({
+      fileInput: Boolean(document.querySelector('#ks-screen-file')),
+      help: document.querySelector('#ks-screen-help')?.textContent || ''
+    }));
+    if (!reopened.fileInput) throw new Error('Native recorded-video import did not reopen after UX session completion');
+    if (!reopened.help.includes('التقاط الشاشة المباشر غير متاح')) throw new Error(`Reopened fallback help missing: ${reopened.help}`);
+
+    console.log('KOSIF_RECORDER_SCREEN_V55_OK', JSON.stringify({ injected, fallback, reopened }));
   } finally {
     await context.close();
     await browser.close();
