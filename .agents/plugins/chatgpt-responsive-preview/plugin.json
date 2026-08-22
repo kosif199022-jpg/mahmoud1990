@@ -1,0 +1,23 @@
+{
+  "name": "chatgpt-responsive-preview",
+  "displayName": "KOSIF Responsive Preview + QA",
+  "version": "1.0.0",
+  "description": "Responsive UI preview and same-origin QA audit plugin integrated into KOSIF with a ChatGPT-compatible postMessage bridge.",
+  "entrypoint": "/preview/index.html",
+  "hostBridge": "/responsive-preview-plugin.js",
+  "category": "Developer Tools",
+  "authentication": "NONE",
+  "capabilities": {
+    "tools": true,
+    "resources": true,
+    "prompts": false,
+    "responsivePreview": true,
+    "qaAudit": true,
+    "chatgptBridge": true
+  },
+  "policy": {
+    "installation": "AVAILABLE",
+    "authentication": "NONE",
+    "sameOriginAuditOnly": true
+  }
+}
