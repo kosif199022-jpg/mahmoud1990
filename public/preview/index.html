@@ -1,1 +1,40 @@
-test
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#081B19">
+<title>KOSIF Preview Lab</title>
+<style>
+html,body{margin:0;min-height:100%;background:#081B19;color:#E9E4D6;font-family:system-ui,Tahoma,sans-serif}
+body{display:grid;place-items:center}.boot{display:grid;gap:14px;text-align:center}.mark{width:58px;height:58px;margin:auto;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#102825,#D7AE58);font-weight:900;font-size:28px}.spin{width:120px;height:3px;border-radius:999px;background:#26332C;overflow:hidden;margin:auto}.spin:after{content:"";display:block;width:45%;height:100%;background:#D7AE58;animation:load 1s ease-in-out infinite alternate}@keyframes load{to{transform:translateX(-120%)}}small{color:#A8A291}
+</style>
+</head>
+<body>
+<div class="boot"><div class="mark">K</div><b>KOSIF Preview Lab</b><small>جاري تجهيز مختبر المعاينة والفحص…</small><div class="spin"></div></div>
+<script>
+(async()=>{
+  const ungzip=async path=>{
+    const b64=(await fetch(path,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(path+' '+r.status);return r.text()})).trim();
+    const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    if(!('DecompressionStream' in window))throw Error('المتصفح يحتاج DecompressionStream لتشغيل Preview Lab');
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return await new Response(stream).text();
+  };
+  try{
+    const [markup,css,js]=await Promise.all([ungzip('./app.html.gz.b64'),ungzip('./preview.css.gz.b64'),ungzip('./preview.js.gz.b64')]);
+    const doc=new DOMParser().parseFromString(markup,'text/html');
+    doc.querySelector('link[href="./preview.css"]')?.remove();
+    doc.querySelector('script[src="./preview.js"]')?.remove();
+    document.documentElement.lang=doc.documentElement.lang||'ar';
+    document.documentElement.dir=doc.documentElement.dir||'rtl';
+    document.head.innerHTML=doc.head.innerHTML;
+    document.body.innerHTML=doc.body.innerHTML;
+    const st=document.createElement('style');st.id='kosif-preview-inline-style';st.textContent=css;document.head.appendChild(st);
+    const sc=document.createElement('script');sc.id='kosif-preview-runtime';sc.textContent=js;document.body.appendChild(sc);
+  }catch(e){
+    document.body.innerHTML='<main style="max-width:720px;padding:28px;text-align:center"><h1>تعذر تشغيل KOSIF Preview Lab</h1><p>'+String(e.message||e)+'</p><p><a style="color:#D7AE58" href="/">العودة إلى Kosif</a></p></main>';
+  }
+})();
+</script>
+</body></html>
