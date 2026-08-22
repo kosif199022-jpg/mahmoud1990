@@ -10,16 +10,12 @@ function ensureVisibleContainers(){
   // Editorial v41 intentionally starts reveal targets at opacity:0. Sales renders #view
   // dynamically, so a newly inserted in-viewport grid can otherwise miss the first
   // IntersectionObserver cycle and remain visually hidden. Make only currently visible
-  // sales containers fail-open; below-fold targets keep their cinematic reveal.
+  // sales containers fail-open by switching the existing class-based reveal state.
   const targets=[...document.querySelectorAll('#view > .grid,[data-k41-reveal]')];
   for(const el of targets){
     const r=el.getBoundingClientRect();
     if(r.width<=0||r.height<=0||r.top>=innerHeight*.99||r.bottom<=0)continue;
     el.classList.add('k41-in');
-    el.style.setProperty('opacity','1','important');
-    el.style.setProperty('visibility','visible','important');
-    el.style.setProperty('filter','none','important');
-    el.style.setProperty('transform','none','important');
   }
 }
 function reveal(){
