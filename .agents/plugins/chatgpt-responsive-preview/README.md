@@ -1,15 +1,19 @@
-# KOSIF Responsive Preview + QA
+# KOSIF Responsive Preview + Hidden UX Recorder
 
-بلجن داخلي داخل KOSIF مبني على تطبيق Responsive Preview Studio Pro المرفق.
+البلجن بدأ كتطبيق Responsive Preview Studio Pro ثم تم تحويل الجسر داخل KOSIF إلى **مسجل جلسات مخفي** لا يضيف أي تبويب أو بطاقة أو زر إلى واجهة الإنتاج.
 
-- واجهة التشغيل: `/preview/index.html`
-- جسر KOSIF/ChatGPT: `/responsive-preview-plugin.js`
-- أوضاع: Single / Split / Matrix / Fluid
-- معاينة أجهزة الهاتف والتابلت واللابتوب وسطح المكتب
-- Safe Area و8px Grid وRuler وOutline وInspect
-- QA سريع للـ overflow، العناصر خارج الشاشة، الصور وalt، الحقول، أهداف اللمس، الأزرار/الروابط، Duplicate IDs وH1
-- التقارير ترسل إلى المضيف عبر `postMessage` عند توفر الجسر داخل تطبيق المعاينة
+- أداة المعاينة المستقلة ما زالت متاحة تقنيًا على `/preview/index.html` عند الحاجة للتطوير.
+- جسر الإنتاج المخفي: `/responsive-preview-plugin.js`.
+- يعمل تلقائيًا فقط عندما تكون **جلسة المالك** صالحة.
+- يسجل تسلسل الحركة والزمن: النقر/اللمس، حركة المؤشر، التمرير، تغيير العرض، التنقل بين الشاشات، التركيز، مفاتيح التحكم، تغيّر المقاس/الاتجاه، وأخطاء JavaScript المنقحة.
+- لا يسجل قيم الحقول، النص المكتوب، محتوى الحافظة، محتوى الملفات، كلمات المرور، مفاتيح API، الكوكيز أو أجسام الطلبات.
+- الدُفعات تحفظ مؤقتًا في Cloudflare KV تحت `kosif:uxrec:pending:*`.
+- Workflow: `.github/workflows/archive-kosif-ux-recordings.yml` يسحب الدُفعات كل 5 دقائق ويرفعها إلى GitHub Actions كـ artifact باسم `kosif-ux-replay-*` لمدة 90 يومًا، ثم يحذف النسخة المرحلية من KV بعد نجاح الأرشفة.
+
+## الرجوع للتسجيل
+
+يمكن لأي وكيل تطوير لاحقًا فتح آخر GitHub Actions artifact، قراءة `manifest.json` ثم ترتيب ملفات الجلسة حسب `sequence` لإعادة بناء timeline كامل للحركة على أساس `sessionId`، الإحداثيات، الـselectors، الـviewport والـview النشط.
 
 ## حدود الأمان
 
-الفحص وInspect يحتاجان نفس النطاق. المواقع الخارجية قد تمنع التضمين عبر CSP أو X-Frame-Options. هذا البلجن لا يتجاوز حماية المتصفح ولا يرسل بيانات مراجعة محاسبية إلى مزود خارجي.
+التسجيل مخصص لجلسة المالك فقط حتى لا يتحول التطبيق العام إلى أداة تتبع لزوار آخرين. البيانات المسجلة هي metadata للحركة والتفاعل وليست محتوى محاسبيًا أو أسرار اعتماد. أداة Preview المستقلة لا تتجاوز CSP أو X-Frame-Options للمواقع الخارجية.
