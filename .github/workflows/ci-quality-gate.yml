@@ -113,6 +113,10 @@ jobs:
           done
           cat /tmp/kosif-worker-v46.log
           exit 1
+      - name: Recorder iPhone fallback browser regression
+        env:
+          KOSIF_TEST_URL: http://127.0.0.1:8788
+        run: node scripts/verify-recorder-screen-v55.cjs
       - name: Safari and mobile scroll regression
         env:
           KOSIF_TEST_URL: http://127.0.0.1:8788
