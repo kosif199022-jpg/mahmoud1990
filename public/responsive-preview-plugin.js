@@ -6,7 +6,6 @@
 
   const $ = (s, scope = document) => scope.querySelector(s);
   const $$ = (s, scope = document) => [...scope.querySelectorAll(s)];
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const VIEW = 'responsive-preview';
 
   function showView() {
@@ -21,9 +20,42 @@
     section.scrollIntoView({block:'start'});
   }
 
+  function publishAudit(detail) {
+    window.__KOSIF_LAST_RESPONSIVE_AUDIT__ = detail;
+    setStatus(detail);
+    window.dispatchEvent(new CustomEvent('kosif-responsive-audit', {detail}));
+  }
+
+  function collectAuditFromFrame(frame) {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) return null;
+      const issues = $$('.audit-item', doc).map(item => {
+        const severity = $('.audit-severity', item)?.textContent?.trim()?.toLowerCase() || 'warning';
+        const title = $('strong', item)?.textContent?.trim() || 'QA issue';
+        const detail = $('small', item)?.textContent?.trim() || '';
+        return {severity, title, detail};
+      });
+      const detail = {url: frame.src, device:'embedded', mode:'attached-runtime', issues, source:'same-origin-dom-bridge'};
+      publishAudit(detail);
+      return detail;
+    } catch (_) { return null; }
+  }
+
   function frameCommand(command, payload = {}) {
     const frame = $('#kosif-responsive-preview-frame');
-    frame?.contentWindow?.postMessage({source:'kosif-responsive-preview-host', type:'kosif:responsive-preview:command', command, payload}, location.origin);
+    if (!frame) return;
+    frame.contentWindow?.postMessage({source:'kosif-responsive-preview-host', type:'kosif:responsive-preview:command', command, payload}, location.origin);
+    if (command === 'run-audit') {
+      try {
+        frame.contentDocument?.querySelector('#auditBtn')?.click();
+        setTimeout(() => collectAuditFromFrame(frame), 350);
+      } catch (_) {}
+    } else if (command === 'get-audit') {
+      collectAuditFromFrame(frame);
+    } else if (command === 'reload') {
+      try { frame.contentDocument?.querySelector('#reloadBtn')?.click(); } catch (_) { frame.src = frame.src; }
+    }
   }
 
   function setStatus(detail) {
@@ -94,11 +126,7 @@
     if (event.origin !== location.origin) return;
     const data = event.data || {};
     if (data.source !== 'kosif-responsive-preview') return;
-    if (data.type === 'kosif:responsive-preview:audit' || data.type === 'kosif:responsive-preview:result') {
-      window.__KOSIF_LAST_RESPONSIVE_AUDIT__ = data.detail || data.payload || data;
-      setStatus(window.__KOSIF_LAST_RESPONSIVE_AUDIT__);
-      window.dispatchEvent(new CustomEvent('kosif-responsive-audit', {detail: window.__KOSIF_LAST_RESPONSIVE_AUDIT__}));
-    }
+    if (data.type === 'kosif:responsive-preview:audit' || data.type === 'kosif:responsive-preview:result') publishAudit(data.detail || data.payload || data);
   });
 
   document.addEventListener('click', event => {
