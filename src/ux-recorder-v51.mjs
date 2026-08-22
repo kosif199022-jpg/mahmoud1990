@@ -70,6 +70,7 @@ function rawUrl(repo,branch,path){
 }
 function githubFailureCode(result){
   if(result?.ok)return null;
+  if(result?.code)return result.code;
   if(result?.configured===false)return 'GITHUB_TOKEN_NOT_CONFIGURED';
   if(result?.status===401)return 'GITHUB_TOKEN_INVALID';
   if(result?.status===403)return 'GITHUB_PERMISSION_DENIED';
