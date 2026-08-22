@@ -50,6 +50,8 @@ jobs:
         run: npx --yes -p typescript@5.9.2 tsc --noEmit -p tsconfig.json
       - name: Run complete KOSIF deterministic gate
         run: npm run check
+      - name: Verify screen recorder integration
+        run: node --test tests/recorder-screen-integration-v55.test.mjs
       - name: Validate modular architecture contract
         run: node scripts/check-platform-architecture-v46.mjs
       - name: Generate complete source snapshot artifact
