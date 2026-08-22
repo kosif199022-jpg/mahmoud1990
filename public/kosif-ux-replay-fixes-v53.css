@@ -42,11 +42,14 @@
   cursor: progress !important;
 }
 
-/* Axe blocking contrast fixes observed in the audit overview on light backgrounds. */
-html[data-kosif-workspace="stable-v42"] .kw42-stat span {
+/* Axe blocking contrast fixes observed in the audit overview on light backgrounds.
+ * Keep these selectors intentionally direct: the v42/v47 widgets can be mounted by
+ * multiple shells, so their accessibility contrast must not depend on an ancestor marker.
+ */
+.kw42-stat > span {
   color: #52615b !important;
 }
-#kw47-audit-lifecycle .kw47-guardrails span {
+.kw47-guardrails > span {
   color: #4f5c58 !important;
 }
 

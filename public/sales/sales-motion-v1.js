@@ -6,17 +6,30 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmt=n=>new Intl.NumberFormat('ar-SA',{maximumFractionDigits:0}).format(Number(n)||0);
 function rows(){try{return JSON.parse(localStorage.getItem(STORE)||'null')?.sales||[]}catch{return[]}}
 function groupChannels(){const m=new Map;for(const r of rows()){const k=String(r.channel||'غير محدد');m.set(k,(m.get(k)||0)+(Number(r.revenue)||0))}return [...m].sort((a,b)=>b[1]-a[1]).slice(0,6)}
+function ensureVisibleContainers(){
+  // Editorial v41 intentionally starts reveal targets at opacity:0. Sales renders #view
+  // dynamically, so a newly inserted in-viewport grid can otherwise miss the first
+  // IntersectionObserver cycle and remain visually hidden. Make only currently visible
+  // sales containers fail-open by switching the existing class-based reveal state.
+  const targets=[...document.querySelectorAll('#view > .grid,[data-k41-reveal]')];
+  for(const el of targets){
+    const r=el.getBoundingClientRect();
+    if(r.width<=0||r.height<=0||r.top>=innerHeight*.99||r.bottom<=0)continue;
+    el.classList.add('k41-in');
+  }
+}
 function reveal(){
   // v41 Editorial owns page-level reveal state (including chapter-head and health-ribbon).
   // Sales motion owns only dynamically rendered sales cards so the two opacity state machines never race.
   const els=[...document.querySelectorAll('.kpi,.panel,.mini-card')];
-  if(reduced||!('IntersectionObserver'in window)){els.forEach(x=>x.classList.add('motion-in'));return}
+  if(reduced||!('IntersectionObserver'in window)){els.forEach(x=>x.classList.add('motion-in'));ensureVisibleContainers();return}
   const io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){e.target.classList.add('motion-in');io.unobserve(e.target)}},{threshold:.08,rootMargin:'40px 0px'});
-  els.forEach((x,i)=>{x.classList.add('kosif-reveal');x.style.transitionDelay=Math.min(i*22,180)+'ms';io.observe(x)})
+  els.forEach((x,i)=>{x.classList.add('kosif-reveal');x.style.transitionDelay=Math.min(i*22,180)+'ms';io.observe(x)});
+  ensureVisibleContainers();
 }
 function tilt(){if(reduced||coarse||!matchMedia('(hover:hover) and (pointer:fine)').matches)return;const els=[...document.querySelectorAll('.kpi,.panel,.mini-card')];for(const el of els){el.classList.add('kosif-tilt');let raf=0;el.addEventListener('pointermove',ev=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const r=el.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width-.5,y=(ev.clientY-r.top)/r.height-.5;el.style.setProperty('--ry',(x*5).toFixed(2)+'deg');el.style.setProperty('--rx',(-y*4).toFixed(2)+'deg')})},{passive:true});el.addEventListener('pointerleave',()=>{el.style.setProperty('--ry','0deg');el.style.setProperty('--rx','0deg')},{passive:true})}}
 function build3D(){const anchor=document.querySelector('.health-ribbon'),view=document.querySelector('#view');if(!anchor||!view||document.querySelector('.sales-3d-panel'))return;const data=groupChannels(),mx=Math.max(1,...data.map(x=>x[1]));const panel=document.createElement('section');panel.className='sales-3d-panel';panel.dataset.mode=(reduced||coarse)?'2d':'3d';panel.setAttribute('aria-label','منظور قنوات المبيعات');panel.innerHTML=`<div class="sales-3d-head"><div><h2>منظور القنوات</h2><p>عرض ثلاثي الأبعاد مشتق حتميًا من الإيراد المسجل لكل قناة.</p></div><div class="sales-3d-toggle" role="group" aria-label="طريقة العرض"><button type="button" data-mode="3d" aria-pressed="${panel.dataset.mode==='3d'}">3D</button><button type="button" data-mode="2d" aria-pressed="${panel.dataset.mode==='2d'}">جدول</button></div></div><div class="sales-3d-stage" aria-hidden="true"><div class="sales-3d-world"><div class="sales-3d-grid"></div><div class="sales-3d-bars">${data.map(([k,v],i)=>`<div class="sales-pillar" style="--h:${Math.max(34,Math.round(v/mx*150))}px;--z:${i%2?8:0}px"><b>${fmt(v)}</b><span>${esc(k)}</span></div>`).join('')}</div></div></div><div class="sales-3d-fallback"><div class="table-wrap"><table><thead><tr><th>القناة</th><th>الإيراد</th><th>النسبة</th></tr></thead><tbody>${data.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${fmt(v)} ر.س</td><td>${(v/mx*100).toFixed(1)}%</td></tr>`).join('')}</tbody></table></div></div><p class="sales-3d-caption"><b>تنبيه:</b> المنظور البصري لا يغيّر البيانات ولا يستنتج أرقامًا. على الأجهزة اللمسية أو مع Reduce Motion يتحول تلقائيًا إلى الجدول.</p>`;anchor.insertAdjacentElement('afterend',panel);panel.addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;const mode=b.dataset.mode;panel.dataset.mode=mode;panel.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.mode===mode)))})}
-function refresh(){document.querySelector('.sales-3d-panel')?.remove();build3D();setTimeout(()=>{reveal();tilt()},0)}
-function init(){build3D();reveal();tilt();document.addEventListener('click',e=>{if(e.target.closest('.sales-tabs button'))setTimeout(refresh,80)});addEventListener('storage',e=>{if(e.key===STORE)refresh()});addEventListener('kosif-sales-updated',refresh)}
+function refresh(){document.querySelector('.sales-3d-panel')?.remove();build3D();setTimeout(()=>{reveal();tilt();ensureVisibleContainers()},0)}
+function init(){build3D();reveal();tilt();ensureVisibleContainers();const view=document.querySelector('#view');if(view)new MutationObserver(()=>requestAnimationFrame(ensureVisibleContainers)).observe(view,{childList:true,subtree:true});document.addEventListener('click',e=>{if(e.target.closest('.sales-tabs button'))setTimeout(refresh,80)});addEventListener('storage',e=>{if(e.key===STORE)refresh()});addEventListener('kosif-sales-updated',refresh);addEventListener('resize',()=>requestAnimationFrame(ensureVisibleContainers),{passive:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

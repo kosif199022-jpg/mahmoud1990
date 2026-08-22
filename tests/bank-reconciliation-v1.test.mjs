@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { reconcileBankLedger, normalizeTransaction, BANK_RECONCILIATION_VERSION } from '../src/engine/bank-reconciliation-v1.mjs';
+import { reconcileBankLedgerGoverned, isExplicitCashLedgerRow } from '../src/engine/bank-reconciliation-governed-v1.mjs';
 
 function run(name, fn) {
   try { fn(); console.log('✓', name); }
@@ -107,6 +108,35 @@ run('aliases learned from accountant decisions normalize supplier identity', () 
   });
   assert.equal(r.matches.length, 1);
   assert.equal(r.matches[0].status, 'CONFIRMED');
+});
+
+run('explicit cash/cashbox supplier rows are excluded from bank reconciliation by default', () => {
+  const bank = [
+    { id: 'b-bank', date: '08/04/2026', amount: '-2000', counterparty: 'رواد' }
+  ];
+  const ledger = [
+    { id: 'l-bank', date: '08/04/2026', debit: '2000', supplier: 'رواد', account: 'البنك الاهلي' },
+    { id: 'l-cash', date: '11/04/2026', debit: '2000', supplier: 'رواد', account: 'صندوق المندوبين والكاش (الصندوق الرئيسي)' }
+  ];
+  assert.equal(isExplicitCashLedgerRow(ledger[1]), true);
+  const r = reconcileBankLedgerGoverned({ bankTransactions: bank, ledgerTransactions: ledger, dateToleranceDays: 3 });
+  assert.equal(r.matches.length, 1);
+  assert.equal(r.summary.unmatchedLedger, 0);
+  assert.equal(r.summary.sourceLedgerTransactions, 2);
+  assert.equal(r.summary.excludedNonBankLedger, 1);
+  assert.equal(r.exceptions.some(x => x.type === 'LEDGER_ONLY'), false);
+  assert.equal(r.excludedNonBankLedger[0].id, 'l-cash');
+});
+
+run('cash exclusion can be explicitly disabled for diagnostic comparisons', () => {
+  const r = reconcileBankLedgerGoverned({
+    bankOnlyLedger: false,
+    bankTransactions: [],
+    ledgerTransactions: [{ id: 'l-cash', date: '11/04/2026', debit: '2000', supplier: 'رواد', account: 'كاش' }]
+  });
+  assert.equal(r.summary.excludedNonBankLedger, 0);
+  assert.equal(r.summary.unmatchedLedger, 1);
+  assert.equal(r.exceptions.some(x => x.type === 'LEDGER_ONLY'), true);
 });
 
 console.log('bank reconciliation v1 tests passed');
