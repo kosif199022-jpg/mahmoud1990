@@ -1,0 +1,114 @@
+name: Archive KOSIF UX recordings
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: kosif-ux-recorder-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CF_ACCOUNT_ID: 9ff3d8494afab356ecbf95a2a231a6b5
+  CF_KV_NAMESPACE_ID: ea12d307eba1439c960c8832337a40f4
+  CF_KV_PREFIX: 'kosif:uxrec:pending:'
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull pending recordings from Cloudflare KV
+        id: pull
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const path=require('path');
+          const token=process.env.CLOUDFLARE_API_TOKEN;
+          if(!token)throw new Error('Missing CLOUDFLARE_API_TOKEN');
+          const account=process.env.CF_ACCOUNT_ID;
+          const namespace=process.env.CF_KV_NAMESPACE_ID;
+          const prefix=process.env.CF_KV_PREFIX;
+          const base=`https://api.cloudflare.com/client/v4/accounts/${account}/storage/kv/namespaces/${namespace}`;
+          const headers={Authorization:`Bearer ${token}`};
+          const safe=s=>String(s||'').replace(/[^a-zA-Z0-9_.-]/g,'_').slice(0,120);
+
+          async function cf(url,init={}){
+            const r=await fetch(url,{...init,headers:{...headers,...(init.headers||{})}});
+            if(!r.ok)throw new Error(`${init.method||'GET'} ${url} -> ${r.status} ${await r.text()}`);
+            return r;
+          }
+          async function listAll(){
+            const rows=[];
+            let cursor='';
+            do{
+              const q=new URLSearchParams({prefix,limit:'1000'});
+              if(cursor)q.set('cursor',cursor);
+              const data=await cf(`${base}/keys?${q}`).then(r=>r.json());
+              rows.push(...(data.result||[]));
+              cursor=data.result_info?.cursor||'';
+            }while(cursor);
+            return rows;
+          }
+          (async()=>{
+            const keys=await listAll();
+            fs.mkdirSync('ux-recordings',{recursive:true});
+            const manifest={schema:'kosif.uxrec.archive.v1',archivedAt:new Date().toISOString(),count:keys.length,batches:[]};
+            for(const item of keys){
+              const key=item.name;
+              const value=await cf(`${base}/values/${encodeURIComponent(key)}`).then(r=>r.text());
+              let parsed={};
+              try{parsed=JSON.parse(value)}catch{}
+              const session=safe(parsed.sessionId||key.split(':')[4]||'unknown');
+              const seq=String(parsed.sequence??manifest.batches.length).padStart(8,'0');
+              const day=safe((parsed.receivedAt||new Date().toISOString()).slice(0,10));
+              const dir=path.join('ux-recordings',day,session);
+              fs.mkdirSync(dir,{recursive:true});
+              const file=path.join(dir,`${seq}-${safe(key.slice(-8))}.json`);
+              fs.writeFileSync(file,JSON.stringify(parsed,null,2));
+              manifest.batches.push({key,file,sessionId:parsed.sessionId||session,sequence:parsed.sequence??null,events:Array.isArray(parsed.events)?parsed.events.length:0});
+            }
+            fs.writeFileSync('ux-recordings/manifest.json',JSON.stringify(manifest,null,2));
+            fs.writeFileSync('ux-recordings/.kv-keys.json',JSON.stringify(keys.map(x=>x.name)));
+            fs.appendFileSync(process.env.GITHUB_OUTPUT,`count=${keys.length}\nhas_records=${keys.length?'true':'false'}\n`);
+            console.log(`Pulled ${keys.length} recorder batch(es).`);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Upload replay bundle to GitHub Actions
+        if: steps.pull.outputs.has_records == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosif-ux-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ux-recordings/
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 9
+
+      - name: Remove archived KV batches
+        if: steps.pull.outputs.has_records == 'true' && success()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKE }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const token=process.env.CLOUDFLARE_API_TOKEN;
+          const account=process.env.CF_ACCOUNT_ID;
+          const namespace=process.env.CF_KV_NAMESPACE_ID;
+          const base=`https://api.cloudflare.com/client/v4/accounts/${account}/storage/kv/namespaces/${namespace}`;
+          const keys=JSON.parse(fs.readFileSync('ux-recordings/.kv-keys.json','utf8'));
+          (async()=>{
+            for(const key of keys){
+              const r=await fetch(`${base}/values/${encodeURIComponent(key)}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});
+              if(!r.ok)throw new Error(`DELETE ${key} -> ${r.status} ${await r.text()}`);
+            }
+            console.log(`Deleted ${keys.length} archived KV batch(es).`);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
