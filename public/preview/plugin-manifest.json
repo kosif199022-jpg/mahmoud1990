@@ -1,0 +1,29 @@
+{
+  "id": "chatgpt-responsive-preview",
+  "name": "KOSIF Responsive Preview + QA",
+  "version": "1.0.0",
+  "entrypoint": "/preview/index.html",
+  "hostBridge": "/responsive-preview-plugin.js",
+  "category": "Developer Tools",
+  "runtime": "browser-static",
+  "authentication": "NONE",
+  "capabilities": [
+    "responsive-preview",
+    "device-emulation",
+    "split-view",
+    "matrix-view",
+    "fluid-responsive",
+    "safe-area-overlay",
+    "8px-grid",
+    "ruler",
+    "same-origin-inspect",
+    "same-origin-qa-audit",
+    "json-export",
+    "chatgpt-postmessage-bridge"
+  ],
+  "security": {
+    "sameOriginAuditOnly": true,
+    "iframeRestrictionsMayApply": true,
+    "notes": "Inspect and QA require same-origin access. External sites may block iframe embedding with CSP or X-Frame-Options."
+  }
+}
