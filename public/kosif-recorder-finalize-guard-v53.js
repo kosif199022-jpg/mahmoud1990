@@ -1,5 +1,6 @@
 /* KOSIF recorder finalization guard v53.
  * Prevents the legacy v2 draft from being copied before v51 finishes the linked v3 replay.
+ * Also applies non-invasive accessibility labels to the recorder UI created asynchronously.
  */
 (() => {
   'use strict';
@@ -18,6 +19,16 @@
     };
   }
 
+  function applyRecorderA11y() {
+    const { report, box } = reportParts();
+    if (report && !report.getAttribute('aria-label') && !report.getAttribute('aria-labelledby')) {
+      report.setAttribute('aria-label', 'تقرير تسجيل تجربة استخدام KOSIF');
+    }
+    if (box && !box.getAttribute('aria-label') && !box.getAttribute('aria-labelledby')) {
+      box.setAttribute('aria-label', 'كود جلسة تجربة الاستخدام المسجلة');
+    }
+  }
+
   function stateNode(card) {
     let node = document.getElementById('kosif-rec-v53-state');
     if (node || !card) return node;
@@ -31,6 +42,7 @@
   }
 
   function setFinalizing(on, message) {
+    applyRecorderA11y();
     const { report, card, copy, download } = reportParts();
     report?.classList.toggle('kosif-v53-finalizing', Boolean(on));
     if (copy) copy.disabled = Boolean(on);
@@ -50,6 +62,7 @@
   }
 
   function finalizeIfReady() {
+    applyRecorderA11y();
     const { box } = reportParts();
     if (!box?.value?.trim()) return false;
     try {
@@ -84,5 +97,14 @@
     }, 100);
   }
 
+  function bootA11yGuard() {
+    applyRecorderA11y();
+    const observer = new MutationObserver(() => applyRecorderA11y());
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(() => observer.disconnect(), 15000);
+  }
+
   window.addEventListener('kosif-ux-replay-ready', waitForV3, true);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootA11yGuard, { once: true });
+  else bootA11yGuard();
 })();
