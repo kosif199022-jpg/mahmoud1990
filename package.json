@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:ui && node scripts/build-assets.mjs && npm run professional-copy-v46",
-    "check": "npm run professional-copy-v46 && npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run audit-lifecycle-v47 && npm run navigation-v48 && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme && npm run v42-requirements && npm run v43-requirements && npm run design-quality-v44 && npm run visual-system-v45 && npm run enterprise-contract && npm run direct-books-v45 && npm run hygiene",
+    "check": "npm run professional-copy-v46 && npm run syntax && npm run payloads && npm run source-export-integrity && npm run legacy-regressions && npm run contract && npm run ui-safety && npm run mobile-phase-b && npm run analytics-3d-phase-c && npm run product-polish-phase-d && npm run history-parity && npm run security-edge && npm run library-privacy && npm run executor-contract && npm run reviewer-media && npm run history-restoration && npm run feature-reachability && npm run accounting && npm run audit && npm run v37-engine && npm run v37-root && npm run libraries-sales && npm run v38-suite && npm run audit-lifecycle-v47 && npm run navigation-v48 && npm run book-engine && npm run v40-experience && npm run v41-experience && npm run kitab-theme && npm run v42-requirements && npm run v43-requirements && npm run design-quality-v44 && npm run visual-system-v45 && npm run enterprise-contract && npm run direct-books-v45 && npm run reconciliation-v49 && npm run hygiene",
     "syntax": "node scripts/check-all.mjs",
     "payloads": "node scripts/validate-payloads.mjs",
     "source-export-integrity": "node scripts/check-source-export-integrity.mjs",
@@ -66,6 +66,7 @@
     "build:ui": "node scripts/build-ui-bundles.mjs",
     "source-export": "node scripts/export-full-source.mjs",
     "professional-copy-v46": "node scripts/apply-professional-copy-v46.mjs",
+    "reconciliation-v49": "node --test tests/v49-reconciliation.test.mjs",
     "hygiene": "node scripts/check-project-hygiene.mjs"
   }
 }
