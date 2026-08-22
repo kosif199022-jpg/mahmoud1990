@@ -2,9 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-test('Cloudflare production entrypoint is the v43 requirements wrapper',()=>{
+test('Cloudflare production entrypoint preserves the v43 requirements wrapper',()=>{
   const wrangler=fs.readFileSync(new URL('../wrangler.toml',import.meta.url),'utf8');
-  assert.match(wrangler,/main\s*=\s*"src\/suite-edge-v43\.js"/);
+  const v43=fs.readFileSync(new URL('../src/suite-edge-v43.js',import.meta.url),'utf8');
+  const v51=fs.existsSync(new URL('../src/suite-edge-v51.js',import.meta.url))?fs.readFileSync(new URL('../src/suite-edge-v51.js',import.meta.url),'utf8'):'';
+  const direct=/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler);
+  const wrapped=/main\s*=\s*"src\/suite-edge-v51\.js"/.test(wrangler)&&v51.includes("import suiteV43 from './suite-edge-v43.js'")&&/await suiteV43\.fetch\(req,\s*env,\s*ctx\)/.test(v51);
+  assert.ok(direct||wrapped,'production entrypoint must retain v43 in the governed wrapper chain');
+  assert.ok(v43.includes("import suite from './suite-edge.js'"));
 });
 
 test('v43 production wrapper exposes runtime coverage and gates sensitive mutations',()=>{

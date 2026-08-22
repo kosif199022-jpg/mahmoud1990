@@ -23,6 +23,7 @@ const requiredFiles=[
   'src/requirements/v43-full-registry.mjs',
   'src/requirements/v43-control-implementation.mjs',
   'src/suite-edge-v43.js',
+  'src/suite-edge-v51.js',
   'wrangler.toml',
   'tests/v43-full-coverage.test.mjs',
   'public/data/kosif-requirements-summary-v43.json',
@@ -31,8 +32,11 @@ const requiredFiles=[
 for(const file of requiredFiles) if(!fs.existsSync(new URL(`../${file}`,import.meta.url))) fail('required evidence file missing',{file});
 
 const wrangler=fs.readFileSync(new URL('../wrangler.toml',import.meta.url),'utf8');
-if(!/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler)) fail('production Worker does not use v43 requirements wrapper');
 const edge=fs.readFileSync(new URL('../src/suite-edge-v43.js',import.meta.url),'utf8');
+const edgeV51=fs.readFileSync(new URL('../src/suite-edge-v51.js',import.meta.url),'utf8');
+const directV43=/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler);
+const governedV51=/main\s*=\s*"src\/suite-edge-v51\.js"/.test(wrangler)&&edgeV51.includes("import suiteV43 from './suite-edge-v43.js'")&&/await suiteV43\.fetch\(req,\s*env,\s*ctx\)/.test(edgeV51);
+if(!directV43&&!governedV51) fail('production Worker does not preserve the v43 requirements wrapper in the governed entry chain');
 for(const marker of ['createFullyImplementedRequirementsRuntime',"p==='/__requirements'",'REQUIREMENTS_BASELINE_INCOMPLETE','x-kosif-requirements-implemented']){
   if(!edge.includes(marker)) fail('production requirements integration marker missing',{marker});
 }
