@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 
 const required = [
+  '.github/workflows/archive-kosif-ux-recordings.yml',
   '.github/workflows/ci-quality-gate.yml',
   '.github/workflows/deploy-production.yml',
   '.github/workflows/gemini-mcp-agent.yml',
@@ -25,7 +26,7 @@ for (const removed of ['.v38-import', 'Kosif-Full-Application-Source.json']) {
 }
 
 const workflows = fs.readdirSync('.github/workflows').filter((name) => /\.ya?ml$/i.test(name)).sort();
-const expectedWorkflows = ['ci-quality-gate.yml', 'deploy-production.yml', 'gemini-mcp-agent.yml'];
+const expectedWorkflows = ['archive-kosif-ux-recordings.yml', 'ci-quality-gate.yml', 'deploy-production.yml', 'gemini-mcp-agent.yml'];
 if (JSON.stringify(workflows) !== JSON.stringify(expectedWorkflows)) {
   throw new Error(`Expected exactly the unified workflows ${expectedWorkflows.join(', ')}, found ${workflows.join(', ')}`);
 }
