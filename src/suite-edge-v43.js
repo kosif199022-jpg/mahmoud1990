@@ -19,6 +19,10 @@ const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safet
 const VISUAL_SYSTEM_V45 = '<link rel="stylesheet" id="kosif-visual-system-v45" href="/kosif-visual-system-v45.css?v=2026.08.21-2">';
 const VISUAL_SYSTEM_V45_GUARD = '<script id="kosif-visual-system-v45-guard" src="/kosif-visual-system-v45.js?v=2026.08.21-1" defer></script>';
 const WORKSPACE_STABILITY = '<script id="kosif-workspace-stability-loader" src="/kosif-workspace-stability-loader-v42.js?v=2026.08.21-5" defer></script>';
+const UX_RECORDER = '<script id="kosif-ux-session-recorder" src="/responsive-preview-plugin.js?v=2026.08.22-v49-hidden" defer></script>';
+const RECORDER_OWNER_COOKIE = 'kosif_ai_session';
+const RECORDER_PREFIX = 'kosif:uxrec:pending:';
+const recorderEncoder = new TextEncoder();
 
 function reqJson(body,status=200){
   return new Response(JSON.stringify(body),{
@@ -34,6 +38,88 @@ function reqJson(body,status=200){
     }
   });
 }
+
+async function recorderHash(value){
+  const digest=await crypto.subtle.digest('SHA-256',recorderEncoder.encode(String(value||'')));
+  return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function recorderCookies(req){
+  const out={};
+  for(const part of String(req.headers.get('cookie')||'').split(';')){
+    const i=part.indexOf('=');
+    if(i<=0)continue;
+    try{out[part.slice(0,i).trim()]=decodeURIComponent(part.slice(i+1).trim())}catch{}
+  }
+  return out;
+}
+async function recorderOwnerSession(req,env){
+  if(!env?.DATA)return null;
+  const token=recorderCookies(req)[RECORDER_OWNER_COOKIE];
+  if(!token)return null;
+  const rec=await env.DATA.get('kosif:ai:session:'+await recorderHash(token),'json');
+  return rec?.expiresAt&&Number(rec.expiresAt)>Date.now()?rec:null;
+}
+function safeRecorderString(value,max=300){
+  return String(value??'')
+    .replace(/(bearer\s+)[^\s]+/ig,'$1[redacted]')
+    .replace(/(token|secret|password|api[_-]?key|authorization|cookie)\s*[:=]\s*[^\s,;]+/ig,'$1=[redacted]')
+    .replace(/\b\d{8,}\b/g,'[number]')
+    .slice(0,max);
+}
+function sanitizeRecorderValue(value,depth=0){
+  if(depth>6)return null;
+  if(value===null||typeof value==='boolean')return value;
+  if(typeof value==='number')return Number.isFinite(value)?value:0;
+  if(typeof value==='string')return safeRecorderString(value);
+  if(Array.isArray(value))return value.slice(0,160).map(x=>sanitizeRecorderValue(x,depth+1));
+  if(typeof value==='object'){
+    const out={};
+    for(const [key,val] of Object.entries(value).slice(0,80)){
+      if(/value|text|html|content|token|secret|password|cookie|authorization|email|phone|clipboard|file(name|content)?/i.test(key))continue;
+      out[safeRecorderString(key,80)]=sanitizeRecorderValue(val,depth+1);
+    }
+    return out;
+  }
+  return null;
+}
+function validRecorderSessionId(value){return /^[a-zA-Z0-9_-]{8,80}$/.test(String(value||''))}
+async function handleRecorder(req,env,ctx,u){
+  if(!u.pathname.startsWith('/api/kosif/recorder/'))return null;
+  if(req.method!=='POST')return reqJson({ok:false,error:'METHOD_NOT_ALLOWED'},405);
+  const owner=await recorderOwnerSession(req,env);
+  if(!owner)return reqJson({ok:false,error:'OWNER_SESSION_REQUIRED'},403);
+  if(!env?.DATA)return reqJson({ok:false,error:'RECORDER_STORAGE_UNAVAILABLE'},503);
+
+  if(u.pathname==='/api/kosif/recorder/start'){
+    return reqJson({ok:true,mode:'owner-only',hidden:true,storage:'cloudflare-kv-to-github-actions-artifact'},200);
+  }
+  if(u.pathname!=='/api/kosif/recorder/batch')return reqJson({ok:false,error:'RECORDER_ROUTE_NOT_FOUND'},404);
+
+  const raw=await req.text();
+  if(raw.length>120000)return reqJson({ok:false,error:'RECORDER_BATCH_TOO_LARGE'},413);
+  let body;
+  try{body=JSON.parse(raw)}catch{return reqJson({ok:false,error:'INVALID_RECORDER_JSON'},400)}
+  if(!validRecorderSessionId(body?.sessionId))return reqJson({ok:false,error:'INVALID_SESSION_ID'},400);
+  if(!Array.isArray(body?.events)||body.events.length<1||body.events.length>160)return reqJson({ok:false,error:'INVALID_EVENT_BATCH'},400);
+  const seq=Math.max(0,Math.min(99999999,Number(body.sequence)||0));
+  const day=new Date().toISOString().slice(0,10);
+  const suffix=crypto.randomUUID().slice(0,8);
+  const key=`${RECORDER_PREFIX}${day}:${body.sessionId}:${String(seq).padStart(8,'0')}:${suffix}`;
+  const safe=sanitizeRecorderValue({
+    schema:'kosif.uxrec.v1',
+    receivedAt:new Date().toISOString(),
+    generatedAt:body.generatedAt,
+    sessionId:body.sessionId,
+    sequence:seq,
+    reason:body.reason,
+    page:body.page,
+    events:body.events
+  });
+  const write=env.DATA.put(key,JSON.stringify(safe),{expirationTtl:60*60*24*14});
+  if(ctx?.waitUntil)ctx.waitUntil(write);else await write;
+  return reqJson({ok:true,accepted:safe.events?.length||0},202);
+}
+
 function decorateRequirements(response,url){
   const h=new Headers(response.headers);
   h.set('x-kosif-requirements-version',KOSIF_REQUIREMENTS_VERSION);
@@ -49,6 +135,10 @@ function decorateRequirements(response,url){
   // Keep the original Mafateeh reader shell intentionally isolated from suite theming.
   const preserveWealthReader=url.pathname==='/wealth'||url.pathname.startsWith('/wealth/');
   const rewriter=new HTMLRewriter();
+  let inkGoldSeen=false;
+  rewriter.on('#kosif-visual-system-v45',{element(el){el.remove();}});
+  rewriter.on('#kosif-visual-system-v45-guard',{element(el){el.remove();}});
+  rewriter.on('#kosif-ink-gold-v46',{element(el){if(inkGoldSeen)el.remove();else inkGoldSeen=true;}});
   if(!preserveWealthReader){
     rewriter.on('html',{
       element(html){html.setAttribute('data-kosif-visual-system','v45');}
@@ -60,6 +150,7 @@ function decorateRequirements(response,url){
       if(!preserveWealthReader){
         head.append(VISUAL_SYSTEM_V45,{html:true});
         head.append(VISUAL_SYSTEM_V45_GUARD,{html:true});
+        head.append(UX_RECORDER,{html:true});
       }
     }
   });
@@ -133,6 +224,9 @@ export default {
       const status=requirementStatus(id);
       return reqJson({ok:status.runtimeImplemented,requirement:status},status.runtimeImplemented?200:503);
     }
+
+    const recorderResponse=await handleRecorder(req,env,ctx,u);
+    if(recorderResponse)return recorderResponse;
 
     // No sensitive mutation is allowed to execute if the 50,000-note runtime is incomplete.
     if(isSensitiveMutation(req,u) && !READY){
