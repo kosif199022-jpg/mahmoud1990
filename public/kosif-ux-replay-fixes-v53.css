@@ -1,4 +1,4 @@
-/* KOSIF UX Replay Fixes v53 — mobile touch, owner feedback, and static affordances. */
+/* KOSIF UX Replay Fixes v53 — mobile touch, owner feedback, static affordances and a11y contrast. */
 #kosif-skip,
 #kosif-user-home-chip {
   min-height: 48px !important;
@@ -40,6 +40,14 @@
 #kosif-ai-gate #kosif-ai-unlock[aria-busy="true"],
 #kosif-ai-gate #kosif-send-email-now[aria-busy="true"] {
   cursor: progress !important;
+}
+
+/* Axe blocking contrast fixes observed in the audit overview on light backgrounds. */
+html[data-kosif-workspace="stable-v42"] .kw42-stat span {
+  color: #52615b !important;
+}
+#kw47-audit-lifecycle .kw47-guardrails span {
+  color: #4f5c58 !important;
 }
 
 @media (max-width: 640px) {
