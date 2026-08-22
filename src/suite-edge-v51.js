@@ -6,7 +6,7 @@
  */
 import suiteV43 from './suite-edge-v43.js';
 import { handleUxRecorderV51 } from './ux-recorder-v51.mjs';
-import { reconcileBankLedger, reconciliationCapabilities } from './engine/bank-reconciliation-v1.mjs';
+import { reconcileBankLedgerGoverned, governedReconciliationCapabilities } from './engine/bank-reconciliation-governed-v1.mjs';
 
 const COMPACT_GUARD = '<script id="kosif-recorder-compact-guard-v52" src="/kosif-recorder-compact-guard-v52.js?v=2026.08.22-2" defer></script>';
 const RECORDER_FINALIZE_GUARD = '<script id="kosif-recorder-finalize-guard-v53" src="/kosif-recorder-finalize-guard-v53.js?v=2026.08.22-1" defer></script>';
@@ -31,7 +31,7 @@ function reconciliationJson(body, status = 200) {
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store',
       'x-content-type-options': 'nosniff',
-      'x-kosif-reconciliation': reconciliationCapabilities.version
+      'x-kosif-reconciliation': governedReconciliationCapabilities.version
     }
   });
 }
@@ -39,7 +39,7 @@ function reconciliationJson(body, status = 200) {
 async function handleBankReconciliation(req, url) {
   if (url.pathname === '/api/kosif/reconciliation/capabilities') {
     if (req.method !== 'GET') return reconciliationJson({ ok: false, error: 'METHOD_NOT_ALLOWED' }, 405);
-    return reconciliationJson({ ok: true, ...reconciliationCapabilities });
+    return reconciliationJson({ ok: true, ...governedReconciliationCapabilities });
   }
   if (url.pathname !== '/api/kosif/reconciliation/run') return null;
   if (req.method !== 'POST') return reconciliationJson({ ok: false, error: 'METHOD_NOT_ALLOWED' }, 405);
@@ -56,7 +56,7 @@ async function handleBankReconciliation(req, url) {
     return reconciliationJson({ ok: false, error: 'TOO_MANY_TRANSACTIONS', limitPerSide: 10000 }, 413);
   }
   try {
-    return reconciliationJson(reconcileBankLedger(body));
+    return reconciliationJson(reconcileBankLedgerGoverned(body));
   } catch (error) {
     return reconciliationJson({ ok: false, error: 'RECONCILIATION_INPUT_INVALID', message: String(error?.message || error).slice(0, 240) }, 400);
   }
