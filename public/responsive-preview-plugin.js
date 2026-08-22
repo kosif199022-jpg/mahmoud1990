@@ -7,10 +7,10 @@
   window.__KOSIF_MANUAL_RECORDER_LOADER_V51__ = true;
 
   const files = [
-    ['/kosif-manual-recorder-v50.js?v=2026.08.22-1', 'kosif-manual-recorder-v50-loader'],
-    ['/kosif-rec-v51-core.js?v=2026.08.22-1', 'kosif-rec-v51-core-loader'],
-    ['/kosif-rec-v51-observe.js?v=2026.08.22-1', 'kosif-rec-v51-observe-loader'],
-    ['/kosif-rec-v51-visual.js?v=2026.08.22-1', 'kosif-rec-v51-visual-loader']
+    ['/kosif-manual-recorder-v50.js?v=2026.08.22-2', 'kosif-manual-recorder-v50-loader'],
+    ['/kosif-rec-v51-core.js?v=2026.08.22-2', 'kosif-rec-v51-core-loader'],
+    ['/kosif-rec-v51-observe.js?v=2026.08.22-2', 'kosif-rec-v51-observe-loader'],
+    ['/kosif-rec-v51-visual.js?v=2026.08.22-2', 'kosif-rec-v51-visual-loader']
   ];
 
   function load(index) {
