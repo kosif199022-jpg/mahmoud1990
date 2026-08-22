@@ -19,7 +19,7 @@ const TOUCH_REVEAL_SAFETY = '<link rel="stylesheet" id="kosif-touch-reveal-safet
 const VISUAL_SYSTEM_V45 = '<link rel="stylesheet" id="kosif-visual-system-v45" href="/kosif-visual-system-v45.css?v=2026.08.21-2">';
 const VISUAL_SYSTEM_V45_GUARD = '<script id="kosif-visual-system-v45-guard" src="/kosif-visual-system-v45.js?v=2026.08.21-1" defer></script>';
 const WORKSPACE_STABILITY = '<script id="kosif-workspace-stability-loader" src="/kosif-workspace-stability-loader-v42.js?v=2026.08.21-5" defer></script>';
-const UX_RECORDER = '<script id="kosif-ux-session-recorder" src="/responsive-preview-plugin.js?v=2026.08.22-v49-hidden" defer></script>';
+const UX_RECORDER = '<script id="kosif-ux-session-recorder" src="/responsive-preview-plugin.js?v=2026.08.22-v50-manual" defer></script>';
 const RECORDER_OWNER_COOKIE = 'kosif_ai_session';
 const RECORDER_PREFIX = 'kosif:uxrec:pending:';
 const recorderEncoder = new TextEncoder();
@@ -91,7 +91,7 @@ async function handleRecorder(req,env,ctx,u){
   if(!env?.DATA)return reqJson({ok:false,error:'RECORDER_STORAGE_UNAVAILABLE'},503);
 
   if(u.pathname==='/api/kosif/recorder/start'){
-    return reqJson({ok:true,mode:'owner-only',hidden:true,storage:'cloudflare-kv-to-github-actions-artifact'},200);
+    return reqJson({ok:true,mode:'manual-owner',hidden:false,recordingStartsOnUserAction:true,storage:'cloudflare-kv-to-github-actions-artifact'},200);
   }
   if(u.pathname!=='/api/kosif/recorder/batch')return reqJson({ok:false,error:'RECORDER_ROUTE_NOT_FOUND'},404);
 
@@ -106,7 +106,7 @@ async function handleRecorder(req,env,ctx,u){
   const suffix=crypto.randomUUID().slice(0,8);
   const key=`${RECORDER_PREFIX}${day}:${body.sessionId}:${String(seq).padStart(8,'0')}:${suffix}`;
   const safe=sanitizeRecorderValue({
-    schema:'kosif.uxrec.v1',
+    schema:body?.schema==='kosif.uxrec.v2'?'kosif.uxrec.v2':'kosif.uxrec.v1',
     receivedAt:new Date().toISOString(),
     generatedAt:body.generatedAt,
     sessionId:body.sessionId,
