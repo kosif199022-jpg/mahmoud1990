@@ -25,6 +25,11 @@ test('v55 opens the fallback panel when v51 starts without direct display captur
   assert.match(bridge, /detail\?\.state==='unsupported'/);
 });
 
+test('v55 reopens native-video import after the UX metadata session finishes', () => {
+  assert.match(bridge, /kosif-ux-replay-ready/);
+  assert.match(bridge, /openFallback\(120\)/);
+});
+
 test('production edge wrapper injects v54.2 and v55 outside Wealth reader', () => {
   assert.match(edge, /kosif-rec-screen-v54\.js\?v=2026\.08\.22-v54\.2/);
   assert.match(edge, /kosif-rec-screen-integration-v55\.js\?v=2026\.08\.22-1/);
