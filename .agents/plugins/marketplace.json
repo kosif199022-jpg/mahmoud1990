@@ -1,7 +1,7 @@
 {
   "name": "kosif-local-plugins",
-  "version": "2.0.0",
-  "description": "KOSIF governed plugin registry for the OAuth-protected engineering MCP server and server-side AI orchestration.",
+  "version": "2.1.0",
+  "description": "KOSIF governed plugin registry for the OAuth-protected engineering MCP server, server-side AI orchestration, and approved in-app developer tools.",
   "interface": {
     "displayName": "KOSIF Local Plugins"
   },
@@ -23,6 +23,19 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Developer Tools"
+    },
+    {
+      "name": "chatgpt-responsive-preview",
+      "source": {
+        "source": "local",
+        "path": "./plugins/chatgpt-responsive-preview"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "NONE"
+      },
+      "category": "Developer Tools",
+      "entrypoint": "/preview/index.html"
     }
   ]
 }
