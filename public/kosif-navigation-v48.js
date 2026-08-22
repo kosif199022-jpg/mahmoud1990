@@ -215,3 +215,13 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 })();
+
+/* Load approved in-app developer plugin after the governed navigation layer. */
+(() => {
+  if (document.getElementById('kosif-responsive-preview-plugin-loader')) return;
+  const script = document.createElement('script');
+  script.id = 'kosif-responsive-preview-plugin-loader';
+  script.src = '/responsive-preview-plugin.js?v=1';
+  script.defer = true;
+  document.head.appendChild(script);
+})();
