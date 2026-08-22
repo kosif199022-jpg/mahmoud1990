@@ -11,7 +11,7 @@ import { reconcileBankLedger, reconciliationCapabilities } from './engine/bank-r
 const COMPACT_GUARD = '<script id="kosif-recorder-compact-guard-v52" src="/kosif-recorder-compact-guard-v52.js?v=2026.08.22-2" defer></script>';
 const RECORDER_FINALIZE_GUARD = '<script id="kosif-recorder-finalize-guard-v53" src="/kosif-recorder-finalize-guard-v53.js?v=2026.08.22-1" defer></script>';
 const SCREEN_CAPTURE = '<script id="kosif-rec-screen-v54" src="/kosif-rec-screen-v54.js?v=2026.08.22-v54.2" defer></script>';
-const SCREEN_CAPTURE_INTEGRATION = '<script id="kosif-rec-screen-integration-v55" src="/kosif-rec-screen-integration-v55.js?v=2026.08.22-1" defer></script>';
+const SCREEN_CAPTURE_INTEGRATION = '<script id="kosif-rec-screen-integration-v55" src="/kosif-rec-screen-integration-v55.js?v=2026.08.22-2" defer></script>';
 const AUDIT_UX_FIXES = '<link rel="stylesheet" id="kosif-ux-replay-fixes-v53-css" href="/kosif-ux-replay-fixes-v53.css?v=2026.08.22-1"><script id="kosif-ux-replay-fixes-v53" src="/kosif-ux-replay-fixes-v53.js?v=2026.08.22-1" defer></script>';
 const BANK_RECONCILIATION = '<script id="kosif-bank-reconciliation-v1" src="/bank-reconciliation-v1.js?v=2026.08.22-1" defer></script>';
 
