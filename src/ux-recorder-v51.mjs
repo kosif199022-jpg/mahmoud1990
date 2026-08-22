@@ -1,10 +1,11 @@
 /* KOSIF UX Recorder v51 server routes.
- * Owner-session only. Stores every checkpoint in Cloudflare KV and, when a server-side
- * GitHub token is configured, writes each batch/screenshot/final replay immediately to GitHub.
+ * Owner-session only. Stores checkpoints in Cloudflare KV and, when a server-side
+ * GitHub token is configured, writes batches/screenshots/final replay immediately to GitHub.
  */
 
 const OWNER_COOKIE='kosif_ai_session';
 const PREFIX='kosif:uxrec:pending:';
+const STATUS_PREFIX='kosif:uxrec:status:';
 const enc=new TextEncoder();
 
 function json(body,status=200){
@@ -67,16 +68,31 @@ function utf8Base64(text){
 function rawUrl(repo,branch,path){
   return `https://raw.githubusercontent.com/${repo}/${encodeURIComponent(branch).replace(/%2F/g,'/')}/${path.split('/').map(encodeURIComponent).join('/')}`;
 }
+function githubFailureCode(result){
+  if(result?.ok)return null;
+  if(result?.configured===false)return 'GITHUB_TOKEN_NOT_CONFIGURED';
+  if(result?.status===401)return 'GITHUB_TOKEN_INVALID';
+  if(result?.status===403)return 'GITHUB_PERMISSION_DENIED';
+  if(result?.status===404)return 'GITHUB_REPO_OR_BRANCH_NOT_FOUND';
+  if(result?.status===409)return 'GITHUB_CONFLICT';
+  if(result?.status===422)return 'GITHUB_WRITE_REJECTED';
+  return 'GITHUB_WRITE_FAILED';
+}
 async function githubCreate(env,path,base64,message){
   const cfg=githubConfig(env);
-  if(!cfg.configured)return {ok:false,configured:false};
+  if(!cfg.configured)return {ok:false,configured:false,code:'GITHUB_TOKEN_NOT_CONFIGURED'};
   const url=`https://api.github.com/repos/${cfg.repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}`;
   try{
     const r=await fetch(url,{method:'PUT',headers:{Authorization:`Bearer ${cfg.token}`,Accept:'application/vnd.github+json','Content-Type':'application/json','User-Agent':'kosif-ux-recorder-v51','X-GitHub-Api-Version':'2022-11-28'},body:JSON.stringify({message,content:base64,branch:cfg.branch})});
     const data=await r.json().catch(()=>({}));
-    if(!r.ok)return {ok:false,configured:true,status:r.status,error:safeString(data?.message||'GitHub write failed',160)};
-    return {ok:true,configured:true,path,repo:cfg.repo,branch:cfg.branch,commitSha:data?.commit?.sha||'',htmlUrl:data?.content?.html_url||'',rawUrl:rawUrl(cfg.repo,cfg.branch,path)};
-  }catch(err){return {ok:false,configured:true,error:safeString(err?.message||err,160)}}
+    if(!r.ok){
+      const result={ok:false,configured:true,status:r.status,error:safeString(data?.message||'GitHub write failed',160)};
+      return {...result,code:githubFailureCode(result)};
+    }
+    return {ok:true,configured:true,code:null,path,repo:cfg.repo,branch:cfg.branch,commitSha:data?.commit?.sha||'',htmlUrl:data?.content?.html_url||'',rawUrl:rawUrl(cfg.repo,cfg.branch,path)};
+  }catch(err){
+    return {ok:false,configured:true,code:'GITHUB_NETWORK_ERROR',error:safeString(err?.message||err,160)};
+  }
 }
 function liveDir(sessionId){return `ux-recordings/live/${new Date().toISOString().slice(0,10)}/${sessionId}`}
 async function storeKv(env,key,value,ttl=60*60*24*14){
@@ -84,7 +100,19 @@ async function storeKv(env,key,value,ttl=60*60*24*14){
 }
 async function parseJson(req,maxBytes){
   const raw=await req.text();if(raw.length>maxBytes)throw Object.assign(new Error('PAYLOAD_TOO_LARGE'),{status:413});
+  if(!raw.trim())return {};
   try{return JSON.parse(raw)}catch{throw Object.assign(new Error('INVALID_JSON'),{status:400})}
+}
+async function readStatus(env,sessionId){
+  if(!env?.DATA||!validSession(sessionId))return null;
+  return await env.DATA.get(STATUS_PREFIX+sessionId,'json');
+}
+async function patchStatus(env,sessionId,patch){
+  if(!env?.DATA||!validSession(sessionId))return null;
+  const prev=await readStatus(env,sessionId)||{};
+  const next=sanitize({...prev,...patch,sessionId,updatedAt:new Date().toISOString()});
+  await env.DATA.put(STATUS_PREFIX+sessionId,JSON.stringify(next),{expirationTtl:60*60*24*30});
+  return next;
 }
 
 export async function handleUxRecorderV51(req,env,ctx,u){
@@ -95,8 +123,21 @@ export async function handleUxRecorderV51(req,env,ctx,u){
 
   const action=u.pathname.slice('/api/kosif/recorder/v51/'.length);
   const gh=githubConfig(env);
+
   if(action==='start'){
-    return json({ok:true,mode:'manual-owner-v51',recordingStartsOnUserAction:true,visualSnapshots:true,screenCapturePermissionRequired:true,storage:'cloudflare-kv',githubImmediate:gh.configured,githubRepo:gh.configured?gh.repo:null},200);
+    let body={};try{body=await parseJson(req,12000)}catch(err){return json({ok:false,error:err.message},err.status||400)}
+    const sessionId=validSession(body?.sessionId)?String(body.sessionId):'';
+    if(sessionId){
+      await patchStatus(env,sessionId,{stage:'started',startedAt:new Date().toISOString(),cloudflare:true,githubConfigured:gh.configured,githubRepo:gh.configured?gh.repo:null,githubBranch:gh.configured?gh.branch:null});
+    }
+    return json({ok:true,mode:'manual-owner-v51',recordingStartsOnUserAction:true,visualSnapshots:true,screenCapturePermissionRequired:true,storage:'cloudflare-kv',sessionId:sessionId||null,githubImmediate:gh.configured,githubRepo:gh.configured?gh.repo:null,githubBranch:gh.configured?gh.branch:null,githubCode:gh.configured?null:'GITHUB_TOKEN_NOT_CONFIGURED'},200);
+  }
+
+  if(action==='status'){
+    let body;try{body=await parseJson(req,12000)}catch(err){return json({ok:false,error:err.message},err.status||400)}
+    if(!validSession(body?.sessionId))return json({ok:false,error:'INVALID_SESSION_ID'},400);
+    const status=await readStatus(env,String(body.sessionId));
+    return json({ok:true,sessionId:String(body.sessionId),cloudflare:true,githubConfigured:gh.configured,githubRepo:gh.configured?gh.repo:null,githubBranch:gh.configured?gh.branch:null,status:status||null},200);
   }
 
   if(action==='batch'){
@@ -109,7 +150,8 @@ export async function handleUxRecorderV51(req,env,ctx,u){
     await storeKv(env,key,text);
     const path=`${liveDir(body.sessionId)}/batches/${String(seq).padStart(8,'0')}-${suffix}.json`;
     const github=await githubCreate(env,path,utf8Base64(JSON.stringify(safe,null,2)),`uxrec: checkpoint ${body.sessionId} #${seq}`);
-    return json({ok:true,accepted:safe.events?.length||0,storage:'cloudflare-kv',github},202);
+    await patchStatus(env,String(body.sessionId),{stage:'recording',lastCheckpointAt:new Date().toISOString(),lastBatchSequence:seq,cloudflare:true,githubConfigured:gh.configured,githubLast:github,githubSaved:Boolean(github.ok)});
+    return json({ok:true,accepted:safe.events?.length||0,storage:'cloudflare-kv',github,githubCode:githubFailureCode(github)},202);
   }
 
   if(action==='screenshot'){
@@ -124,19 +166,21 @@ export async function handleUxRecorderV51(req,env,ctx,u){
     await storeKv(env,key,JSON.stringify({...meta,dataUrl:`data:image/${ext==='jpg'?'jpeg':ext};base64,${b64}`}),60*60*24*7);
     const path=`${liveDir(body.sessionId)}/screens/${body.shotId}.${ext}`;
     const github=await githubCreate(env,path,b64,`uxrec: screenshot ${body.sessionId} ${body.shotId}`);
-    return json({ok:true,storage:'cloudflare-kv',shotId:body.shotId,github},202);
+    await patchStatus(env,String(body.sessionId),{stage:'recording',lastScreenshotAt:new Date().toISOString(),lastScreenshotId:String(body.shotId),cloudflare:true,githubConfigured:gh.configured,githubLast:github,githubSaved:Boolean(github.ok)});
+    return json({ok:true,storage:'cloudflare-kv',shotId:body.shotId,github,githubCode:githubFailureCode(github)},202);
   }
 
   if(action==='final'){
     let body;try{body=await parseJson(req,900000)}catch(err){return json({ok:false,error:err.message},err.status||400)}
-    if(!validSession(body?.sessionId)||!body?.replay||typeof body.replay!=='object')return json({ok:false,error:'INVALID_FINAL_REPLAY'},40);
-    const safe=sanitize({...body.replay,schema;'kosif.chatgpt.ux-replay.v3',serverReceivedAt:new Date().toISOString()});
+    if(!validSession(body?.sessionId)||!body?.replay||typeof body.replay!=='object')return json({ok:false,error:'INVALID_FINAL_REPLAY'},400);
+    const safe=sanitize({...body.replay,schema:'kosif.chatgpt.ux-replay.v3',serverReceivedAt:new Date().toISOString()});
     const stamp=new Date().toISOString().replace(/[:.]/g,'-');const day=new Date().toISOString().slice(0,10);
     const key=`${PREFIX}${day}:${body.sessionId}:final:${stamp}`;const text=JSON.stringify(safe);
     await storeKv(env,key,text,60*60*24*30);
     const path=`${liveDir(body.sessionId)}/replay-${stamp}.json`;
     const github=await githubCreate(env,path,utf8Base64(JSON.stringify(safe,null,2)),`uxrec: final replay ${body.sessionId}`);
-    return json({ok:true,storage:'cloudflare-kv',github,sessionId:body.sessionId},201);
+    const status=await patchStatus(env,String(body.sessionId),{stage:'finished',finishedAt:new Date().toISOString(),finalCloudflareSaved:true,finalGithubSaved:Boolean(github.ok),githubConfigured:gh.configured,githubLast:github,githubCode:githubFailureCode(github),githubPath:github?.path||null,githubHtmlUrl:github?.htmlUrl||null});
+    return json({ok:true,storage:'cloudflare-kv',cloudflareSaved:true,github,githubCode:githubFailureCode(github),status,sessionId:body.sessionId},201);
   }
 
   return json({ok:false,error:'RECORDER_ROUTE_NOT_FOUND'},404);
