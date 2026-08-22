@@ -9,6 +9,7 @@ const ok = (c, m) => { if (!c) throw new Error('V38_CONTRACT_FAIL: ' + m); conso
 
 const edge = read('src/suite-edge.js');
 const edgeV43 = fs.existsSync('src/suite-edge-v43.js') ? read('src/suite-edge-v43.js') : '';
+const edgeV51 = fs.existsSync('src/suite-edge-v51.js') ? read('src/suite-edge-v51.js') : '';
 const proxy = read('src/suite-proxy.js');
 const api = read('src/v38-api.js');
 const realtime = read('src/v38-realtime.js');
@@ -93,7 +94,8 @@ ok(read('src/v38-source-intelligence.js').includes('UNSAFE_OR_INVALID_URL') && r
 
 const directSuiteEntry=/main\s*=\s*"src\/suite-edge\.js"/.test(wrangler);
 const governedV43Entry=/main\s*=\s*"src\/suite-edge-v43\.js"/.test(wrangler)&&edgeV43.includes("import suite from './suite-edge.js'")&&edgeV43.includes('await suite.fetch(req,env,ctx)');
-ok(directSuiteEntry||governedV43Entry, 'governed suite edge remains the deploy entrypoint');
+const governedV51Entry=/main\s*=\s*"src\/suite-edge-v51\.js"/.test(wrangler)&&edgeV51.includes("import suiteV43 from './suite-edge-v43.js'")&&/await suiteV43\.fetch\(req,\s*env,\s*ctx\)/.test(edgeV51)&&edgeV43.includes("import suite from './suite-edge.js'")&&edgeV43.includes('await suite.fetch(req,env,ctx)');
+ok(directSuiteEntry||governedV43Entry||governedV51Entry, 'governed suite edge remains the deploy entrypoint');
 ok(pkg.scripts['v38-core'] && pkg.scripts['v38-graph'] && pkg.scripts['v38-api'] && pkg.scripts['v38-public-ai'], 'v38 test scripts are registered in package.json');
 ok(String(pkg.scripts.check).includes('v38-suite'), 'v38 suite is part of the master check chain');
 
