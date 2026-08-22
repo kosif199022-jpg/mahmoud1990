@@ -1,0 +1,53 @@
+/* KOSIF UX Replay Fixes v53 — mobile touch, owner feedback, and static affordances. */
+#kosif-skip,
+#kosif-user-home-chip {
+  min-height: 48px !important;
+}
+
+#dr-x,
+#kosif-company-sheet .kosif-close {
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  flex: 0 0 48px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#kosif-premium-year[data-kosif-static="1"] {
+  cursor: default !important;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+#kosif-owner-mail-feedback {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--seal, #A97E2F) 45%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sealsoft, #F7EFDC) 82%, #fff);
+  color: var(--ink, #12211C);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+#kosif-owner-mail-feedback[hidden] {
+  display: none !important;
+}
+
+#kosif-ai-gate #kosif-ai-unlock[aria-busy="true"],
+#kosif-ai-gate #kosif-send-email-now[aria-busy="true"] {
+  cursor: progress !important;
+}
+
+@media (max-width: 640px) {
+  #kosif-user-home-chip {
+    min-width: 96px !important;
+    padding-block: 8px !important;
+  }
+  #kosif-skip {
+    padding-block: 12px !important;
+  }
+}
